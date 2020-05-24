@@ -1,25 +1,62 @@
 package com.github.commoble.morered;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
+import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
 
 public class NotGateBlock extends Block
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = GateBlockStateProperties.ATTACHMENT_DIRECTION;
 	public static final IntegerProperty ROTATION = GateBlockStateProperties.ROTATION;
-	public static final BooleanProperty INPUT_LIT = GateBlockStateProperties.INPUT_LIT;
+	public static final BooleanProperty INPUT_LIT = BlockStateProperties.POWERED;
+	
+	public static final VoxelShape[] SHAPES_BY_DIRECTION = {	// DUNSWE, direction of attachment
+		Block.makeCuboidShape(0, 0, 0, 16, 2, 16),
+		Block.makeCuboidShape(0, 14, 0, 16, 16, 16),
+		Block.makeCuboidShape(0, 0, 0, 16, 16, 2),
+		Block.makeCuboidShape(0, 0, 14, 16, 16, 16),
+		Block.makeCuboidShape(0, 0, 0, 2, 16, 16),
+		Block.makeCuboidShape(14, 0, 0, 16, 16, 16)
+	};
 
 	public NotGateBlock(Properties properties)
 	{
 		super(properties);
 		this.setDefaultState(this.getStateContainer().getBaseState().with(ATTACHMENT_DIRECTION, Direction.DOWN).with(ROTATION, 0).with(INPUT_LIT, false));
+	}
+	
+	@Override
+	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	{
+		if (state.has(ATTACHMENT_DIRECTION))
+		{
+			return SHAPES_BY_DIRECTION[state.get(ATTACHMENT_DIRECTION).ordinal()];
+		}
+		else
+		{
+			return SHAPES_BY_DIRECTION[0];
+		}
+	}
+
+	@Nullable
+	@Override
+	public BlockState getStateForPlacement(BlockItemUseContext context)
+	{
+		return GateBlockStateProperties.getStateForPlacedGatePlate(this.getDefaultState(), context);
 	}
 
 	@Override

@@ -1,5 +1,7 @@
 package com.github.commoble.morered;
 
+import java.util.Arrays;
+
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.Mirror;
@@ -157,6 +159,7 @@ public class BlockStateUtil
 		return OUTPUT_TABLE[attachmentDirection.ordinal()][rotationIndex];
 	}
 	
+	/** Get the rotation index for a gate plate state after rotating the blockstate **/
 	public static int getRotatedRotation(Direction attachmentFace, int rotationIndex, Rotation rotation)
 	{
 		if (attachmentFace == Direction.DOWN)
@@ -173,6 +176,7 @@ public class BlockStateUtil
 		}
 	}
 	
+	/** Get the rotation index for a gate plate state after mirroring the blockstate **/
 	public static int getMirroredRotation(Direction attachmentFace, int rotationIndex, Mirror mirror)
 	{
 		if (mirror == Mirror.NONE)
@@ -190,5 +194,30 @@ public class BlockStateUtil
 		{
 			return rotationIndex;
 		}
+	}
+	
+	public static int getRotationIndexForPlacement(Direction attachmentFace, Direction[] sortedLookDirections)
+	{
+		// the fallback here almost certainly won't be used but it's good to have it for java completeness
+		Direction fallback = attachmentFace.getAxis() == Axis.Z ? Direction.UP : Direction.NORTH;
+		
+		// get the best direction closest to the player's look vector that's valid for the attachmentFace
+		Direction bestDirection = Arrays.stream(sortedLookDirections)
+			.filter(direction -> direction.getAxis() != attachmentFace.getAxis())
+			.findFirst()
+			.orElse(fallback);
+		
+		// now using the lookup table above, find the index matching our directions
+		Direction[] rotatedOutputs = OUTPUT_TABLE[attachmentFace.ordinal()];
+		int size = rotatedOutputs.length;
+		for (int i=0; i<size; i++)
+		{
+			if (rotatedOutputs[i] == bestDirection)
+			{
+				return i;
+			}
+		}
+		
+		return 0;
 	}
 }

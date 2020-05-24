@@ -1,0 +1,23 @@
+{
+	"ambientocclusion": false,
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "block/repeater",
+		"repeater": "block/repeater",
+		"smooth_stone": "block/smooth_stone"
+	},
+	"elements": [
+		{
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"north": {"uv": [0, 14, 16, 16], "rotation": 90, "texture": "#smooth_stone"},
+				"east": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#smooth_stone"},
+				"south": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#smooth_stone"},
+				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#repeater"},
+				"up": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#smooth_stone"},
+				"down": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#smooth_stone"}
+			}
+		}
+	]
+}

@@ -1,7 +1,12 @@
 package com.github.commoble.morered;
 
+import com.github.commoble.morered.client.ClientEvents;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
@@ -15,6 +20,15 @@ public class MoreRed
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		
+		CommonModEvents.addListeners(modBus);
+		CommonForgeEvents.addListeners(forgeBus);
 		
+		// add layer of separation to client stuff so we don't break servers
+		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientEvents.addClientListeners(modBus, forgeBus));
+	}
+	
+	public static ResourceLocation getRL(String name)
+	{
+		return new ResourceLocation(MODID, name);
 	}
 }
