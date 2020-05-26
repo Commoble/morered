@@ -1,3 +1,4 @@
+
 package com.github.commoble.morered.client;
 
 import com.github.commoble.morered.InputState;
@@ -28,7 +29,7 @@ public class BlockColorHandlers
 	
 	public static int getLogicGateTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
 	{
-		InputState input = InputState.getPreviousState(state);
+		InputState input = InputState.getInput(state);
 		
 		return getTint(tintIndex, input.a, input.b, input.c);
 	}

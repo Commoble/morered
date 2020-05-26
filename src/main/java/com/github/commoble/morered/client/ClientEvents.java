@@ -1,9 +1,10 @@
 package com.github.commoble.morered.client;
 
-import com.github.commoble.morered.BlockRegistrar;
+import com.github.commoble.morered.LogicGateType;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
+import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
@@ -19,14 +20,19 @@ public class ClientEvents
 	
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.NOT_GATE.get(), RenderType.getTranslucent());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.NOR_GATE.get(), RenderType.getTranslucent());
+		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
+	}
+	
+	public static void setLogicGateRenderLayer(LogicGateType type)
+	{
+		RenderTypeLookup.setRenderLayer(type.blockGetter.get(), RenderType.getTranslucent());
 	}
 	
 	public static void onRegisterBlockColors(ColorHandlerEvent.Block event)
 	{
-		event.getBlockColors().register(BlockColorHandlers::getLogicGateTint,
-			BlockRegistrar.NOT_GATE.get(),
-			BlockRegistrar.NOR_GATE.get());
+		BlockColors colors = event.getBlockColors();
+		LogicGateType.TYPES.values().forEach(type -> colors.register(BlockColorHandlers::getLogicGateTint, type.blockGetter.get()));
 	}
+	
+	
 }

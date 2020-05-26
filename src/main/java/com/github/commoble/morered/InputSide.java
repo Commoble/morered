@@ -17,6 +17,10 @@ public enum InputSide
 	public final BooleanProperty property;
 	public final int rotationsFromOutput;
 	
+	public static final InputType THREE_INPUTS = new InputType(A,B,C);
+	public static final InputType T_INPUTS = new InputType(A,C);
+	public static final InputType LINEAR_INPUT = new InputType(B);
+	
 	InputSide(BooleanProperty property, int rotationsFromOutput)
 	{
 		this.property = property;

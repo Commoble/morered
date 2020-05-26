@@ -41,12 +41,17 @@ public enum InputState
 		}
 	}
 	
+	public boolean applyLogic(LogicFunction function)
+	{
+		return function.apply(this.a, this.b, this.c);
+	}
+	
 	public static InputState getState(boolean a, boolean b, boolean c)
 	{
 		return InputState.values()[boolsToID(a,b,c)];
 	}
 	
-	public static InputState getPreviousState(BlockState state)
+	public static InputState getInput(BlockState state)
 	{
 		return getState(
 			state.has(InputSide.A.property) ? state.get(InputSide.A.property) : false,
@@ -66,7 +71,7 @@ public enum InputState
 	
 	public static BlockState getUpdatedBlockState(World world, BlockState oldBlockState, BlockPos pos)
 	{
-		InputState oldInputState = InputState.getPreviousState(oldBlockState);
+		InputState oldInputState = InputState.getInput(oldBlockState);
 		InputState newInputState = InputState.getWorldPowerState(world, oldBlockState, pos);
 		
 		if (oldInputState == newInputState)

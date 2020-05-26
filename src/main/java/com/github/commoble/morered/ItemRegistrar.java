@@ -23,9 +23,6 @@ public class ItemRegistrar
 		}
 	};
 	
-	public static final RegistryObject<BlockItem> NOT_GATE = registerBlockItem(ObjectNames.NOT_GATE, BlockRegistrar.NOT_GATE);
-	public static final RegistryObject<BlockItem> NOR_GATE = registerBlockItem(ObjectNames.NOR_GATE, BlockRegistrar.NOR_GATE);
-	
 	public static final RegistryObject<BlockItem> registerBlockItem(String name, RegistryObject<? extends Block> block)
 	{
 		return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().group(CREATIVE_TAB)));
