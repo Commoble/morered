@@ -1,8 +1,8 @@
 package com.github.commoble.morered.client;
 
+import com.github.commoble.morered.InputState;
 import com.github.commoble.morered.LogicFunction;
 import com.github.commoble.morered.LogicFunctions;
-import com.github.commoble.morered.NotGateBlock;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;
@@ -26,12 +26,10 @@ public class BlockColorHandlers
 		return logicFunction.apply(a, b, c) ? LIT : UNLIT;
 	}
 	
-	public static int getNotGateTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	public static int getLogicGateTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
 	{
-		boolean inputA = false;
-		boolean inputB = state.has(NotGateBlock.POWERED) ? state.get(NotGateBlock.POWERED) : false;
-		boolean inputC = false;
+		InputState input = InputState.getPreviousState(state);
 		
-		return getTint(tintIndex, inputA, inputB, inputC);
+		return getTint(tintIndex, input.a, input.b, input.c);
 	}
 }

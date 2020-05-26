@@ -20,10 +20,13 @@ public class ClientEvents
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.NOT_GATE.get(), RenderType.getTranslucent());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.NOR_GATE.get(), RenderType.getTranslucent());
 	}
 	
 	public static void onRegisterBlockColors(ColorHandlerEvent.Block event)
 	{
-		event.getBlockColors().register(BlockColorHandlers::getNotGateTint, BlockRegistrar.NOT_GATE.get());
+		event.getBlockColors().register(BlockColorHandlers::getLogicGateTint,
+			BlockRegistrar.NOT_GATE.get(),
+			BlockRegistrar.NOR_GATE.get());
 	}
 }

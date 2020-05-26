@@ -13,4 +13,6 @@ public class BlockRegistrar
 	
 	public static final RegistryObject<Block> NOT_GATE =
 		BLOCKS.register(ObjectNames.NOT_GATE, () -> new NotGateBlock(Block.Properties.create(Material.MISCELLANEOUS).hardnessAndResistance(0).sound(SoundType.WOOD)));
+	public static final RegistryObject<Block> NOR_GATE =
+		BLOCKS.register(ObjectNames.NOR_GATE, () -> new NorGateBlock(Block.Properties.create(Material.MISCELLANEOUS).hardnessAndResistance(0).sound(SoundType.WOOD)));
 }

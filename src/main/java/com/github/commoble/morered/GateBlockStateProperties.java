@@ -2,16 +2,38 @@ package com.github.commoble.morered;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 
+/**
+ * The three input booleanproperties here are the inputs 90, 180, and 270 degrees clockwise from the output
+ * e.g.
+ * 
+ 		OUTPUT
+		/-----\
+		|     |
+	C	|     | A
+		|     |
+		\-----/
+		   B
+ * For consistency, logic plates with fewer than three inputs still use the input property for the appropriate side
+ * (a gate with one input opposite from the output should use the input B property)
+ */
 public class GateBlockStateProperties
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = BlockStateProperties.FACING;
 	public static final IntegerProperty ROTATION = IntegerProperty.create("rotation", 0,3);
+	
+	/** The first input clockwise from the output **/
+	public static final BooleanProperty INPUT_A = BooleanProperty.create("input_a");
+	/** The second input clockwise from the output **/
+	public static final BooleanProperty INPUT_B = BooleanProperty.create("input_b");
+	/** The third input clockwise from the output **/
+	public static final BooleanProperty INPUT_C = BooleanProperty.create("input_c");
 
 	
 	public static Direction getOutputDirection(BlockState state)

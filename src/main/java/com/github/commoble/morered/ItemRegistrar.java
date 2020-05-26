@@ -1,5 +1,6 @@
 package com.github.commoble.morered;
 
+import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -22,7 +23,11 @@ public class ItemRegistrar
 		}
 	};
 	
-	public static final RegistryObject<Item> NOT_GATE =
-		ITEMS.register(ObjectNames.NOT_GATE, () -> new BlockItem(BlockRegistrar.NOT_GATE.get(), new Item.Properties().group(CREATIVE_TAB)));
-
+	public static final RegistryObject<BlockItem> NOT_GATE = registerBlockItem(ObjectNames.NOT_GATE, BlockRegistrar.NOT_GATE);
+	public static final RegistryObject<BlockItem> NOR_GATE = registerBlockItem(ObjectNames.NOR_GATE, BlockRegistrar.NOR_GATE);
+	
+	public static final RegistryObject<BlockItem> registerBlockItem(String name, RegistryObject<? extends Block> block)
+	{
+		return ITEMS.register(name, () -> new BlockItem(block.get(), new Item.Properties().group(CREATIVE_TAB)));
+	}
 }

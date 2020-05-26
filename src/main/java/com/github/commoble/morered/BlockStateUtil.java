@@ -159,6 +159,11 @@ public class BlockStateUtil
 		return OUTPUT_TABLE[attachmentDirection.ordinal()][rotationIndex];
 	}
 	
+	public static Direction getInputDirection(Direction attachmentDirection, int outputRotationIndex, int rotationsFromOutput)
+	{
+		return getOutputDirection(attachmentDirection, (outputRotationIndex + rotationsFromOutput) % 4);
+	}
+	
 	/** Get the rotation index for a gate plate state after rotating the blockstate **/
 	public static int getRotatedRotation(Direction attachmentFace, int rotationIndex, Rotation rotation)
 	{
