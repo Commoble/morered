@@ -39,7 +39,7 @@ public class GateBlockStateProperties
 		BlockState adjacentState = context.getWorld().getBlockState(adjacentPos);
 		boolean placedAgainstPlate = TagWrappers.LOGIC_GATE_PLATES.contains(adjacentState.getBlock()) && adjacentState.has(GateBlockStateProperties.ATTACHMENT_DIRECTION);
 		
-		Direction attachmentDirection = placedAgainstPlate ? adjacentState.get(GateBlockStateProperties.ATTACHMENT_DIRECTION) : directionTowardAdjacentBlock;
+		Direction attachmentDirection = placedAgainstPlate ? getDirectionWhenPlacedAgainstAnotherPlate(adjacentState.get(GateBlockStateProperties.ATTACHMENT_DIRECTION),directionTowardAdjacentBlock): directionTowardAdjacentBlock;
 		int rotationIndex = BlockStateUtil.getRotationIndexForPlacement(attachmentDirection, Direction.getFacingDirections(context.getPlayer()));
 		if (state.has(ATTACHMENT_DIRECTION) && state.has(ROTATION))
 		{
@@ -48,6 +48,21 @@ public class GateBlockStateProperties
 		else
 		{
 			return state;
+		}
+	}
+	
+	// if we are placing this plate against another plate,
+	// and we are NOT placing it against the backside of the other plate,
+	// make the plate line up with the plate we are placing against
+	public static Direction getDirectionWhenPlacedAgainstAnotherPlate(Direction otherPlateDirection, Direction directionTowardAdjacentBlock)
+	{
+		if (otherPlateDirection == directionTowardAdjacentBlock.getOpposite())
+		{
+			return directionTowardAdjacentBlock;
+		}
+		else
+		{
+			return otherPlateDirection;
 		}
 	}
 }
