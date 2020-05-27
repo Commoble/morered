@@ -9,7 +9,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
@@ -30,19 +29,40 @@ public abstract class LogicGatePlateBlock extends Block
 	public static final IntegerProperty ROTATION = GateBlockStateProperties.ROTATION;
 
 	
-	/** The first input clockwise from the output **/
-	public static final BooleanProperty INPUT_A = GateBlockStateProperties.INPUT_A;
-	/** The second input clockwise from the output **/
-	public static final BooleanProperty INPUT_B = GateBlockStateProperties.INPUT_B;
-	/** The third input clockwise from the output **/
-	public static final BooleanProperty INPUT_C = GateBlockStateProperties.INPUT_B;
-	
 	public static final VoxelShape[] SHAPES_BY_DIRECTION = { // DUNSWE, direction of attachment
 		Block.makeCuboidShape(0, 0, 0, 16, 2, 16), Block.makeCuboidShape(0, 14, 0, 16, 16, 16), Block.makeCuboidShape(0, 0, 0, 16, 16, 2),
 		Block.makeCuboidShape(0, 0, 14, 16, 16, 16), Block.makeCuboidShape(0, 0, 0, 2, 16, 16), Block.makeCuboidShape(14, 0, 0, 16, 16, 16) };
 	
 	public static final int OUTPUT_STRENGTH = 15;
 	public static final int TICK_DELAY = 1;
+	
+	@FunctionalInterface
+	public static interface LogicGateBlockFactory
+	{	
+		public LogicGatePlateBlock makeBlock(LogicFunction function, Block.Properties properties);
+	}
+	
+	public static final LogicGateBlockFactory THREE_INPUTS = getBlockFactory(InputSide.A, InputSide.B, InputSide.C);
+	public static final LogicGateBlockFactory T_INPUTS = getBlockFactory(InputSide.A, InputSide.C);
+	public static final LogicGateBlockFactory LINEAR_INPUT = getBlockFactory(InputSide.B);
+
+	
+	public static LogicGateBlockFactory getBlockFactory(InputSide... inputs)
+	{
+		return (properties, function) -> new LogicGatePlateBlock(function, properties)
+		{
+			// fillStateContainer in LogicGatePlateBlock needs to know which blockstate properties to use
+			// but fillStateContainer gets called in the superconstructor, before any information about
+			// our block is available.
+			// The only safe way to handle this (aside from just making subclasses) is this
+			// cursed closure class
+			@Override
+			public InputSide[] getInputSides()
+			{
+				return inputs;
+			}
+		};
+	}
 	
 	private final LogicFunction function;
 	
