@@ -1,6 +1,13 @@
 {
   "replace": false,
   "values": [
-    "morered:not_gate"
+    "morered:not_gate",
+    "morered:nor_gate",
+    "morered:nand_gate",
+    "morered:or_gate",
+    "morered:and_gate",
+    "morered:xor_gate",
+    "morered:xnor_gate",
+    "morered:multiplexer"
   ]
 }

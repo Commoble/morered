@@ -1,0 +1,10 @@
+{
+	"block.morered.not_gate": "NOT Gate",
+	"block.morered.nor_gate": "NOR Gate",
+	"block.morered.nand_gate": "NAND Gate",
+	"block.morered.or_gate": "OR Gate",
+	"block.morered.and_gate": "AND Gate",
+	"block.morered.xor_gate": "XOR Gate",
+	"block.morered.xnor_gate": "XNOR Gate",
+	"block.morered.multiplexer": "Multiplexer"
+}

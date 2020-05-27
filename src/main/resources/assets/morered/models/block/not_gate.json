@@ -50,9 +50,9 @@
 			"to": [9, 4, 8],
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
-				"east": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
+				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 7},
 				"south": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
-				"west": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
+				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 7},
 				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 7}
 			}
 		},
@@ -61,8 +61,8 @@
 			"from": [0, 0, 0],
 			"to": [16, 2, 16],
 			"faces": {
-				"up": {"uv": [0, 0, 16, 16], "texture": "#input_overlay", "tintindex": 4},
-				"south": {"uv": [0, 14, 16, 16], "texture": "#input_overlay", "tintindex": 4}
+				"south": {"uv": [0, 14, 16, 16], "texture": "#input_overlay", "tintindex": 3},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#input_overlay", "tintindex": 3}
 			}
 		},
 		{
@@ -70,8 +70,8 @@
 			"from": [0, 0, 0],
 			"to": [16, 2, 16],
 			"faces": {
-				"up": {"uv": [0, 0, 16, 16], "texture": "#output_overlay", "tintindex": 7},
-				"north": {"uv": [0, 14, 16, 16], "texture": "#input_overlay", "tintindex": 7}
+				"north": {"uv": [0, 14, 16, 16], "texture": "#input_overlay", "tintindex":7},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#output_overlay", "tintindex":7}
 			}
 		}
 	]
