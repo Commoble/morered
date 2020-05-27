@@ -52,7 +52,7 @@
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 7},
 				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 7},
 				"west": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 7},
-				"up": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 7},
+				"up": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 7},
 				"down": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 7}
 			}
 		},

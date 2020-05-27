@@ -53,7 +53,7 @@
 				"east": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
 				"south": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
 				"west": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7},
-				"up": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 7}
+				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 7}
 			}
 		},
 		{
