@@ -136,7 +136,6 @@
 			"from": [0, 0, 0],
 			"to": [16, 2, 16],
 			"faces": {
-				"west": {"uv": [0, 14, 16, 16], "texture": "#edge", "tintindex": 5},
 				"up": {"uv": [0, 0, 16, 16], "texture": "#middle_overlay", "tintindex": 12}
 			}
 		},

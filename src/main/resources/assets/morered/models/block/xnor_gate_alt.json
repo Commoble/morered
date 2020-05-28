@@ -3,15 +3,16 @@
 	"parent": "block/block",
 	"ambientocclusion": false,
 	"textures": {
+		"7": "morered:block/xnor_gate_output_overlay",
 		"input_a_overlay": "morered:block/xor_gate_input_a_overlay",
 		"middle_overlay": "morered:block/xor_gate_middle_overlay",
-		"output_overlay": "morered:block/nor_gate_output_overlay",
 		"particle": "block/smooth_stone",
 		"plate": "block/smooth_stone",
 		"plate_overlay": "morered:block/plate_overlay",
 		"plate_torch": "morered:block/plate_torch",
 		"edge": "morered:block/not_gate_input_overlay",
-		"diode": "block/stone"
+		"diode": "block/stone",
+		"suboutput_a_overlay": "morered:block/xnor_gate_suboutput_a_overlay"
 	},
 	"elements": [
 		{
@@ -49,8 +50,8 @@
 		},
 		{
 			"name": "torch_a",
-			"from": [12, 9, 7],
-			"to": [16, 11, 9],
+			"from": [12, 11, 5],
+			"to": [16, 13, 7],
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 16},
 				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 16},
@@ -73,8 +74,8 @@
 		},
 		{
 			"name": "torch_c",
-			"from": [12, 5, 7],
-			"to": [16, 7, 9],
+			"from": [12, 3, 5],
+			"to": [16, 5, 7],
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 17},
 				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 17},
@@ -109,8 +110,8 @@
 		},
 		{
 			"name": "xnor_diode",
-			"from": [12, 7, 7],
-			"to": [16, 9, 9],
+			"from": [12, 7, 5],
+			"to": [16, 9, 7],
 			"faces": {
 				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
 				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
@@ -121,8 +122,8 @@
 		},
 		{
 			"name": "xnor_torch",
-			"from": [12, 7, 5],
-			"to": [16, 9, 7],
+			"from": [12, 7, 3],
+			"to": [16, 9, 5],
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 14},
 				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 14},
@@ -154,8 +155,23 @@
 			"from": [14, 0, 0],
 			"to": [16, 16, 16],
 			"faces": {
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#middle_overlay", "tintindex": 12},
-				"down": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#edge", "tintindex": 5}
+				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#middle_overlay", "tintindex": 12}
+			}
+		},
+		{
+			"name": "suboutput_a_overlay",
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#suboutput_a_overlay", "tintindex": 16}
+			}
+		},
+		{
+			"name": "suboutput_c_overlay",
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
+			"faces": {
+				"west": {"uv": [16, 0, 0, 16], "rotation": 270, "texture": "#suboutput_a_overlay", "tintindex": 17}
 			}
 		},
 		{
@@ -164,7 +180,7 @@
 			"to": [16, 16, 16],
 			"faces": {
 				"north": {"uv": [0, 14, 16, 16], "rotation": 90, "texture": "#edge", "tintindex": 14},
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#output_overlay", "tintindex": 14}
+				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#7", "tintindex": 14}
 			}
 		}
 	]
