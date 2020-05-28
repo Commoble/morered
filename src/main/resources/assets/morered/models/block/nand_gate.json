@@ -9,7 +9,8 @@
 		"plate_torch": "morered:block/plate_torch",
 		"input_a_overlay": "morered:block/nand_gate_input_a_overlay",
 		"output_overlay": "morered:block/nand_gate_output_overlay",
-		"edge": "morered:block/not_gate_input_overlay"
+		"edge": "morered:block/not_gate_input_overlay",
+		"diode": "block/stone"
 	},
 	"elements": [
 		{
@@ -39,11 +40,11 @@
 			"to": [9, 4, 14],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 13]},
 			"faces": {
-				"north": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"east": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"south": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"west": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"up": {"uv": [7, 7, 9, 9], "texture": "#plate"}
+				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
 			}
 		},
 		{
@@ -52,11 +53,11 @@
 			"to": [4, 4, 9],
 			"rotation": {"angle": 0, "axis": "y", "origin": [7, 8, 12]},
 			"faces": {
-				"north": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"east": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"south": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"west": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"up": {"uv": [7, 7, 9, 9], "texture": "#plate"}
+				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
 			}
 		},
 		{
@@ -65,11 +66,11 @@
 			"to": [14, 4, 9],
 			"rotation": {"angle": 0, "axis": "y", "origin": [9, 8, 12]},
 			"faces": {
-				"north": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"east": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"south": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"west": {"uv": [7, 12, 9, 16], "texture": "#plate"},
-				"up": {"uv": [7, 7, 9, 9], "texture": "#plate"}
+				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
 			}
 		},
 		{

@@ -8,7 +8,6 @@ import com.github.commoble.morered.LogicGatePlateBlock.LogicGateBlockFactory;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
@@ -45,7 +44,7 @@ public class LogicGateType
 	private static RegistryObject<LogicGatePlateBlock> registerLogicGate(DeferredRegister<Block> blocks, String name, LogicFunction function, LogicGateBlockFactory factory)
 	{
 		return blocks.register(name, () -> factory.makeBlock(function,
-			Block.Properties.create(Material.MISCELLANEOUS).hardnessAndResistance(0).sound(SoundType.WOOD)));
+			Block.Properties.create(GateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0).sound(SoundType.WOOD)));
 			
 	}
 	

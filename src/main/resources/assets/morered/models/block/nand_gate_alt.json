@@ -9,13 +9,14 @@
 		"plate_torch": "morered:block/plate_torch",
 		"input_a_overlay": "morered:block/nand_gate_input_a_overlay",
 		"output_overlay": "morered:block/nand_gate_output_overlay",
-		"edge": "morered:block/not_gate_input_overlay"
+		"edge": "morered:block/not_gate_input_overlay",
+		"diode": "block/stone"
 	},
 	"elements": [
 		{
 			"name": "plate",
-			"from": [13, 1, 0],
-			"to": [15, 17, 16],
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"north": {"uv": [0, 14, 16, 16], "rotation": 90, "texture": "#plate"},
@@ -28,8 +29,8 @@
 		},
 		{
 			"name": "plate_overlay",
-			"from": [13, 1, 0],
-			"to": [15, 17, 16],
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#plate_overlay"}
@@ -37,47 +38,47 @@
 		},
 		{
 			"name": "diode_a",
-			"from": [11, 8, 12],
-			"to": [15, 10, 14],
+			"from": [12, 7, 12],
+			"to": [16, 9, 14],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
-				"north": {"uv": [7, 12, 9, 16], "rotation": 90, "texture": "#plate"},
-				"south": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"},
-				"west": {"uv": [7, 7, 9, 9], "rotation": 270, "texture": "#plate"},
-				"up": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"},
-				"down": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"}
+				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
+				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
+				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
+				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
 			}
 		},
 		{
 			"name": "diode_b",
-			"from": [11, 3, 7],
-			"to": [15, 5, 9],
+			"from": [12, 2, 7],
+			"to": [16, 4, 9],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
-				"north": {"uv": [7, 12, 9, 16], "rotation": 90, "texture": "#plate"},
-				"south": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"},
-				"west": {"uv": [7, 7, 9, 9], "rotation": 270, "texture": "#plate"},
-				"up": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"},
-				"down": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"}
+				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
+				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
+				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
+				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
 			}
 		},
 		{
 			"name": "diode_c",
-			"from": [11, 13, 7],
-			"to": [15, 15, 9],
+			"from": [12, 12, 7],
+			"to": [16, 14, 9],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
-				"north": {"uv": [7, 12, 9, 16], "rotation": 90, "texture": "#plate"},
-				"south": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"},
-				"west": {"uv": [7, 7, 9, 9], "rotation": 270, "texture": "#plate"},
-				"up": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"},
-				"down": {"uv": [7, 12, 9, 16], "rotation": 270, "texture": "#plate"}
+				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
+				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
+				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
+				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
 			}
 		},
 		{
 			"name": "torch_a",
-			"from": [11, 11, 7],
-			"to": [15, 13, 9],
+			"from": [12, 10, 7],
+			"to": [16, 12, 9],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 6},
@@ -89,8 +90,8 @@
 		},
 		{
 			"name": "torch_b",
-			"from": [11, 8, 10],
-			"to": [15, 10, 12],
+			"from": [12, 7, 10],
+			"to": [16, 9, 12],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 7},
@@ -102,8 +103,8 @@
 		},
 		{
 			"name": "torch_c",
-			"from": [11, 5, 7],
-			"to": [15, 7, 9],
+			"from": [12, 4, 7],
+			"to": [16, 6, 9],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 8},
@@ -115,8 +116,8 @@
 		},
 		{
 			"name": "input_a_overlay",
-			"from": [13, 1, 0],
-			"to": [15, 17, 16],
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#input_a_overlay", "tintindex": 3},
@@ -125,8 +126,8 @@
 		},
 		{
 			"name": "input_b_overlay",
-			"from": [13, 1, 0],
-			"to": [15, 17, 16],
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"south": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#edge", "tintindex": 5},
@@ -135,8 +136,8 @@
 		},
 		{
 			"name": "input_c_overlay",
-			"from": [13, 1, 0],
-			"to": [15, 17, 16],
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"west": {"uv": [0, 0, 16, 16], "rotation": 90, "texture": "#input_a_overlay", "tintindex": 5},
@@ -145,8 +146,8 @@
 		},
 		{
 			"name": "output_overlay",
-			"from": [13, 1, 0],
-			"to": [15, 17, 16],
+			"from": [14, 0, 0],
+			"to": [16, 16, 16],
 			"rotation": {"angle": 0, "axis": "z", "origin": [7, 8, 12]},
 			"faces": {
 				"north": {"uv": [0, 14, 16, 16], "rotation": 90, "texture": "#edge", "tintindex": 10},

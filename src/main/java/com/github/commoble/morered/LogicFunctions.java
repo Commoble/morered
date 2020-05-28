@@ -25,6 +25,9 @@ public class LogicFunctions
 	public static final LogicFunction XOR_AC = registerTintIndex(13, (a,b,c) -> a ^ c);
 	public static final LogicFunction XNOR_AC = registerTintIndex(14, (a,b,c) -> !(a^c));
 	public static final LogicFunction MULTIPLEX = registerTintIndex(15, (a,b,c) -> b ? c : a);
+	// these two are used for intermediary component tinting in the XOR/XNOR gate models
+	public static final LogicFunction A_NOR_A_NOR_C = registerTintIndex(16, (a,b,c) -> !(a || !(a || c)));
+	public static final LogicFunction C_NOR_A_NOR_C = registerTintIndex(17, (a,b,c) -> !(c || !(a || c)));
 	
 	public static LogicFunction registerTintIndex(int index, LogicFunction function)
 	{

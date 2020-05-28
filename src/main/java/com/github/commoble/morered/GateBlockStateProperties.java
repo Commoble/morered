@@ -1,6 +1,9 @@
 package com.github.commoble.morered;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.material.Material;
+import net.minecraft.block.material.MaterialColor;
+import net.minecraft.block.material.PushReaction;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.DirectionProperty;
@@ -34,6 +37,8 @@ public class GateBlockStateProperties
 	public static final BooleanProperty INPUT_B = BooleanProperty.create("input_b");
 	/** The third input clockwise from the output **/
 	public static final BooleanProperty INPUT_C = BooleanProperty.create("input_c");
+	
+	public static final Material PLATE_MATERIAL = new Material(MaterialColor.STONE, false, false, false, false, true, false, false, PushReaction.NORMAL);
 
 	
 	public static Direction getOutputDirection(BlockState state)
