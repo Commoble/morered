@@ -6,24 +6,45 @@ import com.github.commoble.morered.LogicFunction;
 import com.github.commoble.morered.LogicFunctions;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.ILightReader;
 
-public class BlockColorHandlers
+public class ColorHandlers
 {
 	
 	public static final int NO_TINT = 0xFFFFFF;
 	public static final int LIT = 0xFFFFFF;
 	public static final int UNLIT = 0x560000;
 	
-	public static int getLogicGateTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	public static int getLogicFunctionBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	{
+		return getLogicFunctionBlockStateTint(state, tintIndex);
+	}
+	
+	public static int getLogicFunctionBlockStateTint(BlockState state, int tintIndex)
 	{
 		InputState input = InputState.getInput(state);
 		
-		return getLogicGateTint(tintIndex, input.a, input.b, input.c);
+		return getLogicFunctionTint(tintIndex, input.a, input.b, input.c);
 	}
 	
-	public static int getLogicGateTint(int tintIndex, boolean a, boolean b, boolean c)
+	public static int getLogicFunctionBlockItemTint(ItemStack stack, int tintIndex)
+	{
+		Item item = stack.getItem();
+		if (item instanceof BlockItem)
+		{
+			return getLogicFunctionBlockStateTint(((BlockItem)item).getBlock().getDefaultState(), tintIndex);
+		}
+		else
+		{
+			return NO_TINT;
+		}
+	}
+	
+	public static int getLogicFunctionTint(int tintIndex, boolean a, boolean b, boolean c)
 	{
 		if (tintIndex < 1) // particles have tintindex 0?, unspecified faces have tintindex -1
 		{
