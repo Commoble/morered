@@ -10,4 +10,6 @@ public class ObjectNames
 	public static final String XOR_GATE = "xor_gate";
 	public static final String XNOR_GATE = "xnor_gate";
 	public static final String MULTIPLEXER = "multiplexer";
+	
+	public static final String STONE_PLATE = "stone_plate";
 }

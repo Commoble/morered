@@ -10,9 +10,9 @@ import net.minecraft.world.World;
 
 public enum InputSide
 {
-	A(GateBlockStateProperties.INPUT_A, 1),
-	B(GateBlockStateProperties.INPUT_B, 2),
-	C(GateBlockStateProperties.INPUT_C, 3);
+	A(PlateBlockStateProperties.INPUT_A, 1),
+	B(PlateBlockStateProperties.INPUT_B, 2),
+	C(PlateBlockStateProperties.INPUT_C, 3);
 	
 	public final BooleanProperty property;
 	public final int rotationsFromOutput;
@@ -35,13 +35,13 @@ public enum InputSide
 	public boolean isBlockReceivingPower(World world, BlockState state, BlockPos pos)
 	{
 		// return early if the state doesn't care about this side or we're checking an invalid state
-		if(!state.has(this.property) || !state.has(GateBlockStateProperties.ATTACHMENT_DIRECTION) || !state.has(GateBlockStateProperties.ROTATION))
+		if(!state.has(this.property) || !state.has(PlateBlockStateProperties.ATTACHMENT_DIRECTION) || !state.has(PlateBlockStateProperties.ROTATION))
 		{
 			return false;
 		}
 		
-		Direction attachmentDirection = state.get(GateBlockStateProperties.ATTACHMENT_DIRECTION);
-		int baseRotation = state.get(GateBlockStateProperties.ROTATION);
+		Direction attachmentDirection = state.get(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
+		int baseRotation = state.get(PlateBlockStateProperties.ROTATION);
 		
 		Direction inputDirection = BlockStateUtil.getInputDirection(attachmentDirection, baseRotation, this.rotationsFromOutput);
 		

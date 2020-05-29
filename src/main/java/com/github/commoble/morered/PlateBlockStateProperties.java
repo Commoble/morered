@@ -26,7 +26,7 @@ import net.minecraft.util.math.BlockPos;
  * For consistency, logic plates with fewer than three inputs still use the input property for the appropriate side
  * (a gate with one input opposite from the output should use the input B property)
  */
-public class GateBlockStateProperties
+public class PlateBlockStateProperties
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = BlockStateProperties.FACING;
 	public static final IntegerProperty ROTATION = IntegerProperty.create("rotation", 0,3);
@@ -64,9 +64,9 @@ public class GateBlockStateProperties
 		BlockPos placePos = context.getPos();
 		BlockPos adjacentPos = placePos.offset(directionTowardAdjacentBlock);
 		BlockState adjacentState = context.getWorld().getBlockState(adjacentPos);
-		boolean placedAgainstPlate = TagWrappers.LOGIC_GATE_PLATES.contains(adjacentState.getBlock()) && adjacentState.has(GateBlockStateProperties.ATTACHMENT_DIRECTION);
+		boolean placedAgainstPlate = TagWrappers.LOGIC_GATE_PLATES.contains(adjacentState.getBlock()) && adjacentState.has(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
 		
-		Direction attachmentDirection = placedAgainstPlate ? getDirectionWhenPlacedAgainstAnotherPlate(adjacentState.get(GateBlockStateProperties.ATTACHMENT_DIRECTION),directionTowardAdjacentBlock): directionTowardAdjacentBlock;
+		Direction attachmentDirection = placedAgainstPlate ? getDirectionWhenPlacedAgainstAnotherPlate(adjacentState.get(PlateBlockStateProperties.ATTACHMENT_DIRECTION),directionTowardAdjacentBlock): directionTowardAdjacentBlock;
 		int rotationIndex = BlockStateUtil.getRotationIndexForPlacement(attachmentDirection, Direction.getFacingDirections(context.getPlayer()));
 		if (state.has(ATTACHMENT_DIRECTION) && state.has(ROTATION))
 		{

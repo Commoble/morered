@@ -1,6 +1,6 @@
 {
 	"credit": "Made with Blockbench",
-	"parent": "block/block",
+	"parent": "morered:block/plate_template",
 	"ambientocclusion": false,
 	"textures": {
 		"7": "morered:block/xnor_gate_output_overlay",

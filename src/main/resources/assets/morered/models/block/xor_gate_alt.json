@@ -1,6 +1,6 @@
 {
 	"credit": "Made with Blockbench",
-	"parent": "block/block",
+	"parent": "morered:block/plate_template",
 	"ambientocclusion": false,
 	"textures": {
 		"input_a_overlay": "morered:block/xor_gate_input_a_overlay",

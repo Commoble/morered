@@ -1,6 +1,6 @@
 {
 	"credit": "Made with Blockbench",
-	"parent": "block/block",
+	"parent": "morered:block/plate_template",
 	"ambientocclusion": false,
 	"textures": {
 		"plate_overlay": "morered:block/plate_overlay",
