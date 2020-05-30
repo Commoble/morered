@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#r#",
+    "rtr",
+    "#r#"
+  ],
+  "key": {
+    "#": {
+      "item": "morered:stone_plate"
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    },
+    "t": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "result": {
+    "item": "morered:nor_gate"
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#r#",
+    "rFr",
+    "#r#"
+  ],
+  "key": {
+    "#": {
+      "item": "morered:stone_plate"
+    },
+    "r": {
+      "item": "minecraft:redstone"
+    },
+    "F": {
+      "item": "minecraft:iron_ingot"
+    }
+  },
+  "result": {
+    "item": "morered:multiplexer"
+  }
+}

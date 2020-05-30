@@ -1,7 +1,5 @@
 package com.github.commoble.morered;
 
-import java.util.function.Supplier;
-
 import com.github.commoble.morered.client.ClientEvents;
 
 import net.minecraft.util.ResourceLocation;
@@ -9,11 +7,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 @Mod(MoreRed.MODID)
 public class MoreRed
@@ -38,10 +33,5 @@ public class MoreRed
 	public static ResourceLocation getRL(String name)
 	{
 		return new ResourceLocation(MODID, name);
-	}
-	
-	public static final <T extends IForgeRegistryEntry<T>, SubType extends T> RegistryObject<SubType> register(DeferredRegister<T> register, String name, Supplier<SubType> thingMaker)
-	{
-		return register.register(name, thingMaker);
 	}
 }
