@@ -1,5 +1,7 @@
 package com.github.commoble.morered;
 
+import com.github.commoble.morered.util.BlockStateUtil;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.RedstoneWireBlock;

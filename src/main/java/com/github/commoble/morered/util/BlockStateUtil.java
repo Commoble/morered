@@ -1,11 +1,10 @@
-package com.github.commoble.morered;
-
-import java.util.Arrays;
+package com.github.commoble.morered.util;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
+import net.minecraft.util.math.Vec3d;
 
 public class BlockStateUtil
 {
@@ -201,28 +200,38 @@ public class BlockStateUtil
 		}
 	}
 	
-	public static int getRotationIndexForPlacement(Direction attachmentFace, Direction[] sortedLookDirections)
-	{
-		// the fallback here almost certainly won't be used but it's good to have it for java completeness
-		Direction fallback = attachmentFace.getAxis() == Axis.Z ? Direction.UP : Direction.NORTH;
-		
-		// get the best direction closest to the player's look vector that's valid for the attachmentFace
-		Direction bestDirection = Arrays.stream(sortedLookDirections)
-			.filter(direction -> direction.getAxis() != attachmentFace.getAxis())
-			.findFirst()
-			.orElse(fallback);
-		
+	public static int getRotationIndexForDirection(Direction attachmentFace, Direction outputDirection)
+	{		
 		// now using the lookup table above, find the index matching our directions
 		Direction[] rotatedOutputs = OUTPUT_TABLE[attachmentFace.ordinal()];
 		int size = rotatedOutputs.length;
 		for (int i=0; i<size; i++)
 		{
-			if (rotatedOutputs[i] == bestDirection)
+			if (rotatedOutputs[i] == outputDirection)
 			{
 				return i;
 			}
 		}
 		
 		return 0;
+	}
+	
+	public static Direction getOutputDirectionFromRelativeHitVec(Vec3d hitVec, Direction directionTowardBlockAttachedTo)
+	{
+		// we have the relative hit vector, where 0,0,0 is the bottom-left corner of the cube we are placing into
+		// and 1,1,1 is the top-right
+		// how do we convert this into a direction?
+		// we want to ignore the attachment direction and its opposite
+		// Direction has a method that converts a vector to a direction
+		// we could "flatten" the hit vec's value on the axis of attachment
+		// Direction::getFacingFromVector uses 0,0,0 as the center and 1,1,1 and -1,-1,-1 as corners,
+		// so we'll want to map our hitvec accordingly
+		
+		Axis axis = directionTowardBlockAttachedTo.getAxis();
+		float x = (float) (axis == Axis.X ? 0F : hitVec.x*2 - 1);
+		float y = (float) (axis == Axis.Y ? 0F : hitVec.y*2 - 1);
+		float z = (float) (axis == Axis.Z ? 0F : hitVec.z*2 - 1);
+		
+		return Direction.getFacingFromVector(x, y, z);
 	}
 }

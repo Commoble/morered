@@ -1,5 +1,7 @@
 package com.github.commoble.morered;
 
+import com.github.commoble.morered.util.BlockStateUtil;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -11,6 +13,7 @@ import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 
 /**
  * The three input booleanproperties here are the inputs 90, 180, and 270 degrees clockwise from the output
@@ -56,40 +59,37 @@ public class PlateBlockStateProperties
 	
 	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockItemUseContext context)
 	{
-		Direction faceOfAdjacentBlock = context.getFace();
-		// special case: if the player placed this block against the side of another plate block,
-		// then place this block facing the same way as that plate block
-		// otherwise, place it against the block that was right-clicked0
-		Direction directionTowardAdjacentBlock = faceOfAdjacentBlock.getOpposite();
-		BlockPos placePos = context.getPos();
-		BlockPos adjacentPos = placePos.offset(directionTowardAdjacentBlock);
-		BlockState adjacentState = context.getWorld().getBlockState(adjacentPos);
-		boolean placedAgainstPlate = TagWrappers.LOGIC_GATE_PLATES.contains(adjacentState.getBlock()) && adjacentState.has(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
+		// how do we want to orient the block when we place it?
+		// attachment face should be the face that was clicked
+		// what about the rotation?
 		
-		Direction attachmentDirection = placedAgainstPlate ? getDirectionWhenPlacedAgainstAnotherPlate(adjacentState.get(PlateBlockStateProperties.ATTACHMENT_DIRECTION),directionTowardAdjacentBlock): directionTowardAdjacentBlock;
-		int rotationIndex = BlockStateUtil.getRotationIndexForPlacement(attachmentDirection, Direction.getFacingDirections(context.getPlayer()));
+		// option A: output faces away from player, inverted when sneaking
+		// empirical observations: this is super annoying to get the player in the right standing position,
+		// especially when placing the thing on a wall
+		
+		// option B: the orientation depends on which part of the face was clicked, not the player's facing
+		// this gives more control to the player but might be confusing
+		// we may want to render a preview of the placement somehow
+
+		BlockPos placePos = context.getPos();
+		Direction faceOfAdjacentBlock = context.getFace();
+		Direction directionTowardAdjacentBlock = faceOfAdjacentBlock.getOpposite();
+		Vec3d relativeHitVec = context.getHitVec().subtract(new Vec3d(placePos));
+		return getStateForPlacedGatePlate(state, placePos, directionTowardAdjacentBlock, relativeHitVec); 
+	}
+	
+	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPos placePos, Direction directionTowardAdjacentBlock, Vec3d relativeHitVec)
+	{
+		Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, directionTowardAdjacentBlock);
+		int rotationIndex = BlockStateUtil.getRotationIndexForDirection(directionTowardAdjacentBlock, outputDirection);
+		
 		if (state.has(ATTACHMENT_DIRECTION) && state.has(ROTATION))
 		{
-			return state.with(ATTACHMENT_DIRECTION, attachmentDirection).with(ROTATION, rotationIndex);
+			return state.with(ATTACHMENT_DIRECTION, directionTowardAdjacentBlock).with(ROTATION, rotationIndex);
 		}
 		else
 		{
 			return state;
-		}
-	}
-	
-	// if we are placing this plate against another plate,
-	// and we are NOT placing it against the backside of the other plate,
-	// make the plate line up with the plate we are placing against
-	public static Direction getDirectionWhenPlacedAgainstAnotherPlate(Direction otherPlateDirection, Direction directionTowardAdjacentBlock)
-	{
-		if (otherPlateDirection == directionTowardAdjacentBlock.getOpposite())
-		{
-			return directionTowardAdjacentBlock;
-		}
-		else
-		{
-			return otherPlateDirection;
 		}
 	}
 }

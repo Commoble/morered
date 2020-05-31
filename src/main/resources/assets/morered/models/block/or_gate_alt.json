@@ -42,7 +42,6 @@
 			"to": [16, 9, 9],
 			"rotation": {"angle": 0, "axis": "z", "origin": [8, 8, 4]},
 			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
 				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
 				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
 				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
@@ -55,8 +54,6 @@
 			"to": [16, 9, 5],
 			"rotation": {"angle": 0, "axis": "z", "origin": [8, 8, 4]},
 			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
 				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
 				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
 				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
@@ -68,8 +65,6 @@
 			"to": [16, 9, 7],
 			"rotation": {"angle": 0, "axis": "z", "origin": [8, 8, 4]},
 			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 12},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 12},
 				"west": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 12},
 				"up": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 12},
 				"down": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 12}
@@ -82,7 +77,6 @@
 			"rotation": {"angle": 0, "axis": "z", "origin": [8, 8, 4]},
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 11},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 11},
 				"west": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 11},
 				"up": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 11},
 				"down": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 11}

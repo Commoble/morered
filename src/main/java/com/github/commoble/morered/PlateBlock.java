@@ -2,6 +2,8 @@ package com.github.commoble.morered;
 
 import javax.annotation.Nullable;
 
+import com.github.commoble.morered.util.BlockStateUtil;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;

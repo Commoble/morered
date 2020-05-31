@@ -5,21 +5,25 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.ObjectHolder;
 
 public class ItemRegistrar
 {
 	public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, MoreRed.MODID);
+	
+	// using an objectholder here for the creative tab since the function gates are procedurally generated
+	@ObjectHolder("morered:nor_gate")
+	public static final BlockItem NOR_GATE = null;
 	
 	public static final ItemGroup CREATIVE_TAB = new ItemGroup(MoreRed.MODID)
 	{
 		@Override
 		public ItemStack createIcon()
 		{
-			return new ItemStack(Items.REPEATER);
+			return new ItemStack(ItemRegistrar.NOR_GATE);
 		}
 	};
 	

@@ -193,6 +193,7 @@ public abstract class LogicFunctionPlateBlock extends PlateBlock
 		InputState newInputState = InputState.getWorldPowerState(worldIn, state, pos);
 		if (oldInputState != newInputState && !worldIn.getPendingBlockTicks().isTickPending(pos, this))
 		{
+			// we have to have a 1-tick delay to avoid infinite loops
 			worldIn.getPendingBlockTicks().scheduleTick(pos, this, TICK_DELAY, TickPriority.HIGH);
 		}
 	}

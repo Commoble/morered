@@ -39,7 +39,6 @@
 			"from": [7, 0, 7],
 			"to": [9, 4, 9],
 			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
 				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
 				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
 				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
@@ -52,9 +51,7 @@
 			"to": [9, 4, 5],
 			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 4]},
 			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
 				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
 				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
 				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
 			}
@@ -64,9 +61,7 @@
 			"from": [7, 0, 5],
 			"to": [9, 4, 7],
 			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 12},
 				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 12},
-				"south": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 12},
 				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 12},
 				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 12}
 			}
@@ -79,7 +74,6 @@
 			"faces": {
 				"north": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 11},
 				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 11},
-				"south": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 11},
 				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 11},
 				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 11}
 			}

@@ -1,6 +1,7 @@
 {
   "replace": false,
   "values": [
+  	"morered:diode",
     "morered:not_gate",
     "morered:nor_gate",
     "morered:nand_gate",

@@ -1,5 +1,6 @@
 {
 	"itemGroup.morered": "More Red",
+	"block.morered.diode": "Diode",
 	"block.morered.not_gate": "NOT Gate",
 	"block.morered.nor_gate": "NOR Gate",
 	"block.morered.nand_gate": "NAND Gate",

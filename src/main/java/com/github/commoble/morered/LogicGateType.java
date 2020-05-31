@@ -57,7 +57,8 @@ public class LogicGateType
 	/** Called from MoreRed mod constructor **/
 	public static void registerLogicGateTypes(DeferredRegister<Block> blocks, DeferredRegister<Item> items)
 	{
-		registerLogicGateType(ObjectNames.NOT_GATE, blocks, items, LogicFunctions.NOT_B, LogicFunctionPlateBlock.THREE_INPUTS);
+		registerLogicGateType(ObjectNames.DIODE, blocks, items, LogicFunctions.INPUT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
+		registerLogicGateType(ObjectNames.NOT_GATE, blocks, items, LogicFunctions.NOT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
 		registerLogicGateType(ObjectNames.NOR_GATE, blocks, items, LogicFunctions.NOR, LogicFunctionPlateBlock.THREE_INPUTS);
 		registerLogicGateType(ObjectNames.NAND_GATE, blocks, items, LogicFunctions.NAND, LogicFunctionPlateBlock.THREE_INPUTS);
 		registerLogicGateType(ObjectNames.OR_GATE, blocks, items, LogicFunctions.OR, LogicFunctionPlateBlock.THREE_INPUTS);
