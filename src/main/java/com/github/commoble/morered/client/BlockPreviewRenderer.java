@@ -10,15 +10,22 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.Matrix4f;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Vector3f;
 import net.minecraft.client.renderer.Vector4f;
 import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.ILightReader;
+import net.minecraft.world.World;
 
 /**
  * Wrapper class around the vanilla block renderer so we don't have to copy five
@@ -40,6 +47,37 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 	public BlockPreviewRenderer(BlockModelRenderer baseRenderer)
 	{
 		super(baseRenderer.blockColors);
+	}
+
+	// invoked from the DrawHighlightEvent.HighlightBlock event
+	public static void renderBlockPreview(BlockPos pos, BlockState state, World world, Vec3d currentRenderPos, MatrixStack matrix, IRenderTypeBuffer renderTypeBuffer)
+	{
+		matrix.push();
+	
+		// the current position of the matrix stack is the position of the player's
+		// viewport (the head, essentially)
+		// we want to move it to the correct position to render the block at
+		double offsetX = pos.getX() - currentRenderPos.getX();
+		double offsetY = pos.getY() - currentRenderPos.getY();
+		double offsetZ = pos.getZ() - currentRenderPos.getZ();
+		matrix.translate(offsetX, offsetY, offsetZ);
+	
+		BlockRendererDispatcher blockDispatcher = Minecraft.getInstance().getBlockRendererDispatcher();
+		BlockModelRenderer renderer = getInstance(blockDispatcher.getBlockModelRenderer());
+		renderer.renderModel(
+			world,
+			blockDispatcher.getModelForState(state),
+			state,
+			pos,
+			matrix,
+			renderTypeBuffer.getBuffer(RenderType.getTranslucent()),
+			false,
+			world.rand,
+			state.getPositionRandom(pos),
+			OverlayTexture.NO_OVERLAY,
+			net.minecraftforge.client.model.data.EmptyModelData.INSTANCE);
+	
+		matrix.pop();
 	}
 
 	@Override
@@ -75,7 +113,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 		addTransparentQuad(matrixEntry, quadIn, new float[] { colorMul0, colorMul1, colorMul2, colorMul3 }, f, f1, f2, new int[] { brightness0, brightness1, brightness2, brightness3 },
 			combinedOverlayIn, true, buffer);
 	}
-
+	
 	// as IVertexBuilder::addQuad except when we add the vertex, we add an opacity float instead of 1.0F
 	public static void addTransparentQuad(MatrixStack.Entry matrixEntryIn, BakedQuad quadIn, float[] colorMuls, float redIn, float greenIn, float blueIn, int[] combinedLightsIn,
 		int combinedOverlayIn, boolean mulColor, IVertexBuilder buffer)

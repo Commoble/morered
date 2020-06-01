@@ -98,7 +98,7 @@ public class ClientEvents
 							BlockStateUtil.getRotationIndexForDirection(attachmentDirection, outputDirection);
 							BlockState state = PlateBlockStateProperties.getStateForPlacedGatePlate(block.getDefaultState(), placePos, attachmentDirection, relativeHitVec);
 							
-							RenderBuddy.renderBlockPreview(placePos, state, world, event.getInfo().getProjectedView(), event.getMatrix(), event.getBuffers());
+							BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getInfo().getProjectedView(), event.getMatrix(), event.getBuffers());
 							
 						}
 					}
