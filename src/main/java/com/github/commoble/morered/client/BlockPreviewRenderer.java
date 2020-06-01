@@ -104,6 +104,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 			b *= forgeLighting;
 		}
 
+		// use our method below instead of adding the quad in the usual manner
 		addTransparentQuad(matrixEntry, quadIn, new float[] { tintA, tintB, tintC, tintD }, r, g, b, new int[] { brightness0, brightness1, brightness2, brightness3 },
 			combinedOverlayIn, true, buffer);
 	}
