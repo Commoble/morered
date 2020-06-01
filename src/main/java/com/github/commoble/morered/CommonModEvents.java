@@ -9,7 +9,9 @@ public class CommonModEvents
 	{
 		subscribedDeferredRegisters(modBus,
 			BlockRegistrar.BLOCKS,
-			ItemRegistrar.ITEMS);
+			ItemRegistrar.ITEMS,
+			ContainerRegistrar.CONTAINER_TYPES,
+			RecipeRegistrar.RECIPE_SERIALIZERS);
 	}
 	
 	public static void subscribedDeferredRegisters(IEventBus modBus, DeferredRegister<?>... registers)

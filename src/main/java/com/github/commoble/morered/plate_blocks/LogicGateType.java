@@ -1,10 +1,13 @@
-package com.github.commoble.morered;
+package com.github.commoble.morered.plate_blocks;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 
-import com.github.commoble.morered.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
+import com.github.commoble.morered.ItemRegistrar;
+import com.github.commoble.morered.MoreRed;
+import com.github.commoble.morered.ObjectNames;
+import com.github.commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;

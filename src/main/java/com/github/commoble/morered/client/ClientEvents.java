@@ -1,14 +1,16 @@
 package com.github.commoble.morered.client;
 
-import com.github.commoble.morered.LogicGateType;
-import com.github.commoble.morered.PlateBlock;
-import com.github.commoble.morered.PlateBlockStateProperties;
+import com.github.commoble.morered.ContainerRegistrar;
+import com.github.commoble.morered.plate_blocks.LogicGateType;
+import com.github.commoble.morered.plate_blocks.PlateBlock;
+import com.github.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import com.github.commoble.morered.util.BlockStateUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
@@ -42,6 +44,8 @@ public class ClientEvents
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
+
+		ScreenManager.registerFactory(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
 	}
 	
 	public static void setLogicGateRenderLayer(LogicGateType type)

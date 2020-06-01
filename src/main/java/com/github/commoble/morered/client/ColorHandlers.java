@@ -1,9 +1,9 @@
 
 package com.github.commoble.morered.client;
 
-import com.github.commoble.morered.InputState;
-import com.github.commoble.morered.LogicFunction;
-import com.github.commoble.morered.LogicFunctions;
+import com.github.commoble.morered.plate_blocks.InputState;
+import com.github.commoble.morered.plate_blocks.LogicFunction;
+import com.github.commoble.morered.plate_blocks.LogicFunctions;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;

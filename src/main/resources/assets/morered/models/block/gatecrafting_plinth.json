@@ -1,0 +1,12 @@
+{
+    "parent": "block/cube",
+    "textures": {
+        "particle": "block/red_nether_bricks",
+        "down": "block/nether_bricks",
+        "up": "block/smooth_stone",
+        "north": "block/nether_bricks",
+        "east": "block/nether_bricks",
+        "south": "block/nether_bricks",
+        "west": "block/nether_bricks"
+    }
+}

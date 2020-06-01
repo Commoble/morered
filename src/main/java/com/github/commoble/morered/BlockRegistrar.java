@@ -1,7 +1,12 @@
 package com.github.commoble.morered;
 
+import com.github.commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
+import com.github.commoble.morered.plate_blocks.PlateBlock;
+import com.github.commoble.morered.plate_blocks.PlateBlockStateProperties;
+
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
+import net.minecraft.block.material.Material;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -13,4 +18,7 @@ public class BlockRegistrar
 	
 	public static final RegistryObject<PlateBlock> STONE_PLATE = BLOCKS.register(ObjectNames.STONE_PLATE,
 		() -> new PlateBlock(Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0.4F).sound(SoundType.WOOD)));
+
+	public static final RegistryObject<GatecraftingPlinthBlock> GATECRAFTING_PLINTH = BLOCKS.register(ObjectNames.GATECRAFTING_PLINTH,
+		() -> new GatecraftingPlinthBlock(Block.Properties.create(Material.ROCK).hardnessAndResistance(3.5F)));
 }

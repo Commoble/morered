@@ -13,4 +13,8 @@ public class ObjectNames
 	public static final String MULTIPLEXER = "multiplexer";
 	
 	public static final String STONE_PLATE = "stone_plate";
+	
+	public static final String GATECRAFTING_PLINTH = "gatecrafting_plinth";
+	
+	public static final String GATECRAFTING_RECIPE = "gatecrafting";
 }

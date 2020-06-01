@@ -1,4 +1,4 @@
-package com.github.commoble.morered;
+package com.github.commoble.morered.plate_blocks;
 
 import com.github.commoble.morered.util.BlockStateUtil;
 

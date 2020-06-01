@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "sss",
+    "#b#",
+    "#b#"
+  ],
+  "key": {
+    "#": {
+      "item": "minecraft:nether_bricks"
+    },
+    "s": {
+      "item": "morered:stone_plate"
+    },
+    "b": {
+      "item": "minecraft:blaze_rod"
+    }
+  },
+  "result": {
+    "item": "morered:gatecrafting_plinth"
+  }
+}

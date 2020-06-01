@@ -1,6 +1,7 @@
 package com.github.commoble.morered;
 
 import com.github.commoble.morered.client.ClientEvents;
+import com.github.commoble.morered.plate_blocks.LogicGateType;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;

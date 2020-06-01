@@ -1,4 +1,4 @@
-package com.github.commoble.morered;
+package com.github.commoble.morered.plate_blocks;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.util.math.BlockPos;

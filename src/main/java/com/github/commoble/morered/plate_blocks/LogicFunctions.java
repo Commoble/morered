@@ -1,4 +1,4 @@
-package com.github.commoble.morered;
+package com.github.commoble.morered.plate_blocks;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
