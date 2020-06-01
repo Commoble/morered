@@ -81,90 +81,83 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 	}
 
 	@Override
-	public void renderQuadSmooth(ILightReader blockAccessIn, BlockState stateIn, BlockPos posIn, IVertexBuilder buffer, MatrixStack.Entry matrixEntry, BakedQuad quadIn,
-		float colorMul0, float colorMul1, float colorMul2, float colorMul3, int brightness0, int brightness1, int brightness2, int brightness3, int combinedOverlayIn)
+	public void renderQuadSmooth(ILightReader world, BlockState state, BlockPos pos, IVertexBuilder buffer, MatrixStack.Entry matrixEntry, BakedQuad quadIn,
+		float tintA, float tintB, float tintC, float tintD, int brightness0, int brightness1, int brightness2, int brightness3, int combinedOverlayIn)
 	{
-		float f;
-		float f1;
-		float f2;
+		float r=1F;
+		float g=1F;
+		float b=1F;
 		if (quadIn.hasTintIndex())
 		{
-			int i = this.blockColors.getColor(stateIn, blockAccessIn, posIn, quadIn.getTintIndex());
-			f = (i >> 16 & 255) / 255.0F;
-			f1 = (i >> 8 & 255) / 255.0F;
-			f2 = (i & 255) / 255.0F;
-		}
-		else
-		{
-			f = 1.0F;
-			f1 = 1.0F;
-			f2 = 1.0F;
+			int i = this.blockColors.getColor(state, world, pos, quadIn.getTintIndex());
+			r = (i >> 16 & 255) / 255.0F;
+			g = (i >> 8 & 255) / 255.0F;
+			b = (i & 255) / 255.0F;
 		}
 		// FORGE: Apply diffuse lighting at render-time instead of baking it in
 		if (quadIn.shouldApplyDiffuseLighting())
 		{
 			// TODO this should be handled by the forge lighting pipeline
-			float l = net.minecraftforge.client.model.pipeline.LightUtil.diffuseLight(quadIn.getFace());
-			f *= l;
-			f1 *= l;
-			f2 *= l;
+			float forgeLighting = net.minecraftforge.client.model.pipeline.LightUtil.diffuseLight(quadIn.getFace());
+			r *= forgeLighting;
+			g *= forgeLighting;
+			b *= forgeLighting;
 		}
 
-		addTransparentQuad(matrixEntry, quadIn, new float[] { colorMul0, colorMul1, colorMul2, colorMul3 }, f, f1, f2, new int[] { brightness0, brightness1, brightness2, brightness3 },
+		addTransparentQuad(matrixEntry, quadIn, new float[] { tintA, tintB, tintC, tintD }, r, g, b, new int[] { brightness0, brightness1, brightness2, brightness3 },
 			combinedOverlayIn, true, buffer);
 	}
 	
 	// as IVertexBuilder::addQuad except when we add the vertex, we add an opacity float instead of 1.0F
-	public static void addTransparentQuad(MatrixStack.Entry matrixEntryIn, BakedQuad quadIn, float[] colorMuls, float redIn, float greenIn, float blueIn, int[] combinedLightsIn,
+	public static void addTransparentQuad(MatrixStack.Entry matrixEntry, BakedQuad quad, float[] colorMuls, float r, float g, float b, int[] vertexLights,
 		int combinedOverlayIn, boolean mulColor, IVertexBuilder buffer)
 	{
-		int[] aint = quadIn.getVertexData();
-		Vec3i vec3i = quadIn.getFace().getDirectionVec();
-		Vector3f vector3f = new Vector3f(vec3i.getX(), vec3i.getY(), vec3i.getZ());
-		Matrix4f matrix4f = matrixEntryIn.getMatrix();
-		vector3f.transform(matrixEntryIn.getNormal());
-		int i = 8;
-		int j = aint.length / 8;
+		int[] vertexData = quad.getVertexData();
+		Vec3i faceVector3i = quad.getFace().getDirectionVec();
+		Vector3f faceVector = new Vector3f(faceVector3i.getX(), faceVector3i.getY(), faceVector3i.getZ());
+		Matrix4f matrix = matrixEntry.getMatrix();
+		faceVector.transform(matrixEntry.getNormal());
+		
+		int vertexDataEntries = vertexData.length / 8;
 
 		try (MemoryStack memorystack = MemoryStack.stackPush())
 		{
 			ByteBuffer bytebuffer = memorystack.malloc(DefaultVertexFormats.BLOCK.getSize());
 			IntBuffer intbuffer = bytebuffer.asIntBuffer();
 
-			for (int k = 0; k < j; ++k)
+			for (int vertexIndex = 0; vertexIndex < vertexDataEntries; ++vertexIndex)
 			{
 				((Buffer) intbuffer).clear();
-				intbuffer.put(aint, k * 8, 8);
-				float f = bytebuffer.getFloat(0);
-				float f1 = bytebuffer.getFloat(4);
-				float f2 = bytebuffer.getFloat(8);
-				float f3;
-				float f4;
-				float f5;
+				intbuffer.put(vertexData, vertexIndex * 8, 8);
+				float x = bytebuffer.getFloat(0);
+				float y = bytebuffer.getFloat(4);
+				float z = bytebuffer.getFloat(8);
+				float red = colorMuls[vertexIndex] * r;
+				float green = colorMuls[vertexIndex] * g;
+				float blue = colorMuls[vertexIndex] * b;
+				
+				
 				if (mulColor)
 				{
-					float f6 = (bytebuffer.get(12) & 255) / 255.0F;
-					float f7 = (bytebuffer.get(13) & 255) / 255.0F;
-					float f8 = (bytebuffer.get(14) & 255) / 255.0F;
-					f3 = f6 * colorMuls[k] * redIn;
-					f4 = f7 * colorMuls[k] * greenIn;
-					f5 = f8 * colorMuls[k] * blueIn;
+					float redMultiplier = (bytebuffer.get(12) & 255) / 255.0F;
+					float greenMultiplier = (bytebuffer.get(13) & 255) / 255.0F;
+					float blueMultiplier = (bytebuffer.get(14) & 255) / 255.0F;
+					red = redMultiplier * red;
+					green = greenMultiplier * green;
+					blue = blueMultiplier * blue;
 				}
-				else
-				{
-					f3 = colorMuls[k] * redIn;
-					f4 = colorMuls[k] * greenIn;
-					f5 = colorMuls[k] * blueIn;
-				}
+				
+				// this is the important part
+				float ALPHA = ClientConfig.INSTANCE.previewPlacementOpacity.get().floatValue();
 
-				int l = buffer.applyBakedLighting(combinedLightsIn[k], bytebuffer);
-				float f9 = bytebuffer.getFloat(16);
-				float f10 = bytebuffer.getFloat(20);
-				Vector4f vector4f = new Vector4f(f, f1, f2, 1.0F);
-				vector4f.transform(matrix4f);
-				buffer.applyBakedNormals(vector3f, bytebuffer, matrixEntryIn.getNormal());
-				buffer.addVertex(vector4f.getX(), vector4f.getY(), vector4f.getZ(), f3, f4, f5, ClientConfig.INSTANCE.previewPlacementOpacity.get().floatValue(), f9, f10,
-					combinedOverlayIn, l, vector3f.getX(), vector3f.getY(), vector3f.getZ());
+				int light = buffer.applyBakedLighting(vertexLights[vertexIndex], bytebuffer);
+				float texU = bytebuffer.getFloat(16);
+				float texV = bytebuffer.getFloat(20);
+				Vector4f posVector = new Vector4f(x, y, z, 1.0F);
+				posVector.transform(matrix);
+				buffer.applyBakedNormals(faceVector, bytebuffer, matrixEntry.getNormal());
+				buffer.addVertex(posVector.getX(), posVector.getY(), posVector.getZ(), red, green, blue, ALPHA, texU, texV,
+					combinedOverlayIn, light, faceVector.getX(), faceVector.getY(), faceVector.getZ());
 			}
 		}
 	}
