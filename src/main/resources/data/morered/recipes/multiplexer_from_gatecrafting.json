@@ -1,0 +1,30 @@
+{
+	"type": "morered:gatecrafting",
+	"ingredients": 
+	[
+		{
+			"type": "forge:nbt",
+			"item": "morered:stone_plate",
+			"count": 1
+		},
+		{
+			"type": "forge:nbt",
+			"item": "minecraft:redstone",
+			"count": 1
+		},
+		{
+			"type": "forge:nbt",
+			"item": "minecraft:iron_ingot",
+			"count": 1
+		},
+		{
+			"type": "forge:nbt",
+			"item": "minecraft:stone",
+			"count": 1
+		}
+	],
+	"result": 
+	{
+		"item": "morered:multiplexer"
+	}
+}

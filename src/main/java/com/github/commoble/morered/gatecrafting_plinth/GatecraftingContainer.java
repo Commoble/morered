@@ -1,10 +1,6 @@
 package com.github.commoble.morered.gatecrafting_plinth;
 
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 import com.github.commoble.morered.BlockRegistrar;
 import com.github.commoble.morered.ContainerRegistrar;
@@ -12,27 +8,21 @@ import com.github.commoble.morered.RecipeRegistrar;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.CraftResultInventory;
 import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.IContainerProvider;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.RecipeManager;
 import net.minecraft.util.IWorldPosCallable;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 public class GatecraftingContainer extends Container
 {
-	public static final int INPUT_SLOT_ROWS = 3;
-	public static final int INPUT_SLOT_COLUMNS = 3;
 	public static final int OUTPUT_SLOT_ID = 0;
-	public static final int INPUT_SLOT_COUNT = INPUT_SLOT_ROWS*INPUT_SLOT_COLUMNS;
-	public static final int FIRST_PLAYER_INVENTORY_SLOT_ID = INPUT_SLOT_COUNT;
+	public static final int FIRST_PLAYER_INVENTORY_SLOT_ID = OUTPUT_SLOT_ID + 1;
 	public static final int PLAYER_INVENTORY_SLOT_ROWS = 4;
 	public static final int PLAYER_INVENTORY_SLOT_COLUMNS = 9;
 	public static final int PLAYER_INVENTORY_SLOT_COUNT = PLAYER_INVENTORY_SLOT_ROWS * PLAYER_INVENTORY_SLOT_COLUMNS;
@@ -41,10 +31,10 @@ public class GatecraftingContainer extends Container
 	/** The player that opened the container **/
 	private final PlayerEntity player;
 	/** This is based on the position of the block the container was opened from (or the position of the player if no block was involved) **/
-	private final IWorldPosCallable usableDistanceTest;
+	private final IWorldPosCallable positionInWorld;
+	public final CraftResultInventory craftResult = new CraftResultInventory();
 	
-	private final CraftingInventory craftingInventory= new CraftingInventory(this, 3, 3);
-	private final CraftResultInventory craftResult = new CraftResultInventory();
+	public Optional<IRecipe<CraftingInventory>> currentRecipe = Optional.empty();
 	
 	public static GatecraftingContainer getClientContainer(int id, PlayerInventory playerInventory)
 	{
@@ -61,35 +51,16 @@ public class GatecraftingContainer extends Container
 	{
 		super(ContainerRegistrar.GATECRAFTING.get(), id);
 		this.player = playerInventory.player;
-		this.usableDistanceTest = IWorldPosCallable.of(this.player.world, pos);
-		World world = playerInventory.player.world;
+		this.positionInWorld = IWorldPosCallable.of(this.player.world, pos);
 		
-		// add crafting input slots
 		int inputOffsetX = 126;
 		int inputOffsetY = 17;
 		int slotWidth = 18;
 		int slotHeight = 18;
-		for (int column=0; column<INPUT_SLOT_COLUMNS; column++)
-		{
-			for (int row=0; row<INPUT_SLOT_ROWS; row++)
-			{
-				int slotID = row*INPUT_SLOT_COLUMNS + column;
-				int guiX = inputOffsetX + column*slotWidth;
-				int guiY = inputOffsetY + row*slotHeight;
-				this.addSlot(new Slot(this.craftingInventory, slotID, guiX, guiY));
-				if (!world.isRemote)
-				{
-					List<IRecipe<?>> recipes = getAllGatecraftingRecipes(world.getServer().getRecipeManager());
-					if (recipes.size() > slotID)
-					{
-						System.out.println(recipes.get(slotID).getRecipeOutput());
-					}
-				}
-			}
-		}
 		
-		// crafting output slot
-		this.addSlot(new GatecraftingResultSlot(playerInventory.player, this.craftingInventory, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
+		// crafting output slot // apparently it's helpful to do this first
+//		this.addSlot(new GatecraftingResultSlot(this, playerInventory.player, this.craftingInventory, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
+		this.addSlot(new GatecraftingResultSlot(this, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
 		
 		// add player inventory
 		for (int column = 0; column < 3; ++column)
@@ -113,25 +84,14 @@ public class GatecraftingContainer extends Container
 	@Override
 	public boolean canInteractWith(PlayerEntity playerIn)
 	{
-		return isWithinUsableDistance(this.usableDistanceTest, playerIn, BlockRegistrar.GATECRAFTING_PLINTH.get());
+		return isWithinUsableDistance(this.positionInWorld, playerIn, BlockRegistrar.GATECRAFTING_PLINTH.get());
 	}
 
-	/**
-	 * Callback for when the crafting matrix is changed.
-	 */
-	@Override
-	public void onCraftMatrixChanged(IInventory inventoryIn)
-	{
-		// this.merchantInventory.resetRecipeAndSlots();
-		System.out.println("boop");
-		super.onCraftMatrixChanged(inventoryIn);
-	}
-
-	/**
-	 * Called to determine if the current slot is valid for the stack merging
-	 * (double-click) code. The stack passed in is null for the initial slot that
-	 * was double-clicked.
-	 */
+		/**
+		 * Called to determine if the current slot is valid for the stack merging
+		 * (double-click) code. The stack passed in is null for the initial slot that
+		 * was double-clicked.
+		 */
 	@Override
 	public boolean canMergeSlot(ItemStack stack, Slot slotIn)
 	{
@@ -160,7 +120,6 @@ public class GatecraftingContainer extends Container
 				}
 
 				slot.onSlotChange(stackInSlot, copiedStack);
-//				this.playMerchantYesSound();
 			}
 			// if a player inventory slot was clicked, try to move it from the hotbar to the backpack or vice-versa
 			else if (slotIndex >= FIRST_PLAYER_INVENTORY_SLOT_ID)
@@ -180,11 +139,6 @@ public class GatecraftingContainer extends Container
 				{
 					return ItemStack.EMPTY;
 				}
-			}
-			// otherwise, an input slot was clicked -- try to move it to the player's inventory
-			else if (!this.mergeItemStack(stackInSlot, FIRST_PLAYER_INVENTORY_SLOT_ID, FIRST_PLAYER_INVENTORY_SLOT_ID + PLAYER_INVENTORY_SLOT_COUNT, false))
-			{
-				return ItemStack.EMPTY;
 			}
 
 			if (stackInSlot.isEmpty())
@@ -206,44 +160,29 @@ public class GatecraftingContainer extends Container
 
 		return copiedStack;
 	}
-
-	/**
-	 * Called when the container is closed.
-	 */
-	@Override
-	public void onContainerClosed(PlayerEntity player)
+	
+	public void onPlayerChoseRecipe(ResourceLocation recipeID)
 	{
-		super.onContainerClosed(player);
-		if (player != null && !player.world.isRemote)
-		{
-			// if the player is not available, dump the any items in the container inventory on the ground
-			if (!player.isAlive() || player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).hasDisconnected())
-			{
-				for (int i=0; i<9; i++)
-				{
-					ItemStack itemstack = this.craftingInventory.removeStackFromSlot(i);
-					if (!itemstack.isEmpty())
-					{
-						player.dropItem(itemstack, false);
-					}
-				}
-			}
-			else // if the player is available, attempt to put the items back in the player inventory
-			{
-				for (int i=0; i<9; i++)
-				{
-					player.inventory.placeItemBackInInventory(player.world, this.craftingInventory.removeStackFromSlot(i));
-				}
-			}
-
-		}
+		this.attemptRecipeAssembly(RecipeRegistrar.getGatecraftingRecipe(this.player.world.getRecipeManager(), recipeID));
 	}
-
-	public static List<IRecipe<?>> getAllGatecraftingRecipes(RecipeManager manager)
+	
+	/**
+	 * Tries to match the player's current inventory to the given gatecrafting recipe,
+	 * returns false if it cannot or the recipe is not a gatecrafting recipe.
+	 * @param recipe
+	 * @return the recipe if it was successful, the empty optional otherwise
+	 */
+	public void attemptRecipeAssembly(Optional<IRecipe<CraftingInventory>> recipeHolder)
 	{
-		return manager.recipes.getOrDefault(RecipeRegistrar.GATECRAFTING_RECIPE_TYPE, Collections.emptyMap()).entrySet().stream()
-			.map(Entry::getValue)
-			.sorted(Comparator.comparing(recipe -> recipe.getRecipeOutput().getTranslationKey()))
-			.collect(Collectors.toList());
+		Optional<IRecipe<CraftingInventory>> filteredRecipe = recipeHolder.filter(recipe ->
+			recipe.getType() == RecipeRegistrar.GATECRAFTING_RECIPE_TYPE && GatecraftingRecipe.doesPlayerHaveIngredients(this.player.inventory, recipe)
+		);
+		this.updateRecipeAndResult(filteredRecipe);
+	}
+	
+	public void updateRecipeAndResult(Optional<IRecipe<CraftingInventory>> recipeHolder)
+	{
+		this.currentRecipe = recipeHolder;
+		this.craftResult.setInventorySlotContents(0, recipeHolder.map(recipe -> recipe.getRecipeOutput().copy()).orElse(ItemStack.EMPTY));
 	}
 }

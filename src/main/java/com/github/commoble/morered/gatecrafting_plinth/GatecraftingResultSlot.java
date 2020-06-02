@@ -1,67 +1,82 @@
 package com.github.commoble.morered.gatecrafting_plinth;
 
-import com.github.commoble.morered.RecipeRegistrar;
+import java.util.Optional;
 
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.CraftingResultSlot;
+import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.crafting.IRecipe;
+import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.NonNullList;
 
-/**
- * We have to extend CraftingResultSlot because it doesn't use the recipe type we want to be using
- **/
-public class GatecraftingResultSlot extends CraftingResultSlot
+public class GatecraftingResultSlot extends Slot
 {
+	private final GatecraftingContainer container;
 
-	public final CraftingInventory craftingInventory;
-	public final PlayerEntity player;
-
-	public GatecraftingResultSlot(PlayerEntity player, CraftingInventory craftingInventory, IInventory inventoryIn, int slotIndex, int xPosition, int yPosition)
+	public GatecraftingResultSlot(GatecraftingContainer container, IInventory resultInventory, int index, int xPosition, int yPosition)
 	{
-		super(player, craftingInventory, inventoryIn, slotIndex, xPosition, yPosition);
-		this.craftingInventory = craftingInventory;
-		this.player = player;
+		super(resultInventory, index, xPosition, yPosition);
+		this.container = container;
 	}
 
-	// from CraftingResultSlot
+	/**
+	 * Check if the stack is allowed to be placed in this slot, used for armor slots
+	 * as well as furnace fuel.
+	 */
 	@Override
-	public ItemStack onTake(PlayerEntity thePlayer, ItemStack stack)
+	public boolean isItemValid(ItemStack stack)
 	{
-		this.onCrafting(stack);
-		net.minecraftforge.common.ForgeHooks.setCraftingPlayer(thePlayer);
-		NonNullList<ItemStack> nonnulllist = thePlayer.world.getRecipeManager().getRecipeNonNull(RecipeRegistrar.GATECRAFTING_RECIPE_TYPE, this.craftingInventory, thePlayer.world);
-		net.minecraftforge.common.ForgeHooks.setCraftingPlayer(null);
-		for (int i = 0; i < nonnulllist.size(); ++i)
-		{
-			ItemStack itemstack = this.craftingInventory.getStackInSlot(i);
-			ItemStack itemstack1 = nonnulllist.get(i);
-			if (!itemstack.isEmpty())
-			{
-				this.craftingInventory.decrStackSize(i, 1);
-				itemstack = this.craftingInventory.getStackInSlot(i);
-			}
+		return false;
+	}
 
-			if (!itemstack1.isEmpty())
-			{
-				if (itemstack.isEmpty())
-				{
-					this.craftingInventory.setInventorySlotContents(i, itemstack1);
-				}
-				else if (ItemStack.areItemsEqual(itemstack, itemstack1) && ItemStack.areItemStackTagsEqual(itemstack, itemstack1))
-				{
-					itemstack1.grow(itemstack.getCount());
-					this.craftingInventory.setInventorySlotContents(i, itemstack1);
-				}
-				else if (!this.player.inventory.addItemStackToInventory(itemstack1))
-				{
-					this.player.dropItem(itemstack1, false);
-				}
-			}
-		}
-
+	@Override
+	public ItemStack onTake(PlayerEntity player, ItemStack stack)
+	{
+		// ingredients have already been verified by canTakeStack, we can decrement them now
+		this.onSlotChanged();
+		this.container.currentRecipe.ifPresent(recipe -> this.removeIngredients(player.inventory, recipe));
+		// set the stack and the container's current recipe accordingly
+		this.verifyRecipeAfterCrafting(player.inventory, this.container.currentRecipe);
 		return stack;
 	}
 
+	/**
+	 * Return whether this slot's stack can be taken from this slot.
+	 */
+	@Override
+	public boolean canTakeStack(PlayerEntity player)
+	{
+		return this.container.currentRecipe.map(recipe -> GatecraftingRecipe.doesPlayerHaveIngredients(player.inventory, recipe))
+			.orElse(false);
+	}
+	
+	public void removeIngredients(PlayerInventory playerInventory, IRecipe<CraftingInventory> recipe)
+	{
+		NonNullList<Ingredient> ingredients = recipe.getIngredients();
+		for(Ingredient ingredient : ingredients)
+		{
+			int remainingItemsToRemove = ingredient.getMatchingStacks()[0].getCount();
+			int playerSlots = playerInventory.getSizeInventory();
+			for (int playerSlot=0; playerSlot<playerSlots && remainingItemsToRemove > 0; playerSlot++)
+			{
+				ItemStack stackInSlot = playerInventory.getStackInSlot(playerSlot);
+				if (ingredient.test(stackInSlot))
+				{
+					int decrementAmount = Math.min(remainingItemsToRemove, stackInSlot.getCount());
+					remainingItemsToRemove -= decrementAmount;
+					playerInventory.decrStackSize(playerSlot, decrementAmount);
+				}
+			}
+		}
+	}
+	
+	public void verifyRecipeAfterCrafting(PlayerInventory playerInventory, Optional<IRecipe<CraftingInventory>> recipeHolder)
+	{
+		Optional<IRecipe<CraftingInventory>> remainingRecipe = recipeHolder.filter(recipe -> GatecraftingRecipe.doesPlayerHaveIngredients(playerInventory, recipe));
+		this.putStack(remainingRecipe.map(recipe -> recipe.getRecipeOutput().copy()).orElse(ItemStack.EMPTY));
+		this.container.currentRecipe = remainingRecipe;
+	}
 }

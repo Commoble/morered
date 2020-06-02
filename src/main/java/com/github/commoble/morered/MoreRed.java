@@ -10,11 +10,21 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fml.network.NetworkRegistry;
+import net.minecraftforge.fml.network.simple.SimpleChannel;
 
 @Mod(MoreRed.MODID)
 public class MoreRed
 {
 	public static final String MODID = "morered";
+	
+	// the network channel we'll use for sending packets associated with this mod
+	public static final String CHANNEL_PROTOCOL_VERSION = "1";
+	public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
+		new ResourceLocation(MoreRed.MODID, "main"),
+		() -> CHANNEL_PROTOCOL_VERSION,
+		CHANNEL_PROTOCOL_VERSION::equals,
+		CHANNEL_PROTOCOL_VERSION::equals);
 	
 	public MoreRed()
 	{
