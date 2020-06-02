@@ -53,14 +53,9 @@ public class GatecraftingContainer extends Container
 		this.player = playerInventory.player;
 		this.positionInWorld = IWorldPosCallable.of(this.player.world, pos);
 		
-		int inputOffsetX = 126;
-		int inputOffsetY = 17;
-		int slotWidth = 18;
-		int slotHeight = 18;
-		
 		// crafting output slot // apparently it's helpful to do this first
 //		this.addSlot(new GatecraftingResultSlot(this, playerInventory.player, this.craftingInventory, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
-		this.addSlot(new GatecraftingResultSlot(this, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
+		this.addSlot(new GatecraftingResultSlot(this, this.craftResult, OUTPUT_SLOT_ID, 220,38));
 		
 		// add player inventory
 		for (int column = 0; column < 3; ++column)

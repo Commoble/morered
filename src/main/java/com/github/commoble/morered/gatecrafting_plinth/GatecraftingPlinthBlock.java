@@ -11,13 +11,28 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class GatecraftingPlinthBlock extends Block
 {
+	public static final VoxelShape SHAPE = VoxelShapes.or(
+		// plate
+		Block.makeCuboidShape(0, 14, 0, 16, 16, 16),
+		// blaze rod
+		Block.makeCuboidShape(6, 0, 6, 10, 14, 10),
+		// legs
+		Block.makeCuboidShape(0, 0, 0, 4, 14, 4),
+		Block.makeCuboidShape(0, 0, 12, 4, 14, 16),
+		Block.makeCuboidShape(12, 0, 0, 16, 14, 4),
+		Block.makeCuboidShape(12, 0, 12, 16, 14, 16));
+		
 
 	public GatecraftingPlinthBlock(Properties properties)
 	{
@@ -36,5 +51,11 @@ public class GatecraftingPlinthBlock extends Block
 		}
 
 		return ActionResultType.SUCCESS;
+	}
+	
+	@Override
+	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	{
+		return SHAPE;
 	}
 }
