@@ -84,9 +84,14 @@ dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     
 	// compile against the JEI API but do not include it at runtime
-	compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+	//compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+	//compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 	// at runtime, use the full JEI jar
-	runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+	//runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+	//compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+	//implementation fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+	compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
+    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 
 	// junit dependencies
 	testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')

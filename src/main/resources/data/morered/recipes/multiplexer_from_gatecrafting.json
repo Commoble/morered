@@ -16,11 +16,6 @@
 			"type": "forge:nbt",
 			"item": "minecraft:iron_ingot",
 			"count": 1
-		},
-		{
-			"type": "forge:nbt",
-			"item": "minecraft:stone",
-			"count": 1
 		}
 	],
 	"result": 
