@@ -5,10 +5,16 @@ import javax.annotation.Nullable;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
@@ -52,6 +58,29 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			state = state.with(side.property, side.isBlockReceivingPower(world, state, pos));
 		}
 		return state;
+	}
+	
+	public static final ItemTags.Wrapper STICK = new ItemTags.Wrapper(new ResourceLocation("forge:rods/wooden"));
+	
+	@Override
+	@Deprecated
+	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+	{
+		boolean isPlayerHoldingStick = STICK.contains(player.getHeldItem(handIn).getItem());
+		
+		// rotate the block when the player pokes it with a stick
+		if (isPlayerHoldingStick && !worldIn.isRemote)
+		{
+			int newRotation = (state.get(ROTATION) + 1) % 4;
+			BlockState newState = state.with(ROTATION, newRotation);
+			for (InputSide side : this.getInputSides())
+			{
+				newState = newState.with(side.property, side.isBlockReceivingPower(worldIn, newState, pos));
+			}
+			worldIn.setBlockState(pos, newState);
+		}
+		
+		return isPlayerHoldingStick ? ActionResultType.SUCCESS : ActionResultType.PASS;
 	}
 
 	/**
