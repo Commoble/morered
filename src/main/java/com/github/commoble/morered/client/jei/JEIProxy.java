@@ -11,7 +11,6 @@ import com.google.common.collect.ImmutableList;
 
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
-import mezz.jei.api.registration.IModIngredientRegistration;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
@@ -36,15 +35,6 @@ public class JEIProxy implements IModPlugin
 	public ResourceLocation getPluginUid()
 	{
 		return ID;
-	}
-
-	/**
-	 * Register special ingredients, beyond the basic ItemStack and FluidStack.
-	 */
-	@Override
-	public void registerIngredients(IModIngredientRegistration registration)
-	{
-
 	}
 
 	/**

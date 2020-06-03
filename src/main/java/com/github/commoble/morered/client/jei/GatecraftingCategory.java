@@ -7,6 +7,7 @@ import com.github.commoble.morered.MoreRed;
 import com.github.commoble.morered.ObjectNames;
 import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipe;
 
+import mezz.jei.api.constants.ModIds;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -14,15 +15,15 @@ import mezz.jei.api.gui.ingredient.IGuiItemStackGroup;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.ingredients.IIngredients;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import mezz.jei.config.Constants;
-import mezz.jei.util.Translator;
+import net.minecraft.client.resources.I18n;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.util.ResourceLocation;
 
 public class GatecraftingCategory implements IRecipeCategory<GatecraftingRecipe>
 {
-	public static final ResourceLocation ID = MoreRed.getRL(ObjectNames.GATECRAFTING_RECIPE);
+	public static final ResourceLocation ID = MoreRed.getModRL(ObjectNames.GATECRAFTING_RECIPE);
+	public static final ResourceLocation JEI_RECIPE_TEXTURE = new ResourceLocation(ModIds.JEI_ID, "textures/gui/gui_vanilla.png");
 	
 	private final IDrawable background;
 	private final IDrawable icon;
@@ -31,8 +32,8 @@ public class GatecraftingCategory implements IRecipeCategory<GatecraftingRecipe>
 	public GatecraftingCategory(IGuiHelper guiHelper)
 	{
 		this.icon = guiHelper.createDrawableIngredient(new ItemStack(ItemRegistrar.GATECRAFTING_PLINTH.get()));
-		this.background = guiHelper.createDrawable(Constants.RECIPE_GUI_VANILLA, 0, 60, 116, 54);
-		this.localizedName = Translator.translateToLocal("gui.morered.category.gatecrafting");
+		this.background = guiHelper.createDrawable(JEI_RECIPE_TEXTURE, 0, 60, 116, 54);
+		this.localizedName = I18n.format("gui.morered.category.gatecrafting");
 	}
 
 	@Override

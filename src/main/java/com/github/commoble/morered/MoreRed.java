@@ -1,6 +1,7 @@
 package com.github.commoble.morered;
 
 import com.github.commoble.morered.client.ClientEvents;
+import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import com.github.commoble.morered.plate_blocks.LogicGateType;
 
 import net.minecraft.util.ResourceLocation;
@@ -9,9 +10,11 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
+import net.minecraftforge.registries.DeferredRegister;
 
 @Mod(MoreRed.MODID)
 public class MoreRed
@@ -26,12 +29,17 @@ public class MoreRed
 		CHANNEL_PROTOCOL_VERSION::equals,
 		CHANNEL_PROTOCOL_VERSION::equals);
 	
+	public static ResourceLocation getModRL(String name)
+	{
+		return new ResourceLocation(MODID, name);
+	}
+	
 	public MoreRed()
 	{
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		
-		CommonModEvents.addListeners(modBus);
+		MoreRed.addModListeners(modBus);
 		
 		// add layer of separation to client stuff so we don't break servers
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientEvents.addClientListeners(modBus, forgeBus));
@@ -40,8 +48,33 @@ public class MoreRed
 		LogicGateType.registerLogicGateTypes(BlockRegistrar.BLOCKS, ItemRegistrar.ITEMS);
 	}
 	
-	public static ResourceLocation getRL(String name)
+	public static void addModListeners(IEventBus modBus)
 	{
-		return new ResourceLocation(MODID, name);
+		subscribedDeferredRegisters(modBus,
+			BlockRegistrar.BLOCKS,
+			ItemRegistrar.ITEMS,
+			ContainerRegistrar.CONTAINER_TYPES,
+			RecipeRegistrar.RECIPE_SERIALIZERS);
+		
+		modBus.addListener(MoreRed::onCommonSetup);
+	}
+	
+	public static void subscribedDeferredRegisters(IEventBus modBus, DeferredRegister<?>... registers)
+	{
+		for(DeferredRegister<?> register : registers)
+		{
+			register.register(modBus);
+		}
+	}
+	
+	public static void onCommonSetup(FMLCommonSetupEvent event)
+	{
+		// register packets
+		int packetID = 0;
+		MoreRed.CHANNEL.registerMessage(packetID++,
+			GatecraftingRecipeButtonPacket.class,
+			GatecraftingRecipeButtonPacket::write,
+			GatecraftingRecipeButtonPacket::read,
+			GatecraftingRecipeButtonPacket::handle);
 	}
 }
