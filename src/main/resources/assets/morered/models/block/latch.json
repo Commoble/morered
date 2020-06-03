@@ -1,0 +1,126 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "morered:block/plate_template",
+	"ambientocclusion": false,
+	"textures": {
+		"6": "morered:block/not_gate_input_overlay",
+		"particle": "block/smooth_stone",
+		"plate": "block/smooth_stone",
+		"plate_overlay": "morered:block/plate_overlay",
+		"plate_torch": "morered:block/plate_torch",
+		"diode": "block/stone",
+		"input": "morered:block/latch_input_overlay",
+		"output": "morered:block/latch_output_overlay"
+	},
+	"elements": [
+		{
+			"name": "plate",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"east": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"south": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"west": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#plate"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#plate"}
+			}
+		},
+		{
+			"name": "plate_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"up": {"uv": [0, 0, 16, 16], "texture": "#plate_overlay"}
+			}
+		},
+		{
+			"name": "diode",
+			"from": [5, 0, 7],
+			"to": [7, 4, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6, 8, 8]},
+			"faces": {
+				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
+			}
+		},
+		{
+			"name": "torch",
+			"from": [5, 0, 5],
+			"to": [7, 4, 7],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6, 8, 8]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 18},
+				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 18},
+				"south": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 18},
+				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 18},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 18}
+			}
+		},
+		{
+			"name": "diode_b",
+			"from": [9, 0, 7],
+			"to": [11, 4, 9],
+			"rotation": {"angle": 0, "axis": "y", "origin": [10, 8, 8]},
+			"faces": {
+				"north": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
+				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
+			}
+		},
+		{
+			"name": "torch_b",
+			"from": [9, 0, 9],
+			"to": [11, 4, 11],
+			"rotation": {"angle": 0, "axis": "y", "origin": [10, 8, 12]},
+			"faces": {
+				"north": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 19},
+				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 19},
+				"south": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 19},
+				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 19},
+				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 19}
+			}
+		},
+		{
+			"name": "input_a_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"east": {"uv": [0, 14, 16, 16], "texture": "#6", "tintindex": 3},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#input", "tintindex": 3}
+			}
+		},
+		{
+			"name": "output_b_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"south": {"uv": [0, 14, 16, 16], "texture": "#6", "tintindex": 19},
+				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#output", "tintindex": 19}
+			}
+		},
+		{
+			"name": "input_c_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"west": {"uv": [0, 14, 16, 16], "texture": "#6", "tintindex": 5},
+				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#input", "tintindex": 5}
+			}
+		},
+		{
+			"name": "output_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 14, 16, 16], "texture": "#6", "tintindex": 18},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#output", "tintindex": 18}
+			}
+		}
+	]
+}

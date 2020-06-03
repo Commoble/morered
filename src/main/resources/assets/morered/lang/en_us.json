@@ -10,6 +10,7 @@
 	"block.morered.xor_gate": "XOR Gate",
 	"block.morered.xnor_gate": "XNOR Gate",
 	"block.morered.multiplexer": "Multiplexer",
+	"block.morered.latch": "Latch",
 	"block.morered.stone_plate": "Stone Plate",
 	"block.morered.gatecrafting_plinth": "Gatecrafting Plinth"
 }

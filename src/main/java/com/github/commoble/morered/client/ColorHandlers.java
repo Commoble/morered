@@ -1,7 +1,9 @@
 
 package com.github.commoble.morered.client;
 
+import com.github.commoble.morered.BlockRegistrar;
 import com.github.commoble.morered.plate_blocks.InputState;
+import com.github.commoble.morered.plate_blocks.LatchBlock;
 import com.github.commoble.morered.plate_blocks.LogicFunction;
 import com.github.commoble.morered.plate_blocks.LogicFunctions;
 
@@ -59,5 +61,33 @@ public class ColorHandlers
 		// in LogicFunctions when setting the indexes in the model jsons
 		LogicFunction logicFunction = LogicFunctions.TINTINDEXES.getOrDefault(tintIndex, LogicFunctions.FALSE);
 		return logicFunction.apply(a, b, c) ? LIT : UNLIT;
+	}
+	
+	public static int getLatchBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	{
+		return getLatchTint(state, tintIndex);
+	}
+	
+	public static int getLatchItemTint(ItemStack stack, int tintIndex)
+	{
+		return getLatchTint(BlockRegistrar.LATCH.get().getDefaultState(), tintIndex);
+	}
+	
+	public static int getLatchTint(BlockState state, int tintIndex)
+	{
+		if (tintIndex == LogicFunctions.SET_LATCH)
+		{
+			return state.get(LatchBlock.POWERED) && !state.get(LatchBlock.INPUT_C) ? LIT : UNLIT;
+		}
+		else if (tintIndex == LogicFunctions.UNSET_LATCH)
+		{
+			return !state.get(LatchBlock.POWERED) && !state.get(LatchBlock.INPUT_A) ? LIT : UNLIT;
+		}
+		else
+		{
+			InputState input = InputState.getInput(state);
+			
+			return getLogicFunctionTint(tintIndex, input.a, input.b, input.c);
+		}
 	}
 }

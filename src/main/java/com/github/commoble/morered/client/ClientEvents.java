@@ -1,6 +1,8 @@
 package com.github.commoble.morered.client;
 
+import com.github.commoble.morered.BlockRegistrar;
 import com.github.commoble.morered.ContainerRegistrar;
+import com.github.commoble.morered.ItemRegistrar;
 import com.github.commoble.morered.plate_blocks.LogicGateType;
 import com.github.commoble.morered.plate_blocks.PlateBlock;
 import com.github.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -44,6 +46,7 @@ public class ClientEvents
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.getCutout());
 
 		ScreenManager.registerFactory(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
 	}
@@ -57,12 +60,14 @@ public class ClientEvents
 	{
 		BlockColors colors = event.getBlockColors();
 		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockTint, type.blockGetter.get()));
+		colors.register(ColorHandlers::getLatchBlockTint, BlockRegistrar.LATCH.get());
 	}
 	
 	public static void onRegisterItemColors(ColorHandlerEvent.Item event)
 	{
 		ItemColors colors = event.getItemColors();
 		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockItemTint, type.itemGetter.get()));
+		colors.register(ColorHandlers::getLatchItemTint, ItemRegistrar.LATCH.get());
 	}
 	
 	public static void onHighlightBlock(DrawHighlightEvent.HighlightBlock event)

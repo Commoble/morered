@@ -28,6 +28,8 @@ public class LogicFunctions
 	// these two are used for intermediary component tinting in the XOR/XNOR gate models
 	public static final LogicFunction A_NOR_A_NOR_C = registerTintIndex(16, (a,b,c) -> !(a || !(a || c)));
 	public static final LogicFunction C_NOR_A_NOR_C = registerTintIndex(17, (a,b,c) -> !(c || !(a || c)));
+	public static final int SET_LATCH = 18;	// state-memory blocks don't use logic functions
+	public static final int UNSET_LATCH = 19;
 	
 	public static LogicFunction registerTintIndex(int index, LogicFunction function)
 	{

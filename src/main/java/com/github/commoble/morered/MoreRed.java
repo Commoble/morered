@@ -32,7 +32,6 @@ public class MoreRed
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		
 		CommonModEvents.addListeners(modBus);
-		CommonForgeEvents.addListeners(forgeBus);
 		
 		// add layer of separation to client stuff so we don't break servers
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientEvents.addClientListeners(modBus, forgeBus));
