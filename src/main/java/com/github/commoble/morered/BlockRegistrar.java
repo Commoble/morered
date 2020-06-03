@@ -21,10 +21,10 @@ public class BlockRegistrar
 		() -> new GatecraftingPlinthBlock(Block.Properties.create(Material.ROCK).hardnessAndResistance(3.5F).notSolid()));
 
 	public static final RegistryObject<PlateBlock> STONE_PLATE = BLOCKS.register(ObjectNames.STONE_PLATE,
-		() -> new PlateBlock(Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0.4F).sound(SoundType.WOOD)));
+		() -> new PlateBlock(Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(1.5F).sound(SoundType.WOOD)));
 
 	public static final RegistryObject<LatchBlock> LATCH = BLOCKS.register(ObjectNames.LATCH,
-		() -> new LatchBlock(Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0.4F).sound(SoundType.WOOD)));
+		() -> new LatchBlock(Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0).sound(SoundType.WOOD)));
 
 	
 	

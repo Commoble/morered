@@ -47,7 +47,7 @@ public class LogicGateType
 	private static RegistryObject<LogicFunctionPlateBlock> registerLogicGate(DeferredRegister<Block> blocks, String name, LogicFunction function, LogicFunctionPlateBlockFactory factory)
 	{
 		return blocks.register(name, () -> factory.makeBlock(function,
-			Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0.4F).sound(SoundType.WOOD)));
+			Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0F).sound(SoundType.WOOD)));
 			
 	}
 	
