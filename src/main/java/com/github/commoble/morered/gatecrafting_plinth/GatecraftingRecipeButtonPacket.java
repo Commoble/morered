@@ -20,12 +20,12 @@ public class GatecraftingRecipeButtonPacket
 	
 	public void write(PacketBuffer packet)
 	{
-		packet.writeString(this.recipeID.toString());
+		packet.writeResourceLocation(this.recipeID);
 	}
 	
 	public static GatecraftingRecipeButtonPacket read(PacketBuffer packet)
 	{
-		return new GatecraftingRecipeButtonPacket(new ResourceLocation(packet.readString()));
+		return new GatecraftingRecipeButtonPacket(packet.readResourceLocation());
 	}
 	
 	public void handle(Supplier<NetworkEvent.Context> contextGetter)
