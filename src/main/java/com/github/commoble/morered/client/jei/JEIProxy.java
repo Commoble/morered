@@ -14,7 +14,6 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
 import mezz.jei.api.registration.IRecipeCategoryRegistration;
 import mezz.jei.api.registration.IRecipeRegistration;
-import mezz.jei.util.ErrorUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.inventory.CraftingInventory;
@@ -54,7 +53,10 @@ public class JEIProxy implements IModPlugin
 	@Override
 	public void registerRecipes(IRecipeRegistration registration)
 	{
-		ErrorUtil.checkNotNull(this.gatecraftingCategory, GatecraftingCategory.ID.toString());
+		if (this.gatecraftingCategory == null)
+		{
+			throw new NullPointerException("More Red's Gatecrafting JEI category failed to register! Notify the More Red author for assistance https://github.com/Commoble/morered/issues");
+		}
 		
 		registration.addRecipes(getGatecraftingRecipes(), GatecraftingCategory.ID);
 	}
