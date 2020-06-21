@@ -1,7 +1,9 @@
 package com.github.commoble.morered.client;
 
+import java.util.List;
 import java.util.Set;
 
+import com.github.commoble.morered.wire_post.SlackInterpolator;
 import com.github.commoble.morered.wire_post.WirePostBlock;
 import com.github.commoble.morered.wire_post.WirePostTileEntity;
 import com.github.commoble.morered.wire_post.WireSpoolItem;
@@ -26,6 +28,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
 public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
@@ -47,6 +50,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 			light = Math.round(light * MathHelper.cos(celestialAngle));
 		}
 
+		light = Math.max(light, world.getLightFor(LightType.BLOCK, pos));
 		light = MathHelper.clamp(light, 0, 15);
 		int power = state.has(WirePostBlock.POWER) ? state.get(WirePostBlock.POWER) : 0;
 		double lerpFactor = power / 15D;
@@ -165,28 +169,22 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 		if (startY <= endY)
 		{
-			for (int k = 0; k < 16; ++k)
+			List<Vec3d> pointList = SlackInterpolator.getInterpolatedDifferences(endPos.subtract(startPos));
+			int points = pointList.size();
+			int lines = points - 1;
+			
+			for (int line = 0; line < lines; line++)
 			{
-				float startLerp = getFractionalLerp(k, 16);
-				float endLerp = getFractionalLerp(k + 1, 16);
-				float startYLerp = getYLerp(startLerp, startY, endY);
-				float endYLerp = getYLerp(endLerp, startY, endY);
-				drawNextLineSegment(dx, dy, dz, vertexBuilder, fourMatrix, startLerp, startYLerp, red);
-				drawNextLineSegment(dx, dy, dz, vertexBuilder, fourMatrix, endLerp, endYLerp, red);
+				Vec3d firstPoint = pointList.get(line);
+				Vec3d secondPoint = pointList.get(line+1);
+//				drawNextLineSegment(dx, dy, dz, vertexBuilder, fourMatrix, startLerp, startYLerp, red);
+				vertexBuilder.pos(fourMatrix, (float)firstPoint.getX(), (float)firstPoint.getY(), (float)firstPoint.getZ()).color(red, 0, 0, 255).endVertex();
+//				drawNextLineSegment(dx, dy, dz, vertexBuilder, fourMatrix, endLerp, endYLerp, red);
+				vertexBuilder.pos(fourMatrix, (float)secondPoint.getX(), (float)secondPoint.getY(), (float)secondPoint.getZ()).color(red, 0, 0, 255).endVertex();
 			}
 		}
 
 		matrices.pop();
-	}
-
-	public static float getFractionalLerp(int current, int max)
-	{
-		return (float) current / (float) max;
-	}
-
-	public static float getYLerp(float lerp, double startY, double endY)
-	{
-		return (float) Math.pow(lerp, Math.log(Math.abs(endY - startY) + 3));
 	}
 
 	public static void drawNextLineSegment(float x, float y, float z, IVertexBuilder vertexBuilder, Matrix4f fourMatrix, float lerp, float yLerp, int red)

@@ -8,9 +8,11 @@ import com.github.commoble.morered.wire_post.PostsInChunk;
 import com.github.commoble.morered.wire_post.PostsInChunkCapability;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -46,6 +48,7 @@ public class MoreRed
 		ServerConfig.initServerConfig();
 		
 		MoreRed.addModListeners(modBus);
+		MoreRed.addForgeListeners(forgeBus);
 		
 		// add layer of separation to client stuff so we don't break servers
 		DistExecutor.runWhenOn(Dist.CLIENT, () -> () -> ClientEvents.addClientListeners(modBus, forgeBus));
@@ -86,5 +89,15 @@ public class MoreRed
 		
 		// register capabilities
 		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), PostsInChunk::new);
+	}
+	
+	public static void addForgeListeners(IEventBus forgeBus)
+	{
+		forgeBus.addGenericListener(Chunk.class, MoreRed::onAttachChunkCapabilities);
+	}
+	
+	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
+	{
+		event.addCapability(getModRL(ObjectNames.POSTS_IN_CHUNK), new PostsInChunk());
 	}
 }

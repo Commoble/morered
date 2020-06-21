@@ -20,6 +20,7 @@ public class ObjectNames
 	
 	public static final String REDWIRE_POST = "redwire_post";
 	public static final String REDWIRE_SPOOL = "redwire_spool";
+	public static final String POSTS_IN_CHUNK = "posts_in_chunk";
 	
 	public static final String GATECRAFTING_RECIPE = "gatecrafting";
 }
