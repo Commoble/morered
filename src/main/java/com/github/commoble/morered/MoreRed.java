@@ -6,6 +6,7 @@ import com.github.commoble.morered.plate_blocks.LogicGateType;
 import com.github.commoble.morered.wire_post.IPostsInChunk;
 import com.github.commoble.morered.wire_post.PostsInChunk;
 import com.github.commoble.morered.wire_post.PostsInChunkCapability;
+import com.github.commoble.morered.wire_post.WireBreakPacket;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.chunk.Chunk;
@@ -13,6 +14,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -86,6 +89,11 @@ public class MoreRed
 			GatecraftingRecipeButtonPacket::write,
 			GatecraftingRecipeButtonPacket::read,
 			GatecraftingRecipeButtonPacket::handle);
+		MoreRed.CHANNEL.registerMessage(packetID++,
+			WireBreakPacket.class,
+			WireBreakPacket::write,
+			WireBreakPacket::read,
+			WireBreakPacket::handle);
 		
 		// register capabilities
 		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), PostsInChunk::new);
@@ -94,10 +102,16 @@ public class MoreRed
 	public static void addForgeListeners(IEventBus forgeBus)
 	{
 		forgeBus.addGenericListener(Chunk.class, MoreRed::onAttachChunkCapabilities);
+		forgeBus.addListener(EventPriority.LOWEST, MoreRed::onEntityPlaceBlock);
 	}
 	
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
 	{
 		event.addCapability(getModRL(ObjectNames.POSTS_IN_CHUNK), new PostsInChunk());
+	}
+	
+	public static void onEntityPlaceBlock(BlockEvent.EntityPlaceEvent event)
+	{
+		
 	}
 }

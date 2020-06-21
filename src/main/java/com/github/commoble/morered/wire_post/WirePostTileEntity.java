@@ -6,6 +6,7 @@ import java.util.Set;
 
 import javax.annotation.Nonnull;
 
+import com.github.commoble.morered.MoreRed;
 import com.github.commoble.morered.TileEntityRegistrar;
 import com.github.commoble.morered.util.NBTListHelper;
 import com.github.commoble.morered.util.WorldHelper;
@@ -20,10 +21,12 @@ import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.IWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 public class WirePostTileEntity extends TileEntity
 {
@@ -116,6 +119,11 @@ public class WirePostTileEntity extends TileEntity
 	{
 		this.remoteConnections.remove(otherPos);
 		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
+		if (!this.world.isRemote)
+		{
+			MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(this.pos)),
+				new WireBreakPacket(getConnectionVector(this.pos), getConnectionVector(otherPos)));
+		}
 		this.onDataUpdated();
 	}
 	
@@ -125,6 +133,11 @@ public class WirePostTileEntity extends TileEntity
 			.forEach(connectionPos -> this.world.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.pos));
 //			world.notifyNeighborsOfStateExcept(neighborPos, this, dir);
 			
+	}
+	
+	public static Vec3d getConnectionVector(BlockPos pos)
+	{
+		return new Vec3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
 	}
 
 	@Override

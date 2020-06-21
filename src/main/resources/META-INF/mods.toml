@@ -27,7 +27,6 @@ logoFile="logo.png" #optional
 credits='''
 I hear the Minecraft Mod Development discord channel is the cat's bananas.
 Thanks to porl for contributing the two-input AND and NAND gates
-https://github.com/Commoble/morered/pull/3
 '''
 # A text field displayed in the mod UI
 authors="Commoble"

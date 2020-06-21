@@ -1,6 +1,5 @@
 package com.github.commoble.morered.client;
 
-import java.util.List;
 import java.util.Set;
 
 import com.github.commoble.morered.wire_post.SlackInterpolator;
@@ -62,7 +61,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 	public void render(WirePostTileEntity post, float partialTicks, MatrixStack matrices, IRenderTypeBuffer buffer, int combinedLightIn, int combinedOverlayIn)
 	{
 		BlockPos postPos = post.getPos();
-		Vec3d postVector = new Vec3d(postPos).add(0.5D, 0.5D, 0.5D);
+		Vec3d postVector = WirePostTileEntity.getConnectionVector(postPos);
 		Set<BlockPos> connections = post.getRemoteConnections();
 		World world = post.getWorld();
 		BlockState postState = world.getBlockState(postPos);
@@ -72,7 +71,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 		{
 			BlockState otherState = world.getBlockState(connectionPos);
 			int red = Math.min(postRed, getRed(world, connectionPos, otherState, partialTicks));
-			this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, postVector, new Vec3d(connectionPos).add(0.5D, 0.5D, 0.5D), 0F, red);
+			this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, postVector, WirePostTileEntity.getConnectionVector(connectionPos), 0F, red);
 		}
 
 		@SuppressWarnings("resource")
@@ -169,19 +168,20 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 		if (startY <= endY)
 		{
-			List<Vec3d> pointList = SlackInterpolator.getInterpolatedDifferences(endPos.subtract(startPos));
-			int points = pointList.size();
+			Vec3d[] pointList = SlackInterpolator.getInterpolatedDifferences(endPos.subtract(startPos));
+			int points = pointList.length;
 			int lines = points - 1;
 			
 			for (int line = 0; line < lines; line++)
 			{
-				Vec3d firstPoint = pointList.get(line);
-				Vec3d secondPoint = pointList.get(line+1);
-//				drawNextLineSegment(dx, dy, dz, vertexBuilder, fourMatrix, startLerp, startYLerp, red);
+				Vec3d firstPoint = pointList[line];
+				Vec3d secondPoint = pointList[line+1];
 				vertexBuilder.pos(fourMatrix, (float)firstPoint.getX(), (float)firstPoint.getY(), (float)firstPoint.getZ()).color(red, 0, 0, 255).endVertex();
-//				drawNextLineSegment(dx, dy, dz, vertexBuilder, fourMatrix, endLerp, endYLerp, red);
 				vertexBuilder.pos(fourMatrix, (float)secondPoint.getX(), (float)secondPoint.getY(), (float)secondPoint.getZ()).color(red, 0, 0, 255).endVertex();
 			}
+			
+//			double x = startPos.getX() + pointList[lines].getX();
+//			System.out.println(x);
 		}
 
 		matrices.pop();

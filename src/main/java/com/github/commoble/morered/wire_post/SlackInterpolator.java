@@ -1,17 +1,13 @@
 package com.github.commoble.morered.wire_post;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
 import net.minecraft.util.math.Vec3d;
 
 public class SlackInterpolator
 {
-	public static List<Vec3d> getInterpolatedDifferences(Vec3d vector)
+	public static Vec3d[] getInterpolatedDifferences(Vec3d vector)
 	{
-		List<Vec3d> list = new ArrayList<>();
 		int points = 17; // 16 segments
+		Vec3d[] list = new Vec3d[points];
 		
 		double dx = vector.getX();
 		double dy = vector.getY();
@@ -19,19 +15,24 @@ public class SlackInterpolator
 		
 		for (int point=0; point<points; point++)
 		{
-			double startLerp = getFractionalLerp(point, points);
+			double startLerp = getFractionalLerp(point, points-1);
 			double startYLerp = getYLerp(startLerp, dy);
-			list.add(new Vec3d(startLerp*dx, startYLerp*dy, startLerp*dz));
+			list[point] = new Vec3d(startLerp*dx, startYLerp*dy, startLerp*dz);
 		}
 		
 		return list;
 	}
 	
-	public static List<Vec3d> getInterpolatedPoints(Vec3d start, Vec3d end)
+	public static Vec3d[] getInterpolatedPoints(Vec3d start, Vec3d end)
 	{
-		return getInterpolatedDifferences(end.subtract(start)).stream()
-			.map(diff -> start.add(diff))
-			.collect(Collectors.toList());
+		Vec3d diff = end.subtract(start);
+		Vec3d[] diffs = getInterpolatedDifferences(diff);
+		Vec3d[] points = new Vec3d[diffs.length];
+		for (int i=0; i<points.length; i++)
+		{
+			points[i] = start.add(diffs[i]);
+		}
+		return points;
 	}
 
 	public static double getFractionalLerp(int current, int max)
