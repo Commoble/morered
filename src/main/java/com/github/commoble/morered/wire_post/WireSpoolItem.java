@@ -4,10 +4,12 @@ import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
+import com.github.commoble.morered.MoreRed;
 import com.github.commoble.morered.ServerConfig;
 import com.github.commoble.morered.TileEntityRegistrar;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
@@ -20,6 +22,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 public class WireSpoolItem extends Item
 {
@@ -98,7 +101,7 @@ public class WireSpoolItem extends Item
 			Optional.ofNullable(stack.getChildTag(LAST_POST_POS))
 				.map(nbt -> NBTUtil.readBlockPos(nbt))
 				.filter(pos -> shouldRemoveConnection(pos, worldIn, entityIn))
-				.ifPresent(pos -> stack.removeChildTag(LAST_POST_POS));;
+				.ifPresent(pos -> breakPendingConnection(stack, pos, entityIn, worldIn));
 		}
 	}
 	
@@ -111,5 +114,17 @@ public class WireSpoolItem extends Item
 		}
 		TileEntity te = world.getTileEntity(connectionPos);
 		return te == null || te.getType() != TileEntityRegistrar.REDWIRE_POST.get();
+	}
+	
+	public static void breakPendingConnection(ItemStack stack, BlockPos connectingPos, Entity holder, World world)
+	{
+		stack.removeChildTag(LAST_POST_POS);
+		if (holder instanceof ServerPlayerEntity)
+		{
+			MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)holder),
+				new WireBreakPacket(
+					WirePostTileEntity.getConnectionVector(connectingPos),
+					new Vec3d(holder.getPosX(), holder.getPosYEye(), holder.getPosZ())));
+		}
 	}
 }
