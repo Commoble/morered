@@ -69,5 +69,7 @@ public class LogicGateType
 		registerLogicGateType(ObjectNames.XOR_GATE, blocks, items, LogicFunctions.XOR_AC, LogicFunctionPlateBlock.T_INPUTS);
 		registerLogicGateType(ObjectNames.XNOR_GATE, blocks, items, LogicFunctions.XNOR_AC, LogicFunctionPlateBlock.T_INPUTS);
 		registerLogicGateType(ObjectNames.MULTIPLEXER, blocks, items, LogicFunctions.MULTIPLEX, LogicFunctionPlateBlock.THREE_INPUTS);
+		registerLogicGateType(ObjectNames.AND_2_GATE, blocks, items, LogicFunctions.AND_2, LogicFunctionPlateBlock.T_INPUTS);
+		registerLogicGateType(ObjectNames.NAND_2_GATE, blocks, items, LogicFunctions.NAND_2, LogicFunctionPlateBlock.T_INPUTS);
 	}
 }
