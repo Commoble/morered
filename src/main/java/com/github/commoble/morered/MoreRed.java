@@ -3,10 +3,14 @@ package com.github.commoble.morered;
 import com.github.commoble.morered.client.ClientEvents;
 import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import com.github.commoble.morered.plate_blocks.LogicGateType;
+import com.github.commoble.morered.wire_post.IPostsInChunk;
+import com.github.commoble.morered.wire_post.PostsInChunk;
+import com.github.commoble.morered.wire_post.PostsInChunkCapability;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.common.Mod;
@@ -39,6 +43,8 @@ public class MoreRed
 		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		
+		ServerConfig.initServerConfig();
+		
 		MoreRed.addModListeners(modBus);
 		
 		// add layer of separation to client stuff so we don't break servers
@@ -53,6 +59,7 @@ public class MoreRed
 		subscribedDeferredRegisters(modBus,
 			BlockRegistrar.BLOCKS,
 			ItemRegistrar.ITEMS,
+			TileEntityRegistrar.TILES,
 			ContainerRegistrar.CONTAINER_TYPES,
 			RecipeRegistrar.RECIPE_SERIALIZERS);
 		
@@ -76,5 +83,8 @@ public class MoreRed
 			GatecraftingRecipeButtonPacket::write,
 			GatecraftingRecipeButtonPacket::read,
 			GatecraftingRecipeButtonPacket::handle);
+		
+		// register capabilities
+		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), PostsInChunk::new);
 	}
 }

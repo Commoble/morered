@@ -12,5 +12,8 @@
 	"block.morered.multiplexer": "Multiplexer",
 	"block.morered.latch": "Latch",
 	"block.morered.stone_plate": "Stone Plate",
-	"block.morered.gatecrafting_plinth": "Gatecrafting Plinth"
+	"block.morered.gatecrafting_plinth": "Gatecrafting Plinth",
+	"block.morered.redwire_post": "Redwire Post",
+	
+	"item.morered.redwire_spool": "Redwire Spool"
 }

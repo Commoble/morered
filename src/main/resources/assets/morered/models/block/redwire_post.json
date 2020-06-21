@@ -1,0 +1,79 @@
+{
+	"credit": "Made with Blockbench",
+	"parent": "morered:block/plate_template",
+	"ambientocclusion": false,
+	"textures": {
+		"rod": "morered:block/redwire_post_rod",
+		"upper_plate": "minecraft:block/hopper_outside",
+		"plate": "block/smooth_stone",
+		"redstone_overlay": "morered:block/redwire_post_plate_overlay",
+		"particle": "minecraft:block/smooth_stone"
+	},
+	"elements": [
+		{
+			"name": "rod",
+			"from": [7, 0, 7],
+			"to": [9, 10, 9],
+			"color": 3,
+			"faces": {
+				"north": {"uv": [7, 6, 9, 16], "texture": "#rod", "tintindex": 1},
+				"east": {"uv": [7, 6, 9, 16], "texture": "#rod", "tintindex": 1},
+				"south": {"uv": [7, 6, 9, 16], "texture": "#rod", "tintindex": 1},
+				"west": {"uv": [7, 6, 9, 16], "texture": "#rod", "tintindex": 1},
+				"up": {"uv": [7, 7, 9, 9], "texture": "#rod", "tintindex": 1}
+			}
+		},
+		{
+			"name": "upper_upper_plate",
+			"from": [6, 8, 6],
+			"to": [10, 9, 10],
+			"faces": {
+				"north": {"uv": [6, 7, 10, 8], "texture": "#upper_plate"},
+				"east": {"uv": [6, 7, 10, 8], "texture": "#upper_plate"},
+				"south": {"uv": [6, 7, 10, 8], "texture": "#upper_plate"},
+				"west": {"uv": [6, 7, 10, 8], "texture": "#upper_plate"},
+				"up": {"uv": [6, 6, 10, 10], "texture": "#upper_plate"},
+				"down": {"uv": [6, 6, 10, 10], "texture": "#upper_plate"}
+			}
+		},
+		{
+			"name": "lower_upper_plate",
+			"from": [6, 6, 6],
+			"to": [10, 7, 10],
+			"color": 6,
+			"faces": {
+				"north": {"uv": [6, 9, 10, 10], "texture": "#upper_plate"},
+				"east": {"uv": [6, 9, 10, 10], "texture": "#upper_plate"},
+				"south": {"uv": [6, 9, 10, 10], "texture": "#upper_plate"},
+				"west": {"uv": [6, 9, 10, 10], "texture": "#upper_plate"},
+				"up": {"uv": [6, 6, 10, 10], "texture": "#upper_plate"},
+				"down": {"uv": [6, 6, 10, 10], "texture": "#upper_plate"}
+			}
+		},
+		{
+			"name": "plate",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"east": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"south": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"west": {"uv": [0, 14, 16, 16], "texture": "#plate"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#plate"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#plate"}
+			}
+		},
+		{
+			"name": "plate_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 2, 16],
+			"faces": {
+				"north": {"uv": [0, 14, 16, 16], "texture": "#redstone_overlay", "tintindex": 1},
+				"south": {"uv": [0, 14, 16, 16], "texture": "#redstone_overlay", "tintindex": 1},
+				"west": {"uv": [0, 14, 16, 16], "texture": "#redstone_overlay", "tintindex": 1},
+				"east": {"uv": [0, 14, 16, 16], "texture": "#redstone_overlay", "tintindex": 1},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#redstone_overlay", "tintindex": 1}
+			}
+		}
+	]
+}

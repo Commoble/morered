@@ -3,6 +3,7 @@ package com.github.commoble.morered.client;
 import com.github.commoble.morered.BlockRegistrar;
 import com.github.commoble.morered.ContainerRegistrar;
 import com.github.commoble.morered.ItemRegistrar;
+import com.github.commoble.morered.TileEntityRegistrar;
 import com.github.commoble.morered.plate_blocks.LogicGateType;
 import com.github.commoble.morered.plate_blocks.PlateBlock;
 import com.github.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -28,6 +29,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 
 public class ClientEvents
@@ -47,8 +49,10 @@ public class ClientEvents
 	{
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST.get(), RenderType.getCutout());
 
 		ScreenManager.registerFactory(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDWIRE_POST.get(), WirePostRenderer::new);
 	}
 	
 	public static void setLogicGateRenderLayer(LogicGateType type)
@@ -61,6 +65,7 @@ public class ClientEvents
 		BlockColors colors = event.getBlockColors();
 		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockTint, type.blockGetter.get()));
 		colors.register(ColorHandlers::getLatchBlockTint, BlockRegistrar.LATCH.get());
+		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST.get());
 	}
 	
 	public static void onRegisterItemColors(ColorHandlerEvent.Item event)
@@ -68,6 +73,7 @@ public class ClientEvents
 		ItemColors colors = event.getItemColors();
 		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockItemTint, type.itemGetter.get()));
 		colors.register(ColorHandlers::getLatchItemTint, ItemRegistrar.LATCH.get());
+		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST.get());
 	}
 	
 	public static void onHighlightBlock(DrawHighlightEvent.HighlightBlock event)

@@ -6,12 +6,14 @@ import com.github.commoble.morered.plate_blocks.InputState;
 import com.github.commoble.morered.plate_blocks.LatchBlock;
 import com.github.commoble.morered.plate_blocks.LogicFunction;
 import com.github.commoble.morered.plate_blocks.LogicFunctions;
+import com.github.commoble.morered.wire_post.WirePostBlock;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.ILightReader;
 
 public class ColorHandlers
@@ -20,6 +22,8 @@ public class ColorHandlers
 	public static final int NO_TINT = 0xFFFFFF;
 	public static final int LIT = 0xFFFFFF;
 	public static final int UNLIT = 0x560000;
+	public static final int LIT_RED = LIT >> 16;
+	public static final int UNLIT_RED = UNLIT >> 16;
 	
 	public static int getLogicFunctionBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
 	{
@@ -88,6 +92,30 @@ public class ColorHandlers
 			InputState input = InputState.getInput(state);
 			
 			return getLogicFunctionTint(tintIndex, input.a, input.b, input.c);
+		}
+	}
+	
+	public static int getRedwirePostBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	{
+		return getRedwirePostTint(state, tintIndex);
+	}
+	
+	public static int getRedwirePostItemTint(ItemStack stack, int tintIndex)
+	{
+		return getRedwirePostTint(BlockRegistrar.REDWIRE_POST.get().getDefaultState(), tintIndex);
+	}
+	
+	public static int getRedwirePostTint(BlockState state, int tintIndex)
+	{
+		if (tintIndex == 1)
+		{
+			int power = state.get(WirePostBlock.POWER);
+			double lerpFactor = power / 15D;
+			return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
+		}
+		else
+		{
+			return NO_TINT;
 		}
 	}
 }

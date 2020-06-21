@@ -1,5 +1,7 @@
 package com.github.commoble.morered;
 
+import com.github.commoble.morered.wire_post.WireSpoolItem;
+
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -27,8 +29,12 @@ public class ItemRegistrar
 		}
 	};
 	public static final RegistryObject<BlockItem> GATECRAFTING_PLINTH = registerBlockItem(ObjectNames.GATECRAFTING_PLINTH, BlockRegistrar.GATECRAFTING_PLINTH);
+	public static final RegistryObject<BlockItem> REDWIRE_POST = registerBlockItem(ObjectNames.REDWIRE_POST, BlockRegistrar.REDWIRE_POST);
+
+	public static final RegistryObject<WireSpoolItem> REDWIRE_SPOOL = ITEMS.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().group(CREATIVE_TAB).maxStackSize(1)));
 	public static final RegistryObject<BlockItem> STONE_PLATE = registerBlockItem(ObjectNames.STONE_PLATE, BlockRegistrar.STONE_PLATE);
 	public static final RegistryObject<BlockItem> LATCH = registerBlockItem(ObjectNames.LATCH, BlockRegistrar.LATCH);
+	
 	
 	public static final RegistryObject<BlockItem> registerBlockItem(String name, RegistryObject<? extends Block> block)
 	{
