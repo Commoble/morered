@@ -1,0 +1,20 @@
+{
+	"type": "morered:gatecrafting",
+	"ingredients": 
+	[
+		{
+			"type": "forge:nbt",
+			"item": "morered:stone_plate",
+			"count": 1
+		},
+		{
+			"type": "forge:nbt",
+			"item": "minecraft:redstone",
+			"count": 3
+		}
+	],
+	"result": 
+	{
+		"item": "morered:nand_2_gate"
+	}
+}

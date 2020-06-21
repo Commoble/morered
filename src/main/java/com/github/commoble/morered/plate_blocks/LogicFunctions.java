@@ -30,7 +30,10 @@ public class LogicFunctions
 	public static final LogicFunction C_NOR_A_NOR_C = registerTintIndex(17, (a,b,c) -> !(c || !(a || c)));
 	public static final int SET_LATCH = 18;	// state-memory blocks don't use logic functions
 	public static final int UNSET_LATCH = 19;
-	
+	// two input AND gate (does not use B input)
+	public static final LogicFunction AND_2 = registerTintIndex(20, (a,b,c) -> a && c);
+	public static final LogicFunction NAND_2 = registerTintIndex(21, (a,b,c) -> !(a && c));
+
 	public static LogicFunction registerTintIndex(int index, LogicFunction function)
 	{
 		TINTINDEXES.put(index, function);
