@@ -81,7 +81,18 @@ public class WirePostBlock extends Block
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
-		return SHAPES_DUNSWE[state.has(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
+		// if we're raytracing a wire, ignore the post (the plate can still block the raytrace)
+		VoxelShape[] shapeTable = context instanceof WireRayTraceSelectionContext && ((WireRayTraceSelectionContext)context).shouldIgnoreBlock(pos)
+			? PlateBlock.SHAPES_BY_DIRECTION
+			: SHAPES_DUNSWE;
+		return shapeTable[state.has(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
+	}
+
+	@Override
+	@Deprecated
+	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	{
+		return this.blocksMovement ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
 	}
 	
 	@Override

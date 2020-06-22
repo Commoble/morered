@@ -9,12 +9,14 @@ import com.github.commoble.morered.ServerConfig;
 import com.github.commoble.morered.TileEntityRegistrar;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.SoundCategory;
@@ -22,6 +24,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.PacketDistributor;
 
 public class WireSpoolItem extends Item
@@ -42,11 +45,11 @@ public class WireSpoolItem extends Item
 		World world = context.getWorld();
 		BlockPos pos = context.getPos();
 		return WirePostTileEntity.getPost(world, pos)
-			.map(post -> this.onUseOnPost(world, pos, post, context.getItem()))
+			.map(post -> this.onUseOnPost(world, pos, post, context.getItem(), context.getPlayer()))
 			.orElseGet(() -> super.onItemUse(context));
 	}
 	
-	private ActionResultType onUseOnPost(World world, BlockPos pos, @Nonnull WirePostTileEntity post, ItemStack stack)
+	private ActionResultType onUseOnPost(World world, BlockPos pos, @Nonnull WirePostTileEntity post, ItemStack stack, PlayerEntity player)
 	{
 		if (!world.isRemote)
 		{
@@ -70,18 +73,40 @@ public class WireSpoolItem extends Item
 					WirePostTileEntity.removeConnection(world, pos, lastPos);
 					stack.removeChildTag(LAST_POST_POS);
 				}
-				// if post wasn't connected, connect them if they're close enough
-				else if (pos.withinDistance(lastPos, ServerConfig.INSTANCE.max_wire_post_connection_range.get()))
+				else // we clicked a different post that doesn't have an existing connection to the original post
 				{
-					stack.removeChildTag(LAST_POST_POS);
-					WirePostTileEntity.getPost(world, lastPos)
-						.ifPresent(lastPost -> WirePostTileEntity.addConnection(world, post, lastPost));
-						
-				}
-				else	// too far away, initiate a new connection from here
-				{
-					stack.setTagInfo(LAST_POST_POS, NBTUtil.writeBlockPos(pos));
-					// TODO give feedback to player
+					// do a curved raytrace to check for interruptions
+					boolean lastPosIsHigher = pos.getY() < lastPos.getY();
+					BlockPos upperPos = lastPosIsHigher ? lastPos : pos;
+					BlockPos lowerPos = lastPosIsHigher ? pos : lastPos; 
+					Vec3d hit = SlackInterpolator.getWireRaytraceHit(lowerPos, upperPos, world);
+					
+					// if post wasn't connected but they can't be connected due to a block in the way, interrupt the connection
+					if (hit != null)
+					{
+						stack.removeChildTag(LAST_POST_POS);
+						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
+						{
+							MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new WireBreakPacket(WirePostTileEntity.getConnectionVector(lowerPos), WirePostTileEntity.getConnectionVector(upperPos)));
+//							MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new WireBreakPacket(hit, hit));
+							((ServerWorld)world).spawnParticle((ServerPlayerEntity)player, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+							
+							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_AMBIENT, SoundCategory.BLOCKS, 1F, 1F);
+						}
+					}
+					// if post wasn't connected, connect them if they're close enough
+					else if (pos.withinDistance(lastPos, ServerConfig.INSTANCE.max_wire_post_connection_range.get()))
+					{
+						stack.removeChildTag(LAST_POST_POS);
+						WirePostTileEntity.getPost(world, lastPos)
+							.ifPresent(lastPost -> WirePostTileEntity.addConnection(world, post, lastPost));
+							
+					}
+					else	// too far away, initiate a new connection from here
+					{
+						stack.setTagInfo(LAST_POST_POS, NBTUtil.writeBlockPos(pos));
+						// TODO give feedback to player
+					}
 				}
 			}
 			world.playSound(null, pos, SoundEvents.BLOCK_STONE_BUTTON_CLICK_ON, SoundCategory.BLOCKS,
