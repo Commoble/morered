@@ -88,7 +88,6 @@ public class WireSpoolItem extends Item
 						if (player instanceof ServerPlayerEntity && world instanceof ServerWorld)
 						{
 							MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new WireBreakPacket(WirePostTileEntity.getConnectionVector(lowerPos), WirePostTileEntity.getConnectionVector(upperPos)));
-//							MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new WireBreakPacket(hit, hit));
 							((ServerWorld)world).spawnParticle((ServerPlayerEntity)player, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 							
 							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_AMBIENT, SoundCategory.BLOCKS, 1F, 1F);

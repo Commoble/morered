@@ -1,5 +1,8 @@
 package com.github.commoble.morered;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.github.commoble.morered.client.ClientEvents;
 import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import com.github.commoble.morered.plate_blocks.LogicGateType;
@@ -7,9 +10,23 @@ import com.github.commoble.morered.wire_post.IPostsInChunk;
 import com.github.commoble.morered.wire_post.PostsInChunk;
 import com.github.commoble.morered.wire_post.PostsInChunkCapability;
 import com.github.commoble.morered.wire_post.WireBreakPacket;
+import com.github.commoble.morered.wire_post.WirePostTileEntity;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.particles.RedstoneParticleData;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.Vec3d;
+import net.minecraft.world.IWorld;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -102,7 +119,7 @@ public class MoreRed
 	public static void addForgeListeners(IEventBus forgeBus)
 	{
 		forgeBus.addGenericListener(Chunk.class, MoreRed::onAttachChunkCapabilities);
-		forgeBus.addListener(EventPriority.LOWEST, MoreRed::onEntityPlaceBlock);
+		forgeBus.addListener(EventPriority.LOW, MoreRed::onEntityPlaceBlock);
 	}
 	
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
@@ -112,6 +129,49 @@ public class MoreRed
 	
 	public static void onEntityPlaceBlock(BlockEvent.EntityPlaceEvent event)
 	{
-		
+		BlockPos pos = event.getPos();
+		IWorld iworld = event.getWorld();
+		BlockState state = event.getState();
+		if (iworld instanceof World && !iworld.isRemote())
+		{
+			World world = (World)iworld;
+			
+			Set<ChunkPos> chunkPositions = PostsInChunk.getRelevantChunkPositionsNearPos(pos);
+			
+			for (ChunkPos chunkPos : chunkPositions)
+			{
+				if (world.isBlockLoaded(chunkPos.asBlockPos()))
+				{
+					Chunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
+					chunk.getCapability(PostsInChunkCapability.INSTANCE).ifPresent(posts ->
+					{
+						Set<BlockPos> checkedPostPositions = new HashSet<BlockPos>();
+						for (BlockPos postPos : posts.getPositions())
+						{
+							TileEntity te = world.getTileEntity(postPos);
+							if (te instanceof WirePostTileEntity)
+							{
+								Vec3d hit = ((WirePostTileEntity)te).doesBlockStateIntersectConnection(pos, state, checkedPostPositions);
+								if (hit != null)
+								{
+									event.setCanceled(true);
+									Entity entity = event.getEntity();
+									if (entity instanceof ServerPlayerEntity)
+									{
+										((ServerWorld)world).spawnParticle((ServerPlayerEntity)entity, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+										((ServerPlayerEntity)entity).playSound(SoundEvents.ENTITY_WANDERING_TRADER_AMBIENT, SoundCategory.BLOCKS, 1F, 1F);
+									}
+									return;
+								}
+								else
+								{
+									checkedPostPositions.add(postPos);
+								}
+							}
+						}
+					});
+				}
+			}
+		}
 	}
 }

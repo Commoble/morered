@@ -86,6 +86,9 @@ public class NestedBoundingBox
 			}
 			else if (box.subBoxes.isEmpty())
 			{	// if the nested box's AABB intersects the target AABB and there are no sub-boxes to check, the target box intersects
+
+//				MoreRed.CHANNEL.send(PacketDistributor.ALL.noArg(),
+//					new WireBreakPacket(new Vec3d(box.superBox.minX, box.superBox.minY, box.superBox.minZ), new Vec3d(box.superBox.maxX, box.superBox.maxY, box.superBox.maxZ)));
 				return true;
 			}
 			else

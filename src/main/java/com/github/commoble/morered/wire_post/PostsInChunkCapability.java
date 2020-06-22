@@ -16,7 +16,7 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 public class PostsInChunkCapability
 {
 	@CapabilityInject(IPostsInChunk.class)
-	static Capability<IPostsInChunk> INSTANCE = null;
+	public static Capability<IPostsInChunk> INSTANCE = null;
 	
 	public static class Storage implements Capability.IStorage<IPostsInChunk>
 	{

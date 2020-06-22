@@ -3,9 +3,12 @@ package com.github.commoble.morered.wire_post;
 import java.util.HashSet;
 import java.util.Set;
 
+import com.github.commoble.morered.ServerConfig;
+
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.ChunkPos;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
@@ -52,6 +55,23 @@ public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSer
 	public void deserializeNBT(CompoundNBT nbt)
 	{
 		PostsInChunkCapability.INSTANCE.getStorage().readNBT(PostsInChunkCapability.INSTANCE, this, null, nbt);
+	}
+	
+	public static Set<ChunkPos> getRelevantChunkPositionsNearPos(BlockPos pos)
+	{
+		double range = ServerConfig.INSTANCE.max_wire_post_connection_range.get();
+		ChunkPos chunkPos = new ChunkPos(pos);
+		int chunkRange = (int) Math.ceil(range/16D);
+		Set<ChunkPos> set = new HashSet<>();
+		for (int xOff = -chunkRange; xOff <= chunkRange; xOff++)
+		{
+			for (int zOff = -chunkRange; zOff <= chunkRange; zOff++)
+			{
+				set.add(new ChunkPos(chunkPos.x + xOff, chunkPos.z + zOff));
+			}
+		}
+		
+		return set;
 	}
 
 }
