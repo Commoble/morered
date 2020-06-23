@@ -8,16 +8,17 @@
 			"count": 1
 		},
 		{
-			"type": "forge:nbt",
-			"item": "minecraft:redstone",
-			"count": 1
+			"tag": "forge:ingots/iron"
 		},
 		{
-			"tag": "forge:ingots/iron"
+			"tag": "forge:ingots/red_alloy"
+		},
+		{
+			"item": "minecraft:redstone"
 		}
 	],
 	"result": 
 	{
-		"item": "morered:multiplexer"
+		"item": "morered:redwire_post"
 	}
 }

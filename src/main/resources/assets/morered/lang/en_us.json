@@ -17,5 +17,7 @@
 	"block.morered.gatecrafting_plinth": "Gatecrafting Plinth",
 	"block.morered.redwire_post": "Redwire Post",
 	
-	"item.morered.redwire_spool": "Redwire Spool"
+	"item.morered.empty_wire_spool": "Empty Wire Spool",
+	"item.morered.redwire_spool": "Redwire Spool",
+	"item.morered.red_alloy_ingot": "Red Alloy Ingot"
 }

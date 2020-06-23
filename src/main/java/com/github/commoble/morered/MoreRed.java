@@ -15,8 +15,11 @@ import com.github.commoble.morered.wire_post.WirePostTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.network.play.server.SEntityEquipmentPacket;
 import net.minecraft.particles.RedstoneParticleData;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -158,8 +161,10 @@ public class MoreRed
 									Entity entity = event.getEntity();
 									if (entity instanceof ServerPlayerEntity)
 									{
-										((ServerWorld)world).spawnParticle((ServerPlayerEntity)entity, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
-										((ServerPlayerEntity)entity).playSound(SoundEvents.ENTITY_WANDERING_TRADER_AMBIENT, SoundCategory.BLOCKS, 1F, 1F);
+										ServerPlayerEntity serverPlayer = (ServerPlayerEntity)entity;
+										serverPlayer.connection.sendPacket(new SEntityEquipmentPacket(serverPlayer.getEntityId(), EquipmentSlotType.MAINHAND, serverPlayer.getHeldItem(Hand.MAIN_HAND)));
+										((ServerWorld)world).spawnParticle(serverPlayer, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+										serverPlayer.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 									}
 									return;
 								}

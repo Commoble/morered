@@ -103,11 +103,13 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 						double handY;
 						double handZ;
 						float eyeHeight;
+						
+						// first person
 						if ((renderManager.options == null || renderManager.options.thirdPersonView <= 0))
 						{
 							double fov = renderManager.options.fov;
 							fov = fov / 100.0D;
-							Vec3d handVector = new Vec3d(handSideID * -0.36D * fov, -0.045D * fov, 0.4D);
+							Vec3d handVector = new Vec3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
 							handVector = handVector.rotatePitch(-MathHelper.lerp(partialTicks, player.prevRotationPitch, player.rotationPitch) * ((float) Math.PI / 180F));
 							handVector = handVector.rotateYaw(-MathHelper.lerp(partialTicks, player.prevRotationYaw, player.rotationYaw) * ((float) Math.PI / 180F));
 							handVector = handVector.rotateYaw(swingZ * 0.5F);
@@ -117,10 +119,12 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 							handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) + handVector.z;
 							eyeHeight = player.getEyeHeight();
 						}
+						
+						// third person
 						else
 						{
 							handX = MathHelper.lerp(partialTicks, player.prevPosX, player.getPosX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
-							handY = player.prevPosY + player.getEyeHeight() + (player.getPosY() - player.prevPosY) * partialTicks - 0.45D;
+							handY = -0.2 + player.prevPosY + player.getEyeHeight() + (player.getPosY() - player.prevPosY) * partialTicks - 0.45D;
 							handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
 							eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
 						}

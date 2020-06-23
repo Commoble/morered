@@ -1,9 +1,9 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    "#r#",
-    "rFr",
-    "#r#"
+    " F ",
+    "rRr",
+    "###"
   ],
   "key": {
     "#": {
@@ -12,11 +12,14 @@
     "r": {
       "item": "minecraft:redstone"
     },
+    "R": {
+      "tag": "forge:ingots/red_alloy"
+    },
     "F": {
       "tag": "forge:ingots/iron"
     }
   },
   "result": {
-    "item": "morered:multiplexer"
+    "item": "morered:redwire_post"
   }
 }

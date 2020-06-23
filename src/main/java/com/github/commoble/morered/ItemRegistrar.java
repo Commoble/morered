@@ -28,10 +28,13 @@ public class ItemRegistrar
 			return new ItemStack(ItemRegistrar.NOR_GATE);
 		}
 	};
+	
+	public static final RegistryObject<WireSpoolItem> REDWIRE_SPOOL = ITEMS.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().group(CREATIVE_TAB).maxDamage(64)));
+	public static final RegistryObject<Item> RED_ALLOY_INGOT = ITEMS.register(ObjectNames.RED_ALLOY_INGOT, () -> new Item(new Item.Properties().group(CREATIVE_TAB)));
+
 	public static final RegistryObject<BlockItem> GATECRAFTING_PLINTH = registerBlockItem(ObjectNames.GATECRAFTING_PLINTH, BlockRegistrar.GATECRAFTING_PLINTH);
 	public static final RegistryObject<BlockItem> REDWIRE_POST = registerBlockItem(ObjectNames.REDWIRE_POST, BlockRegistrar.REDWIRE_POST);
 
-	public static final RegistryObject<WireSpoolItem> REDWIRE_SPOOL = ITEMS.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().group(CREATIVE_TAB).maxDamage(64).maxStackSize(1)));
 	public static final RegistryObject<BlockItem> STONE_PLATE = registerBlockItem(ObjectNames.STONE_PLATE, BlockRegistrar.STONE_PLATE);
 	public static final RegistryObject<BlockItem> LATCH = registerBlockItem(ObjectNames.LATCH, BlockRegistrar.LATCH);
 	

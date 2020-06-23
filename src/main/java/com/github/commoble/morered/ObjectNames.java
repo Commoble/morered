@@ -24,5 +24,7 @@ public class ObjectNames
 	public static final String REDWIRE_SPOOL = "redwire_spool";
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";
 	
+	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
+	
 	public static final String GATECRAFTING_RECIPE = "gatecrafting";
 }

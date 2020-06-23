@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "rfs",
+    "frf",
+    "sfr"
+  ],
+  "key": {
+    "s": {
+      "tag": "forge:rods/wooden"
+    },
+    "f": {
+      "tag": "forge:ingots/iron"
+    },
+    "r": {
+      "tag": "forge:ingots/red_alloy"
+    }
+  },
+  "result": {
+    "item": "morered:redwire_spool"
+  }
+}

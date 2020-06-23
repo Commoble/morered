@@ -2,6 +2,7 @@
     "parent": "item/handheld",
     "textures":
     {
-        "layer0": "morered:item/redwire_spool"
+        "layer0": "minecraft:item/stick",
+        "layer1": "morered:item/redwire_spool"
     }
 }

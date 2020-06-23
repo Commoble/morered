@@ -11,6 +11,7 @@ import com.github.commoble.morered.TileEntityRegistrar;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemUseContext;
@@ -90,7 +91,7 @@ public class WireSpoolItem extends Item
 							MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)player), new WireBreakPacket(WirePostTileEntity.getConnectionVector(lowerPos), WirePostTileEntity.getConnectionVector(upperPos)));
 							((ServerWorld)world).spawnParticle((ServerPlayerEntity)player, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 							
-							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_AMBIENT, SoundCategory.BLOCKS, 1F, 1F);
+							((ServerPlayerEntity)player).playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 						}
 					}
 					// if post wasn't connected, connect them if they're close enough
@@ -99,6 +100,7 @@ public class WireSpoolItem extends Item
 						stack.removeChildTag(LAST_POST_POS);
 						WirePostTileEntity.getPost(world, lastPos)
 							.ifPresent(lastPost -> WirePostTileEntity.addConnection(world, post, lastPost));
+						stack.damageItem(1, player, thePlayer -> thePlayer.sendBreakAnimation(EquipmentSlotType.MAINHAND));
 							
 					}
 					else	// too far away, initiate a new connection from here
