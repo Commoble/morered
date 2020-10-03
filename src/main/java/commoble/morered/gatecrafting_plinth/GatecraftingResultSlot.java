@@ -1,4 +1,4 @@
-package com.github.commoble.morered.gatecrafting_plinth;
+package commoble.morered.gatecrafting_plinth;
 
 import java.util.Optional;
 

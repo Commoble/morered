@@ -1,12 +1,11 @@
-package com.github.commoble.morered.client.jei;
+package commoble.morered.client.jei;
 
 import java.util.List;
 
-import com.github.commoble.morered.ItemRegistrar;
-import com.github.commoble.morered.MoreRed;
-import com.github.commoble.morered.ObjectNames;
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipe;
-
+import commoble.morered.ItemRegistrar;
+import commoble.morered.MoreRed;
+import commoble.morered.ObjectNames;
+import commoble.morered.gatecrafting_plinth.GatecraftingRecipe;
 import mezz.jei.api.constants.ModIds;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.IRecipeLayout;

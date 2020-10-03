@@ -1,14 +1,13 @@
-package com.github.commoble.morered.client;
+package commoble.morered.client;
 
-import com.github.commoble.morered.BlockRegistrar;
-import com.github.commoble.morered.ContainerRegistrar;
-import com.github.commoble.morered.ItemRegistrar;
-import com.github.commoble.morered.TileEntityRegistrar;
-import com.github.commoble.morered.plate_blocks.LogicGateType;
-import com.github.commoble.morered.plate_blocks.PlateBlock;
-import com.github.commoble.morered.plate_blocks.PlateBlockStateProperties;
-import com.github.commoble.morered.util.BlockStateUtil;
-
+import commoble.morered.BlockRegistrar;
+import commoble.morered.ContainerRegistrar;
+import commoble.morered.ItemRegistrar;
+import commoble.morered.TileEntityRegistrar;
+import commoble.morered.plate_blocks.LogicGateType;
+import commoble.morered.plate_blocks.PlateBlock;
+import commoble.morered.plate_blocks.PlateBlockStateProperties;
+import commoble.morered.util.BlockStateUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;

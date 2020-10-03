@@ -1,8 +1,7 @@
-package com.github.commoble.morered.client;
+package commoble.morered.client;
 
-import com.github.commoble.morered.wire_post.SlackInterpolator;
-import com.github.commoble.morered.wire_post.WireBreakPacket;
-
+import commoble.morered.wire_post.SlackInterpolator;
+import commoble.morered.wire_post.WireBreakPacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;

@@ -1,14 +1,14 @@
-package com.github.commoble.morered.client;
+package commoble.morered.client;
 
 import java.util.Set;
 
-import com.github.commoble.morered.wire_post.SlackInterpolator;
-import com.github.commoble.morered.wire_post.WirePostBlock;
-import com.github.commoble.morered.wire_post.WirePostTileEntity;
-import com.github.commoble.morered.wire_post.WireSpoolItem;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import commoble.morered.wire_post.SlackInterpolator;
+import commoble.morered.wire_post.WirePostBlock;
+import commoble.morered.wire_post.WirePostTileEntity;
+import commoble.morered.wire_post.WireSpoolItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;

@@ -1,9 +1,8 @@
-package com.github.commoble.morered.gatecrafting_plinth;
+package commoble.morered.gatecrafting_plinth;
 
 import javax.annotation.Nonnull;
 
-import com.github.commoble.morered.RecipeRegistrar;
-
+import commoble.morered.RecipeRegistrar;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;

@@ -1,4 +1,4 @@
-package com.github.commoble.morered.plate_blocks;
+package commoble.morered.plate_blocks;
 
 import java.util.Random;
 

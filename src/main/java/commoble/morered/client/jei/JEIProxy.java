@@ -1,14 +1,14 @@
-package com.github.commoble.morered.client.jei;
+package commoble.morered.client.jei;
 
 import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.morered.ItemRegistrar;
-import com.github.commoble.morered.MoreRed;
-import com.github.commoble.morered.RecipeRegistrar;
 import com.google.common.collect.ImmutableList;
 
+import commoble.morered.ItemRegistrar;
+import commoble.morered.MoreRed;
+import commoble.morered.RecipeRegistrar;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;

@@ -1,13 +1,12 @@
 
-package com.github.commoble.morered.client;
+package commoble.morered.client;
 
-import com.github.commoble.morered.BlockRegistrar;
-import com.github.commoble.morered.plate_blocks.InputState;
-import com.github.commoble.morered.plate_blocks.LatchBlock;
-import com.github.commoble.morered.plate_blocks.LogicFunction;
-import com.github.commoble.morered.plate_blocks.LogicFunctions;
-import com.github.commoble.morered.wire_post.WirePostBlock;
-
+import commoble.morered.BlockRegistrar;
+import commoble.morered.plate_blocks.InputState;
+import commoble.morered.plate_blocks.LatchBlock;
+import commoble.morered.plate_blocks.LogicFunction;
+import commoble.morered.plate_blocks.LogicFunctions;
+import commoble.morered.wire_post.WirePostBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;

@@ -1,9 +1,8 @@
-package com.github.commoble.morered.plate_blocks;
+package commoble.morered.plate_blocks;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.morered.util.BlockStateUtil;
-
+import commoble.morered.util.BlockStateUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItemUseContext;

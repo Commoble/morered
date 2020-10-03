@@ -1,4 +1,4 @@
-package com.github.commoble.morered.client;
+package commoble.morered.client;
 
 import java.nio.Buffer;
 import java.nio.ByteBuffer;

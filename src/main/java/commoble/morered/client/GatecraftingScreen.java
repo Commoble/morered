@@ -1,17 +1,17 @@
-package com.github.commoble.morered.client;
+package commoble.morered.client;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-import com.github.commoble.morered.BlockRegistrar;
-import com.github.commoble.morered.MoreRed;
-import com.github.commoble.morered.RecipeRegistrar;
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingContainer;
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import commoble.morered.BlockRegistrar;
+import commoble.morered.MoreRed;
+import commoble.morered.RecipeRegistrar;
+import commoble.morered.gatecrafting_plinth.GatecraftingContainer;
+import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;

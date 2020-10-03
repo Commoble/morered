@@ -1,11 +1,10 @@
-package com.github.commoble.morered.gatecrafting_plinth;
+package commoble.morered.gatecrafting_plinth;
 
 import java.util.Optional;
 
-import com.github.commoble.morered.BlockRegistrar;
-import com.github.commoble.morered.ContainerRegistrar;
-import com.github.commoble.morered.RecipeRegistrar;
-
+import commoble.morered.BlockRegistrar;
+import commoble.morered.ContainerRegistrar;
+import commoble.morered.RecipeRegistrar;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.inventory.CraftResultInventory;
