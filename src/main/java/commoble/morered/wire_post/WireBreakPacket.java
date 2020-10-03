@@ -1,9 +1,8 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.function.Supplier;
 
-import com.github.commoble.morered.client.ClientPacketHandlers;
-
+import commoble.morered.client.ClientPacketHandlers;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.Vec3d;

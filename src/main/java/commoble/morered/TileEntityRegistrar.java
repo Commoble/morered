@@ -1,7 +1,6 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
-import com.github.commoble.morered.wire_post.WirePostTileEntity;
-
+import commoble.morered.wire_post.WirePostTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;

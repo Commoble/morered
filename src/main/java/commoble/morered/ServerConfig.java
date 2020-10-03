@@ -1,8 +1,7 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
-import com.github.commoble.morered.util.ConfigHelper;
-import com.github.commoble.morered.util.ConfigHelper.ConfigValueListener;
-
+import commoble.morered.util.ConfigHelper;
+import commoble.morered.util.ConfigHelper.ConfigValueListener;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 

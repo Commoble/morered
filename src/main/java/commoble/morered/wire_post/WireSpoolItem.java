@@ -1,13 +1,12 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
 
-import com.github.commoble.morered.MoreRed;
-import com.github.commoble.morered.ServerConfig;
-import com.github.commoble.morered.TileEntityRegistrar;
-
+import commoble.morered.MoreRed;
+import commoble.morered.ServerConfig;
+import commoble.morered.TileEntityRegistrar;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;

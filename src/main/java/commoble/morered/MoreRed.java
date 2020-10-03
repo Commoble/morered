@@ -1,17 +1,16 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.commoble.morered.client.ClientEvents;
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
-import com.github.commoble.morered.plate_blocks.LogicGateType;
-import com.github.commoble.morered.wire_post.IPostsInChunk;
-import com.github.commoble.morered.wire_post.PostsInChunk;
-import com.github.commoble.morered.wire_post.PostsInChunkCapability;
-import com.github.commoble.morered.wire_post.WireBreakPacket;
-import com.github.commoble.morered.wire_post.WirePostTileEntity;
-
+import commoble.morered.client.ClientEvents;
+import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
+import commoble.morered.plate_blocks.LogicGateType;
+import commoble.morered.wire_post.IPostsInChunk;
+import commoble.morered.wire_post.PostsInChunk;
+import commoble.morered.wire_post.PostsInChunkCapability;
+import commoble.morered.wire_post.WireBreakPacket;
+import commoble.morered.wire_post.WirePostTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;

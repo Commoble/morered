@@ -1,10 +1,9 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.HashSet;
 import java.util.Set;
 
-import com.github.commoble.morered.ServerConfig;
-
+import commoble.morered.ServerConfig;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;

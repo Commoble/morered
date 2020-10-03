@@ -1,4 +1,4 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.fluid.IFluidState;

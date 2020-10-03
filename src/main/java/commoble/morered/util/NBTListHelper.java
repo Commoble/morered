@@ -1,4 +1,4 @@
-package com.github.commoble.morered.util;
+package commoble.morered.util;
 
 import java.util.ArrayList;
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
 public class ObjectNames
 {

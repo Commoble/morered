@@ -1,7 +1,6 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingContainer;
-
+import commoble.morered.gatecrafting_plinth.GatecraftingContainer;
 import net.minecraft.inventory.container.ContainerType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;

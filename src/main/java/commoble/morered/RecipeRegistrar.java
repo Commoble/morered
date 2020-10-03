@@ -1,4 +1,4 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -8,9 +8,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipe;
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingRecipeSerializer;
-
+import commoble.morered.gatecrafting_plinth.GatecraftingRecipe;
+import commoble.morered.gatecrafting_plinth.GatecraftingRecipeSerializer;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.crafting.IRecipe;
 import net.minecraft.item.crafting.IRecipeSerializer;

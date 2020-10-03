@@ -1,11 +1,10 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
-import com.github.commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
-import com.github.commoble.morered.plate_blocks.LatchBlock;
-import com.github.commoble.morered.plate_blocks.PlateBlock;
-import com.github.commoble.morered.plate_blocks.PlateBlockStateProperties;
-import com.github.commoble.morered.wire_post.WirePostBlock;
-
+import commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
+import commoble.morered.plate_blocks.LatchBlock;
+import commoble.morered.plate_blocks.PlateBlock;
+import commoble.morered.plate_blocks.PlateBlockStateProperties;
+import commoble.morered.wire_post.WirePostBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;

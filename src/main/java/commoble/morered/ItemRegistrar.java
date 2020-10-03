@@ -1,7 +1,6 @@
-package com.github.commoble.morered;
+package commoble.morered;
 
-import com.github.commoble.morered.wire_post.WireSpoolItem;
-
+import commoble.morered.wire_post.WireSpoolItem;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;

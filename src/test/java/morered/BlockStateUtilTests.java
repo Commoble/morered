@@ -3,8 +3,7 @@ package morered;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-import com.github.commoble.morered.util.BlockStateUtil;
-
+import commoble.morered.util.BlockStateUtil;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;

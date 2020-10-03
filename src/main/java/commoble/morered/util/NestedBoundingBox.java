@@ -1,4 +1,4 @@
-package com.github.commoble.morered.util;
+package commoble.morered.util;
 
 import java.util.Collections;
 import java.util.List;

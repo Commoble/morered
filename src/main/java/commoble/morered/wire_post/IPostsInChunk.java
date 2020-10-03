@@ -1,4 +1,4 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.Set;
 

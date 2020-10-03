@@ -1,4 +1,4 @@
-package com.github.commoble.morered.util;
+package commoble.morered.util;
 
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;

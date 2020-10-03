@@ -1,4 +1,4 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.HashMap;
 import java.util.List;
@@ -10,14 +10,14 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.commoble.morered.MoreRed;
-import com.github.commoble.morered.TileEntityRegistrar;
-import com.github.commoble.morered.util.NBTListHelper;
-import com.github.commoble.morered.util.NestedBoundingBox;
-import com.github.commoble.morered.util.WorldHelper;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
+import commoble.morered.MoreRed;
+import commoble.morered.TileEntityRegistrar;
+import commoble.morered.util.NBTListHelper;
+import commoble.morered.util.NestedBoundingBox;
+import commoble.morered.util.WorldHelper;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;

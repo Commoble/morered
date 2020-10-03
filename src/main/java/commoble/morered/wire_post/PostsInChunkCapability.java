@@ -1,10 +1,9 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import com.github.commoble.morered.util.NBTListHelper;
-
+import commoble.morered.util.NBTListHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTUtil;

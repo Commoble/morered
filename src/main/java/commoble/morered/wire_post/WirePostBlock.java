@@ -1,4 +1,4 @@
-package com.github.commoble.morered.wire_post;
+package commoble.morered.wire_post;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -6,11 +6,11 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
-import com.github.commoble.morered.TileEntityRegistrar;
-import com.github.commoble.morered.plate_blocks.PlateBlock;
-import com.github.commoble.morered.util.WorldHelper;
 import com.google.common.collect.ImmutableSet;
 
+import commoble.morered.TileEntityRegistrar;
+import commoble.morered.plate_blocks.PlateBlock;
+import commoble.morered.util.WorldHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
