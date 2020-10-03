@@ -115,7 +115,7 @@ public class MoreRed
 			WireBreakPacket::handle);
 		
 		// register capabilities
-		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), PostsInChunk::new);
+		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), () -> new PostsInChunk(null));
 	}
 	
 	public static void addForgeListeners(IEventBus forgeBus)
@@ -126,7 +126,9 @@ public class MoreRed
 	
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
 	{
-		event.addCapability(getModRL(ObjectNames.POSTS_IN_CHUNK), new PostsInChunk());
+		PostsInChunk cap = new PostsInChunk(event.getObject());
+		event.addCapability(getModRL(ObjectNames.POSTS_IN_CHUNK), cap);
+		event.addListener(cap::onCapabilityInvalidated);
 	}
 	
 	public static void onEntityPlaceBlock(BlockEvent.EntityPlaceEvent event)

@@ -3,21 +3,30 @@ package commoble.morered.wire_post;
 import java.util.HashSet;
 import java.util.Set;
 
+import commoble.morered.MoreRed;
 import commoble.morered.ServerConfig;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.chunk.Chunk;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.fml.network.PacketDistributor;
 
 public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSerializable<CompoundNBT>
 {	
 	private final LazyOptional<IPostsInChunk> holder = LazyOptional.of(() -> this);
 	
 	private Set<BlockPos> positions = new HashSet<>();
+	private final Chunk chunk; public Chunk getChunk() {return this.chunk;}
+	
+	public PostsInChunk(Chunk chunk)
+	{
+		this.chunk = chunk;
+	}
 	
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
@@ -42,6 +51,7 @@ public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSer
 	public void setPositions(Set<BlockPos> set)
 	{
 		this.positions = set;
+		MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(this::getChunk), new SyncPostsInChunkPacket(this.chunk.getPos(), set));
 	}
 
 	@Override
@@ -71,6 +81,11 @@ public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSer
 		}
 		
 		return set;
+	}
+	
+	public void onCapabilityInvalidated()
+	{
+		this.holder.invalidate();
 	}
 
 }

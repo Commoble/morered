@@ -14,6 +14,7 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 
 public class PostsInChunkCapability
 {
+	/** Don't get the default IPostsInChunk instance from this, it intentionally returns a broken instance that will probably cause crashes if used **/
 	@CapabilityInject(IPostsInChunk.class)
 	public static Capability<IPostsInChunk> INSTANCE = null;
 	
