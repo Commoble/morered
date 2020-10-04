@@ -14,17 +14,17 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.BlockModelRenderer;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Vector3f;
-import net.minecraft.client.renderer.Vector4f;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.ILightReader;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.util.math.vector.Vector4f;
+import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 
 /**
@@ -50,7 +50,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 	}
 
 	// invoked from the DrawHighlightEvent.HighlightBlock event
-	public static void renderBlockPreview(BlockPos pos, BlockState state, World world, Vec3d currentRenderPos, MatrixStack matrix, IRenderTypeBuffer renderTypeBuffer)
+	public static void renderBlockPreview(BlockPos pos, BlockState state, World world, Vector3d currentRenderPos, MatrixStack matrix, IRenderTypeBuffer renderTypeBuffer)
 	{
 		matrix.push();
 	
@@ -81,7 +81,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 	}
 
 	@Override
-	public void renderQuadSmooth(ILightReader world, BlockState state, BlockPos pos, IVertexBuilder buffer, MatrixStack.Entry matrixEntry, BakedQuad quadIn,
+	public void renderQuadSmooth(IBlockDisplayReader world, BlockState state, BlockPos pos, IVertexBuilder buffer, MatrixStack.Entry matrixEntry, BakedQuad quadIn,
 		float tintA, float tintB, float tintC, float tintD, int brightness0, int brightness1, int brightness2, int brightness3, int combinedOverlayIn)
 	{
 		float r=1F;
@@ -95,7 +95,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 			b = (i & 255) / 255.0F;
 		}
 		// FORGE: Apply diffuse lighting at render-time instead of baking it in
-		if (quadIn.shouldApplyDiffuseLighting())
+		if (quadIn.applyDiffuseLighting()) // better name: shouldApplyDiffuseLighting
 		{
 			// TODO this should be handled by the forge lighting pipeline
 			float forgeLighting = net.minecraftforge.client.model.pipeline.LightUtil.diffuseLight(quadIn.getFace());
@@ -114,7 +114,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 		int combinedOverlayIn, boolean mulColor, IVertexBuilder buffer)
 	{
 		int[] vertexData = quad.getVertexData();
-		Vec3i faceVector3i = quad.getFace().getDirectionVec();
+		Vector3i faceVector3i = quad.getFace().getDirectionVec();
 		Vector3f faceVector = new Vector3f(faceVector3i.getX(), faceVector3i.getY(), faceVector3i.getZ());
 		Matrix4f matrix = matrixEntry.getMatrix();
 		faceVector.transform(matrixEntry.getNormal());

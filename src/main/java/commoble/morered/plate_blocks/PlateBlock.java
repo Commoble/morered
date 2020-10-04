@@ -55,7 +55,7 @@ public class PlateBlock extends Block
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
-		if (state.has(ATTACHMENT_DIRECTION))
+		if (state.hasProperty(ATTACHMENT_DIRECTION))
 		{
 			return SHAPES_BY_DIRECTION[state.get(ATTACHMENT_DIRECTION).ordinal()];
 		}
@@ -76,7 +76,7 @@ public class PlateBlock extends Block
 	@Deprecated
 	public BlockState rotate(BlockState state, Rotation rotation)
 	{
-		if (state.has(ATTACHMENT_DIRECTION) && state.has(ROTATION))
+		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
 		{
 			Direction attachmentDirection = state.get(ATTACHMENT_DIRECTION);
 			int rotationIndex = state.get(ROTATION);
@@ -103,7 +103,7 @@ public class PlateBlock extends Block
 	@Deprecated
 	public BlockState mirror(BlockState state, Mirror mirror)
 	{
-		if (state.has(ATTACHMENT_DIRECTION) && state.has(ROTATION))
+		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
 		{
 			Direction attachmentDirection = state.get(ATTACHMENT_DIRECTION);
 			int rotationIndex = state.get(ROTATION);

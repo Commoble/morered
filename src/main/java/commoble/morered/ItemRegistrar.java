@@ -13,7 +13,7 @@ import net.minecraftforge.registries.ObjectHolder;
 
 public class ItemRegistrar
 {
-	public static final DeferredRegister<Item> ITEMS = new DeferredRegister<>(ForgeRegistries.ITEMS, MoreRed.MODID);
+	public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, MoreRed.MODID);
 	
 	// using an objectholder here for the creative tab since the function gates are procedurally generated
 	@ObjectHolder("morered:nor_gate")

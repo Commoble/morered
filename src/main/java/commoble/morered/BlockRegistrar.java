@@ -16,7 +16,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class BlockRegistrar
 {
 	// logic function blocks are registered elsewhere, see LogicGateType
-	public static final DeferredRegister<Block> BLOCKS = new DeferredRegister<>(ForgeRegistries.BLOCKS, MoreRed.MODID);
+	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MoreRed.MODID);
 	
 	public static final RegistryObject<GatecraftingPlinthBlock> GATECRAFTING_PLINTH = BLOCKS.register(ObjectNames.GATECRAFTING_PLINTH,
 		() -> new GatecraftingPlinthBlock(Block.Properties.create(Material.ROCK).hardnessAndResistance(3.5F).notSolid()));

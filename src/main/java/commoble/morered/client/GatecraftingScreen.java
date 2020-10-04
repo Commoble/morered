@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import commoble.morered.BlockRegistrar;
@@ -13,6 +14,7 @@ import commoble.morered.RecipeRegistrar;
 import commoble.morered.gatecrafting_plinth.GatecraftingContainer;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
@@ -28,6 +30,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.client.gui.ScrollPanel;
@@ -52,7 +55,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		super(screenContainer, inv, titleIn);
 		this.xSize = 276;
 		this.ySize = 166;
-		this.name = new TranslationTextComponent(BlockRegistrar.GATECRAFTING_PLINTH.get().getTranslationKey()).getFormattedText();
+		this.name = new TranslationTextComponent(BlockRegistrar.GATECRAFTING_PLINTH.get().getTranslationKey()).getString();
 	}
 	
 	@Override
@@ -68,15 +71,15 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 	}
 
 	@Override
-	public void render(int mouseX, int mouseY, float partialTicks)
+	public void render(MatrixStack matrix, int mouseX, int mouseY, float partialTicks)
 	{
-		this.renderBackground();
-		super.render(mouseX, mouseY, partialTicks);
+		this.renderBackground(matrix);
+		super.render(matrix, mouseX, mouseY, partialTicks);
 		if (this.scrollPanel != null)
 		{
-			this.scrollPanel.render(mouseX, mouseY, 0);
+			this.scrollPanel.render(matrix, mouseX, mouseY, 0);
 		}
-		this.renderHoveredToolTip(mouseX, mouseY);
+		this.renderHoveredTooltip(matrix, mouseX, mouseY);
 	}
 	
 	public void renderItemStack(ItemStack stack, int x, int y)
@@ -86,30 +89,30 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 	}
 
 	@Override
-	protected void renderHoveredToolTip(int mouseX, int mouseY)
+	protected void renderHoveredTooltip(MatrixStack matrix, int mouseX, int mouseY)
 	{
 		if (this.minecraft.player.inventory.getItemStack().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.getHasStack())
 		{
-			this.renderTooltip(this.hoveredSlot.getStack(), mouseX, mouseY);
+			this.renderTooltip(matrix, this.hoveredSlot.getStack(), mouseX, mouseY);
 		}
 		else if (this.scrollPanel != null && !this.scrollPanel.tooltipItem.isEmpty())
 		{
-			this.renderTooltip(this.scrollPanel.tooltipItem, mouseX, mouseY);
+			this.renderTooltip(matrix, this.scrollPanel.tooltipItem, mouseX, mouseY);
 		}
 
 	}
 
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(int mouseX, int mouseY)
+	protected void drawGuiContainerForegroundLayer(MatrixStack matrix, int mouseX, int mouseY)
 	{
-		String playerName = this.playerInventory.getName().getFormattedText();
-		this.font.drawString(this.name, this.xSize/2 - this.font.getStringWidth(this.name)/2, 6, 4210752);	// y-value and color from dispenser, etc
-		this.font.drawString(playerName, 107, this.ySize-96+2, 4210752);
+		String playerName = this.playerInventory.getName().getString();
+		this.font.drawString(matrix, this.name, this.xSize/2 - this.font.getStringWidth(this.name)/2, 6, 4210752);	// y-value and color from dispenser, etc
+		this.font.drawString(matrix, playerName, 107, this.ySize-96+2, 4210752);
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(float partialTicks, int mouseX, int mouseY)
+	protected void drawGuiContainerBackgroundLayer(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
 	{
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
 		int xStart = (this.width - this.xSize) / 2;
@@ -117,7 +120,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		
 		// use the trading window as the main background
 		this.minecraft.getTextureManager().bindTexture(TRADING_SCREEN);
-		blit(xStart,  yStart, 0, 0, this.xSize, this.ySize, 512, 256);
+		AbstractGui.blit(matrix, xStart,  yStart, 0, 0, this.xSize, this.ySize, 512, 256);
 		
 		// stretch the arrow over the crafting slot background
 		int arrowU = 186;
@@ -128,7 +131,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		int arrowScreenX = xStart + arrowU - tiles*arrowWidth;
 		int arrowScreenY = yStart + arrowV;
 		int blitWidth = arrowWidth*tiles;
-		blit(arrowScreenX, arrowScreenY, blitWidth, arrowHeight, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		AbstractGui.blit(matrix, arrowScreenX, arrowScreenY, blitWidth, arrowHeight, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 	}
 
 	@Override
@@ -147,7 +150,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 
 		public RecipeButton(GatecraftingScreen screen, IRecipe<CraftingInventory> recipe, int x, int y, int width)
 		{
-			super(x, y, width, getHeightForRecipe(recipe), "", button -> onButtonClicked(screen.container, recipe));
+			super(x, y, width, getHeightForRecipe(recipe), new StringTextComponent(""), button -> onButtonClicked(screen.container, recipe));
 			this.baseY = y;
 			this.screen = screen;
 			this.recipe = recipe;
@@ -175,12 +178,12 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 	     * Draws this button to the screen.
 	     */
 	    @Override
-	    public void renderButton(int mouseX, int mouseY, float partial)
+	    public void renderButton(MatrixStack matrix, int mouseX, int mouseY, float partial)
 	    {
 	    	this.tooltipItem = ItemStack.EMPTY;
 	        if (this.visible)
 	        {
-	            super.renderButton(mouseX, mouseY, partial);
+	            super.renderButton(matrix, mouseX, mouseY, partial);
 	            NonNullList<Ingredient> ingredients = this.recipe.getIngredients();
 	            int ingredientCount = ingredients.size();
 	            // render ingredients
@@ -213,7 +216,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		            int arrowU = 15;
 		            int arrowV = 171;
 		            this.screen.minecraft.textureManager.bindTexture(TRADING_SCREEN);
-		            Screen.blit(arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		            Screen.blit(matrix, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
 		            ItemStack outputStack = this.recipe.getRecipeOutput();
@@ -279,14 +282,14 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 				{
 					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
 					this.buttons.add(recipeButton);
-					totalButtonHeight += recipeButton.getHeight();
+					totalButtonHeight += recipeButton.getHeightRealms();
 				}
 			}
 			this.totalButtonHeight = totalButtonHeight;
 		}
 		
 		@Override
-		public List<? extends IGuiEventListener> children()
+		public List<? extends IGuiEventListener> getEventListeners()
 		{
 			return this.buttons;
 		}
@@ -298,13 +301,13 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		}
 
 		@Override
-		protected void drawPanel(int entryRight, int relativeY, Tessellator tess, int mouseX, int mouseY)
+		protected void drawPanel(MatrixStack matrix, int entryRight, int relativeY, Tessellator tess, int mouseX, int mouseY)
 		{
 	    	this.tooltipItem = ItemStack.EMPTY;
 			for (RecipeButton button : this.buttons)
 			{
 				button.scrollButton((int) this.scrollDistance);
-				button.render(mouseX, mouseY, 0);
+				button.render(matrix, mouseX, mouseY, 0);
 				if (!button.tooltipItem.isEmpty())
 				{
 					this.tooltipItem = button.tooltipItem;

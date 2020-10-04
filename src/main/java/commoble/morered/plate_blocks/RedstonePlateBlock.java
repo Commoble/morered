@@ -7,17 +7,18 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.tags.ItemTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
+import net.minecraftforge.common.Tags;
 
 public abstract class RedstonePlateBlock extends PlateBlock
 {
@@ -60,7 +61,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		return state;
 	}
 	
-	public static final ItemTags.Wrapper STICK = new ItemTags.Wrapper(new ResourceLocation("forge:rods/wooden"));
+	public static final ITag<Item> STICK = Tags.Items.RODS_WOODEN;//ItemTags.Wrapper STICK = new ItemTags.Wrapper(new ResourceLocation("forge:rods/wooden"));
 	
 	@Override
 	@Deprecated

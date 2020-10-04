@@ -22,7 +22,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.PacketDistributor;
@@ -79,7 +79,7 @@ public class WireSpoolItem extends Item
 					boolean lastPosIsHigher = pos.getY() < lastPos.getY();
 					BlockPos upperPos = lastPosIsHigher ? lastPos : pos;
 					BlockPos lowerPos = lastPosIsHigher ? pos : lastPos; 
-					Vec3d hit = SlackInterpolator.getWireRaytraceHit(lowerPos, upperPos, world);
+					Vector3d hit = SlackInterpolator.getWireRaytraceHit(lowerPos, upperPos, world);
 					
 					// if post wasn't connected but they can't be connected due to a block in the way, interrupt the connection
 					if (hit != null)
@@ -133,7 +133,7 @@ public class WireSpoolItem extends Item
 	public static boolean shouldRemoveConnection(BlockPos connectionPos, World world, Entity holder)
 	{
 		double maxDistance = ServerConfig.INSTANCE.max_wire_post_connection_range.get();
-		if (holder.getPositionVec().squareDistanceTo((new Vec3d(connectionPos).add(0.5,0.5,0.5))) > maxDistance*maxDistance)
+		if (holder.getPositionVec().squareDistanceTo(Vector3d.copyCentered(connectionPos)) > maxDistance*maxDistance)
 		{
 			return true;
 		}
@@ -149,7 +149,7 @@ public class WireSpoolItem extends Item
 			MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayerEntity)holder),
 				new WireBreakPacket(
 					WirePostTileEntity.getConnectionVector(connectingPos),
-					new Vec3d(holder.getPosX(), holder.getPosYEye(), holder.getPosZ())));
+					new Vector3d(holder.getPosX(), holder.getPosYEye(), holder.getPosZ())));
 		}
 	}
 }

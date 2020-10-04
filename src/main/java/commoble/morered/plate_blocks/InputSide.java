@@ -36,7 +36,7 @@ public enum InputSide
 	public boolean isBlockReceivingPower(World world, BlockState state, BlockPos pos)
 	{
 		// return early if the state doesn't care about this side or we're checking an invalid state
-		if(!state.has(this.property) || !state.has(PlateBlockStateProperties.ATTACHMENT_DIRECTION) || !state.has(PlateBlockStateProperties.ROTATION))
+		if(!state.hasProperty(this.property) || !state.hasProperty(PlateBlockStateProperties.ATTACHMENT_DIRECTION) || !state.hasProperty(PlateBlockStateProperties.ROTATION))
 		{
 			return false;
 		}

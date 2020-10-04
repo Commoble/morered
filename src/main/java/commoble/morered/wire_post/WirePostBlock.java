@@ -32,7 +32,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.chunk.IChunk;
 
 public class WirePostBlock extends Block
 {
@@ -81,14 +80,14 @@ public class WirePostBlock extends Block
 		VoxelShape[] shapeTable = context instanceof WireRayTraceSelectionContext && ((WireRayTraceSelectionContext)context).shouldIgnoreBlock(pos)
 			? PlateBlock.SHAPES_BY_DIRECTION
 			: SHAPES_DUNSWE;
-		return shapeTable[state.has(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
+		return shapeTable[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
 	}
 
 	@Override
 	@Deprecated
 	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
-		return this.blocksMovement ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
+		return this.canCollide ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
 	}
 	
 	/**
@@ -106,17 +105,6 @@ public class WirePostBlock extends Block
 		}
 
 	}
-
-//	@Override
-//	public void tick(BlockState oldBlockState, ServerWorld world, BlockPos pos, Random rand)
-//	{
-//		int oldPower = oldBlockState.get(POWER);
-//		int newPower = this.getNewPower(oldBlockState, world, pos);
-//		if (oldPower != newPower)
-//		{
-//			world.setBlockState(pos, oldBlockState.with(POWER, newPower), 2);
-//		}
-//	}
 
 	@Override
 	@Deprecated
@@ -136,7 +124,7 @@ public class WirePostBlock extends Block
 	@Deprecated
 	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		this.doPostSetOperation(world, pos, Set<BlockPos>::add);
+		this.updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onBlockAdded(state, world, pos, oldState, isMoving);
 		this.notifyNeighbors(world, pos, state);
 	}
@@ -153,19 +141,23 @@ public class WirePostBlock extends Block
 		}
 		else
 		{
-			this.doPostSetOperation(world, pos, Set<BlockPos>::remove);
+			this.updatePostSet(world, pos, Set<BlockPos>::remove);
 			super.onReplaced(state, world, pos, newState, isMoving);
 		}
 		this.notifyNeighbors(world, pos, state);
 	}
 	
-	public void doPostSetOperation(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
+	public void updatePostSet(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
-		IChunk chunk = world.getChunk(pos);
-		if (chunk instanceof Chunk)
+		Chunk chunk = world.getChunkAt(pos);
+		if (chunk != null)
 		{
-			((Chunk)chunk).getCapability(PostsInChunkCapability.INSTANCE)
-				.ifPresent(posts -> consumer.accept(posts.getPositions(), pos));
+			chunk.getCapability(PostsInChunkCapability.INSTANCE)
+				.ifPresent(posts -> {
+					Set<BlockPos> set = posts.getPositions();
+					consumer.accept(set, pos);
+					posts.setPositions(set);
+				});
 		}
 	}
 
@@ -188,7 +180,7 @@ public class WirePostBlock extends Block
 			}
 		}
 
-		return bestState != null && world.func_226663_a_(bestState, pos, ISelectionContext.dummy())
+		return bestState != null && world.placedBlockCollides(bestState, pos, ISelectionContext.dummy())
 			? bestState.with(POWER, this.getNewPower(bestState, world, pos))
 			: null;
 	}
@@ -317,7 +309,7 @@ public class WirePostBlock extends Block
 			.orElse(ImmutableSet.of())
 			.stream()
 			.map(tePos -> world.getBlockState(tePos))
-			.map(otherState -> otherState.has(POWER) ? otherState.get(POWER) : 0)
+			.map(otherState -> otherState.hasProperty(POWER) ? otherState.get(POWER) : 0)
 			.reduce(0, Math::max);
 	}
 
@@ -341,7 +333,7 @@ public class WirePostBlock extends Block
 	
 	public static EnumSet<Direction> getRedstoneConnectionDirections(BlockState state)
 	{
-		if (!state.has(DIRECTION_OF_ATTACHMENT))
+		if (!state.hasProperty(DIRECTION_OF_ATTACHMENT))
 		{
 			return EnumSet.noneOf(Direction.class);
 		}

@@ -23,7 +23,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
@@ -99,10 +99,10 @@ public class ClientEvents
 						if (existingState.isAir(world, placePos) || existingState.getMaterial().isReplaceable())
 						{
 							// only render the preview if we know it would make sense for the block to be placed where we expect it to be
-							Vec3d hitVec = rayTrace.getHitVec();
+							Vector3d hitVec = rayTrace.getHitVec();
 							
 							Direction attachmentDirection = directionAwayFromTargetedBlock.getOpposite();
-							Vec3d relativeHitVec = hitVec.subtract(new Vec3d(placePos));
+							Vector3d relativeHitVec = hitVec.subtract(Vector3d.copy(placePos));
 							
 							Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentDirection);
 							BlockStateUtil.getRotationIndexForDirection(attachmentDirection, outputDirection);

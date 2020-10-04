@@ -1,0 +1,19 @@
+{
+	"required": true,
+	"package": "commoble.morered.mixin",
+	"compatibilityLevel": "JAVA_8",
+	"refmap": "morered.refmap.json",
+	"mixins": 
+	[
+		
+	],
+	"client": 
+	[
+		"ClientBlockItemMixin"
+	],
+	"injectors": 
+	{
+		"defaultRequire": 1
+	},
+	"minVersion": "0.8"
+}

@@ -5,15 +5,15 @@ import java.util.function.Supplier;
 import commoble.morered.client.ClientPacketHandlers;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class WireBreakPacket
 {
-	public final Vec3d start;
-	public final Vec3d end;
+	public final Vector3d start;
+	public final Vector3d end;
 	
-	public WireBreakPacket(Vec3d start, Vec3d end)
+	public WireBreakPacket(Vector3d start, Vector3d end)
 	{
 		this.start = start;
 		this.end = end;
@@ -36,15 +36,15 @@ public class WireBreakPacket
 		CompoundNBT nbt = buffer.readCompoundTag();
 		if (nbt == null)
 		{
-			return new WireBreakPacket(Vec3d.ZERO, Vec3d.ZERO);
+			return new WireBreakPacket(Vector3d.ZERO, Vector3d.ZERO);
 		}
 		else
 		{
-			Vec3d start = new Vec3d(
+			Vector3d start = new Vector3d(
 				nbt.getDouble("startX"),
 				nbt.getDouble("startY"),
 				nbt.getDouble("startZ"));
-			Vec3d end = new Vec3d(
+			Vector3d end = new Vector3d(
 				nbt.getDouble("endX"),
 				nbt.getDouble("endY"),
 				nbt.getDouble("endZ"));

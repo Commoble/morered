@@ -13,7 +13,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.ILightReader;
+import net.minecraft.world.IBlockDisplayReader;
 
 public class ColorHandlers
 {
@@ -24,7 +24,7 @@ public class ColorHandlers
 	public static final int LIT_RED = LIT >> 16;
 	public static final int UNLIT_RED = UNLIT >> 16;
 	
-	public static int getLogicFunctionBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	public static int getLogicFunctionBlockTint(BlockState state, IBlockDisplayReader lightReader, BlockPos pos, int tintIndex)
 	{
 		return getLogicFunctionBlockStateTint(state, tintIndex);
 	}
@@ -66,7 +66,7 @@ public class ColorHandlers
 		return logicFunction.apply(a, b, c) ? LIT : UNLIT;
 	}
 	
-	public static int getLatchBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	public static int getLatchBlockTint(BlockState state, IBlockDisplayReader lightReader, BlockPos pos, int tintIndex)
 	{
 		return getLatchTint(state, tintIndex);
 	}
@@ -94,7 +94,7 @@ public class ColorHandlers
 		}
 	}
 	
-	public static int getRedwirePostBlockTint(BlockState state, ILightReader lightReader, BlockPos pos, int tintIndex)
+	public static int getRedwirePostBlockTint(BlockState state, IBlockDisplayReader lightReader, BlockPos pos, int tintIndex)
 	{
 		return getRedwirePostTint(state, tintIndex);
 	}

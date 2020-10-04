@@ -2,7 +2,11 @@ package commoble.morered.wire_post;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Set;
 
+import com.mojang.serialization.Codec;
+
+import commoble.databuddy.codec.SetCodecHelper;
 import commoble.morered.util.NBTListHelper;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -17,6 +21,9 @@ public class PostsInChunkCapability
 	/** Don't get the default IPostsInChunk instance from this, it intentionally returns a broken instance that will probably cause crashes if used **/
 	@CapabilityInject(IPostsInChunk.class)
 	public static Capability<IPostsInChunk> INSTANCE = null;
+
+	/** This codec serializes a list-like element **/
+	public static final Codec<Set<BlockPos>> POST_SET_CODEC = SetCodecHelper.makeSetCodec(BlockPos.CODEC);
 	
 	public static class Storage implements Capability.IStorage<IPostsInChunk>
 	{

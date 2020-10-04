@@ -12,7 +12,7 @@ import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 
 /**
  * The three input booleanproperties here are the inputs 90, 180, and 270 degrees clockwise from the output
@@ -40,12 +40,12 @@ public class PlateBlockStateProperties
 	/** The third input clockwise from the output **/
 	public static final BooleanProperty INPUT_C = BooleanProperty.create("input_c");
 	
-	public static final Material PLATE_MATERIAL = new Material(MaterialColor.STONE, false, false, false, false, true, false, false, PushReaction.NORMAL);
+	public static final Material PLATE_MATERIAL = new Material(MaterialColor.STONE, false, true, true, true, false, false, PushReaction.NORMAL);
 
 	
 	public static Direction getOutputDirection(BlockState state)
 	{
-		if (!state.has(ATTACHMENT_DIRECTION) || !state.has(ROTATION))
+		if (!state.hasProperty(ATTACHMENT_DIRECTION) || !state.hasProperty(ROTATION))
 		{
 			return Direction.DOWN;
 		}
@@ -73,16 +73,16 @@ public class PlateBlockStateProperties
 		BlockPos placePos = context.getPos();
 		Direction faceOfAdjacentBlock = context.getFace();
 		Direction directionTowardAdjacentBlock = faceOfAdjacentBlock.getOpposite();
-		Vec3d relativeHitVec = context.getHitVec().subtract(new Vec3d(placePos));
+		Vector3d relativeHitVec = context.getHitVec().subtract(Vector3d.copy(placePos));
 		return getStateForPlacedGatePlate(state, placePos, directionTowardAdjacentBlock, relativeHitVec); 
 	}
 	
-	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPos placePos, Direction directionTowardAdjacentBlock, Vec3d relativeHitVec)
+	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPos placePos, Direction directionTowardAdjacentBlock, Vector3d relativeHitVec)
 	{
 		Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, directionTowardAdjacentBlock);
 		int rotationIndex = BlockStateUtil.getRotationIndexForDirection(directionTowardAdjacentBlock, outputDirection);
 		
-		if (state.has(ATTACHMENT_DIRECTION) && state.has(ROTATION))
+		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
 		{
 			return state.with(ATTACHMENT_DIRECTION, directionTowardAdjacentBlock).with(ROTATION, rotationIndex);
 		}

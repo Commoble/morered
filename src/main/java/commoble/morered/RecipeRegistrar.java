@@ -22,7 +22,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class RecipeRegistrar
 {
-	public static final DeferredRegister<IRecipeSerializer<?>> RECIPE_SERIALIZERS = new DeferredRegister<>(ForgeRegistries.RECIPE_SERIALIZERS, MoreRed.MODID);
+	public static final DeferredRegister<IRecipeSerializer<?>> RECIPE_SERIALIZERS = DeferredRegister.create(ForgeRegistries.RECIPE_SERIALIZERS, MoreRed.MODID);
 	
 	public static final IRecipeType<GatecraftingRecipe> GATECRAFTING_RECIPE_TYPE = IRecipeType.register("morered:gatecrafting");
 	

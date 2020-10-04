@@ -12,11 +12,11 @@ import commoble.morered.wire_post.WireSpoolItem;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.Matrix4f;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -26,7 +26,8 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.LightType;
 import net.minecraft.world.World;
 
@@ -51,7 +52,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 		light = Math.max(light, world.getLightFor(LightType.BLOCK, pos));
 		light = MathHelper.clamp(light, 0, 15);
-		int power = state.has(WirePostBlock.POWER) ? state.get(WirePostBlock.POWER) : 0;
+		int power = state.hasProperty(WirePostBlock.POWER) ? state.get(WirePostBlock.POWER) : 0;
 		double lerpFactor = power / 15D;
 		return (int)MathHelper.lerp(lerpFactor, ColorHandlers.UNLIT_RED, ColorHandlers.LIT_RED) * light / 15;
 	}
@@ -61,7 +62,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 	public void render(WirePostTileEntity post, float partialTicks, MatrixStack matrices, IRenderTypeBuffer buffer, int combinedLightIn, int combinedOverlayIn)
 	{
 		BlockPos postPos = post.getPos();
-		Vec3d postVector = WirePostTileEntity.getConnectionVector(postPos);
+		Vector3d postVector = WirePostTileEntity.getConnectionVector(postPos);
 		Set<BlockPos> connections = post.getRemoteConnections();
 		World world = post.getWorld();
 		BlockState postState = world.getBlockState(postPos);
@@ -89,7 +90,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 					if (positionOfCurrentPostOfPlayer.equals(postPos))
 					{
-						Vec3d vectorOfCurrentPostOfPlayer = new Vec3d(positionOfCurrentPostOfPlayer).add(0.5d, 0.5d, 0.5d);
+						Vector3d vectorOfCurrentPostOfPlayer = Vector3d.copyCentered(positionOfCurrentPostOfPlayer);
 						int handSideID = -(hand == Hand.MAIN_HAND ? -1 : 1) * (player.getPrimaryHand() == HandSide.RIGHT ? 1 : -1);
 
 						float swingProgress = player.getSwingProgress(partialTicks);
@@ -105,11 +106,11 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 						float eyeHeight;
 						
 						// first person
-						if ((renderManager.options == null || renderManager.options.thirdPersonView <= 0))
+						if ((renderManager.options == null || renderManager.options.getPointOfView() == PointOfView.FIRST_PERSON))
 						{
 							double fov = renderManager.options.fov;
 							fov = fov / 100.0D;
-							Vec3d handVector = new Vec3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
+							Vector3d handVector = new Vector3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
 							handVector = handVector.rotatePitch(-MathHelper.lerp(partialTicks, player.prevRotationPitch, player.rotationPitch) * ((float) Math.PI / 180F));
 							handVector = handVector.rotateYaw(-MathHelper.lerp(partialTicks, player.prevRotationYaw, player.rotationYaw) * ((float) Math.PI / 180F));
 							handVector = handVector.rotateYaw(swingZ * 0.5F);
@@ -128,7 +129,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 							handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
 							eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
 						}
-						Vec3d renderPlayerVec = new Vec3d(handX, handY + eyeHeight, handZ);
+						Vector3d renderPlayerVec = new Vector3d(handX, handY + eyeHeight, handZ);
 							
 						this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, vectorOfCurrentPostOfPlayer, renderPlayerVec, eyeHeight, postRed);
 					
@@ -139,14 +140,14 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 	}
 
 	private void renderConnection(WirePostTileEntity post, World world, float partialTicks,
-		MatrixStack matrices, IVertexBuilder vertexBuilder, Vec3d startPos, Vec3d endPos, float eyeHeight, int red)
+		MatrixStack matrices, IVertexBuilder vertexBuilder, Vector3d startPos, Vector3d endPos, float eyeHeight, int red)
 	{
 		matrices.push();
 
 		boolean translateSwap = false;
 		if (startPos.getY() > endPos.getY())
 		{
-			Vec3d swap = startPos;
+			Vector3d swap = startPos;
 			startPos = endPos;
 			endPos = swap;
 			translateSwap = true;
@@ -172,14 +173,14 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 		if (startY <= endY)
 		{
-			Vec3d[] pointList = SlackInterpolator.getInterpolatedDifferences(endPos.subtract(startPos));
+			Vector3d[] pointList = SlackInterpolator.getInterpolatedDifferences(endPos.subtract(startPos));
 			int points = pointList.length;
 			int lines = points - 1;
 			
 			for (int line = 0; line < lines; line++)
 			{
-				Vec3d firstPoint = pointList[line];
-				Vec3d secondPoint = pointList[line+1];
+				Vector3d firstPoint = pointList[line];
+				Vector3d secondPoint = pointList[line+1];
 				vertexBuilder.pos(fourMatrix, (float)firstPoint.getX(), (float)firstPoint.getY(), (float)firstPoint.getZ()).color(red, 0, 0, 255).endVertex();
 				vertexBuilder.pos(fourMatrix, (float)secondPoint.getX(), (float)secondPoint.getY(), (float)secondPoint.getZ()).color(red, 0, 0, 255).endVertex();
 			}
@@ -196,7 +197,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 		vertexBuilder.pos(fourMatrix, x * lerp, y * (yLerp), z * lerp).color(red, 0, 0, 255).endVertex();
 	}
 
-	public static void spawnParticleFromTo(World world, Vec3d start, Vec3d end)
+	public static void spawnParticleFromTo(World world, Vector3d start, Vector3d end)
 	{
 		double lerp = world.rand.nextDouble();
 		double x = MathHelper.lerp(lerp, start.getX(), end.getX());

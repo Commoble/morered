@@ -54,9 +54,9 @@ public enum InputState
 	public static InputState getInput(BlockState state)
 	{
 		return getState(
-			state.has(InputSide.A.property) ? state.get(InputSide.A.property) : false,
-			state.has(InputSide.B.property) ? state.get(InputSide.B.property) : false,
-			state.has(InputSide.C.property) ? state.get(InputSide.C.property) : false
+			state.hasProperty(InputSide.A.property) ? state.get(InputSide.A.property) : false,
+			state.hasProperty(InputSide.B.property) ? state.get(InputSide.B.property) : false,
+			state.hasProperty(InputSide.C.property) ? state.get(InputSide.C.property) : false
 		);
 	}
 	
@@ -83,7 +83,7 @@ public enum InputState
 		
 		for (InputSide side : InputSide.values())
 		{
-			if (newBlockState.has(side.property))
+			if (newBlockState.hasProperty(side.property))
 			{
 				newBlockState = newBlockState.with(side.property, newInputState.getSideState(side));
 			}

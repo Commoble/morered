@@ -4,7 +4,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class BlockStateUtil
 {
@@ -216,7 +216,7 @@ public class BlockStateUtil
 		return 0;
 	}
 	
-	public static Direction getOutputDirectionFromRelativeHitVec(Vec3d hitVec, Direction directionTowardBlockAttachedTo)
+	public static Direction getOutputDirectionFromRelativeHitVec(Vector3d hitVec, Direction directionTowardBlockAttachedTo)
 	{
 		// we have the relative hit vector, where 0,0,0 is the bottom-left corner of the cube we are placing into
 		// and 1,1,1 is the top-right
