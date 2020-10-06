@@ -1,0 +1,25 @@
+{
+	"type": "morered:gatecrafting",
+	"ingredients": 
+	[
+		{
+			"type": "forge:nbt",
+			"item": "morered:stone_plate",
+			"count": 8
+		},
+		{
+			"type": "morered:tag_stack",
+			"tag": "forge:dusts/redstone",
+			"count": 64
+		},
+		{
+			"type": "morered:tag_stack",
+			"tag": "forge:gems/quartz",
+			"count": 4
+		}
+	],
+	"result": 
+	{
+		"item": "morered:hexidecrubrometer"
+	}
+}

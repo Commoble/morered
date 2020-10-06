@@ -37,5 +37,6 @@ public class BlockRegistrar
 	public static final RegistryObject<WirePostPlateBlock> REDWIRE_POST_RELAY_PLATE = BLOCKS.register(ObjectNames.REDWIRE_POST_RELAY_PLATE,
 		() -> new WirePostPlateBlock(Block.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
 	
-	
+	public static final RegistryObject<HexidecrubrometerBlock> HEXIDECRUBROMETER = BLOCKS.register(ObjectNames.HEXIDECRUBROMETER,
+		() -> new HexidecrubrometerBlock(Block.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F)));
 }
