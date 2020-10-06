@@ -27,6 +27,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
@@ -77,12 +78,13 @@ public abstract class AbstractWirePostBlock extends Block
 		builder.add(DIRECTION_OF_ATTACHMENT, POWER);
 	}
 
-//	@Override
-//	@Deprecated
-//	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
-//	{
-//		return this.canCollide ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
-//	}
+	@Override
+	@Deprecated
+	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	{
+		// we override this to ensure the correct context is used instead of the dummy context
+		return this.canCollide ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
+	}
 	
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place
