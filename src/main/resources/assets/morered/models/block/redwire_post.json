@@ -5,7 +5,7 @@
 	"textures": {
 		"rod": "morered:block/redwire_post_rod",
 		"upper_plate": "minecraft:block/hopper_outside",
-		"particle": "minecraft:block/smooth_stone"
+		"particle": "minecraft:block/redstone_block"
 	},
 	"elements": [
 		{
