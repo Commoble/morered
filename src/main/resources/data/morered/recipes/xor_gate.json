@@ -10,7 +10,7 @@
       "item": "morered:stone_plate"
     },
     "r": {
-      "item": "forge:dusts/redstone"
+      "tag": "forge:dusts/redstone"
     },
     "t": {
       "item": "minecraft:redstone_torch"
