@@ -6,13 +6,14 @@
 			"item": "morered:stone_plate"
 		},
 		{
-			"type": "morered:tag_stack",
-			"tag": "forge:dusts/redstone",
-			"count": 3
+			"tag": "forge:ingots/iron"
+		},
+		{
+			"tag": "forge:ingots/red_alloy"
 		}
 	],
 	"result": 
 	{
-		"item": "morered:latch"
+		"item": "morered:redwire_post_plate"
 	}
 }

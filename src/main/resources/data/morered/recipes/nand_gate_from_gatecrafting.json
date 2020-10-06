@@ -3,13 +3,11 @@
 	"ingredients": 
 	[
 		{
-			"type": "forge:nbt",
-			"item": "morered:stone_plate",
-			"count": 1
+			"item": "morered:stone_plate"
 		},
 		{
-			"type": "forge:nbt",
-			"item": "minecraft:redstone",
+			"type": "morered:tag_stack",
+			"tag": "forge:dusts/redstone",
 			"count": 4
 		}
 	],

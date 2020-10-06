@@ -2,11 +2,16 @@
 	"type": "minecraft:crafting_shaped",
 	"pattern": 
 	[
-		"F",
-		"R"
+		" F ",
+		" R ",
+		"###"
 	],
 	"key": 
 	{
+		"#": 
+		{
+			"item": "morered:stone_plate"
+		},
 		"R": 
 		{
 			"tag": "forge:ingots/red_alloy"
@@ -18,6 +23,6 @@
 	},
 	"result": 
 	{
-		"item": "morered:redwire_post"
+		"item": "morered:redwire_post_plate"
 	}
 }

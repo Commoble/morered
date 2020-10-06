@@ -3,14 +3,20 @@
 	"ingredients": 
 	[
 		{
+			"item": "morered:stone_plate"
+		},
+		{
 			"tag": "forge:ingots/iron"
 		},
 		{
 			"tag": "forge:ingots/red_alloy"
+		},
+		{
+			"tag": "forge:dusts/redstone"
 		}
 	],
 	"result": 
 	{
-		"item": "morered:redwire_post"
+		"item": "morered:redwire_post_relay_plate"
 	}
 }

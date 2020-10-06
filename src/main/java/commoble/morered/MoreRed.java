@@ -22,6 +22,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.network.play.server.SEntityEquipmentPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
@@ -36,7 +37,9 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
+import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -100,7 +103,14 @@ public class MoreRed
 			ContainerRegistrar.CONTAINER_TYPES,
 			RecipeRegistrar.RECIPE_SERIALIZERS);
 		
+		modBus.addGenericListener(IRecipeSerializer.class, MoreRed::onRegisterRecipeStuff);
 		modBus.addListener(MoreRed::onCommonSetup);
+	}
+	
+	private static void onRegisterRecipeStuff(RegistryEvent.Register<IRecipeSerializer<?>> event)
+	{
+		// forge registers ingredient serializers here for some reason, might as well do it here too
+		CraftingHelper.register(new ResourceLocation("morered:tag_stack"), TagStackIngredient.SERIALIZER);
 	}
 	
 	public static void subscribedDeferredRegisters(IEventBus modBus, DeferredRegister<?>... registers)

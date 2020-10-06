@@ -48,7 +48,8 @@ public class ClientEvents
 	{
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.getCutout());
 
 		ScreenManager.registerFactory(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDWIRE_POST.get(), WirePostRenderer::new);
@@ -65,6 +66,8 @@ public class ClientEvents
 		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockTint, type.blockGetter.get()));
 		colors.register(ColorHandlers::getLatchBlockTint, BlockRegistrar.LATCH.get());
 		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST.get());
+		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST_PLATE.get());
+		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get());
 	}
 	
 	public static void onRegisterItemColors(ColorHandlerEvent.Item event)
@@ -73,6 +76,8 @@ public class ClientEvents
 		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockItemTint, type.itemGetter.get()));
 		colors.register(ColorHandlers::getLatchItemTint, ItemRegistrar.LATCH.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST.get());
+		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_PLATE.get());
+		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_RELAY_PLATE.get());
 	}
 	
 	public static void onHighlightBlock(DrawHighlightEvent.HighlightBlock event)

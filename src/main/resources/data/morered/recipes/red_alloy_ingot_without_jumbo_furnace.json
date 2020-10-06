@@ -6,16 +6,16 @@
 			"tag": "morered:red_alloyable_ingots"
 		},
 		{
-			"item": "minecraft:redstone"
+			"tag": "forge:dusts/redstone"
 		},
 		{
-			"item": "minecraft:redstone"
+			"tag": "forge:dusts/redstone"
 		},
 		{
-			"item": "minecraft:redstone"
+			"tag": "forge:dusts/redstone"
 		},
 		{
-			"item": "minecraft:redstone"
+			"tag": "forge:dusts/redstone"
 		}
 	],
 	"result": 

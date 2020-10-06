@@ -6,7 +6,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import commoble.morered.wire_post.SlackInterpolator;
-import commoble.morered.wire_post.WirePostBlock;
+import commoble.morered.wire_post.AbstractWirePostBlock;
 import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wire_post.WireSpoolItem;
 import net.minecraft.block.BlockState;
@@ -52,7 +52,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 		light = Math.max(light, world.getLightFor(LightType.BLOCK, pos));
 		light = MathHelper.clamp(light, 0, 15);
-		int power = state.hasProperty(WirePostBlock.POWER) ? state.get(WirePostBlock.POWER) : 0;
+		int power = state.hasProperty(AbstractWirePostBlock.POWER) ? state.get(AbstractWirePostBlock.POWER) : 0;
 		double lerpFactor = power / 15D;
 		return (int)MathHelper.lerp(lerpFactor, ColorHandlers.UNLIT_RED, ColorHandlers.LIT_RED) * light / 15;
 	}

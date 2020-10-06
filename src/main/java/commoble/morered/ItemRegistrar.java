@@ -33,6 +33,8 @@ public class ItemRegistrar
 
 	public static final RegistryObject<BlockItem> GATECRAFTING_PLINTH = registerBlockItem(ObjectNames.GATECRAFTING_PLINTH, BlockRegistrar.GATECRAFTING_PLINTH);
 	public static final RegistryObject<BlockItem> REDWIRE_POST = registerBlockItem(ObjectNames.REDWIRE_POST, BlockRegistrar.REDWIRE_POST);
+	public static final RegistryObject<BlockItem> REDWIRE_POST_PLATE = registerBlockItem(ObjectNames.REDWIRE_POST_PLATE, BlockRegistrar.REDWIRE_POST_PLATE);
+	public static final RegistryObject<BlockItem> REDWIRE_POST_RELAY_PLATE = registerBlockItem(ObjectNames.REDWIRE_POST_RELAY_PLATE, BlockRegistrar.REDWIRE_POST_RELAY_PLATE);
 
 	public static final RegistryObject<BlockItem> STONE_PLATE = registerBlockItem(ObjectNames.STONE_PLATE, BlockRegistrar.STONE_PLATE);
 	public static final RegistryObject<BlockItem> LATCH = registerBlockItem(ObjectNames.LATCH, BlockRegistrar.LATCH);

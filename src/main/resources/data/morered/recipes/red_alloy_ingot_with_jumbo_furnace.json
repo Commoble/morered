@@ -6,8 +6,8 @@
 			"tag": "morered:red_alloyable_ingots"
 		},
 		{
-			"type": "forge:nbt",
-			"item": "minecraft:redstone",
+			"type": "jumbofurnace:tag_stack",
+			"tag": "forge:dusts/redstone",
 			"count": 4
 		}
 	],

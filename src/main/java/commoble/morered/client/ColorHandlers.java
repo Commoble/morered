@@ -6,7 +6,7 @@ import commoble.morered.plate_blocks.InputState;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.LogicFunction;
 import commoble.morered.plate_blocks.LogicFunctions;
-import commoble.morered.wire_post.WirePostBlock;
+import commoble.morered.wire_post.AbstractWirePostBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -108,7 +108,7 @@ public class ColorHandlers
 	{
 		if (tintIndex == 1)
 		{
-			int power = state.get(WirePostBlock.POWER);
+			int power = state.get(AbstractWirePostBlock.POWER);
 			double lerpFactor = power / 15D;
 			return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 		}
