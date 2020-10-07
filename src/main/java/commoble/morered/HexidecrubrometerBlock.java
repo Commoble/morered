@@ -51,14 +51,15 @@ public class HexidecrubrometerBlock extends Block
 		World world = context.getWorld();
 		BlockPos pos = context.getPos();
 		Direction attachDirection = context.getNearestLookingDirection();
-		Direction directionAwayFromDisplay = context.getPlacementHorizontalFacing();
+		Direction horizontalDirectionAwayFromPlayer = context.getPlacementHorizontalFacing();
 		AttachFace attachFace = attachDirection == Direction.DOWN ? AttachFace.FLOOR
 			: attachDirection == Direction.UP ? AttachFace.CEILING
 			: AttachFace.WALL;
-		int power = getInputValue(world, pos, directionAwayFromDisplay);
+		Direction readingDirection = getReadingDirection(attachFace, horizontalDirectionAwayFromPlayer);
+		int power = getInputValue(world, pos, readingDirection);
 		return this.getDefaultState()
 			.with(READING_FACE, attachFace)
-			.with(ROTATION, directionAwayFromDisplay.getOpposite())
+			.with(ROTATION, horizontalDirectionAwayFromPlayer.getOpposite())
 			.with(POWER, power);
 	}
 
