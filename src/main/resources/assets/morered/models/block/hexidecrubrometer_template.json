@@ -2,9 +2,9 @@
 	"credit": "Made with Blockbench",
 	"parent": "minecraft:block/cube",
 	"textures": {
-		"back": "morered:block/hexedecrubrometer_back",
+		"back": "morered:block/hexidecrubrometer_back",
 		"side": "morered:block/hexidecrubrometer_side",
-		"particle": "morered:block/hexedecrubrometer_back"
+		"particle": "morered:block/hexidecrubrometer_back"
 	},
 	"elements": [
 		{
