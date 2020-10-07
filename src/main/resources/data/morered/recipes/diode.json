@@ -6,7 +6,7 @@
   ],
   "key": {
     "#": {
-      "item": "morered:stone_plate"
+      "tag": "forge:quarter_slabs/smooth_stone"
     },
     "r": {
       "tag": "forge:dusts/redstone"

@@ -5,7 +5,7 @@
   ],
   "key": {
     "#": {
-      "item": "minecraft:smooth_stone_slab"
+      "tag": "forge:slabs/smooth_stone"
     }
   },
   "result": {

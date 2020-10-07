@@ -10,7 +10,7 @@
       "item": "minecraft:red_nether_bricks"
     },
     "s": {
-      "item": "morered:stone_plate"
+      "tag": "forge:quarter_slabs/smooth_stone"
     },
     "b": {
       "tag": "forge:rods/blaze"

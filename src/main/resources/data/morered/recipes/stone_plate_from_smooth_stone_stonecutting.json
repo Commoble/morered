@@ -1,7 +1,7 @@
 {
   "type": "minecraft:stonecutting",
   "ingredient": {
-    "item": "minecraft:smooth_stone"
+    "tag": "forge:smooth_stone"
   },
   "result": "morered:stone_plate",
   "count": 8

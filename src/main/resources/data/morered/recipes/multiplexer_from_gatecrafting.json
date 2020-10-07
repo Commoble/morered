@@ -3,7 +3,7 @@
 	"ingredients": 
 	[
 		{
-			"item": "morered:stone_plate"
+			"tag": "forge:quarter_slabs/smooth_stone"
 		},
 		{
 			"tag": "forge:dusts/redstone"
