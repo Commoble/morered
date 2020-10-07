@@ -1,18 +1,20 @@
 package commoble.morered.client;
 
-import commoble.morered.util.ConfigHelper;
-import commoble.morered.util.ConfigHelper.ConfigValueListener;
+import commoble.databuddy.config.ConfigHelper;
+import commoble.databuddy.config.ConfigHelper.ConfigValueListener;
 import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.ModConfig;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ClientConfig
 {
 	public static ClientConfig INSTANCE;
 	
 	// called during mod object construction on client side
-	public static void initClientConfig()
+	public static void initClientConfig(ModLoadingContext modContext, FMLJavaModLoadingContext fmlContext)
 	{
-		INSTANCE = ConfigHelper.register(ModConfig.Type.CLIENT, ClientConfig::new);
+		INSTANCE = ConfigHelper.register(modContext, fmlContext, ModConfig.Type.CLIENT, ClientConfig::new);
 	}
 	
 	

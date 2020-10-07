@@ -28,14 +28,16 @@ import net.minecraft.world.World;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 public class ClientEvents
 {
-	public static void addClientListeners(IEventBus modBus, IEventBus forgeBus)
+	public static void addClientListeners(ModLoadingContext modContext, FMLJavaModLoadingContext fmlContext, IEventBus modBus, IEventBus forgeBus)
 	{
-		ClientConfig.initClientConfig();
+		ClientConfig.initClientConfig(modContext, fmlContext);
 		
 		modBus.addListener(ClientEvents::onClientSetup);
 		modBus.addListener(ClientEvents::onRegisterBlockColors);

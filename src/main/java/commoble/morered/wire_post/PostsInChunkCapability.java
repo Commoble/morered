@@ -7,7 +7,7 @@ import java.util.Set;
 import com.mojang.serialization.Codec;
 
 import commoble.databuddy.codec.SetCodecHelper;
-import commoble.morered.util.NBTListHelper;
+import commoble.databuddy.nbt.NBTListCodec;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.NBTUtil;
@@ -29,18 +29,22 @@ public class PostsInChunkCapability
 	{
 		public static final String POSITIONS = "positions";
 		
-		private static final NBTListHelper<BlockPos> POS_LISTER = new NBTListHelper<>(
+		@SuppressWarnings("deprecation")
+		private static final NBTListCodec<BlockPos, CompoundNBT> POS_LISTER = new NBTListCodec<>(
 			POSITIONS,
+			NBTListCodec.ListNBTType.COMPOUND,
 			NBTUtil::writeBlockPos,
-			NBTUtil::readBlockPos
-			);
+			NBTUtil::readBlockPos);
 		
+		// this must return a CompoundNBT
+		@SuppressWarnings("deprecation")
 		@Override
 		public INBT writeNBT(Capability<IPostsInChunk> capability, IPostsInChunk instance, Direction side)
 		{
 			return POS_LISTER.write(new ArrayList<>(instance.getPositions()), new CompoundNBT());
 		}
 
+		@SuppressWarnings("deprecation")
 		@Override
 		public void readNBT(Capability<IPostsInChunk> capability, IPostsInChunk instance, Direction side, INBT nbt)
 		{

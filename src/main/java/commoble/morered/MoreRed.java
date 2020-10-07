@@ -45,6 +45,7 @@ import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -76,10 +77,12 @@ public class MoreRed
 	
 	public MoreRed()
 	{
-		IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+		ModLoadingContext modContext = ModLoadingContext.get();
+		FMLJavaModLoadingContext fmlContext = FMLJavaModLoadingContext.get();
+		IEventBus modBus = fmlContext.getModEventBus();
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 		
-		ServerConfig.initServerConfig();
+		ServerConfig.initServerConfig(modContext, fmlContext);
 		
 		MoreRed.addModListeners(modBus);
 		MoreRed.addForgeListeners(forgeBus);
@@ -87,7 +90,7 @@ public class MoreRed
 		// add layer of separation to client stuff so we don't break servers
 		if (FMLEnvironment.dist == Dist.CLIENT)
 		{
-			ClientEvents.addClientListeners(modBus, forgeBus);
+			ClientEvents.addClientListeners(modContext, fmlContext, modBus, forgeBus);
 		}
 		
 		// blocks and blockitems for the logic gates are registered here

@@ -11,9 +11,9 @@ import javax.annotation.Nonnull;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
+import commoble.databuddy.nbt.NBTListCodec;
 import commoble.morered.MoreRed;
 import commoble.morered.TileEntityRegistrar;
-import commoble.morered.util.NBTListHelper;
 import commoble.morered.util.NestedBoundingBox;
 import commoble.morered.util.WorldHelper;
 import net.minecraft.block.BlockState;
@@ -40,8 +40,13 @@ public class WirePostTileEntity extends TileEntity
 	
 	private AxisAlignedBB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
 
-	public static NBTListHelper<BlockPos> BLOCKPOS_LISTER = new NBTListHelper<>(CONNECTIONS, pos -> NBTUtil.writeBlockPos(pos), nbt -> NBTUtil.readBlockPos(nbt));
-
+	@SuppressWarnings("deprecation")
+	public static final NBTListCodec<BlockPos, CompoundNBT> BLOCKPOS_LISTER = new NBTListCodec<>(
+		CONNECTIONS,
+		NBTListCodec.ListNBTType.COMPOUND,
+		NBTUtil::writeBlockPos,
+		NBTUtil::readBlockPos);
+	
 	public WirePostTileEntity()
 	{
 		super(TileEntityRegistrar.REDWIRE_POST.get());
@@ -176,6 +181,7 @@ public class WirePostTileEntity extends TileEntity
 		this.readNBT(compound);
 	}
 	
+	@SuppressWarnings("deprecation")
 	protected void readNBT(CompoundNBT compound)
 	{
 		if (compound.contains(CONNECTIONS))
@@ -188,6 +194,7 @@ public class WirePostTileEntity extends TileEntity
 		this.renderAABB = getAABBContainingAllBlockPos(this.pos, this.remoteConnections.keySet());
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	public CompoundNBT write(CompoundNBT compound)
 	{
