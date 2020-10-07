@@ -6,7 +6,7 @@
 			"tag": "morered:red_alloyable_ingots"
 		},
 		{
-			"type": "jumbofurnace:tag_stack",
+			"type": "morered:tag_stack",
 			"tag": "forge:dusts/redstone",
 			"count": 4
 		}
