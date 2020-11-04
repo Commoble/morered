@@ -33,7 +33,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
@@ -41,7 +40,6 @@ import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
 import net.minecraftforge.event.world.BlockEvent;
-import net.minecraftforge.event.world.ChunkWatchEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -51,7 +49,6 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkRegistry;
-import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import net.minecraftforge.registries.DeferredRegister;
 
@@ -152,7 +149,6 @@ public class MoreRed
 	{
 		forgeBus.addGenericListener(Chunk.class, MoreRed::onAttachChunkCapabilities);
 		forgeBus.addListener(EventPriority.LOW, MoreRed::onEntityPlaceBlock);
-		forgeBus.addListener(MoreRed::onPlayerStartWatchingChunk);
 	}
 	
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
@@ -211,16 +207,5 @@ public class MoreRed
 				}
 			}
 		}
-	}
-	
-	// sync redwire post positions to clients when a chunk needs to be loaded on the client
-	public static void onPlayerStartWatchingChunk(ChunkWatchEvent.Watch event)
-	{
-		ServerWorld world = event.getWorld();
-		ChunkPos pos = event.getPos();
-		Chunk chunk = world.getChunkAt(pos.asBlockPos());
-		chunk.getCapability(PostsInChunkCapability.INSTANCE).ifPresent(cap -> 
-			CHANNEL.send(PacketDistributor.PLAYER.with(event::getPlayer), new SyncPostsInChunkPacket(pos, cap.getPositions()))
-		);
 	}
 }
