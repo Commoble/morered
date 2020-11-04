@@ -20,6 +20,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class RedstonePlateBlock extends PlateBlock
 {
 	public static final int OUTPUT_STRENGTH = 15;

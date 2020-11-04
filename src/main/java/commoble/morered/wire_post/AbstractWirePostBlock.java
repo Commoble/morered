@@ -33,6 +33,8 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class AbstractWirePostBlock extends Block
 {
 	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;

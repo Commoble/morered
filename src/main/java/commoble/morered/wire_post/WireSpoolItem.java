@@ -27,6 +27,8 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.PacketDistributor;
 
+import net.minecraft.item.Item.Properties;
+
 public class WireSpoolItem extends Item
 {
 	public static final String LAST_POST_POS = "last_post_pos";

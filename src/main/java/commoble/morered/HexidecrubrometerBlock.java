@@ -17,6 +17,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class HexidecrubrometerBlock extends Block
 {
 	public static final IntegerProperty POWER = BlockStateProperties.POWER_0_15;

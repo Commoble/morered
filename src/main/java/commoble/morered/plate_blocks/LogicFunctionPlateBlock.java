@@ -13,6 +13,9 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
+import net.minecraft.block.AbstractBlock;
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
@@ -23,7 +26,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	@FunctionalInterface
 	public static interface LogicFunctionPlateBlockFactory
 	{	
-		public LogicFunctionPlateBlock makeBlock(LogicFunction function, Block.Properties properties);
+		public LogicFunctionPlateBlock makeBlock(LogicFunction function, AbstractBlock.Properties properties);
 	}
 	
 	public static final LogicFunctionPlateBlockFactory THREE_INPUTS = getBlockFactory(InputSide.A, InputSide.B, InputSide.C);

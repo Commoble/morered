@@ -16,6 +16,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 
+import net.minecraft.block.AbstractBlock;
+
 public class LogicGateType
 {
 	public static final Map<ResourceLocation, LogicGateType> TYPES = new HashMap<>();
@@ -46,7 +48,7 @@ public class LogicGateType
 	private static RegistryObject<LogicFunctionPlateBlock> registerLogicGate(DeferredRegister<Block> blocks, String name, LogicFunction function, LogicFunctionPlateBlockFactory factory)
 	{
 		return blocks.register(name, () -> factory.makeBlock(function,
-			Block.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0F).sound(SoundType.WOOD)));
+			AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0F).sound(SoundType.WOOD)));
 			
 	}
 	
