@@ -1,11 +1,11 @@
-package commoble.morered;
+package commoble.morered.client;
 
 import java.util.HashSet;
 import java.util.Set;
 
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import commoble.morered.client.ClientProxy;
+import commoble.morered.MoreRed;
 import commoble.morered.wire_post.FakeStateWorld;
 import commoble.morered.wire_post.PostsInChunk;
 import commoble.morered.wire_post.SlackInterpolator;
@@ -29,7 +29,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public class MixinCallbacks
+public class ClientMixinCallbacks
 {
 	public static void onBlockItemUse(ItemUseContext itemContext, CallbackInfoReturnable<ActionResultType> info)
 	{

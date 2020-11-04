@@ -216,7 +216,6 @@ public class MoreRed
 	// sync redwire post positions to clients when a chunk needs to be loaded on the client
 	public static void onPlayerStartWatchingChunk(ChunkWatchEvent.Watch event)
 	{
-
 		ServerWorld world = event.getWorld();
 		ChunkPos pos = event.getPos();
 		Chunk chunk = world.getChunkAt(pos.asBlockPos());
