@@ -5,7 +5,7 @@
 	"refmap": "morered.refmap.json",
 	"mixins": 
 	[
-		
+		"ChunkManagerMixin"
 	],
 	"client": 
 	[
