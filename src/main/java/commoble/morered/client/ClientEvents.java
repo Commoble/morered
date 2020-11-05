@@ -3,6 +3,7 @@ package commoble.morered.client;
 import commoble.morered.BlockRegistrar;
 import commoble.morered.ContainerRegistrar;
 import commoble.morered.ItemRegistrar;
+import commoble.morered.MoreRed;
 import commoble.morered.TileEntityRegistrar;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.plate_blocks.PlateBlock;
@@ -25,6 +26,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -43,6 +45,8 @@ public class ClientEvents
 		modBus.addListener(ClientEvents::onRegisterBlockColors);
 		modBus.addListener(ClientEvents::onRegisterItemColors);
 		
+		forgeBus.addListener(ClientEvents::onClientLogIn);
+		forgeBus.addListener(ClientEvents::onClientLogOut);
 		forgeBus.addListener(ClientEvents::onHighlightBlock);
 	}
 	
@@ -80,6 +84,18 @@ public class ClientEvents
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_PLATE.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_RELAY_PLATE.get());
+	}
+	
+	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)
+	{
+		// clean up static data on the client
+		MoreRed.CLIENT_PROXY = ClientProxy.makeClientProxy();
+	}
+	
+	public static void onClientLogOut(ClientPlayerNetworkEvent.LoggedOutEvent event)
+	{
+		// clean up static data on the client
+		MoreRed.CLIENT_PROXY = ClientProxy.makeClientProxy();
 	}
 	
 	public static void onHighlightBlock(DrawHighlightEvent.HighlightBlock event)

@@ -57,7 +57,7 @@ public class MoreRed
 {
 	public static final String MODID = "morered";
 	
-	public static final Optional<ClientProxy> CLIENT_PROXY = DistExecutor.unsafeRunForDist(() -> ClientProxy::makeClientProxy, () -> () -> Optional.empty());
+	public static Optional<ClientProxy> CLIENT_PROXY = DistExecutor.unsafeRunForDist(() -> ClientProxy::makeClientProxy, () -> () -> Optional.empty());
 	
 	// the network channel we'll use for sending packets associated with this mod
 	public static final String CHANNEL_PROTOCOL_VERSION = "1";
