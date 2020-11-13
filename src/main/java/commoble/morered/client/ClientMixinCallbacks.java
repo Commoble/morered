@@ -48,7 +48,7 @@ public class ClientMixinCallbacks
 		{
 			BlockItem blockItem = (BlockItem)item;
 			BlockItemUseContext context = new BlockItemUseContext(itemContext);
-			if (context.canPlace())	// return early if we can't place it here for consistency with vanilla (prevent getStateForPlacement check)
+			if (!context.canPlace())	// return early if we can't place it here for consistency with vanilla (prevent getStateForPlacement check)
 			{
 				return;
 			}
