@@ -46,9 +46,18 @@ public class ClientMixinCallbacks
 		// we need to check world side because physical clients can have server worlds
 		if (world.isRemote && item instanceof BlockItem)
 		{
-			BlockItemUseContext context = new BlockItemUseContext(itemContext);
-			BlockPos pos = context.getPos();
 			BlockItem blockItem = (BlockItem)item;
+			BlockItemUseContext context = new BlockItemUseContext(itemContext);
+			if (context.canPlace())	// return early if we can't place it here for consistency with vanilla (prevent getStateForPlacement check)
+			{
+				return;
+			}
+			context = blockItem.getBlockItemUseContext(context);	// allow blockItem to transform use context after checking canPlace
+			if (context == null) // BlockItem::getBlockItemUseContext is nullable
+			{
+				return;
+			}
+			BlockPos pos = context.getPos();
 			BlockState placementState = MoreRedBlockItemHelper.getStateForPlacement(blockItem, context);
 			
 			if (placementState != null)
