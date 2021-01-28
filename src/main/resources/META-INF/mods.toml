@@ -28,6 +28,7 @@ logoFile="logo.png" #optional
 credits='''
 I hear the Minecraft Mod Development discord channel is the cat's bananas.
 Thanks to porl for contributing the two-input AND and NAND gates
+Thanks to zorc for contributing the zh_cn localization
 '''
 # A text field displayed in the mod UI
 authors="Commoble"
