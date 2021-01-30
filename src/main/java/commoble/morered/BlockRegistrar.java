@@ -4,8 +4,10 @@ import commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
+import commoble.morered.redwire.WireBlock;
 import commoble.morered.wire_post.WirePostBlock;
 import commoble.morered.wire_post.WirePostPlateBlock;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
@@ -13,8 +15,6 @@ import net.minecraft.block.material.MaterialColor;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-
-import net.minecraft.block.AbstractBlock;
 
 public class BlockRegistrar
 {
@@ -41,4 +41,7 @@ public class BlockRegistrar
 	
 	public static final RegistryObject<HexidecrubrometerBlock> HEXIDECRUBROMETER = BLOCKS.register(ObjectNames.HEXIDECRUBROMETER,
 		() -> new HexidecrubrometerBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F)));
+
+	public static final RegistryObject<WireBlock> RED_ALLOY_WIRE = BLOCKS.register(ObjectNames.RED_ALLOY_WIRE, 
+		() -> new WireBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.RED).doesNotBlockMovement().zeroHardnessAndResistance()));
 }

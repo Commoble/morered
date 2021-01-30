@@ -1,0 +1,21 @@
+{
+	"parent": "block/block",
+	"ambientocclusion": false,
+	"textures": {
+		"particle": "morered:block/redwire_post_plate_overlay",
+		"wire": "morered:block/redwire_post_plate_overlay"
+	},
+	"elements": [
+		{
+			"from": [7, 0, 0],
+			"to": [9, 2, 7],
+			"faces": {
+				"north": {"uv": [7, 14, 9, 16], "texture": "#wire", "tintindex": 1},
+				"east": {"uv": [7, 0, 9, 7], "rotation": 90, "texture": "#wire", "tintindex": 1},
+				"south": {"uv": [7, 7, 9, 9], "texture": "#wire", "tintindex": 1},
+				"west": {"uv": [7, 0, 9, 7], "rotation": 270, "texture": "#wire", "tintindex": 1},
+				"up": {"uv": [7, 0, 9, 7], "texture": "#wire", "tintindex": 1}
+			}
+		}
+	]
+}

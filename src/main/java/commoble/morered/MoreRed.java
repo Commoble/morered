@@ -11,6 +11,7 @@ import commoble.morered.client.ClientEvents;
 import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import commoble.morered.plate_blocks.LogicGateType;
+import commoble.morered.redwire.WireCountLootFunction;
 import commoble.morered.wire_post.IPostsInChunk;
 import commoble.morered.wire_post.PostsInChunk;
 import commoble.morered.wire_post.PostsInChunkCapability;
@@ -30,6 +31,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
@@ -143,6 +145,13 @@ public class MoreRed
 		
 		// register capabilities
 		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), () -> new PostsInChunk(null));
+		
+		event.enqueueWork(MoreRed::afterCommonSetup);
+	}
+	
+	static void afterCommonSetup()
+	{
+		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(MODID, ObjectNames.WIRE_COUNT), WireCountLootFunction.TYPE);
 	}
 	
 	public static void addForgeListeners(IEventBus forgeBus)

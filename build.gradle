@@ -23,23 +23,24 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
 version = "${mod_version}"
-group = "com.github.commoble.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
+group = "commoble.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${modid}-${mc_version}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
 minecraft {
-    mappings channel: 'snapshot', version: "${mappings_version}"    
+    mappings channel: 'snapshot', version: "${mappings_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
     
     runs {
         client {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            properties 'mixin.env.disableRefMap': 'true'
             arg "-mixin.config="+"morered"+".mixins.json"
 
             mods {
-                morered {
+                "morered" {
                     source sourceSets.main
                 }
             }
@@ -48,10 +49,11 @@ minecraft {
         server {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            properties 'mixin.env.disableRefMap': 'true'
             arg "-mixin.config="+"morered"+".mixins.json"
 
             mods {
-                morered {
+                "morered" {
                     source sourceSets.main
                 }
             }
@@ -60,11 +62,13 @@ minecraft {
         data {
             workingDirectory project.file('run')
             property 'forge.logging.console.level', 'debug'
+            properties 'mixin.env.disableRefMap': 'true'
+            arg "-mixin.config="+"morered"+".mixins.json"
 
-            args '--mod', "morered", '--all', '--output', file('src/generated/resources/')
+            args '--mod', 'morered', '--all', '--output', file('src/generated/resources/')
 
             mods {
-                morered {
+                "morered" {
                     source sourceSets.main
                 }
             }
@@ -72,37 +76,29 @@ minecraft {
     }
 }
 
-test {
-	useJUnitPlatform()
+configurations {
+	shade
 }
 
 repositories {
-  maven {
-    // location of the maven that hosts JEI files
-    name = "Progwml6 maven"
-    url = "https://dvs1.progwml6.com/files/maven/"
-  }
-  maven {
-    // location of a maven mirror for JEI files, as a fallback
-    name = "ModMaven"
-    url = "https://modmaven.k-4u.nl"
-  }
+	// jei maven and backup maven
+	maven {url = "https://dvs1.progwml6.com/files/maven/"}
+	maven {url = "https://modmaven.k-4u.nl"}
 	// repos for mixin
 	jcenter()
 	mavenCentral()
 	// repo for databuddy
 	maven { url "https://cubicinterpolation.net/maven/" }
-}
-
-configurations {
-	shade
+	// local repo for cram until we get a proper maven up
+	maven { url "file://C:/Users/Joseph/Saved Games/minecraft mods/cram/maven" }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     
-	compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    // jei
+	compileOnly fg.deobf("mezz.jei:${jei_branch}:${jei_version}:api")
+	runtimeOnly fg.deobf("mezz.jei:${jei_branch}:${jei_version}")
 
 	// junit dependencies
 	testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
@@ -110,6 +106,10 @@ dependencies {
 	// databuddy shadowjar
 	compile fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	shade fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
+	
+	// cram dependencies
+	//compileOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}:debug")
+	//runtimeOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}")
 }
 
 // Example for how to get properties into the manifest for reading by the runtime..

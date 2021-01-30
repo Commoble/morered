@@ -1,5 +1,6 @@
 package commoble.morered;
 
+import commoble.morered.redwire.WireBlockItem;
 import commoble.morered.wire_post.WireSpoolItem;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
@@ -39,6 +40,9 @@ public class ItemRegistrar
 	
 	public static final RegistryObject<BlockItem> STONE_PLATE = registerBlockItem(ObjectNames.STONE_PLATE, BlockRegistrar.STONE_PLATE);
 	public static final RegistryObject<BlockItem> LATCH = registerBlockItem(ObjectNames.LATCH, BlockRegistrar.LATCH);
+	
+	public static final RegistryObject<BlockItem> RED_ALLOY_WIRE = ITEMS.register(ObjectNames.RED_ALLOY_WIRE,
+		() -> new WireBlockItem(BlockRegistrar.RED_ALLOY_WIRE.get(), new Item.Properties().group(CREATIVE_TAB)));
 	
 	
 	public static final RegistryObject<BlockItem> registerBlockItem(String name, RegistryObject<? extends Block> block)
