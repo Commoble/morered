@@ -27,6 +27,7 @@ import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.util.Constants.BlockFlags;
 
 public class WireBlock extends Block
 {
@@ -40,7 +41,7 @@ public class WireBlock extends Block
 		Block.makeCuboidShape(14, 7, 7, 16, 9, 9)
 	};
 	
-	public static final VoxelShape[] FACE_PLATES_DUNSWE = 
+	public static final VoxelShape[] RAYTRACE_BACKBOARDS = 
 	{
 		Block.makeCuboidShape(0,0,0,16,2,16),
 		Block.makeCuboidShape(0,14,0,16,16,16),
@@ -49,6 +50,70 @@ public class WireBlock extends Block
 		Block.makeCuboidShape(0,0,0,2,16,16),
 		Block.makeCuboidShape(14,0,0,16,16,16)
 	};
+	
+	public static final VoxelShape[] LINE_SHAPES = Util.make(() ->
+	{		
+		double min = 0;
+		double max = 16;
+		double minPlus = 2;
+		double maxMinus = 14;
+		double innerMin = 7;
+		double innerMax = 9;
+		
+		VoxelShape[] result =
+		{
+			Block.makeCuboidShape(innerMin, min, min, innerMax, minPlus, innerMin), // down-north
+			Block.makeCuboidShape(innerMin, min, innerMax, innerMax, minPlus, max), // down-south
+			Block.makeCuboidShape(min, min, innerMin, innerMin, minPlus, innerMax), // down-west
+			Block.makeCuboidShape(innerMax, min, innerMin, max, minPlus, innerMax), // down-east
+			Block.makeCuboidShape(innerMin, maxMinus, min, innerMax, max, innerMin), // up-north
+			Block.makeCuboidShape(innerMin, maxMinus, innerMax, innerMax, max, max), // up-south
+			Block.makeCuboidShape(min, maxMinus, innerMin, innerMin, max, innerMax), // up-west
+			Block.makeCuboidShape(innerMax, maxMinus, innerMin, max, max, innerMax), // up-east
+			Block.makeCuboidShape(innerMin, min, min, innerMax, innerMin, minPlus), // north-down
+			Block.makeCuboidShape(innerMin, innerMax, min, innerMax, max, minPlus), // north-up
+			Block.makeCuboidShape(min, innerMin, min, innerMin, innerMax, minPlus), //north-west
+			Block.makeCuboidShape(innerMax, innerMin, min, max, innerMax, minPlus), // north-east
+			Block.makeCuboidShape(innerMin, min, maxMinus, innerMax, innerMin, max), // south-down
+			Block.makeCuboidShape(innerMin, innerMax, maxMinus, innerMax, max, max), // south-up
+			Block.makeCuboidShape(min, innerMin, maxMinus, innerMin, innerMax, max), // south-west
+			Block.makeCuboidShape(innerMax, innerMin, maxMinus, max, innerMax, max), // south-east
+			Block.makeCuboidShape(min, min, innerMin, minPlus, innerMin, innerMax), // west-down
+			Block.makeCuboidShape(min, innerMax, innerMin, minPlus, max, innerMax), // west-up
+			Block.makeCuboidShape(min, innerMin, min, minPlus, innerMax, innerMin), // west-north
+			Block.makeCuboidShape(min, innerMin, innerMax, minPlus, innerMax, max), // west-south
+			Block.makeCuboidShape(maxMinus, min, innerMin, max, innerMin, innerMax), // east-down
+			Block.makeCuboidShape(maxMinus, innerMax, innerMin, max, max, innerMax), // east-up
+			Block.makeCuboidShape(maxMinus, innerMin, min, max, innerMax, innerMin), // east-north
+			Block.makeCuboidShape(maxMinus, innerMin, innerMax, max, innerMax, max) // east-south
+		};
+		
+		return result;
+	});
+	
+	public static VoxelShape getLineShape(int side, int secondarySide)
+	{
+		return LINE_SHAPES[side*4 + secondarySide];
+	}
+	
+	/**
+	 * Returns the relative secondary side index given two side indices.
+	 * Some definitions:
+	 * -- let a side index be the ordinal of a Direction
+	 * -- let a relative secondary side index be an integer in the range [0,3], representing what the ordinal of a direction would be
+	 * if the primary side and its opposite didn't exist
+	 * e.g. if the primary side is NORTH, the secondary indices would represent down, up, west, east, respectively
+	 * @param primary side index, the side index representing the interior face a wire is attached to
+	 * @param secondary side index representing which direction a wire line is pointing from the center of the face,
+	 * must *not* be the same axis as the primary side or an incorrect result will be returned
+	 * @return the relative secondary side index given two side indices
+	 */
+	public static int getRelativeSecondarySideIndex(int primary, int secondary)
+	{
+		return secondary < primary
+			? secondary
+			: secondary - 2;
+	}
 	
 	public static final BooleanProperty DOWN = SixWayBlock.DOWN;
 	public static final BooleanProperty UP = SixWayBlock.UP;
@@ -65,11 +130,25 @@ public class WireBlock extends Block
 		for (int i=0; i<64; i++)
 		{
 			VoxelShape nextShape = VoxelShapes.empty();
+			boolean[] addedSides = new boolean[6]; // sides for which we've already added node shapes to
 			for (int side=0; side<6; side++)
 			{
 				if ((i & (1 << side)) != 0)
 				{
 					nextShape = VoxelShapes.or(nextShape, NODE_SHAPES_DUNSWE[side]);
+					
+					int sideAxis = side/2; // 0,1,2 = y,z,x
+					for (int secondarySide = 0; secondarySide < side; secondarySide++)
+					{
+						if (addedSides[secondarySide] && sideAxis != secondarySide/2) // the two sides are orthagonal to each other (not parallel)
+						{
+							// add line shapes for the elbows
+							nextShape = VoxelShapes.or(nextShape, getLineShape(side, getRelativeSecondarySideIndex(side,secondarySide)));
+							nextShape = VoxelShapes.or(nextShape, getLineShape(secondarySide, getRelativeSecondarySideIndex(secondarySide,side)));
+						}
+					}
+					
+					addedSides[side] = true;
 				}
 			}
 			result[i] = nextShape;
@@ -188,78 +267,6 @@ public class WireBlock extends Block
 	@Override
 	public boolean removedByPlayer(BlockState state, World world, BlockPos pos, @Nullable PlayerEntity player, boolean willHarvest, FluidState fluid)
 	{
-		// raytrace against the face voxels, get the one the player is actually pointing at
-		// this is invoked when the player has been holding left-click sufficiently long enough for the block to break
-			// (so it this is an input response, not a performance-critical method)
-		// so we can assume that the player is still looking directly at the block's interaction shape
-		// do one raytrace against the state's interaction voxel itself,
-		// then compare the hit vector to the six face cuboids
-		// and see if any of them contain the hit vector
-		// we'll need the player to not be null though
-		if (player != null)
-		{
-			Vector3d startVec = player.getEyePosition(1F);
-			Vector3d lookOffset = player.getLook(1F); // unit normal vector in look direction
-			double rayTraceDistance = 10D; // standard number used elsewhere
-			Vector3d endVec = startVec.add(lookOffset.mul(rayTraceDistance, rayTraceDistance, rayTraceDistance));
-			ISelectionContext context = ISelectionContext.forEntity(player);
-			
-			// raytrace against the entire block's interaction shape
-			BlockRayTraceResult raytrace = state.getShape(world, pos, context).rayTrace(startVec, endVec, pos);
-			if (raytrace != null && raytrace.getHitVec() != null)
-			{
-				// we want to adjust the hitvec by a very small amount toward the hit voxel
-				// because the contains math includes the minimum positions of the box's dimensions but not the maximum
-				// and the hit vector's position is equal to the edge position of the voxel
-				Vector3d hitVec = raytrace.getHitVec();
-				Vector3d relativeHitVec = hitVec
-					.add(lookOffset.mul(0.001D, 0.001D, 0.001D))
-					.subtract(pos.getX(), pos.getY(), pos.getZ()); // we're also wanting this to be relative to the voxel
-				for (int side=0; side<6; side++)
-				{
-					// figure out which part of the shape we clicked
-					VoxelShape faceShape = FACE_PLATES_DUNSWE[side];
-					
-					for (AxisAlignedBB aabb : faceShape.toBoundingBoxList())
-					{
-						if (aabb.contains(relativeHitVec))
-						{
-							BooleanProperty sideProperty = INTERIOR_FACES[side];
-							if (state.get(sideProperty))
-							{
-								BlockState newState = state.with(sideProperty, false);
-								Block newBlock = newState.getBlock();
-								BlockState removedState = newBlock.getDefaultState().with(sideProperty, true);
-								Block removedBlock = removedState.getBlock();
-								removedBlock.onPlayerDestroy(world, pos, removedState);
-								if (willHarvest)
-								{
-									// add player stats and spawn drops
-									removedBlock.harvestBlock(world, player, pos, removedState, null, player.getHeldItemMainhand().copy());
-								}
-								if (world.isRemote)
-								{
-									// on the server world, onBlockHarvested will play the break effects for each player except the player given
-									// and also anger piglins at that player, so we do want to give it the player
-									// on the client world, willHarvest is always false, so we need to manually play the effects for that player
-									world.playEvent(player, 2001, pos, Block.getStateId(removedState));
-								}
-								else
-								{
-									// plays the break event for every nearby player except the breaking player
-									removedBlock.onBlockHarvested(world, pos, removedState, player);
-								}
-								world.setBlockState(pos, newState);
-								return false;
-							}
-						}
-					}
-				}
-			}
-			
-			// if we failed to removed any particular state, return false so the whole block doesn't get broken
-			return false;
-		}
 		
 		// if the player doesn't exist, just break the whole block
 		return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
@@ -306,5 +313,121 @@ public class WireBlock extends Block
 			}
 		}
 		return count;
+	}
+	
+	@Nullable
+	public Direction getInteriorFaceToBreak(BlockState state, BlockPos pos, PlayerEntity player, BlockRayTraceResult raytrace, float partialTicks)
+	{
+		// raytrace against the face voxels, get the one the player is actually pointing at
+		// this is invoked when the player has been holding left-click sufficiently long enough for the block to break
+			// (so it this is an input response, not a performance-critical method)
+		// so we can assume that the player is still looking directly at the block's interaction shape
+		// do one raytrace against the state's interaction voxel itself,
+		// then compare the hit vector to the six face cuboids
+		// and see if any of them contain the hit vector
+		// we'll need the player to not be null though
+//		if (player != null)
+		{
+//			Vector3d startVec = player.getEyePosition(partialTicks);
+			Vector3d lookOffset = player.getLook(partialTicks); // unit normal vector in look direction
+//			double rayTraceDistance = 10D; // standard number used elsewhere
+//			Vector3d endVec = startVec.add(lookOffset.mul(rayTraceDistance, rayTraceDistance, rayTraceDistance));
+//			ISelectionContext context = ISelectionContext.forEntity(player);
+			
+			// raytrace against the entire block's interaction shape
+//			BlockRayTraceResult raytrace = state.getShape(world, pos, context).rayTrace(startVec, endVec, pos);
+//			if (raytrace != null && raytrace.getHitVec() != null)
+			{
+				// we want to adjust the hitvec by a very small amount toward the hit voxel
+				// because the contains math includes the minimum positions of the box's dimensions but not the maximum
+				// and the hit vector's position is equal to the edge position of the voxel
+				Vector3d hitVec = raytrace.getHitVec();
+				Vector3d relativeHitVec = hitVec
+					.add(lookOffset.mul(0.001D, 0.001D, 0.001D))
+					.subtract(pos.getX(), pos.getY(), pos.getZ()); // we're also wanting this to be relative to the voxel
+				for (int side=0; side<6; side++)
+				{
+					if (state.get(INTERIOR_FACES[side]))
+					{
+						// figure out which part of the shape we clicked
+						VoxelShape faceShape = RAYTRACE_BACKBOARDS[side];
+						
+						
+						for (AxisAlignedBB aabb : faceShape.toBoundingBoxList())
+						{
+							if (aabb.contains(relativeHitVec))
+							{
+								return Direction.byIndex(side);
+//								BooleanProperty sideProperty = INTERIOR_FACES[side];
+//								if (state.get(sideProperty))
+//								{
+//									BlockState newState = state.with(sideProperty, false);
+//									Block newBlock = newState.getBlock();
+//									BlockState removedState = newBlock.getDefaultState().with(sideProperty, true);
+//									Block removedBlock = removedState.getBlock();
+//									removedBlock.onPlayerDestroy(world, pos, removedState);
+//									if (willHarvest)
+//									{
+//										// add player stats and spawn drops
+//										removedBlock.harvestBlock(world, player, pos, removedState, null, player.getHeldItemMainhand().copy());
+//									}
+//									if (world.isRemote)
+//									{
+//										// on the server world, onBlockHarvested will play the break effects for each player except the player given
+//										// and also anger piglins at that player, so we do want to give it the player
+//										// on the client world, willHarvest is always false, so we need to manually play the effects for that player
+//										world.playEvent(player, 2001, pos, Block.getStateId(removedState));
+//									}
+//									else
+//									{
+//										// plays the break event for every nearby player except the breaking player
+//										removedBlock.onBlockHarvested(world, pos, removedState, player);
+//									}
+//									world.setBlockState(pos, newState);
+//								}
+							}
+						}
+					}
+				}
+			}
+			
+			// if we failed to removed any particular state, return false so the whole block doesn't get broken
+			return null;
+		}
+	}
+	
+	public void destroyClickedSegment(BlockState state, World world, BlockPos pos, PlayerEntity player, Direction interiorFace, boolean dropItems)
+	{
+		int side = interiorFace.ordinal();
+		BooleanProperty sideProperty = INTERIOR_FACES[side];
+		if (state.get(sideProperty))
+		{
+			BlockState newState = state.with(sideProperty, false);
+			Block newBlock = newState.getBlock();
+			BlockState removedState = newBlock.getDefaultState().with(sideProperty, true);
+			Block removedBlock = removedState.getBlock();
+			if (dropItems)
+			{
+				// add player stats and spawn drops
+				removedBlock.harvestBlock(world, player, pos, removedState, null, player.getHeldItemMainhand().copy());
+			}
+			if (world.isRemote)
+			{
+				// on the server world, onBlockHarvested will play the break effects for each player except the player given
+				// and also anger piglins at that player, so we do want to give it the player
+				// on the client world, willHarvest is always false, so we need to manually play the effects for that player
+				world.playEvent(player, 2001, pos, Block.getStateId(removedState));
+			}
+			else
+			{
+				// plays the break event for every nearby player except the breaking player
+				removedBlock.onBlockHarvested(world, pos, removedState, player);
+			}
+			// default and rerender flags are used when block is broken on client
+			if (world.setBlockState(pos, newState, BlockFlags.DEFAULT_AND_RERENDER))
+			{
+				removedBlock.onPlayerDestroy(world, pos, removedState);
+			}
+		}
 	}
 }

@@ -11,6 +11,7 @@ import commoble.morered.client.ClientEvents;
 import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import commoble.morered.plate_blocks.LogicGateType;
+import commoble.morered.redwire.WireBlock;
 import commoble.morered.redwire.WireCountLootFunction;
 import commoble.morered.wire_post.IPostsInChunk;
 import commoble.morered.wire_post.PostsInChunk;
@@ -19,13 +20,16 @@ import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.SyncPostsInChunkPacket;
 import commoble.morered.wire_post.WireBreakPacket;
 import commoble.morered.wire_post.WirePostTileEntity;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.crafting.IRecipeSerializer;
 import net.minecraft.network.play.server.SEntityEquipmentPacket;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
@@ -35,13 +39,16 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.world.BlockEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -158,6 +165,7 @@ public class MoreRed
 	{
 		forgeBus.addGenericListener(Chunk.class, MoreRed::onAttachChunkCapabilities);
 		forgeBus.addListener(EventPriority.LOW, MoreRed::onEntityPlaceBlock);
+		forgeBus.addListener(EventPriority.LOW, MoreRed::onLeftClickBlock);
 	}
 	
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
@@ -216,5 +224,73 @@ public class MoreRed
 				}
 			}
 		}
+	}
+	
+	public static void onLeftClickBlock(LeftClickBlock event)
+	{
+		World world = event.getWorld();
+		if (!(world instanceof ServerWorld))
+			return;
+		BlockPos pos = event.getPos();
+		BlockState state = world.getBlockState(pos);
+		Block block = state.getBlock();
+		if (!(block instanceof WireBlock))
+			return;
+		PlayerEntity player = event.getPlayer();
+		if (!(player instanceof ServerPlayerEntity))
+			return;
+		ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
+		boolean blockActionRestricted = player.blockActionRestricted(world, pos, serverPlayer.interactionManager.getGameType());
+		boolean isCreative = player.isCreative();
+		if (!isCreative && (event.getUseItem() == Event.Result.DENY || blockActionRestricted))
+			return;
+		ServerWorld serverWorld = (ServerWorld)world;
+		if (pos.getY() > serverWorld.getServer().getBuildLimit())
+			return;
+		if (!world.isBlockModifiable(player, pos))
+			return;
+		
+		double dx = player.getPosX() - (pos.getX() + 0.5D);
+		double dy = player.getPosY() - (pos.getY() + 0.5D) + 1.5D;
+		double dz = player.getPosZ() - (pos.getZ() + 0.5D);
+		double distSquared = dx * dx + dy * dy + dz * dz;
+		double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue() + 1;
+		if (distSquared > reachDistance*reachDistance)
+			return;
+		
+		WireBlock wireBlock = (WireBlock) block;
+		
+		// we have a specific enough situation to take over the event from this point forward
+		event.setCanceled(true);
+		// if we cancel the event, a digging response packet will be sent
+		// using whatever state exists in the world *after* the event
+		// so we can set our own blockstate here and it should be sent to the client correctly
+		
+		// we also really don't want to be sending any packets ourselves
+		// each digging packet the client sent has to have a response packet for the same pos and action or we get log spam
+		// the event handler will send a matching digging response for us if we cancel it
+		// (it's a deny response, but it also immediately send a block update afterward, so that's fine)
+		Direction hitNormal = event.getFace();
+		Direction destroySide = hitNormal.getOpposite();
+		if (!isCreative && (event.getUseBlock() != net.minecraftforge.eventbus.api.Event.Result.DENY))
+		{
+			state.onBlockClicked(world, pos, player);
+		}
+
+		int exp = net.minecraftforge.common.ForgeHooks.onBlockBreakEvent(world, serverPlayer.interactionManager.getGameType(), serverPlayer, pos);
+		if (exp == -1)
+			return;
+		
+		if (player.getHeldItemMainhand().onBlockStartBreak(pos, player))
+            return;
+		
+		// checking blockActionRestricted again looks weird, but it's for parity with normal logic
+		// if the player is in creative, they're allowed to fire the block break event and onBlockStartBreak first
+		// then this gets checked again even if they are in creative
+		if (blockActionRestricted)
+			return;
+		
+		// don't drop items if creative
+		wireBlock.destroyClickedSegment(state, serverWorld, pos, serverPlayer, destroySide, !isCreative);
 	}
 }

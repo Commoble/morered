@@ -1,34 +1,47 @@
 package commoble.morered.client;
 
+import javax.annotation.Nullable;
+
 import commoble.morered.BlockRegistrar;
 import commoble.morered.ContainerRegistrar;
 import commoble.morered.ItemRegistrar;
 import commoble.morered.MoreRed;
 import commoble.morered.TileEntityRegistrar;
+import commoble.morered.mixin.ClientPlayerControllerAccess;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
+import commoble.morered.redwire.WireBlock;
 import commoble.morered.util.BlockStateUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.ScreenManager;
+import net.minecraft.client.multiplayer.PlayerController;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
+import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
@@ -48,6 +61,7 @@ public class ClientEvents
 		forgeBus.addListener(ClientEvents::onClientLogIn);
 		forgeBus.addListener(ClientEvents::onClientLogOut);
 		forgeBus.addListener(ClientEvents::onHighlightBlock);
+		forgeBus.addListener(ClientEvents::onClickInput);
 	}
 	
 	public static void onClientSetup(FMLClientSetupEvent event)
@@ -139,4 +153,82 @@ public class ClientEvents
 			}
 		}
 	}
+	
+	public static void onClickInput(ClickInputEvent event)
+	{
+		// when the player clicks a wire block,
+		// we want to handle the block in a manner that causes the digging packet to be sent
+		// with the interior side of the wire block as the face value
+		// (we can't do this perfectly with the raytrace shape normal overrider)
+		// but we can do this by sending our own digging packet and bypassing the vanilla behaviour
+		// (it helps that wire blocks are instant-break blocks)
+		Minecraft mc = Minecraft.getInstance();
+		RayTraceResult rayTraceResult = mc.objectMouseOver;
+		ClientWorld world = mc.world;
+		ClientPlayerEntity player = mc.player;
+		if (rayTraceResult != null && rayTraceResult.getHitVec() != null && world != null && player != null && event.isAttack() && rayTraceResult.getType() == RayTraceResult.Type.BLOCK)
+		{
+			BlockRayTraceResult blockResult = (BlockRayTraceResult) rayTraceResult;
+			BlockPos pos = blockResult.getPos();
+			BlockState state = world.getBlockState(pos);
+			Block block = state.getBlock();
+			if (block instanceof WireBlock)
+			{
+				// we'll be taking over the event from here onward
+				event.setCanceled(true);
+				
+				WireBlock wireBlock = (WireBlock)block;
+				PlayerController controller = mc.playerController;
+				ClientPlayerControllerAccess controllerAccess = (ClientPlayerControllerAccess)(Object)controller;
+				GameType gameType = controller.getCurrentGameType();
+				// now run over all the permissions checking that would normally happen here
+				if (player.blockActionRestricted(world, pos, gameType))
+					return;
+				if (!world.getWorldBorder().contains(pos))
+					return;
+				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getRenderPartialTicks());
+				if (faceToBreak == null)
+					return;
+				Direction hitNormal = faceToBreak.getOpposite();
+				if (gameType.isCreative())
+				{
+					controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
+					// TODO do stuff from onPlayerDestroyBlock here
+					if (!net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player, pos, hitNormal).isCanceled())
+					{
+						destroyClickedWireBlock(wireBlock, state, world, pos, player, faceToBreak);
+					}
+					controllerAccess.setBlockHitDelay(5);
+				}
+				else if (!controller.getIsHittingBlock() || !controllerAccess.callIsHittingPosition(pos))
+				{
+					if (controller.getIsHittingBlock())
+					{
+						controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.ABORT_DESTROY_BLOCK, controllerAccess.getCurrentBlock(), blockResult.getFace());
+					}
+					PlayerInteractEvent.LeftClickBlock leftClickBlockEvent = net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player,pos,hitNormal);
+
+					controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
+					if (!leftClickBlockEvent.isCanceled() && leftClickBlockEvent.getUseItem() != Event.Result.DENY)
+					{
+						destroyClickedWireBlock(wireBlock, state, world, pos, player, faceToBreak);
+					}
+				}
+			}
+		}
+	}
+	
+	// more parity with existing destroy-clicked-block code
+	// these checks are run after the digging packet is sent
+	// the existing code checks some things that are already checked above, so we'll skip those
+	private static void destroyClickedWireBlock(WireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, Direction interiorSide)
+	{
+		ItemStack heldItemStack = player.getHeldItemMainhand();
+		if (heldItemStack.onBlockStartBreak(pos, player))
+			return;
+		if (!heldItemStack.getItem().canPlayerBreakBlockWhileHolding(state, world, pos, player))
+            return;
+		block.destroyClickedSegment(state, world, pos, player, interiorSide, false);
+	}
+	
 }
