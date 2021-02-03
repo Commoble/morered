@@ -11,6 +11,7 @@ import commoble.morered.mixin.ClientPlayerControllerAccess;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
+import commoble.morered.redwire.VoxelCache;
 import commoble.morered.redwire.WireBlock;
 import commoble.morered.util.BlockStateUtil;
 import net.minecraft.block.Block;
@@ -104,12 +105,14 @@ public class ClientEvents
 	{
 		// clean up static data on the client
 		MoreRed.CLIENT_PROXY = ClientProxy.makeClientProxy();
+		VoxelCache.clearClientCache();
 	}
 	
 	public static void onClientLogOut(ClientPlayerNetworkEvent.LoggedOutEvent event)
 	{
 		// clean up static data on the client
 		MoreRed.CLIENT_PROXY = ClientProxy.makeClientProxy();
+		VoxelCache.clearClientCache();
 	}
 	
 	public static void onHighlightBlock(DrawHighlightEvent.HighlightBlock event)
@@ -179,7 +182,7 @@ public class ClientEvents
 				
 				WireBlock wireBlock = (WireBlock)block;
 				PlayerController controller = mc.playerController;
-				ClientPlayerControllerAccess controllerAccess = (ClientPlayerControllerAccess)(Object)controller;
+				ClientPlayerControllerAccess controllerAccess = (ClientPlayerControllerAccess)controller;
 				GameType gameType = controller.getCurrentGameType();
 				// now run over all the permissions checking that would normally happen here
 				if (player.blockActionRestricted(world, pos, gameType))

@@ -1,5 +1,7 @@
 package commoble.morered.client;
 
+import commoble.morered.redwire.VoxelCache;
+import commoble.morered.redwire.WireUpdatePacket;
 import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.WireBreakPacket;
 import net.minecraft.block.BlockState;
@@ -33,6 +35,16 @@ public class ClientPacketHandlers
 					new DiggingParticle(world, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
 						.setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
 			}
+		}
+	}
+	
+	public static void onWireUpdatePacket(WireUpdatePacket packet)
+	{
+		@SuppressWarnings("resource")
+		ClientWorld world = Minecraft.getInstance().world;
+		if (world != null)
+		{
+			VoxelCache.get(world).shapesByPos.invalidateAll(packet.getPositions());
 		}
 	}
 }

@@ -2,13 +2,15 @@ package commoble.morered.redwire;
 
 import javax.annotation.Nullable;
 
+import commoble.morered.util.DirectionHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SixWayBlock;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.item.BlockItemUseContext;
+import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.util.Direction;
@@ -17,6 +19,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -25,6 +28,7 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants.BlockFlags;
@@ -96,25 +100,6 @@ public class WireBlock extends Block
 		return LINE_SHAPES[side*4 + secondarySide];
 	}
 	
-	/**
-	 * Returns the relative secondary side index given two side indices.
-	 * Some definitions:
-	 * -- let a side index be the ordinal of a Direction
-	 * -- let a relative secondary side index be an integer in the range [0,3], representing what the ordinal of a direction would be
-	 * if the primary side and its opposite didn't exist
-	 * e.g. if the primary side is NORTH, the secondary indices would represent down, up, west, east, respectively
-	 * @param primary side index, the side index representing the interior face a wire is attached to
-	 * @param secondary side index representing which direction a wire line is pointing from the center of the face,
-	 * must *not* be the same axis as the primary side or an incorrect result will be returned
-	 * @return the relative secondary side index given two side indices
-	 */
-	public static int getRelativeSecondarySideIndex(int primary, int secondary)
-	{
-		return secondary < primary
-			? secondary
-			: secondary - 2;
-	}
-	
 	public static final BooleanProperty DOWN = SixWayBlock.DOWN;
 	public static final BooleanProperty UP = SixWayBlock.UP;
 	public static final BooleanProperty NORTH = SixWayBlock.NORTH;
@@ -143,8 +128,8 @@ public class WireBlock extends Block
 						if (addedSides[secondarySide] && sideAxis != secondarySide/2) // the two sides are orthagonal to each other (not parallel)
 						{
 							// add line shapes for the elbows
-							nextShape = VoxelShapes.or(nextShape, getLineShape(side, getRelativeSecondarySideIndex(side,secondarySide)));
-							nextShape = VoxelShapes.or(nextShape, getLineShape(secondarySide, getRelativeSecondarySideIndex(secondarySide,side)));
+							nextShape = VoxelShapes.or(nextShape, getLineShape(side, DirectionHelper.getCompressedSecondSide(side,secondarySide)));
+							nextShape = VoxelShapes.or(nextShape, getLineShape(secondarySide, DirectionHelper.getCompressedSecondSide(secondarySide,side)));
 						}
 					}
 					
@@ -157,6 +142,11 @@ public class WireBlock extends Block
 		return result;
 	});
 	
+	/**
+	 * Get the index of the primary shape for the given wireblock blockstate (64 combinations)
+	 * @param state A blockstate belonging to WireBlock
+	 * @return An index useable in SHAPES_BY_STATE_INDEX
+	 */
 	public static int getShapeIndex(BlockState state)
 	{
 		int index = 0;
@@ -200,6 +190,15 @@ public class WireBlock extends Block
 
 	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	{
+		return worldIn instanceof World
+			? VoxelCache.get((World)worldIn).getWireShape(pos)
+			: SHAPES_BY_STATE_INDEX[getShapeIndex(state)];
+	}
+
+	// overriding this so we don't delegate to getShape for the render shape (to reduce lookups of the extended shape)
+	@Override
+	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos)
 	{
 		return SHAPES_BY_STATE_INDEX[getShapeIndex(state)];
 	}
@@ -263,15 +262,6 @@ public class WireBlock extends Block
 			? this.getDefaultState().with(INTERIOR_FACES[directionToNeighbor.ordinal()], true)
 			: null;
 	}
-	
-	@Override
-	public boolean removedByPlayer(BlockState state, World world, BlockPos pos, @Nullable PlayerEntity player, boolean willHarvest, FluidState fluid)
-	{
-		
-		// if the player doesn't exist, just break the whole block
-		return super.removedByPlayer(state, world, pos, player, willHarvest, fluid);
-	}
-
 	/**
 	 * Spawn a digging particle effect in the world, this is a wrapper around
 	 * EffectRenderer.addBlockHitEffects to allow the block more control over the
@@ -300,6 +290,49 @@ public class WireBlock extends Block
 	public boolean isReplaceable(BlockState state, BlockItemUseContext useContext)
 	{
 		return this.getWireCount(state) == 0;
+	}
+	
+	// called when a different block instance is replaced with this one
+	// only called on server
+	@Override
+	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	{
+		this.updateShapeCache(worldIn, pos);
+		super.onBlockAdded(state, worldIn, pos, oldState, isMoving);
+	}
+
+	// called when a player places this block or adds a wire to a wire block
+	// also called on the client of the placing player
+	@Override
+	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+	{
+		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+	}
+
+	// called when the block is destroyed or a player removes a wire from a wire block
+	// also called on the client of the breaking player
+	@Override
+	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	{
+		this.updateShapeCache(worldIn, pos);
+		super.onReplaced(state, worldIn, pos, newState, isMoving);
+	}
+
+	// called when a neighboring blockstate changes, not called on the client
+	@Override
+	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	{
+		this.updateShapeCache(worldIn, pos);
+		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+	}
+	
+	public void updateShapeCache(World world, BlockPos pos)
+	{
+		VoxelCache.get(world).shapesByPos.invalidate(pos);
+		if (world instanceof ServerWorld)
+		{
+			WireUpdateBuffer.get((ServerWorld)world).enqueue(pos);
+		}
 	}
 
 	public int getWireCount(BlockState state)
@@ -429,5 +462,81 @@ public class WireBlock extends Block
 				removedBlock.onPlayerDestroy(world, pos, removedState);
 			}
 		}
+	}
+	
+
+	
+	/**
+	 * Get the index of the expanded shape for the given wireblock blockstate (including non-blockstate-based shapes);
+	 * this is a bit pattern, the bits are defined as such starting from the least-significant bit:
+	 * bits 0-5 -- the unexpanded shape index for a given state (indicating which of the six interior faces wires are attached to)
+	 * bits 6-29 (the next 24 bits) -- the flags indicating which adjacent neighbors the faces are connecting to
+	 * 	each primary face can connect to the faces of four neighbors (6*4 = 24)
+	 * bits 30-41 (the next 12 bits) -- the flags indicating any edges connecting wires diagonally
+	 * @param state A blockstate belonging to a WireBlock
+	 * @param world world
+	 * @param pos position of the blockstate
+	 * @return An index usable by the voxel cache
+	 */
+	public int getExpandedShapeIndex(BlockState state, IBlockReader world, BlockPos pos)
+	{
+		// for each of the six interior faces a wire block can have a wire attached to,
+		// that face can be connected to any of the four orthagonally adjacent blocks
+		// producing an additional component of the resulting shape
+		// 6*4 = 24, we have 24 boolean properties, so we have 2^24 different possible shapes
+		// we can store these in a bit pattern for efficient keying
+		int result = 0;
+		for (int side = 0; side < 6; side++)
+		{
+			// we have to have a wire attached to a side to connect to secondary sides
+			if (state.get(INTERIOR_FACES[side]))
+			{
+				result |= (1 << side);
+				for (int subSide = 0; subSide < 4; subSide++)
+				{
+					int secondaryOrdinal = DirectionHelper.uncompressSecondSide(side, subSide);
+					Direction secondaryDir = Direction.byIndex(secondaryOrdinal);
+					BlockPos neighborPos = pos.offset(secondaryDir);
+					BlockState neighborState = world.getBlockState(neighborPos);
+					if (neighborState.canConnectRedstone(world, neighborPos, secondaryDir))
+					{
+						VoxelShape lineShape = getLineShape(side, subSide);
+						VoxelShape neighborShape = neighborState.getRenderShape(world, neighborPos); // block support shape
+						VoxelShape projectedNeighborShape = neighborShape.project(secondaryDir.getOpposite());
+						// if the projected neighbor shape entirely overlaps the line shape,
+						// then the neighbor shape can be connected to by the wire
+						// we can test this by doing an ONLY_SECOND comparison on the shapes
+						// if this returns true, then there are places where the second shape is not overlapped by the first
+						// so if this returns false, then we can proceed
+						if (!VoxelShapes.compare(projectedNeighborShape, lineShape, IBooleanFunction.ONLY_SECOND))
+						{
+							result |= (1 << (side*4 + subSide + 6));
+						}
+					}
+				}
+			}
+		}
+		return result;
+	}
+	
+	public static VoxelShape makeExpandedShapeForIndex(int index)
+	{
+		int primaryShapeIndex = index & 63;
+		int expandedShapeIndex = index >> 6;
+		VoxelShape shape = SHAPES_BY_STATE_INDEX[primaryShapeIndex];
+		// we want to use the index to combine secondary line shapes with the actual voxelshape for a given state
+		int flag = 1;
+		for (int side = 0; side < 6; side++)
+		{
+			for (int subSide = 0; subSide < 4; subSide++)
+			{
+				if ((expandedShapeIndex & flag) != 0)
+				{
+					shape = VoxelShapes.or(shape, getLineShape(side, subSide));
+				}
+				flag = flag << 1;
+			}
+		}
+		return shape;
 	}
 }

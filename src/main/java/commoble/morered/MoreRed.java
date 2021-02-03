@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 
+import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
@@ -13,6 +14,8 @@ import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.redwire.WireBlock;
 import commoble.morered.redwire.WireCountLootFunction;
+import commoble.morered.redwire.WireUpdateBuffer;
+import commoble.morered.redwire.WireUpdatePacket;
 import commoble.morered.wire_post.IPostsInChunk;
 import commoble.morered.wire_post.PostsInChunk;
 import commoble.morered.wire_post.PostsInChunkCapability;
@@ -46,6 +49,8 @@ import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegistryEvent;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 import net.minecraftforge.event.world.BlockEvent;
 import net.minecraftforge.eventbus.api.Event;
@@ -149,6 +154,7 @@ public class MoreRed
 			SyncPostsInChunkPacket::write,
 			SyncPostsInChunkPacket::read,
 			SyncPostsInChunkPacket::handle);
+		PacketTypeFactory.register(packetID++, MoreRed.CHANNEL, WireUpdatePacket.CODEC, new WireUpdatePacket(ImmutableSet.of()));
 		
 		// register capabilities
 		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), () -> new PostsInChunk(null));
@@ -166,6 +172,7 @@ public class MoreRed
 		forgeBus.addGenericListener(Chunk.class, MoreRed::onAttachChunkCapabilities);
 		forgeBus.addListener(EventPriority.LOW, MoreRed::onEntityPlaceBlock);
 		forgeBus.addListener(EventPriority.LOW, MoreRed::onLeftClickBlock);
+		forgeBus.addListener(MoreRed::onWorldTick);
 	}
 	
 	public static void onAttachChunkCapabilities(AttachCapabilitiesEvent<Chunk> event)
@@ -291,6 +298,17 @@ public class MoreRed
 			return;
 		
 		// don't drop items if creative
-		wireBlock.destroyClickedSegment(state, serverWorld, pos, serverPlayer, destroySide, !isCreative);
+		boolean dropItems = !isCreative;
+		wireBlock.destroyClickedSegment(state, serverWorld, pos, serverPlayer, destroySide, dropItems);
+	}
+	
+	static void onWorldTick(WorldTickEvent event)
+	{
+		World world = event.world;
+		if (event.phase == TickEvent.Phase.END && world instanceof ServerWorld)
+		{
+			ServerWorld serverWorld = (ServerWorld)world;
+			WireUpdateBuffer.get(serverWorld).sendPackets(serverWorld);
+		}
 	}
 }
