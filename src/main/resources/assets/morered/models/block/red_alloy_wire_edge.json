@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"loader": "morered:rotate_tints",
 	"parent": "block/block",
 	"ambientocclusion": false,
 	"textures": {
@@ -11,10 +12,10 @@
 			"from": [0, 0, 7],
 			"to": [2, 2, 9],
 			"faces": {
-				"north": {"uv": [7, 12, 9, 14], "texture": "#wire", "tintindex": 1},
-				"east": {"uv": [7, 12, 9, 14], "rotation": 180, "texture": "#wire", "tintindex": 1},
-				"south": {"uv": [7, 12, 9, 14], "rotation": 270, "texture": "#wire", "tintindex": 1},
-				"up": {"uv": [7, 12, 9, 14], "rotation": 270, "texture": "#wire", "tintindex": 1}
+				"north": {"uv": [7, 12, 9, 14], "texture": "#wire", "tintindex": 9},
+				"east": {"uv": [7, 12, 9, 14], "rotation": 180, "texture": "#wire", "tintindex": 9},
+				"south": {"uv": [7, 12, 9, 14], "rotation": 270, "texture": "#wire", "tintindex": 9},
+				"up": {"uv": [7, 12, 9, 14], "rotation": 270, "texture": "#wire", "tintindex": 9}
 			}
 		}
 	]

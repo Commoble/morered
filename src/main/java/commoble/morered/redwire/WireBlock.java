@@ -650,7 +650,7 @@ public class WireBlock extends Block
 		long result = 0;
 		for (int edge=0; edge<12; edge++)
 		{
-			if (Edge.EDGES[edge].shouldEdgeRender(world, pos))
+			if (Edge.values()[edge].shouldEdgeRender(world, pos))
 			{
 				result |= (1L << (30 + edge));
 			}

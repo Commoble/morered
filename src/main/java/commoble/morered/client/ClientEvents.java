@@ -10,7 +10,6 @@ import commoble.morered.ItemRegistrar;
 import commoble.morered.MoreRed;
 import commoble.morered.ObjectNames;
 import commoble.morered.TileEntityRegistrar;
-import commoble.morered.client.WirePartGeometry.WireBlockModel;
 import commoble.morered.mixin.ClientPlayerControllerAccess;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.plate_blocks.PlateBlock;
@@ -96,7 +95,8 @@ public class ClientEvents
 	
 	public static void onRegisterModelLoaders(ModelRegistryEvent event)
 	{
-		ModelLoaderRegistry.registerLoader(new ResourceLocation(MoreRed.MODID, ObjectNames.WIRE_PARTS), WirePartGeometry.WirePartLoader.INSTANCE);
+		ModelLoaderRegistry.registerLoader(new ResourceLocation(MoreRed.MODID, ObjectNames.WIRE_PARTS), WirePartModelLoader.INSTANCE);
+		ModelLoaderRegistry.registerLoader(new ResourceLocation(MoreRed.MODID, ObjectNames.ROTATE_TINTS), TintRotatingModelLoader.INSTANCE);
 	}
 	
 	public static void onRegisterBlockColors(ColorHandlerEvent.Block event)
@@ -107,6 +107,7 @@ public class ClientEvents
 		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST.get());
 		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST_PLATE.get());
 		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get());
+		colors.register(ColorHandlers::getRedAlloyWireBlockTint, BlockRegistrar.RED_ALLOY_WIRE.get());
 	}
 	
 	public static void onRegisterItemColors(ColorHandlerEvent.Item event)
@@ -128,7 +129,7 @@ public class ClientEvents
 			IBakedModel model = registry.get(mrl);
 			if (model != null)
 			{
-				registry.put(mrl, new WireBlockModel(model));
+				registry.put(mrl, new WirePartModelLoader.WireBlockModel(model));
 			}
 		});
 	}

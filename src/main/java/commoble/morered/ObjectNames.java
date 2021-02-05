@@ -44,4 +44,5 @@ public class ObjectNames
 	
 	// model loaders
 	public static final String WIRE_PARTS = "wire_parts";
+	public static final String ROTATE_TINTS = "rotate_tints";
 }

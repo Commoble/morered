@@ -117,4 +117,9 @@ public class ColorHandlers
 			return NO_TINT;
 		}
 	}
+	
+	public static int getRedAlloyWireBlockTint(BlockState state, IBlockDisplayReader world, BlockPos pos, int tintIndex)
+	{
+		return NO_TINT;
+	}
 }

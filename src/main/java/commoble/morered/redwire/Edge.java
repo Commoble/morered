@@ -15,38 +15,36 @@ import net.minecraft.world.IBlockReader;
  * A wire block should render an edge if and only if both of the adjacent blocks in the two given directions are wire blocks,
  * and if both wire blocks have a wire attached to the relevant face of the central cube.
  */
-public class Edge
+public enum Edge
 {
-	public static final Edge[] EDGES =
+
+	DOWN_NORTH(Direction.DOWN, Direction.NORTH),
+	DOWN_SOUTH(Direction.DOWN, Direction.SOUTH),
+	DOWN_WEST(Direction.DOWN, Direction.WEST),
+	DOWN_EAST(Direction.DOWN, Direction.EAST),
+	UP_NORTH(Direction.UP, Direction.NORTH),
+	UP_SOUTH(Direction.UP, Direction.SOUTH),
+	UP_WEST(Direction.UP, Direction.WEST),
+	UP_EAST(Direction.UP, Direction.EAST),
+	NORTH_WEST(Direction.NORTH, Direction.WEST),
+	NORTH_EAST(Direction.NORTH, Direction.EAST),
+	SOUTH_WEST(Direction.SOUTH, Direction.WEST),
+	SOUTH_EAST(Direction.SOUTH, Direction.EAST);
+	
+	public static final Edge[][] EDGES_BY_RELEVANT_DIRECTION =
 	{
-		new Edge(Direction.DOWN, Direction.NORTH),
-		new Edge(Direction.DOWN, Direction.SOUTH),
-		new Edge(Direction.DOWN, Direction.WEST),
-		new Edge(Direction.DOWN, Direction.EAST),
-		new Edge(Direction.UP, Direction.NORTH),
-		new Edge(Direction.UP, Direction.SOUTH),
-		new Edge(Direction.UP, Direction.WEST),
-		new Edge(Direction.UP, Direction.EAST),
-		new Edge(Direction.NORTH, Direction.WEST),
-		new Edge(Direction.NORTH, Direction.EAST),
-		new Edge(Direction.SOUTH, Direction.WEST),
-		new Edge(Direction.SOUTH, Direction.EAST),
+		{DOWN_NORTH,DOWN_SOUTH,DOWN_WEST,DOWN_EAST}, // edges with down
+		{UP_NORTH,UP_SOUTH,UP_WEST,UP_EAST}, // up
+		{DOWN_NORTH,UP_NORTH,NORTH_WEST,NORTH_EAST}, // north
+		{DOWN_SOUTH,UP_SOUTH,SOUTH_WEST,SOUTH_EAST}, // south
+		{DOWN_WEST,UP_WEST,NORTH_WEST,SOUTH_WEST}, // west
+		{DOWN_EAST,UP_EAST,NORTH_EAST,SOUTH_EAST} // east
 	};
 	
-//	public static final Edge[][] EDGES_BY_RELEVANT_DIRECTION =
-//	{
-//		{EDGES[0], EDGES[1], EDGES[2], EDGES[3]}, // edges with down
-//		{EDGES[4], EDGES[5], EDGES[6], EDGES[7]}, // up
-//		{EDGES[0], EDGES[4], EDGES[8], EDGES[9]}, // north
-//		{EDGES[1], EDGES[5], EDGES[10], EDGES[11]}, // south
-//		{EDGES[2], EDGES[6], EDGES[8], EDGES[10]}, // west
-//		{EDGES[3], EDGES[7], EDGES[9], EDGES[11]}
-//	};
+	public final Direction sideA;
+	public final Direction sideB;
 	
-	private final Direction sideA;
-	private final Direction sideB;
-	
-	public Edge(Direction sideA, Direction sideB)
+	Edge(Direction sideA, Direction sideB)
 	{
 		this.sideA = sideA;
 		this.sideB = sideB;

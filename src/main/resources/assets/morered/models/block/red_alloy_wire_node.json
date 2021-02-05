@@ -1,5 +1,6 @@
 {
 	"credit": "Made with Blockbench",
+	"loader": "morered:rotate_tints",
 	"parent": "block/block",
 	"ambientocclusion": false,
 	"textures": {
