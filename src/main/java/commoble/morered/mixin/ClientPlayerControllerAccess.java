@@ -18,6 +18,15 @@ public interface ClientPlayerControllerAccess
 	@Accessor
 	public BlockPos getCurrentBlock();
 	
+	@Accessor
+	public void setIsHittingBlock(boolean is);
+	
+	@Accessor
+	public void setCurBlockDamageMP(float damage);
+	
+	@Accessor
+	public void setStepSoundTickCounter(float count);
+	
 	@Invoker
 	public boolean callIsHittingPosition(BlockPos pos);
 	

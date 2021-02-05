@@ -1,0 +1,5 @@
+{
+	"loader": "morered:wire_parts",
+	"line": {"parent": "morered:block/red_alloy_wire_line"},
+	"edge": {"parent": "morered:block/red_alloy_wire_edge"}
+}

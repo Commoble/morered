@@ -14,6 +14,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer.Builder;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Mirror;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -176,7 +178,7 @@ public class WireBlock extends Block
 			);
 	}
 	
-	public boolean isStateEmpty(BlockState state)
+	public boolean isEmptyWireBlock(BlockState state)
 	{
 		return state == this.getDefaultState();
 	}
@@ -211,6 +213,10 @@ public class WireBlock extends Block
 		{
 			Direction neighborSide = directionToNeighbor.getOpposite();
 			boolean isNeighborSideSolid = neighborState.isSolidSide(world, neighborPos, neighborSide);
+			if (!isNeighborSideSolid && world instanceof ServerWorld)
+			{
+				Block.spawnDrops(this.getDefaultState().with(sideProperty, true), (ServerWorld)world, thisPos);
+			}
 			return thisState.with(sideProperty, isNeighborSideSolid);
 		}
 		else
@@ -306,24 +312,117 @@ public class WireBlock extends Block
 	@Override
 	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
+		if (!worldIn.isRemote)
+		{
+			for (Direction directionToNeighbor : Direction.values())
+			{
+				BlockPos neighborPos = pos.offset(directionToNeighbor);
+				BlockState neighborState = worldIn.getBlockState(neighborPos);
+				if (neighborState.isAir())
+				{
+					this.addEmptyWireToAir(state, worldIn, neighborPos, directionToNeighbor);
+				}
+			}
+		}
+		this.updateShapeCache(worldIn, pos);
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
 	// called when the block is destroyed or a player removes a wire from a wire block
 	// also called on the client of the breaking player
 	@Override
-	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onReplaced(BlockState oldState, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
+		// if this is an empty wire block, remove it if no edges are valid anymore
+		if (this.isEmptyWireBlock(newState))
+		{
+			long edgeFlags = getEdgeFlags(worldIn,pos);
+			if (edgeFlags == 0)
+			{
+				worldIn.removeBlock(pos, false);
+			}
+		}
 		this.updateShapeCache(worldIn, pos);
-		super.onReplaced(state, worldIn, pos, newState, isMoving);
+		super.onReplaced(oldState, worldIn, pos, newState, isMoving);
 	}
 
 	// called when a neighboring blockstate changes, not called on the client
 	@Override
 	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
+		// if this is an empty wire block, remove it if no edges are valid anymore
+		if (this.isEmptyWireBlock(state))
+		{
+			long edgeFlags = getEdgeFlags(worldIn,pos);
+			if (edgeFlags == 0)
+			{
+				worldIn.removeBlock(pos, false);
+			}
+		}
+		// if this is a non-empty wire block and the changed state is an air block
+		else if (worldIn.isAirBlock(fromPos))
+		{
+			BlockPos offset = fromPos.subtract(pos);
+			Direction directionToNeighbor = Direction.byLong(offset.getX(), offset.getY(), offset.getZ());
+			if (directionToNeighbor != null)
+			{
+				this.addEmptyWireToAir(state, worldIn, fromPos, directionToNeighbor);
+			}
+		}
+
 		this.updateShapeCache(worldIn, pos);
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+	}
+	
+	
+	
+	@Override
+	public BlockState rotate(BlockState state, Rotation rot)
+	{
+		BlockState result = state;
+		for (int i=0; i<4; i++) // rotations only rotated about the y-axis, we only need to rotated the horizontal faces
+		{
+			Direction dir = Direction.byHorizontalIndex(i);
+			Direction newDir = rot.rotate(dir);
+			result = result.with(INTERIOR_FACES[newDir.ordinal()], state.get(INTERIOR_FACES[dir.ordinal()]));
+		}
+		return result;
+	}
+
+	@Override
+	public BlockState mirror(BlockState state, Mirror mirrorIn)
+	{
+		BlockState result = state;
+		for (int i=0; i<4; i++) // only horizontal sides get mirrored
+		{
+			Direction dir = Direction.byHorizontalIndex(i);
+			Direction newDir = mirrorIn.mirror(dir);
+			result = result.with(INTERIOR_FACES[newDir.ordinal()], state.get(INTERIOR_FACES[dir.ordinal()]));
+		}
+		return result;
+	}
+
+	protected void addEmptyWireToAir(BlockState thisState, World world, BlockPos neighborAirPos, Direction directionToNeighbor)
+	{
+		Direction directionFromNeighbor = directionToNeighbor.getOpposite();
+		for (Direction dir : Direction.values())
+		{
+			if (dir != directionToNeighbor && dir != directionFromNeighbor)
+			{
+				BooleanProperty thisAttachmentFace = INTERIOR_FACES[dir.ordinal()];
+				if (thisState.get(thisAttachmentFace))
+				{
+					BlockPos diagonalNeighbor = neighborAirPos.offset(dir);
+					BooleanProperty neighborAttachmentFace = INTERIOR_FACES[directionFromNeighbor.ordinal()];
+					BlockState diagonalState = world.getBlockState(diagonalNeighbor);
+					if (diagonalState.getBlock() == this.getBlock() && diagonalState.get(neighborAttachmentFace))
+					{
+						world.setBlockState(neighborAirPos, this.getDefaultState());
+						break; // we don't need to set the wire block more than once
+					}
+				}
+			}
+		}
 	}
 	
 	public void updateShapeCache(World world, BlockPos pos)
@@ -478,27 +577,53 @@ public class WireBlock extends Block
 	 * @param pos position of the blockstate
 	 * @return An index usable by the voxel cache
 	 */
-	public int getExpandedShapeIndex(BlockState state, IBlockReader world, BlockPos pos)
+	public long getExpandedShapeIndex(BlockState state, IBlockReader world, BlockPos pos)
 	{
 		// for each of the six interior faces a wire block can have a wire attached to,
 		// that face can be connected to any of the four orthagonally adjacent blocks
 		// producing an additional component of the resulting shape
 		// 6*4 = 24, we have 24 boolean properties, so we have 2^24 different possible shapes
 		// we can store these in a bit pattern for efficient keying
-		int result = 0;
+		long result = 0;
 		for (int side = 0; side < 6; side++)
 		{
 			// we have to have a wire attached to a side to connect to secondary sides
-			if (state.get(INTERIOR_FACES[side]))
+			BooleanProperty attachmentSide = INTERIOR_FACES[side];
+			if (state.get(attachmentSide))
 			{
-				result |= (1 << side);
+				result |= (1L << side);
 				for (int subSide = 0; subSide < 4; subSide++)
 				{
 					int secondaryOrdinal = DirectionHelper.uncompressSecondSide(side, subSide);
 					Direction secondaryDir = Direction.byIndex(secondaryOrdinal);
+					Block thisBlock = state.getBlock();
 					BlockPos neighborPos = pos.offset(secondaryDir);
 					BlockState neighborState = world.getBlockState(neighborPos);
-					if (neighborState.canConnectRedstone(world, neighborPos, secondaryDir))
+					Block neighborBlock = neighborState.getBlock();
+					boolean isNeighborWire = neighborBlock == thisBlock;
+					// first, check if the neighbor state is a wire that shares this attachment side
+					// TODO filter out wire block connectability for different types of wires
+					if (isNeighborWire && neighborState.get(attachmentSide))
+					{
+						result |= (1L << (side*4 + subSide + 6));
+					}
+					// otherwise, check if we can connect through a wire edge
+					else if (isNeighborWire || neighborState.isAir())
+					{
+						Direction primaryDir = Direction.byIndex(side);
+						BlockPos diagonalPos = neighborPos.offset(primaryDir);
+						BlockState diagonalState = world.getBlockState(diagonalPos);
+						if (diagonalState.getBlock() == thisBlock)
+						{
+							Direction diagonalAttachmentDir = secondaryDir.getOpposite();
+							if (diagonalState.get(INTERIOR_FACES[diagonalAttachmentDir.ordinal()]))
+							{
+								result |= (1L << (side*4 + subSide + 6));
+							}
+						}
+					}
+					// otherwise, check if we can redstone-connect to the neighbor block
+					else if (neighborState.canConnectRedstone(world, neighborPos, secondaryDir))
 					{
 						VoxelShape lineShape = getLineShape(side, subSide);
 						VoxelShape neighborShape = neighborState.getRenderShape(world, neighborPos); // block support shape
@@ -510,19 +635,33 @@ public class WireBlock extends Block
 						// so if this returns false, then we can proceed
 						if (!VoxelShapes.compare(projectedNeighborShape, lineShape, IBooleanFunction.ONLY_SECOND))
 						{
-							result |= (1 << (side*4 + subSide + 6));
+							result |= (1L << (side*4 + subSide + 6));
 						}
 					}
 				}
 			}
 		}
+		result = result | getEdgeFlags(world,pos);
 		return result;
 	}
 	
-	public static VoxelShape makeExpandedShapeForIndex(int index)
+	public static long getEdgeFlags(IBlockReader world, BlockPos pos)
 	{
-		int primaryShapeIndex = index & 63;
-		int expandedShapeIndex = index >> 6;
+		long result = 0;
+		for (int edge=0; edge<12; edge++)
+		{
+			if (Edge.EDGES[edge].shouldEdgeRender(world, pos))
+			{
+				result |= (1L << (30 + edge));
+			}
+		}
+		return result;
+	}
+	
+	public static VoxelShape makeExpandedShapeForIndex(long index)
+	{
+		int primaryShapeIndex = (int) (index & 63);
+		long expandedShapeIndex = index >> 6;
 		VoxelShape shape = SHAPES_BY_STATE_INDEX[primaryShapeIndex];
 		// we want to use the index to combine secondary line shapes with the actual voxelshape for a given state
 		int flag = 1;

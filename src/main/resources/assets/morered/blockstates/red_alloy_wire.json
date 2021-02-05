@@ -1,6 +1,7 @@
 {
 	"multipart":
 	[
+		{ "apply": {"model": "morered:block/red_alloy_wire_parts" }},
 		{
 			"when": { "down": "true" },
 			"apply": { "model": "morered:block/red_alloy_wire_node"}

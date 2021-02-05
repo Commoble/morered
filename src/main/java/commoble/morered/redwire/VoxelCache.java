@@ -26,13 +26,13 @@ public class VoxelCache extends WorldSavedData
 	protected final World world;
 	public final LoadingCache<BlockPos, VoxelShape> shapesByPos;
 	
-	public static final LoadingCache<Integer, VoxelShape> SHAPE_CACHE = CacheBuilder.newBuilder()
+	public static final LoadingCache<Long, VoxelShape> SHAPE_CACHE = CacheBuilder.newBuilder()
 		.expireAfterAccess(5, TimeUnit.MINUTES)
-		.build(new CacheLoader<Integer, VoxelShape>()
+		.build(new CacheLoader<Long, VoxelShape>()
 		{
 
 			@Override
-			public VoxelShape load(Integer key) throws Exception
+			public VoxelShape load(Long key) throws Exception
 			{
 				return WireBlock.makeExpandedShapeForIndex(key);
 			}
@@ -98,7 +98,7 @@ public class VoxelCache extends WorldSavedData
 			if (!(block instanceof WireBlock))
 				return VoxelShapes.empty();
 			
-			int index = ((WireBlock)block).getExpandedShapeIndex(state, world, pos);
+			long index = ((WireBlock)block).getExpandedShapeIndex(state, world, pos);
 			
 			return SHAPE_CACHE.getUnchecked(index);
 		}

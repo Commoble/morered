@@ -1,12 +1,16 @@
 package commoble.morered.client;
 
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
 import commoble.morered.BlockRegistrar;
 import commoble.morered.ContainerRegistrar;
 import commoble.morered.ItemRegistrar;
 import commoble.morered.MoreRed;
+import commoble.morered.ObjectNames;
 import commoble.morered.TileEntityRegistrar;
+import commoble.morered.client.WirePartGeometry.WireBlockModel;
 import commoble.morered.mixin.ClientPlayerControllerAccess;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.plate_blocks.PlateBlock;
@@ -20,10 +24,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.multiplayer.PlayerController;
+import net.minecraft.client.renderer.BlockModelShapes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.color.BlockColors;
 import net.minecraft.client.renderer.color.ItemColors;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
@@ -31,6 +38,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.play.client.CPlayerDiggingPacket;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
@@ -41,6 +49,9 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.DrawHighlightEvent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
+import net.minecraftforge.client.event.ModelBakeEvent;
+import net.minecraftforge.client.event.ModelRegistryEvent;
+import net.minecraftforge.client.model.ModelLoaderRegistry;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -56,8 +67,10 @@ public class ClientEvents
 		ClientConfig.initClientConfig(modContext, fmlContext);
 		
 		modBus.addListener(ClientEvents::onClientSetup);
+		modBus.addListener(ClientEvents::onRegisterModelLoaders);
 		modBus.addListener(ClientEvents::onRegisterBlockColors);
 		modBus.addListener(ClientEvents::onRegisterItemColors);
+		modBus.addListener(ClientEvents::onModelBakeEvent);
 		
 		forgeBus.addListener(ClientEvents::onClientLogIn);
 		forgeBus.addListener(ClientEvents::onClientLogOut);
@@ -81,6 +94,11 @@ public class ClientEvents
 		RenderTypeLookup.setRenderLayer(type.blockGetter.get(), RenderType.getCutout());
 	}
 	
+	public static void onRegisterModelLoaders(ModelRegistryEvent event)
+	{
+		ModelLoaderRegistry.registerLoader(new ResourceLocation(MoreRed.MODID, ObjectNames.WIRE_PARTS), WirePartGeometry.WirePartLoader.INSTANCE);
+	}
+	
 	public static void onRegisterBlockColors(ColorHandlerEvent.Block event)
 	{
 		BlockColors colors = event.getBlockColors();
@@ -99,6 +117,20 @@ public class ClientEvents
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_PLATE.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_RELAY_PLATE.get());
+	}
+	
+	public static void onModelBakeEvent(ModelBakeEvent event)
+	{
+		Map<ResourceLocation, IBakedModel> registry = event.getModelRegistry();
+		BlockRegistrar.RED_ALLOY_WIRE.get().getStateContainer().getValidStates().forEach(state ->
+		{
+			ModelResourceLocation mrl = BlockModelShapes.getModelLocation(state);
+			IBakedModel model = registry.get(mrl);
+			if (model != null)
+			{
+				registry.put(mrl, new WireBlockModel(model));
+			}
+		});
 	}
 	
 	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)
@@ -199,7 +231,7 @@ public class ClientEvents
 					// TODO do stuff from onPlayerDestroyBlock here
 					if (!net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player, pos, hitNormal).isCanceled())
 					{
-						destroyClickedWireBlock(wireBlock, state, world, pos, player, faceToBreak);
+						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
 					}
 					controllerAccess.setBlockHitDelay(5);
 				}
@@ -214,7 +246,7 @@ public class ClientEvents
 					controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
 					if (!leftClickBlockEvent.isCanceled() && leftClickBlockEvent.getUseItem() != Event.Result.DENY)
 					{
-						destroyClickedWireBlock(wireBlock, state, world, pos, player, faceToBreak);
+						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
 					}
 				}
 			}
@@ -224,14 +256,18 @@ public class ClientEvents
 	// more parity with existing destroy-clicked-block code
 	// these checks are run after the digging packet is sent
 	// the existing code checks some things that are already checked above, so we'll skip those
-	private static void destroyClickedWireBlock(WireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, Direction interiorSide)
+	private static void destroyClickedWireBlock(WireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, ClientPlayerControllerAccess controllerAccess, Direction interiorSide)
 	{
 		ItemStack heldItemStack = player.getHeldItemMainhand();
 		if (heldItemStack.onBlockStartBreak(pos, player))
 			return;
 		if (!heldItemStack.getItem().canPlayerBreakBlockWhileHolding(state, world, pos, player))
             return;
+		controllerAccess.setIsHittingBlock(false);
 		block.destroyClickedSegment(state, world, pos, player, interiorSide, false);
+		controllerAccess.setCurBlockDamageMP(0F);
+        controllerAccess.setStepSoundTickCounter(0F);
+		
 	}
 	
 }

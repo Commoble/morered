@@ -41,4 +41,7 @@ public class ObjectNames
 	
 	// loot functions
 	public static final String WIRE_COUNT = "set_wire_count";
+	
+	// model loaders
+	public static final String WIRE_PARTS = "wire_parts";
 }
