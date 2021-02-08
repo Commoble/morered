@@ -1,7 +1,7 @@
 package commoble.morered;
 
-import commoble.morered.redwire.WireBlockItem;
 import commoble.morered.wire_post.WireSpoolItem;
+import commoble.morered.wires.WireBlockItem;
 import net.minecraft.block.Block;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import commoble.morered.client.EdgeRotation;
-import commoble.morered.redwire.Edge;
+import commoble.morered.wires.Edge;
 import net.minecraft.client.renderer.model.ModelRotation;
 
 public class EdgeTests

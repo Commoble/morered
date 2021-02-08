@@ -1,4 +1,4 @@
-package commoble.morered.redwire;
+package commoble.morered.wires;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.state.BooleanProperty;

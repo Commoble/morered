@@ -1,9 +1,9 @@
 package commoble.morered.client;
 
-import commoble.morered.redwire.VoxelCache;
-import commoble.morered.redwire.WireUpdatePacket;
 import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.WireBreakPacket;
+import commoble.morered.wires.VoxelCache;
+import commoble.morered.wires.WireUpdatePacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.client.Minecraft;

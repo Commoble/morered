@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 
 import commoble.morered.client.TintRotatingModelLoader.TintRotatingModelGeometry;
-import commoble.morered.redwire.Edge;
+import commoble.morered.wires.Edge;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.IModelTransform;

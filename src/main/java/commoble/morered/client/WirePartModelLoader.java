@@ -15,7 +15,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 
 import commoble.morered.client.WirePartModelLoader.WirePartGeometry;
-import commoble.morered.redwire.WireBlock;
+import commoble.morered.wires.WireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.BakedQuad;

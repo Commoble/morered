@@ -1,7 +1,7 @@
 package commoble.morered.client;
 
-import commoble.morered.redwire.Edge;
 import commoble.morered.util.DirectionHelper;
+import commoble.morered.wires.Edge;
 import net.minecraft.client.renderer.model.ModelRotation;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.vector.Matrix4f;

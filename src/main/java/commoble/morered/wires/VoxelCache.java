@@ -1,4 +1,4 @@
-package commoble.morered.redwire;
+package commoble.morered.wires;
 
 import java.util.concurrent.TimeUnit;
 
