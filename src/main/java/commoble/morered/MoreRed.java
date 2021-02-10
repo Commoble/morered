@@ -1,13 +1,21 @@
 package commoble.morered;
 
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
+import commoble.morered.api.MoreRedAPI;
+import commoble.morered.api.WireConnector;
 import commoble.morered.client.ClientEvents;
 import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
@@ -20,11 +28,13 @@ import commoble.morered.wire_post.SyncPostsInChunkPacket;
 import commoble.morered.wire_post.WireBreakPacket;
 import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wires.WireBlock;
+import commoble.morered.wires.WireConnectors;
 import commoble.morered.wires.WireCountLootFunction;
 import commoble.morered.wires.WireUpdateBuffer;
 import commoble.morered.wires.WireUpdatePacket;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -60,6 +70,7 @@ import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.network.NetworkRegistry;
@@ -70,6 +81,8 @@ import net.minecraftforge.registries.DeferredRegister;
 public class MoreRed
 {
 	public static final String MODID = "morered";
+	public static final Logger LOGGER = LogManager.getLogger();
+	public static MoreRed INSTANCE;
 	
 	public static Optional<ClientProxy> CLIENT_PROXY = DistExecutor.unsafeRunForDist(() -> ClientProxy::makeClientProxy, () -> () -> Optional.empty());
 	
@@ -81,6 +94,9 @@ public class MoreRed
 		CHANNEL_PROTOCOL_VERSION::equals,
 		CHANNEL_PROTOCOL_VERSION::equals);
 	
+	private Map<Block, WireConnector> wireConnectabilities = new ConcurrentHashMap<>();
+	public Map<Block, WireConnector> getWireConnectabilities() { return this.wireConnectabilities; }
+	
 	public static ResourceLocation getModRL(String name)
 	{
 		return new ResourceLocation(MODID, name);
@@ -88,6 +104,10 @@ public class MoreRed
 	
 	public MoreRed()
 	{
+		INSTANCE = this;
+		
+		
+		
 		ModLoadingContext modContext = ModLoadingContext.get();
 		FMLJavaModLoadingContext fmlContext = FMLJavaModLoadingContext.get();
 		IEventBus modBus = fmlContext.getModEventBus();
@@ -118,7 +138,9 @@ public class MoreRed
 			RecipeRegistrar.RECIPE_SERIALIZERS);
 		
 		modBus.addGenericListener(IRecipeSerializer.class, MoreRed::onRegisterRecipeStuff);
+		modBus.addListener(EventPriority.HIGH, MoreRed::onHighPriorityCommonSetup);
 		modBus.addListener(MoreRed::onCommonSetup);
+		modBus.addListener(MoreRed.INSTANCE::onLoadComplete);
 	}
 	
 	private static void onRegisterRecipeStuff(RegistryEvent.Register<IRecipeSerializer<?>> event)
@@ -133,6 +155,17 @@ public class MoreRed
 		{
 			register.register(modBus);
 		}
+	}
+	
+	public static void onHighPriorityCommonSetup(FMLCommonSetupEvent event)
+	{
+		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
+		
+		// add behaviour for vanilla objects
+		wireConnectors.put(Blocks.REDSTONE_WIRE, WireConnectors::isRedstoneWireConnectable);
+		
+		// add behaviour for More Red objects
+		MoreRedAPI.getWireConnectabilityRegistry().put(BlockRegistrar.RED_ALLOY_WIRE.get(), BlockRegistrar.RED_ALLOY_WIRE.get());
 	}
 	
 	public static void onCommonSetup(FMLCommonSetupEvent event)
@@ -165,6 +198,13 @@ public class MoreRed
 	static void afterCommonSetup()
 	{
 		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(MODID, ObjectNames.WIRE_COUNT), WireCountLootFunction.TYPE);
+	}
+
+	void onLoadComplete(FMLLoadCompleteEvent event)
+	{
+		ImmutableMap.Builder<Block, WireConnector> builder = ImmutableMap.builder();
+		this.wireConnectabilities.forEach(builder::put);
+		this.wireConnectabilities = builder.build();
 	}
 	
 	public static void addForgeListeners(IEventBus forgeBus)

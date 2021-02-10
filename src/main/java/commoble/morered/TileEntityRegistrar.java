@@ -1,6 +1,7 @@
 package commoble.morered;
 
 import commoble.morered.wire_post.WirePostTileEntity;
+import commoble.morered.wires.WireTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -15,5 +16,10 @@ public class TileEntityRegistrar
 			BlockRegistrar.REDWIRE_POST.get(),
 			BlockRegistrar.REDWIRE_POST_PLATE.get(),
 			BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get())
+		.build(null));
+	
+	public static final RegistryObject<TileEntityType<WireTileEntity>> WIRE = TILES.register(ObjectNames.WIRE,
+		() -> TileEntityType.Builder.create(WireTileEntity::new,
+			BlockRegistrar.RED_ALLOY_WIRE.get())
 		.build(null));
 }

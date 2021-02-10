@@ -7,10 +7,14 @@ import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.LogicFunction;
 import commoble.morered.plate_blocks.LogicFunctions;
 import commoble.morered.wire_post.AbstractWirePostBlock;
+import commoble.morered.wires.Edge;
+import commoble.morered.wires.WireTileEntity;
 import net.minecraft.block.BlockState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.IBlockDisplayReader;
@@ -120,6 +124,47 @@ public class ColorHandlers
 	
 	public static int getRedAlloyWireBlockTint(BlockState state, IBlockDisplayReader world, BlockPos pos, int tintIndex)
 	{
+		if (tintIndex < 0 || tintIndex > 18) // no tint specified / unused
+			return NO_TINT;
+		if (tintIndex == 0) // reserved for particle, particle tint is hardcoded to 0
+			return UNLIT;
+		TileEntity te = world.getTileEntity(pos);
+		if (te instanceof WireTileEntity)
+		{
+			WireTileEntity wire = (WireTileEntity)te;
+			if (tintIndex < 7) // range is [1,6], indicating a face tint
+			{
+				int side = tintIndex-1;
+				int power = wire.getPower(side);
+				double lerpFactor = power/15D;
+				return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
+			}
+			else // range is [7,18], indicating an edge tint
+			{
+				// average litness from neighbor wires
+				int edgeIndex = tintIndex - 7;
+				Edge edge = Edge.values()[edgeIndex];
+				Direction directionA = edge.sideA;
+				BlockPos neighborPosA = pos.offset(directionA);
+				TileEntity neighborTileA = world.getTileEntity(neighborPosA);
+				if (neighborTileA instanceof WireTileEntity)
+				{
+					WireTileEntity neighborWireA = (WireTileEntity)neighborTileA;
+					Direction directionB = edge.sideB;
+					BlockPos neighborPosB = pos.offset(directionB);
+					TileEntity neighborTileB = world.getTileEntity(neighborPosB);
+					if (neighborTileB instanceof WireTileEntity)
+					{
+						WireTileEntity neighborWireB = (WireTileEntity)neighborTileB;
+						double powerA = neighborWireA.getPower(directionB);
+						double powerB = neighborWireB.getPower(directionA);
+						double averagePower = (powerA + powerB)/2D;
+						double lerpFactor = averagePower/15D;
+						return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
+					}
+				}
+			}
+		}
 		return NO_TINT;
 	}
 }

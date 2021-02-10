@@ -1,7 +1,16 @@
 package commoble.morered.wires;
 
+import java.util.EnumSet;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
+import com.google.common.cache.LoadingCache;
+
+import commoble.morered.TileEntityRegistrar;
+import commoble.morered.api.MoreRedAPI;
+import commoble.morered.api.WireConnector;
+import commoble.morered.util.BlockStateUtil;
 import commoble.morered.util.DirectionHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -13,6 +22,7 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.StateContainer.Builder;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Mirror;
 import net.minecraft.util.Rotation;
@@ -21,7 +31,6 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
@@ -35,7 +44,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 
-public class WireBlock extends Block
+public class WireBlock extends Block implements WireConnector
 {
 	public static final VoxelShape[] NODE_SHAPES_DUNSWE =
 	{
@@ -191,6 +200,18 @@ public class WireBlock extends Block
 	}
 
 	@Override
+	public boolean hasTileEntity(BlockState state)
+	{
+		return true;
+	}
+
+	@Override
+	public TileEntity createTileEntity(BlockState state, IBlockReader world)
+	{
+		return TileEntityRegistrar.WIRE.get().create();
+	}
+
+	@Override
 	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
 		return worldIn instanceof World
@@ -300,6 +321,7 @@ public class WireBlock extends Block
 	
 	// called when a different block instance is replaced with this one
 	// only called on server
+	// called after previous block and TE are removed, but before this block's TE is added
 	@Override
 	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
@@ -325,25 +347,43 @@ public class WireBlock extends Block
 			}
 		}
 		this.updateShapeCache(worldIn, pos);
+		this.updatePower(worldIn, pos, state);
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
-	// called when the block is destroyed or a player removes a wire from a wire block
-	// also called on the client of the breaking player
+	// called when the blockstate at the given pos changes
+	// only called on servers
+	// oldState is a state of this block, newState may or may not be
 	@Override
 	public void onReplaced(BlockState oldState, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		// if this is an empty wire block, remove it if no edges are valid anymore
-		if (this.isEmptyWireBlock(newState))
+		boolean doPowerUpdate = true;
+		if (newState.getBlock() != this) // wire block was completely destroyed
+		{
+			notifyNeighbors(worldIn, pos, newState, EnumSet.allOf(Direction.class));
+			doPowerUpdate = false;
+		}
+		else if (this.isEmptyWireBlock(newState)) // wire block has no attached faces and consists only of fake wire edges
 		{
 			long edgeFlags = getEdgeFlags(worldIn,pos);
-			if (edgeFlags == 0)
+			if (edgeFlags == 0)	// if we don't need to be rendering any edges, set wire block to air
 			{
+				// removing the block will call onReplaced again, but using the newBlock != this condition
 				worldIn.removeBlock(pos, false);
 			}
+			else
+			{
+				// so only notify neighbors if we *don't* completely remove the block
+				notifyNeighbors(worldIn, pos, newState, EnumSet.allOf(Direction.class));
+			}
+			doPowerUpdate = false;
 		}
 		this.updateShapeCache(worldIn, pos);
 		super.onReplaced(oldState, worldIn, pos, newState, isMoving);
+		// if the new state is still a wire block and has at least one wire in it, do a power update
+		if (doPowerUpdate)
+			this.updatePower(worldIn, pos, newState);
 	}
 
 	// called when a neighboring blockstate changes, not called on the client
@@ -371,11 +411,105 @@ public class WireBlock extends Block
 		}
 
 		this.updateShapeCache(worldIn, pos);
+		this.updatePower(worldIn, pos, state);
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
 	}
 	
 	
 	
+	@Override
+	public boolean canProvidePower(BlockState state)
+	{
+		return !this.isEmptyWireBlock(state);
+	}
+
+	@Override
+	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction directionFromNeighbor)
+	{
+		// connectability is fundamentally sided
+		// if no side is supplied, we can't connect
+		if (directionFromNeighbor == null)
+			return false;
+		
+		Direction directionToNeighbor = directionFromNeighbor.getOpposite();
+		int side = directionToNeighbor.ordinal();
+		
+		// if we have a wire attached to the given side, we can connect
+		if (state.get(INTERIOR_FACES[side]))
+			return true;
+		
+		// otherwise, check the four orthagonal faces relative to the neighbor block
+		// this.canConnectRedstone is used when the other state wants to know whether it can potentially receive redstone from this block
+		for (int subSide = 0; subSide < 4; subSide++)
+		{
+			int orthagonalSide = DirectionHelper.uncompressSecondSide(side, subSide);
+			// if the projected neighbor shape entirely overlaps the line shape,
+			// then the neighbor shape can be connected to by the wire
+			// we can test this by doing an ONLY_SECOND comparison on the shapes
+			// if this returns true, then there are places where the second shape is not overlapped by the first
+			// so if this returns false, then we can proceed
+			if (state.get(INTERIOR_FACES[orthagonalSide]))
+			{
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	// the difference between strong power and weak power is mostly to do with the way power is conducted through solid blocks
+	// when the world is queried for power output from a position, it checks if that position is a solid cube
+		// forge patches the world to check shouldCheckWeakPower so blocks can "conduct" indirect power even if they're not a solid cube
+	// if the block isn't a solid cube / doesn't conduct, we check weak power output of the block
+	// if the block is a solid cube / does conduct, we check strong power output of blocks adjacent to the cube
+	// so generally, if we supply strong power, we should also supply weak power for consistency
+	// but if we supply weak power, we don't necessarily have to supply strong power
+
+	// get "immediate power"
+	@Override
+	public int getWeakPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
+	{
+		return this.getStrongPower(state, world, pos, directionFromNeighbor);
+	}
+
+	// get the power that can be conducted through solid blocks
+	@Override
+	public int getStrongPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
+	{
+//		return 0;
+		// power is stored in the TE (because storing it in 16 states per side is too many state combinations)
+		// if we don't have a TE, we have no power
+		TileEntity te = world.getTileEntity(pos);
+		if (!(te instanceof WireTileEntity))
+			return 0;
+		WireTileEntity wire = (WireTileEntity)te;
+		
+		Direction directionToNeighbor = directionFromNeighbor.getOpposite();
+		int side = directionToNeighbor.ordinal();
+		
+		// if we have a wire attached on the given side, always use the power value of that wire
+		if (state.get(INTERIOR_FACES[side]))
+		{
+			return wire.getPower(side);
+		}
+		
+		// otherwise, check the four orthagonal attachment faces and use the highest power of the side-connectable wires
+		BlockPos neighborPos = pos.offset(directionToNeighbor);
+		BlockState neighborState = world.getBlockState(neighborPos);
+		WireConnector connector = MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborState.getBlock(), MoreRedAPI.getDefaultWireConnector());
+		int output = 0;
+		for (int i=0; i<4; i++)
+		{
+			int attachmentSide = DirectionHelper.uncompressSecondSide(side, i);
+			Direction attachmentDirection = Direction.byIndex(attachmentSide);
+			if (state.get(INTERIOR_FACES[attachmentSide]) && connector.canConnectToAdjacentWire(world, pos, state, attachmentDirection, directionFromNeighbor, neighborPos, neighborState))
+			{
+				output = Math.max(output, wire.getPower(attachmentSide));
+			}
+		}
+		return output;
+	}
+
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
@@ -427,7 +561,12 @@ public class WireBlock extends Block
 	
 	public void updateShapeCache(World world, BlockPos pos)
 	{
-		VoxelCache.get(world).shapesByPos.invalidate(pos);
+		LoadingCache<BlockPos, VoxelShape> cache = VoxelCache.get(world).shapesByPos;
+		cache.invalidate(pos);
+		for (int i=0; i<6; i++)
+		{
+			cache.invalidate(pos.offset(Direction.byIndex(i)));
+		}
 		if (world instanceof ServerWorld)
 		{
 			WireUpdateBuffer.get((ServerWorld)world).enqueue(pos);
@@ -561,6 +700,8 @@ public class WireBlock extends Block
 				removedBlock.onPlayerDestroy(world, pos, removedState);
 			}
 		}
+		
+		this.updateShapeCache(world, pos);
 	}
 	
 
@@ -585,6 +726,8 @@ public class WireBlock extends Block
 		// 6*4 = 24, we have 24 boolean properties, so we have 2^24 different possible shapes
 		// we can store these in a bit pattern for efficient keying
 		long result = 0;
+		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
+		WireConnector defaultConnector = MoreRedAPI.getDefaultWireConnector();
 		for (int side = 0; side < 6; side++)
 		{
 			// we have to have a wire attached to a side to connect to secondary sides
@@ -592,52 +735,60 @@ public class WireBlock extends Block
 			if (state.get(attachmentSide))
 			{
 				result |= (1L << side);
+				Direction attachmentDirection = Direction.byIndex(side);
 				for (int subSide = 0; subSide < 4; subSide++)
 				{
 					int secondaryOrdinal = DirectionHelper.uncompressSecondSide(side, subSide);
 					Direction secondaryDir = Direction.byIndex(secondaryOrdinal);
-					Block thisBlock = state.getBlock();
+					Direction directionToWire = secondaryDir.getOpposite();
+//					Block thisBlock = state.getBlock();
 					BlockPos neighborPos = pos.offset(secondaryDir);
 					BlockState neighborState = world.getBlockState(neighborPos);
 					Block neighborBlock = neighborState.getBlock();
-					boolean isNeighborWire = neighborBlock == thisBlock;
+//					boolean isNeighborWire = neighborBlock == thisBlock;
 					// first, check if the neighbor state is a wire that shares this attachment side
-					// TODO filter out wire block connectability for different types of wires
-					if (isNeighborWire && neighborState.get(attachmentSide))
+					if (wireConnectors.getOrDefault(neighborBlock, defaultConnector)
+						.canConnectToAdjacentWire(world, pos, state, attachmentDirection, directionToWire, neighborPos, neighborState))
 					{
 						result |= (1L << (side*4 + subSide + 6));
 					}
-					// otherwise, check if we can connect through a wire edge
-					else if (isNeighborWire || neighborState.isAir())
-					{
-						Direction primaryDir = Direction.byIndex(side);
-						BlockPos diagonalPos = neighborPos.offset(primaryDir);
-						BlockState diagonalState = world.getBlockState(diagonalPos);
-						if (diagonalState.getBlock() == thisBlock)
-						{
-							Direction diagonalAttachmentDir = secondaryDir.getOpposite();
-							if (diagonalState.get(INTERIOR_FACES[diagonalAttachmentDir.ordinal()]))
-							{
-								result |= (1L << (side*4 + subSide + 6));
-							}
-						}
-					}
-					// otherwise, check if we can redstone-connect to the neighbor block
-					else if (neighborState.canConnectRedstone(world, neighborPos, secondaryDir))
-					{
-						VoxelShape lineShape = getLineShape(side, subSide);
-						VoxelShape neighborShape = neighborState.getRenderShape(world, neighborPos); // block support shape
-						VoxelShape projectedNeighborShape = neighborShape.project(secondaryDir.getOpposite());
-						// if the projected neighbor shape entirely overlaps the line shape,
-						// then the neighbor shape can be connected to by the wire
-						// we can test this by doing an ONLY_SECOND comparison on the shapes
-						// if this returns true, then there are places where the second shape is not overlapped by the first
-						// so if this returns false, then we can proceed
-						if (!VoxelShapes.compare(projectedNeighborShape, lineShape, IBooleanFunction.ONLY_SECOND))
-						{
-							result |= (1L << (side*4 + subSide + 6));
-						}
-					}
+					
+//					// TODO filter out wire block connectability for different types of wires
+//					if (isNeighborWire && neighborState.get(attachmentSide))
+//					{
+//						result |= (1L << (side*4 + subSide + 6));
+//					}
+//					// otherwise, check if we can connect through a wire edge
+//					else if (isNeighborWire || neighborState.isAir())
+//					{
+//						Direction primaryDir = Direction.byIndex(side);
+//						BlockPos diagonalPos = neighborPos.offset(primaryDir);
+//						BlockState diagonalState = world.getBlockState(diagonalPos);
+//						if (diagonalState.getBlock() == thisBlock)
+//						{
+//							Direction diagonalAttachmentDir = secondaryDir.getOpposite();
+//							if (diagonalState.get(INTERIOR_FACES[diagonalAttachmentDir.ordinal()]))
+//							{
+//								result |= (1L << (side*4 + subSide + 6));
+//							}
+//						}
+//					}
+//					// otherwise, check if we can redstone-connect to the neighbor block
+//					else if (neighborState.canConnectRedstone(world, neighborPos, secondaryDir))
+//					{
+//						VoxelShape lineShape = getLineShape(side, subSide);
+//						VoxelShape neighborShape = neighborState.getRenderShape(world, neighborPos); // block support shape
+//						VoxelShape projectedNeighborShape = neighborShape.project(secondaryDir.getOpposite());
+//						// if the projected neighbor shape entirely overlaps the line shape,
+//						// then the neighbor shape can be connected to by the wire
+//						// we can test this by doing an ONLY_SECOND comparison on the shapes
+//						// if this returns true, then there are places where the second shape is not overlapped by the first
+//						// so if this returns false, then we can proceed
+//						if (!VoxelShapes.compare(projectedNeighborShape, lineShape, IBooleanFunction.ONLY_SECOND))
+//						{
+//							result |= (1L << (side*4 + subSide + 6));
+//						}
+//					}
 				}
 			}
 		}
@@ -677,5 +828,182 @@ public class WireBlock extends Block
 			}
 		}
 		return shape;
+	}
+
+	@Override
+	public boolean canConnectToAdjacentWire(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos neighborPos,
+		BlockState neighborState)
+	{
+		// this wire can connect to an adjacent wire's subwire if
+		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
+		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
+		// and B) this wire is also attached to the same face
+		if (wireFace.getAxis() != directionToWire.getAxis() && neighborState.get(INTERIOR_FACES[wireFace.ordinal()]))
+			return true;
+		
+		// otherwise, check if we can connect through a wire edge
+		Block wireBlock = wireState.getBlock();
+		if (wireBlock == neighborState.getBlock())
+		{
+			BlockPos diagonalPos = neighborPos.offset(wireFace);
+			BlockState diagonalState = world.getBlockState(diagonalPos);
+			if (diagonalState.getBlock() == wireBlock)
+			{
+				if (diagonalState.get(INTERIOR_FACES[directionToWire.ordinal()]))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	protected void updatePower(World world, BlockPos wirePos, BlockState wireState)
+	{
+		TileEntity te = world.getTileEntity(wirePos);
+		if (!(te instanceof WireTileEntity))
+			return; // if there's no TE then we can't make any updates
+		WireTileEntity wire = (WireTileEntity)te;
+		
+//		EnumSet<Direction> updatedDirections = EnumSet.noneOf(Direction.class);
+		Map<Block,WireConnector> connectors = MoreRedAPI.getWireConnectabilityRegistry();
+		WireConnector defaultConnector = MoreRedAPI.getDefaultWireConnector();
+		
+		BlockPos.Mutable mutaPos = wirePos.toMutable();
+		BlockState[] neighborStates = new BlockState[6];
+		
+		boolean anyPowerUpdated = false;
+		
+		// set of faces needing updates
+		// ONLY faces of attached wires are to be added to this set (check the state before adding)
+		EnumSet<Direction> facesNeedingUpdates = EnumSet.noneOf(Direction.class);
+//		Set<BlockPos> diagonalNeighborsToUpdate = new HashSet<>();
+		boolean attachedFaceStates[] = new boolean[6];
+		for (int attachmentSide=0; attachmentSide<6; attachmentSide++)
+		{
+			if (wireState.get(INTERIOR_FACES[attachmentSide]))
+			{
+				attachedFaceStates[attachmentSide] = true;
+				facesNeedingUpdates.add(Direction.byIndex(attachmentSide));
+			}
+			else
+			{
+				// wire is not attached on this face, ensure power is 0
+				if (wire.setPower(attachmentSide, 0))
+				{	// if we lost power here, do neighbor updates later
+					anyPowerUpdated = true;
+					Direction[] nextUpdateDirs = BlockStateUtil.OUTPUT_TABLE[attachmentSide];
+					for (int i=0; i<4; i++)
+					{
+						Direction nextUpdateDir = nextUpdateDirs[i];
+//						updatedDirections.add(nextUpdateDir);
+					}
+//					updatedDirections.add(Direction.byHorizontalIndex(attachmentSide));
+				}
+			}
+		}
+		
+		int iteration = 0;
+		while (!facesNeedingUpdates.isEmpty())
+		{
+			int attachmentSide = (iteration++) % 6;
+			Direction attachmentDirection = Direction.byIndex(attachmentSide);
+			
+			// if the set of remaining faces doesn't contain the face, skip the rest of the iteration
+			if (!facesNeedingUpdates.remove(attachmentDirection)) 
+				continue;
+			
+			Direction oppositeOfAttachmentDirection = attachmentDirection.getOpposite();
+			// we know there's a wire attached to the face because we checked the state before adding
+			int power = 0;
+			// always get power from attached faces, those are full cubes and may supply conducted power
+			mutaPos.setAndMove(wirePos, attachmentDirection);
+			power = Math.max(power, world.getRedstonePower(mutaPos, attachmentDirection)-1);
+			for (int neighborSide = 0; neighborSide < 6; neighborSide++)
+			{
+				Direction directionToNeighbor = Direction.byIndex(neighborSide);
+				if (directionToNeighbor == oppositeOfAttachmentDirection)
+					continue; // an attached wire can never connect to the neighbor on the opposite side by itself
+				if (directionToNeighbor == attachmentDirection)
+					continue; // we don't want to pick up feedback from the attached solid block
+
+				Direction directionToWire = directionToNeighbor.getOpposite();
+				BlockState neighborState;
+				BlockState neighborStateCheck = neighborStates[neighborSide];
+				mutaPos.setAndMove(wirePos, directionToNeighbor);
+				if (neighborStateCheck == null)
+				{
+					neighborState = world.getBlockState(mutaPos);
+					neighborStates[neighborSide] = neighborState;
+				}
+				else
+				{
+					neighborState = neighborStateCheck;
+				}
+				Block neighborBlock = neighborState.getBlock();
+				WireConnector connector = connectors.getOrDefault(neighborBlock, defaultConnector);
+				if (connector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
+				{
+					// power will always be at least 0 because it started at 0 and we're maxing against that
+					power = Math.max(power, world.getRedstonePower(mutaPos, directionToNeighbor)-1);
+				}
+				if (directionToNeighbor != attachmentDirection)
+				{
+					power = Math.max(power, wire.getPower(neighborSide) - 1);
+				}
+				// if we should check edge connections
+				if (!attachedFaceStates[neighborSide] && neighborBlock instanceof WireBlock && !neighborState.get(INTERIOR_FACES[attachmentSide]))
+				{
+					BlockPos diagonalPos = mutaPos.move(attachmentDirection);
+					BlockState diagonalState = world.getBlockState(mutaPos);
+					int directionToWireSide = directionToWire.ordinal();
+					if (diagonalState.getBlock() instanceof WireBlock && diagonalState.get(INTERIOR_FACES[directionToWireSide]))
+					{
+						TileEntity diagonalTe = world.getTileEntity(diagonalPos);
+						if (diagonalTe instanceof WireTileEntity)
+						{
+							power = Math.max(power, ((WireTileEntity)diagonalTe).getPower(directionToWireSide)-1);
+						}
+					}
+				}
+			}
+			if (wire.setPower(attachmentSide, power))
+			{
+				anyPowerUpdated = true;
+				// mark the face and the four orthagonal faces to it for updates
+				Direction[] nextUpdateDirs = BlockStateUtil.OUTPUT_TABLE[attachmentSide];
+				for (int i=0; i<4; i++)
+				{
+					Direction nextUpdateDir = nextUpdateDirs[i];
+					if (attachedFaceStates[nextUpdateDir.ordinal()])
+					{
+						facesNeedingUpdates.add(nextUpdateDir);
+					}
+//					updatedDirections.add(nextUpdateDir);
+				}
+//				updatedDirections.add(attachmentDirection);
+			}
+			
+		}
+		if (anyPowerUpdated && !world.isRemote)
+		{
+			notifyNeighbors(world, wirePos, wireState, EnumSet.allOf(Direction.class));
+		}
+	}
+	
+	protected static void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections)
+	{
+		BlockPos.Mutable mutaPos = wirePos.toMutable();
+		Block newBlock = newState.getBlock();
+		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
+		{
+			for (Direction dir : updateDirections)
+			{
+				BlockPos neighborPos = mutaPos.setAndMove(wirePos, dir);
+				world.neighborChanged(neighborPos, newBlock, wirePos);
+				world.notifyNeighborsOfStateChange(neighborPos, newBlock);
+//				world.notifyNeighborsOfStateExcept(neighborPos, newBlock, dir.getOpposite());
+			}
+		}
 	}
 }

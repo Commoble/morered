@@ -17,8 +17,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class HexidecrubrometerBlock extends Block
 {
 	public static final IntegerProperty POWER = BlockStateProperties.POWER_0_15;
@@ -63,6 +61,23 @@ public class HexidecrubrometerBlock extends Block
 			.with(READING_FACE, attachFace)
 			.with(ROTATION, horizontalDirectionAwayFromPlayer.getOpposite())
 			.with(POWER, power);
+	}
+
+	// called on the client and server when this block is added to the world
+	// we want to make sure we update our power after this to react to changes in nearby blocks
+	@Override
+	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	{
+		if (oldState.getBlock() != this)
+		{
+			int oldPower = state.get(POWER);
+			int newPower = getInputValue(worldIn,pos,state);
+			if (newPower != oldPower)
+			{
+				worldIn.setBlockState(pos, state.with(POWER, newPower));
+			}
+		}
+		super.onBlockAdded(state, worldIn, pos, oldState, isMoving);
 	}
 
 	// forge method, called when a neighbor calls updateComparatorOutputLevel

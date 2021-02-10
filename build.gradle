@@ -28,6 +28,13 @@ archivesBaseName = "${modid}-${mc_version}"
 
 sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
+sourceSets
+{
+	main
+	api
+	test
+}
+
 minecraft {
     mappings channel: 'snapshot', version: "${mappings_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -42,6 +49,7 @@ minecraft {
             mods {
                 "morered" {
                     source sourceSets.main
+					source sourceSets.api
                 }
             }
         }
@@ -55,6 +63,7 @@ minecraft {
             mods {
                 "morered" {
                     source sourceSets.main
+					source sourceSets.api
                 }
             }
         }
@@ -70,6 +79,7 @@ minecraft {
             mods {
                 "morered" {
                     source sourceSets.main
+					source sourceSets.api
                 }
             }
         }
@@ -78,6 +88,8 @@ minecraft {
 
 configurations {
 	shade
+	apiCompile.extendsFrom(compile)
+	debugCompile.extendsFrom(compile)
 }
 
 repositories {
@@ -95,6 +107,7 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+	implementation sourceSets.api.output
     
     // jei
 	compileOnly fg.deobf("mezz.jei:${jei_branch}:${jei_version}:api")
@@ -112,8 +125,15 @@ dependencies {
 	//runtimeOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}")
 }
 
+test {
+	useJUnitPlatform()
+}
+
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
+	from sourceSets.main.output.classesDirs
+	from sourceSets.api.output.classesDirs
+	from sourceSets.main.output.resourcesDir
     manifest {
         attributes([
             "Specification-Title": "${modid}",
@@ -141,18 +161,62 @@ reobf {
 tasks.build.dependsOn reobfShadowJar
 jar.finalizedBy('reobfShadowJar')
 
+//task javadocJar(type: Jar, dependsOn: javadoc) {
+//	classifier = "javadoc"
+//	from javadoc.destinationDir
+//}
+
+task sourcesJar(type: Jar) {
+	classifier = "sources"
+	from sourceSets.main.allJava
+	from sourceSets.api.allJava
+}
+task apiJar(type: Jar) {
+	classifier = "api"
+	from sourceSets.api.output
+	from sourceSets.api.allJava
+}
+
+// full production jar plus attached sources for debugging
+task debugJar(type: Jar) {
+	classifier = "debug"
+	from sourceSets.main.output
+	from sourceSets.main.allJava
+	from sourceSets.api.output
+	from sourceSets.api.allJava
+	// we have to exclude this from the compileOnly dependency,
+	// or mixins from this mod don't apply when we run the depending mod, weirdly
+	exclude "META-INF/mods.toml"
+}
+
+artifacts {
+	//archives javadocJar
+	archives sourcesJar
+	archives apiJar
+	archives debugJar
+}
+
+// run "gradlew build publish" to build jars and generate a maven repo for them
+// run "gradlew build" to build the jars without mavening them
 publishing {
     publications {
         mavenJava(MavenPublication) {
+			artifactId project.archivesBaseName
             artifact jar
+			artifact apiJar
+			artifact sourcesJar
+			//artifact javadocJar
+			artifact debugJar
         }
     }
     repositories {
         maven {
-            url "file:///${project.projectDir}/mcmodsrepo"
+			name="localMaven"
+            url "file:///${project.projectDir}/maven"
         }
     }
 }
+
 apply plugin: 'org.spongepowered.mixin'
 
 mixin {

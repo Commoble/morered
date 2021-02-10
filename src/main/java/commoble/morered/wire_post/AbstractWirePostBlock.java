@@ -33,8 +33,6 @@ import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public abstract class AbstractWirePostBlock extends Block
 {
 	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
@@ -312,7 +310,7 @@ public abstract class AbstractWirePostBlock extends Block
 			{
 				BlockPos neighborPos = pos.offset(dir);
 				world.neighborChanged(neighborPos, this, pos);
-				world.notifyNeighborsOfStateExcept(neighborPos, this, dir);
+				world.notifyNeighborsOfStateExcept(neighborPos, this, dir.getOpposite());
 			}
 			WorldHelper.getTileEntityAt(WirePostTileEntity.class, world, pos).ifPresent(te -> te.notifyConnections());
 		}
