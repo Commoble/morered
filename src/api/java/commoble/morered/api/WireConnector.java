@@ -6,6 +6,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
+import net.minecraft.world.World;
 
 @FunctionalInterface
 public interface WireConnector
@@ -25,4 +26,22 @@ public interface WireConnector
 	 * @return Whether the wire in the given face at the given position can be connected to the given neighboring block
 	 */
 	public boolean canConnectToAdjacentWire(@Nonnull IBlockReader world, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToWire, @Nonnull BlockPos thisNeighborPos, @Nonnull BlockState thisNeighborState);
+	
+	/**
+	 * Gets the "expanded power" of the block this wire connector is assigned to.
+	 * Internally, wire blocks use 0-31 instead of 0-15 for power storage (outputting half of this value to non-wires)
+	 * letting them transmit power twice as far 
+	 * @param world The world we're doing power queries in
+	 * @param wirePos The position of a wire block
+	 * @param wireState The blockstate of the wire block
+	 * @param wireFace The attachment face of the subwire we're supplying power to
+	 * @param directionToThis The direction from wirePos to neighborPos (e.g. if wirepos is west of neighborpos, this is EAST)
+	 * @param thisNeighborPos The position of this neighbor block we're querying for power
+	 * @param thisNeighborState The position of this neighbor state we're querying for power
+	 * @return a power value in the range [0, 31]
+	 */
+	public default int getExpandedPower(@Nonnull World world, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToThis, @Nonnull BlockPos thisNeighborPos, @Nonnull BlockState thisNeighborState)
+	{
+		return world.getRedstonePower(thisNeighborPos, directionToThis) * 2;
+	}
 }

@@ -476,6 +476,11 @@ public class WireBlock extends Block implements WireConnector
 	@Override
 	public int getStrongPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
 	{
+		return this.getPower(state,world,pos,directionFromNeighbor,false);
+	}
+	
+	protected int getPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor, boolean expand)
+	{
 //		return 0;
 		// power is stored in the TE (because storing it in 16 states per side is too many state combinations)
 		// if we don't have a TE, we have no power
@@ -490,7 +495,8 @@ public class WireBlock extends Block implements WireConnector
 		// if we have a wire attached on the given side, always use the power value of that wire
 		if (state.get(INTERIOR_FACES[side]))
 		{
-			return wire.getPower(side);
+			int power = wire.getPower(side);
+			return expand ? power : power/2;
 		}
 		
 		// otherwise, check the four orthagonal attachment faces and use the highest power of the side-connectable wires
@@ -507,7 +513,7 @@ public class WireBlock extends Block implements WireConnector
 				output = Math.max(output, wire.getPower(attachmentSide));
 			}
 		}
-		return output;
+		return expand ? output : output/2;
 	}
 
 	@Override
@@ -739,6 +745,8 @@ public class WireBlock extends Block implements WireConnector
 				for (int subSide = 0; subSide < 4; subSide++)
 				{
 					int secondaryOrdinal = DirectionHelper.uncompressSecondSide(side, subSide);
+					if (state.get(INTERIOR_FACES[secondaryOrdinal]))
+						continue; // dont add lines if the state already has an elbow here
 					Direction secondaryDir = Direction.byIndex(secondaryOrdinal);
 					Direction directionToWire = secondaryDir.getOpposite();
 //					Block thisBlock = state.getBlock();
@@ -858,6 +866,19 @@ public class WireBlock extends Block implements WireConnector
 		return false;
 	}
 	
+	@Override
+	public int getExpandedPower(World world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionFromWire, BlockPos thisNeighborPos,
+		BlockState thisNeighborState)
+	{
+		TileEntity te = world.getTileEntity(thisNeighborPos);
+		if (!(te instanceof WireTileEntity))
+			return 0; // if there's no TE then we can't make power
+		WireTileEntity wire = (WireTileEntity)te;
+		return thisNeighborState.get(INTERIOR_FACES[wireFace.ordinal()])
+			? wire.getPower(wireFace)
+			: 0;
+	}
+
 	protected void updatePower(World world, BlockPos wirePos, BlockState wireState)
 	{
 		TileEntity te = world.getTileEntity(wirePos);
@@ -892,12 +913,12 @@ public class WireBlock extends Block implements WireConnector
 				if (wire.setPower(attachmentSide, 0))
 				{	// if we lost power here, do neighbor updates later
 					anyPowerUpdated = true;
-					Direction[] nextUpdateDirs = BlockStateUtil.OUTPUT_TABLE[attachmentSide];
-					for (int i=0; i<4; i++)
-					{
-						Direction nextUpdateDir = nextUpdateDirs[i];
+//					Direction[] nextUpdateDirs = BlockStateUtil.OUTPUT_TABLE[attachmentSide];
+//					for (int i=0; i<4; i++)
+//					{
+//						Direction nextUpdateDir = nextUpdateDirs[i];
 //						updatedDirections.add(nextUpdateDir);
-					}
+//					}
 //					updatedDirections.add(Direction.byHorizontalIndex(attachmentSide));
 				}
 			}
@@ -918,7 +939,7 @@ public class WireBlock extends Block implements WireConnector
 			int power = 0;
 			// always get power from attached faces, those are full cubes and may supply conducted power
 			mutaPos.setAndMove(wirePos, attachmentDirection);
-			power = Math.max(power, world.getRedstonePower(mutaPos, attachmentDirection)-1);
+			power = Math.max(power, world.getRedstonePower(mutaPos, attachmentDirection)*2 - 1);
 			for (int neighborSide = 0; neighborSide < 6; neighborSide++)
 			{
 				Direction directionToNeighbor = Direction.byIndex(neighborSide);
@@ -945,7 +966,7 @@ public class WireBlock extends Block implements WireConnector
 				if (connector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
 				{
 					// power will always be at least 0 because it started at 0 and we're maxing against that
-					power = Math.max(power, world.getRedstonePower(mutaPos, directionToNeighbor)-1);
+					power = Math.max(power, connector.getExpandedPower(world, wirePos, wireState, attachmentDirection, directionToNeighbor, mutaPos, neighborState)-1);
 				}
 				if (directionToNeighbor != attachmentDirection)
 				{
