@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 
@@ -100,7 +99,7 @@ public class ColoredCablesDataProvider implements IDataProvider
 			ResourceLocation partsModel = new ResourceLocation(modid, String.format("block/%s_parts", blockLocation));
 			ResourceLocation nodeModel = new ResourceLocation(modid, String.format("block/%s_node", blockLocation));
 			ResourceLocation elbowModel = new ResourceLocation(modid, String.format("block/%s_elbow", blockLocation));
-			new JsonDataProvider<MultipartBlockStateDefinition>(new GsonBuilder().setPrettyPrinting().create(),generator, ResourceType.ASSETS, "blockstates", MultipartBlockStateDefinition.CODEC)
+			new JsonDataProvider<MultipartBlockStateDefinition>(generator, ResourceType.ASSETS, "blockstates", MultipartBlockStateDefinition.CODEC)
 				.with(blockid, MultipartBlockStateDefinition.builder()
 					.withCase(CaseDefinition.builder(partsModel,0,0))
 					.withCase(CaseDefinition.builder(nodeModel,0,0)
