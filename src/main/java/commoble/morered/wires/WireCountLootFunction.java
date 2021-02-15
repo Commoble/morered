@@ -30,9 +30,9 @@ public class WireCountLootFunction implements ILootFunction, ILootSerializer<Wir
 	{
 		BlockState state = context.get(LootParameters.BLOCK_STATE);
 		Block block = state.getBlock();
-		if (block instanceof WireBlock)
+		if (block instanceof AbstractWireBlock)
 		{
-			input.setCount(((WireBlock)block).getWireCount(state));
+			input.setCount(((AbstractWireBlock)block).getWireCount(state));
 		}
 		return input;
 	}

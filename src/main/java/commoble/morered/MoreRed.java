@@ -27,7 +27,7 @@ import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.SyncPostsInChunkPacket;
 import commoble.morered.wire_post.WireBreakPacket;
 import commoble.morered.wire_post.WirePostTileEntity;
-import commoble.morered.wires.WireBlock;
+import commoble.morered.wires.AbstractWireBlock;
 import commoble.morered.wires.WireConnectors;
 import commoble.morered.wires.WireCountLootFunction;
 import commoble.morered.wires.WireUpdateBuffer;
@@ -166,6 +166,10 @@ public class MoreRed
 		
 		// add behaviour for More Red objects
 		MoreRedAPI.getWireConnectabilityRegistry().put(BlockRegistrar.RED_ALLOY_WIRE.get(), BlockRegistrar.RED_ALLOY_WIRE.get());
+		for (int i=0; i<16; i++)
+		{
+			MoreRedAPI.getWireConnectabilityRegistry().put(BlockRegistrar.NETWORK_CABLES[i].get(), BlockRegistrar.NETWORK_CABLES[i].get());	
+		}
 	}
 	
 	public static void onCommonSetup(FMLCommonSetupEvent event)
@@ -196,6 +200,15 @@ public class MoreRed
 	}
 	
 	static void afterCommonSetup()
+	{
+		registerToVanillaRegistries();
+	}
+	
+	/**
+	 * Register things that have to be registered to vanilla registries in common setup
+	 * datagen must call this separately since common setup doesn't run
+	 */
+	public static void registerToVanillaRegistries()
 	{
 		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(MODID, ObjectNames.WIRE_COUNT), WireCountLootFunction.TYPE);
 	}
@@ -281,7 +294,7 @@ public class MoreRed
 		BlockPos pos = event.getPos();
 		BlockState state = world.getBlockState(pos);
 		Block block = state.getBlock();
-		if (!(block instanceof WireBlock))
+		if (!(block instanceof AbstractWireBlock))
 			return;
 		PlayerEntity player = event.getPlayer();
 		if (!(player instanceof ServerPlayerEntity))
@@ -305,7 +318,7 @@ public class MoreRed
 		if (distSquared > reachDistance*reachDistance)
 			return;
 		
-		WireBlock wireBlock = (WireBlock) block;
+		AbstractWireBlock wireBlock = (AbstractWireBlock) block;
 		
 		// we have a specific enough situation to take over the event from this point forward
 		event.setCanceled(true);

@@ -1,5 +1,10 @@
 package commoble.morered;
 
+import java.util.Arrays;
+
+import net.minecraft.item.DyeColor;
+import net.minecraft.util.Util;
+
 public class ObjectNames
 {
 	// blocks and blockitems
@@ -27,6 +32,7 @@ public class ObjectNames
 	
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";
+	public static final String[] NETWORK_CABLES = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_network_cable"));
 	
 	public static final String HEXIDECRUBROMETER = "hexidecrubrometer";
 

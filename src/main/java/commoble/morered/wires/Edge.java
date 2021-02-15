@@ -56,7 +56,7 @@ public enum Edge
 	 * @param pos The position of a wire or air block
 	 * @return true if this edge should be rendered for this block
 	 */
-	public boolean shouldEdgeRender(IBlockReader world, BlockPos pos)
+	public boolean shouldEdgeRender(IBlockReader world, BlockPos pos, AbstractWireBlock centerWireBlock)
 	{
 		// suppose we're checking the edge for down-north
 		// we want to render this edge if the block below us is a wire block attached to north,
@@ -64,13 +64,13 @@ public enum Edge
 		// we also want to make sure we don't render an edge if THIS wire block is attached on either of those faces
 		// can we assume this is true?
 		// if both of the neighboring blocks are wire blocks, then they have non-solid faces, so this is true
-		BooleanProperty propB = WireBlock.INTERIOR_FACES[this.sideB.ordinal()];
+		BooleanProperty propB = AbstractWireBlock.INTERIOR_FACES[this.sideB.ordinal()];
 		BlockState neighborStateA = world.getBlockState(pos.offset(this.sideA));
-		if (neighborStateA.getBlock() instanceof WireBlock && neighborStateA.get(propB))
+		if (neighborStateA.getBlock() == centerWireBlock && neighborStateA.get(propB))
 		{
-			BooleanProperty propA = WireBlock.INTERIOR_FACES[this.sideA.ordinal()];
+			BooleanProperty propA = AbstractWireBlock.INTERIOR_FACES[this.sideA.ordinal()];
 			BlockState neighborStateB = world.getBlockState(pos.offset(this.sideB));
-			return neighborStateB.getBlock() instanceof WireBlock && neighborStateB.get(propA);
+			return neighborStateB.getBlock() == centerWireBlock && neighborStateB.get(propA);
 		}
 		return false;
 	}

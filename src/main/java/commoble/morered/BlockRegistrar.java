@@ -1,21 +1,27 @@
 package commoble.morered;
 
+import java.util.Arrays;
+
 import commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.wire_post.WirePostBlock;
 import commoble.morered.wire_post.WirePostPlateBlock;
+import commoble.morered.wires.NetworkCableBlock;
 import commoble.morered.wires.WireBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
+import net.minecraft.item.DyeColor;
+import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
+@SuppressWarnings("unchecked")
 public class BlockRegistrar
 {
 	// logic function blocks are registered elsewhere, see LogicGateType
@@ -44,4 +50,9 @@ public class BlockRegistrar
 
 	public static final RegistryObject<WireBlock> RED_ALLOY_WIRE = BLOCKS.register(ObjectNames.RED_ALLOY_WIRE, 
 		() -> new WireBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.RED).doesNotBlockMovement().zeroHardnessAndResistance()));
+
+	public static final RegistryObject<NetworkCableBlock>[] NETWORK_CABLES = Util.make((RegistryObject<NetworkCableBlock>[])new RegistryObject[16], array ->
+		Arrays.setAll(array, i -> BLOCKS.register(ObjectNames.NETWORK_CABLES[i],
+			() -> new NetworkCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, DyeColor.values()[i].getMapColor()).doesNotBlockMovement().zeroHardnessAndResistance()))));
+	
 }

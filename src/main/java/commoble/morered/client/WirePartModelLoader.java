@@ -15,7 +15,7 @@ import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 
 import commoble.morered.client.WirePartModelLoader.WirePartGeometry;
-import commoble.morered.wires.WireBlock;
+import commoble.morered.wires.AbstractWireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.BakedQuad;
@@ -214,9 +214,9 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		public IModelData getModelData(IBlockDisplayReader world, BlockPos pos, BlockState state, IModelData tileData)
 		{
 			Block block = state.getBlock();
-			if (block instanceof WireBlock)
+			if (block instanceof AbstractWireBlock)
 			{
-				return new WirePartModelLoader.WireModelData(((WireBlock)block).getExpandedShapeIndex(state, world, pos));
+				return new WirePartModelLoader.WireModelData(((AbstractWireBlock)block).getExpandedShapeIndex(state, world, pos));
 			}
 			else
 			{

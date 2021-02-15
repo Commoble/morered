@@ -49,7 +49,7 @@ public class WireBlockItem extends BlockItem
 		{
 			BlockState existingPlacePosState = world.getBlockState(placePos);
 			Direction attachmentSide = activatedFace.getOpposite();
-			BooleanProperty sideProperty = WireBlock.INTERIOR_FACES[attachmentSide.ordinal()];
+			BooleanProperty sideProperty = AbstractWireBlock.INTERIOR_FACES[attachmentSide.ordinal()];
 			// if the position of placement contains the same wire type this blockitem places,
 			// but we don't have a wire on the given face,
 			if (existingPlacePosState.getBlock() == this.getBlock()

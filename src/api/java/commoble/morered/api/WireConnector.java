@@ -42,6 +42,6 @@ public interface WireConnector
 	 */
 	public default int getExpandedPower(@Nonnull World world, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToThis, @Nonnull BlockPos thisNeighborPos, @Nonnull BlockState thisNeighborState)
 	{
-		return world.getRedstonePower(thisNeighborPos, directionToThis) * 2;
+		return thisNeighborState.getWeakPower(world, thisNeighborPos, directionToThis) * 2;
 	}
 }

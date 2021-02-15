@@ -1,0 +1,20 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "www",
+    "w#w",
+    "www"
+  ],
+  "key": {
+    "w": {
+      "tag": "morered:red_alloy_wire"
+    },
+    "#": {
+      "tag": "forge:wools/orange"
+    }
+  },
+  "result": {
+    "item": "morered:orange_network_cable",
+    "count": 8
+  }
+}

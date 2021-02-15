@@ -15,8 +15,8 @@ import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.util.BlockStateUtil;
+import commoble.morered.wires.AbstractWireBlock;
 import commoble.morered.wires.VoxelCache;
-import commoble.morered.wires.WireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
@@ -132,6 +132,18 @@ public class ClientEvents
 				registry.put(mrl, new WirePartModelLoader.WireBlockModel(model));
 			}
 		});
+		for (int i=0; i<16; i++)
+		{
+			BlockRegistrar.NETWORK_CABLES[i].get().getStateContainer().getValidStates().forEach(state ->
+			{
+				ModelResourceLocation mrl = BlockModelShapes.getModelLocation(state);
+				IBakedModel model = registry.get(mrl);
+				if (model != null)
+				{
+					registry.put(mrl, new WirePartModelLoader.WireBlockModel(model));
+				}
+			});
+		}
 	}
 	
 	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)
@@ -208,12 +220,12 @@ public class ClientEvents
 			BlockPos pos = blockResult.getPos();
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();
-			if (block instanceof WireBlock)
+			if (block instanceof AbstractWireBlock)
 			{
 				// we'll be taking over the event from here onward
 				event.setCanceled(true);
 				
-				WireBlock wireBlock = (WireBlock)block;
+				AbstractWireBlock wireBlock = (AbstractWireBlock)block;
 				PlayerController controller = mc.playerController;
 				ClientPlayerControllerAccess controllerAccess = (ClientPlayerControllerAccess)controller;
 				GameType gameType = controller.getCurrentGameType();
@@ -257,7 +269,7 @@ public class ClientEvents
 	// more parity with existing destroy-clicked-block code
 	// these checks are run after the digging packet is sent
 	// the existing code checks some things that are already checked above, so we'll skip those
-	private static void destroyClickedWireBlock(WireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, ClientPlayerControllerAccess controllerAccess, Direction interiorSide)
+	private static void destroyClickedWireBlock(AbstractWireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, ClientPlayerControllerAccess controllerAccess, Direction interiorSide)
 	{
 		ItemStack heldItemStack = player.getHeldItemMainhand();
 		if (heldItemStack.onBlockStartBreak(pos, player))

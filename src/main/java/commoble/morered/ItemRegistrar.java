@@ -1,5 +1,7 @@
 package commoble.morered;
 
+import java.util.Arrays;
+
 import commoble.morered.wire_post.WireSpoolItem;
 import commoble.morered.wires.WireBlockItem;
 import net.minecraft.block.Block;
@@ -7,6 +9,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -44,6 +47,11 @@ public class ItemRegistrar
 	public static final RegistryObject<BlockItem> RED_ALLOY_WIRE = ITEMS.register(ObjectNames.RED_ALLOY_WIRE,
 		() -> new WireBlockItem(BlockRegistrar.RED_ALLOY_WIRE.get(), new Item.Properties().group(CREATIVE_TAB)));
 	
+	@SuppressWarnings("unchecked")
+	public static final RegistryObject<WireBlockItem>[] NETWORK_CABLES = Util.make((RegistryObject<WireBlockItem>[])new RegistryObject[16], array ->
+		Arrays.setAll(array, i -> ITEMS.register(ObjectNames.NETWORK_CABLES[i],
+			() -> new WireBlockItem(BlockRegistrar.NETWORK_CABLES[i].get(), new Item.Properties().group(CREATIVE_TAB)))));
+
 	
 	public static final RegistryObject<BlockItem> registerBlockItem(String name, RegistryObject<? extends Block> block)
 	{
