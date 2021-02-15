@@ -37,6 +37,8 @@ sourceSets
 	generated
 }
 
+sourceSets.main.resources { srcDirs += sourceSets.generated.resources.srcDirs }
+
 minecraft {
     mappings channel: 'snapshot', version: "${mappings_version}"
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
@@ -52,7 +54,6 @@ minecraft {
                 "morered" {
                     source sourceSets.main
 					source sourceSets.api
-					source sourceSets.generated
                 }
             }
         }
@@ -67,7 +68,6 @@ minecraft {
                 "morered" {
                     source sourceSets.main
 					source sourceSets.api
-					source sourceSets.generated
                 }
             }
         }
@@ -88,7 +88,6 @@ minecraft {
                 "morered" {
                     source sourceSets.main
 					source sourceSets.api
-					source sourceSets.generated
                 }
             }
         }
@@ -143,7 +142,6 @@ jar {
 	from sourceSets.main.output.classesDirs
 	from sourceSets.api.output.classesDirs
 	from sourceSets.main.output.resourcesDir
-	from sourceSets.generated.output.resourcesDir
     manifest {
         attributes([
             "Specification-Title": "${modid}",
@@ -194,7 +192,6 @@ task debugJar(type: Jar) {
 	from sourceSets.main.allJava
 	from sourceSets.api.output
 	from sourceSets.api.allJava
-	from sourceSets.generated.output.resourcesDir
 	// we have to exclude this from the compileOnly dependency,
 	// or mixins from this mod don't apply when we run the depending mod, weirdly
 	exclude "META-INF/mods.toml"

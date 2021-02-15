@@ -3,10 +3,15 @@ package commoble.morered.wires;
 import com.google.common.cache.LoadingCache;
 
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
+import net.minecraft.item.DyeColor;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
+import net.minecraft.world.IBlockReader;
 
-public class NetworkCableBlock extends PoweredWireBlock
+public class ColoredCableBlock extends PoweredWireBlock
 {
 	public static final VoxelShape[] NODE_SHAPES_DUNSWE =
 	{
@@ -71,20 +76,23 @@ public class NetworkCableBlock extends PoweredWireBlock
 	public static final VoxelShape[] SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(NODE_SHAPES_DUNSWE, LINE_SHAPES);
 	
 	public static final LoadingCache<Long, VoxelShape> VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(SHAPES_BY_STATE_INDEX, LINE_SHAPES);
+	
+	private final DyeColor color; public DyeColor getDyeColor() { return this.color; }
 
-	public NetworkCableBlock(Properties properties)
+	public ColoredCableBlock(Properties properties, DyeColor color)
 	{
 		super(properties, SHAPES_BY_STATE_INDEX, RAYTRACE_BACKBOARDS, VOXEL_CACHE, false);
-		// the "default" state has to be the empty state so we can build it up one face at a time
-		this.setDefaultState(this.getStateContainer().getBaseState()
-			.with(DOWN, false)
-			.with(UP, false)
-			.with(NORTH, false)
-			.with(SOUTH, false)
-			.with(WEST, false)
-			.with(EAST, false)
-			);
+		this.color = color;
 	}
-
+	
+	@Override
+	public boolean canConnectToAdjacentWire(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos neighborPos,
+		BlockState neighborState)
+	{
+		Block wireBlock = wireState.getBlock();
+		return wireBlock instanceof ColoredCableBlock && ((ColoredCableBlock)wireBlock).getDyeColor() != this.getDyeColor()
+			? false
+			: super.canConnectToAdjacentWire(world, wirePos, wireState, wireFace, directionToWire, neighborPos, neighborState);
+	}
 	
 }

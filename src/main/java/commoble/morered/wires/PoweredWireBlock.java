@@ -21,7 +21,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public abstract class PoweredWireBlock extends AbstractWireBlock
+public abstract class PoweredWireBlock extends AbstractWireBlock implements WireConnector
 {
 	
 	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower)
@@ -140,6 +140,34 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			}
 		}
 		return expand ? output : output/2;
+	}
+
+	@Override
+	public boolean canConnectToAdjacentWire(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos neighborPos,
+		BlockState neighborState)
+	{
+		// this wire can connect to an adjacent wire's subwire if
+		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
+		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
+		// and B) this wire is also attached to the same face
+		if (wireFace.getAxis() != directionToWire.getAxis() && neighborState.get(INTERIOR_FACES[wireFace.ordinal()]))
+			return true;
+		
+		// otherwise, check if we can connect through a wire edge
+		Block wireBlock = wireState.getBlock();
+		if (wireBlock == neighborState.getBlock())
+		{
+			BlockPos diagonalPos = neighborPos.offset(wireFace);
+			BlockState diagonalState = world.getBlockState(diagonalPos);
+			if (diagonalState.getBlock() == wireBlock)
+			{
+				if (diagonalState.get(INTERIOR_FACES[directionToWire.ordinal()]))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	@Override

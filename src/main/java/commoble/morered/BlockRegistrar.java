@@ -8,7 +8,7 @@ import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.wire_post.WirePostBlock;
 import commoble.morered.wire_post.WirePostPlateBlock;
-import commoble.morered.wires.NetworkCableBlock;
+import commoble.morered.wires.ColoredCableBlock;
 import commoble.morered.wires.WireBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
@@ -51,8 +51,8 @@ public class BlockRegistrar
 	public static final RegistryObject<WireBlock> RED_ALLOY_WIRE = BLOCKS.register(ObjectNames.RED_ALLOY_WIRE, 
 		() -> new WireBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.RED).doesNotBlockMovement().zeroHardnessAndResistance()));
 
-	public static final RegistryObject<NetworkCableBlock>[] NETWORK_CABLES = Util.make((RegistryObject<NetworkCableBlock>[])new RegistryObject[16], array ->
+	public static final RegistryObject<ColoredCableBlock>[] NETWORK_CABLES = Util.make((RegistryObject<ColoredCableBlock>[])new RegistryObject[16], array ->
 		Arrays.setAll(array, i -> BLOCKS.register(ObjectNames.NETWORK_CABLES[i],
-			() -> new NetworkCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, DyeColor.values()[i].getMapColor()).doesNotBlockMovement().zeroHardnessAndResistance()))));
+			() -> new ColoredCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, DyeColor.values()[i].getMapColor()).doesNotBlockMovement().zeroHardnessAndResistance(), DyeColor.values()[i]))));
 	
 }

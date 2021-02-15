@@ -182,7 +182,7 @@ public class ColoredCablesDataProvider implements IDataProvider
 				protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables()
 				{
 					return ImmutableList.of(Pair.of(
-						() -> context -> context.accept(block.getRegistryName(), LootTable.builder()
+						() -> context -> context.accept(new ResourceLocation(modid, "blocks/"+blockLocation), LootTable.builder()
 							.addLootPool(LootPool.builder().rolls(ConstantRange.of(1))
 								.addEntry(ItemLootEntry.builder(item)
 									.acceptFunction(() -> WireCountLootFunction.INSTANCE))
