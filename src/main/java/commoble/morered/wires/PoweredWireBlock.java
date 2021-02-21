@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.google.common.cache.LoadingCache;
 
 import commoble.morered.TileEntityRegistrar;
+import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
 import commoble.morered.util.BlockStateUtil;
@@ -21,7 +22,7 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-public abstract class PoweredWireBlock extends AbstractWireBlock implements WireConnector
+public abstract class PoweredWireBlock extends AbstractWireBlock
 {
 	
 	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower)
@@ -104,7 +105,6 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Wire
 		return false;
 	}
 	
-	@Override
 	protected int getPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor, boolean expand)
 	{
 //		return 0;
@@ -141,36 +141,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Wire
 		}
 		return expand ? output : output/2;
 	}
-
-	@Override
-	public boolean canConnectToAdjacentWire(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos neighborPos,
-		BlockState neighborState)
-	{
-		// this wire can connect to an adjacent wire's subwire if
-		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
-		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
-		// and B) this wire is also attached to the same face
-		if (wireFace.getAxis() != directionToWire.getAxis() && neighborState.get(INTERIOR_FACES[wireFace.ordinal()]))
-			return true;
-		
-		// otherwise, check if we can connect through a wire edge
-		Block wireBlock = wireState.getBlock();
-		if (wireBlock == neighborState.getBlock())
-		{
-			BlockPos diagonalPos = neighborPos.offset(wireFace);
-			BlockState diagonalState = world.getBlockState(diagonalPos);
-			if (diagonalState.getBlock() == wireBlock)
-			{
-				if (diagonalState.get(INTERIOR_FACES[directionToWire.ordinal()]))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
-	}
 	
-	@Override
 	public int getExpandedPower(World world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionFromWire, BlockPos thisNeighborPos,
 		BlockState thisNeighborState)
 	{
@@ -193,7 +164,9 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Wire
 		
 //		EnumSet<Direction> updatedDirections = EnumSet.noneOf(Direction.class);
 		Map<Block,WireConnector> connectors = MoreRedAPI.getWireConnectabilityRegistry();
+		Map<Block,ExpandedPowerSupplier> expandedPowerSuppliers = MoreRedAPI.getExpandedPowerRegistry();
 		WireConnector defaultConnector = MoreRedAPI.getDefaultWireConnector();
+		ExpandedPowerSupplier defaultPowerSupplier = MoreRedAPI.getDefaultExpandedPowerSupplier();
 		
 		BlockPos.Mutable mutaPos = wirePos.toMutable();
 		BlockState[] neighborStates = new BlockState[6];
@@ -275,8 +248,9 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Wire
 				WireConnector connector = connectors.getOrDefault(neighborBlock, defaultConnector);
 				if (connector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
 				{
+					ExpandedPowerSupplier expandedPowerSupplier = expandedPowerSuppliers.getOrDefault(neighborBlock, defaultPowerSupplier);
 					// power will always be at least 0 because it started at 0 and we're maxing against that
-					int expandedWeakNeighborPower = connector.getExpandedPower(world, wirePos, wireState, attachmentDirection, directionToNeighbor, mutaPos, neighborState);
+					int expandedWeakNeighborPower = expandedPowerSupplier.getExpandedPower(world, wirePos, wireState, attachmentDirection, directionToNeighbor, mutaPos, neighborState);
 					int expandedNeighborPower = this.useIndirectPower && neighborState.shouldCheckWeakPower(world, mutaPos, directionToNeighbor)
 						? Math.max(expandedWeakNeighborPower, world.getStrongPower(mutaPos)*2)
 						: expandedWeakNeighborPower;

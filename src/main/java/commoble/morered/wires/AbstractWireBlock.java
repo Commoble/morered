@@ -55,6 +55,88 @@ public abstract class AbstractWireBlock extends Block
 	public static final BooleanProperty[] INTERIOR_FACES = {DOWN,UP,NORTH,SOUTH,WEST,EAST};
 	
 	/**
+	 * Creates and returns an array of six voxelshapes for the wire nodes in dunswe order
+	 * @param xzRadius The radius of the node shape on the axes parallel to the attachment face
+	 * @param height The height of the node shape perpendicular to the attachment face
+	 * @return An array of six voxelshapes in dunswe order, where the ordinal of an attachment face's direction is the respective index
+	 */
+	public static VoxelShape[] makeNodeShapes(int xzRadius, int height)
+	{
+		int min = 0;
+		int max = 16;
+		int minPlusHeight = min + height;
+		int maxMinusHeight = max - height;
+		int minWidth = 8 - xzRadius;
+		int maxWidth = 8 + xzRadius;
+		return new VoxelShape[]
+		{
+			Block.makeCuboidShape(minWidth, min, minWidth, maxWidth, minPlusHeight, maxWidth),
+			Block.makeCuboidShape(minWidth, maxMinusHeight, minWidth, maxWidth, max, maxWidth),
+			Block.makeCuboidShape(minWidth, minWidth, min, maxWidth, maxWidth, minPlusHeight),
+			Block.makeCuboidShape(minWidth, minWidth, maxMinusHeight, maxWidth, maxWidth, max),
+			Block.makeCuboidShape(min, minWidth, minWidth, minPlusHeight, maxWidth, maxWidth),
+			Block.makeCuboidShape(maxMinusHeight, minWidth, minWidth, max, maxWidth, maxWidth)
+		};
+	}
+	
+	public static VoxelShape[] makeRaytraceBackboards(int height)
+	{
+		int min = 0;
+		int max = 16;
+		int minPlusHeight = min + height;
+		int maxMinusHeight = max - height;
+		return new VoxelShape[]
+		{
+			Block.makeCuboidShape(min,min,min,max,minPlusHeight,max),
+			Block.makeCuboidShape(min,maxMinusHeight,min,max,max,max),
+			Block.makeCuboidShape(min,min,min,max,max,minPlusHeight),
+			Block.makeCuboidShape(min,min,maxMinusHeight,max,max,max),
+			Block.makeCuboidShape(min,min,min,minPlusHeight,max,max),
+			Block.makeCuboidShape(maxMinusHeight,min,min,max,max,max)
+		};
+	}
+	
+	public static VoxelShape[] makeLineShapes(int radius, int height)
+	{
+		double min = 0;
+		double max = 16;
+		double minPlusHeight = min + height;
+		double maxMinusHeight = max - height;
+		double minWidth = 8 - radius;
+		double maxWidth = 8 + radius;
+		
+		VoxelShape[] result =
+		{
+			Block.makeCuboidShape(minWidth, min, min, maxWidth, minPlusHeight, minWidth), // down-north
+			Block.makeCuboidShape(minWidth, min, maxWidth, maxWidth, minPlusHeight, max), // down-south
+			Block.makeCuboidShape(min, min, minWidth, minWidth, minPlusHeight, maxWidth), // down-west
+			Block.makeCuboidShape(maxWidth, min, minWidth, max, minPlusHeight, maxWidth), // down-east
+			Block.makeCuboidShape(minWidth, maxMinusHeight, min, maxWidth, max, minWidth), // up-north
+			Block.makeCuboidShape(minWidth, maxMinusHeight, maxWidth, maxWidth, max, max), // up-south
+			Block.makeCuboidShape(min, maxMinusHeight, minWidth, minWidth, max, maxWidth), // up-west
+			Block.makeCuboidShape(maxWidth, maxMinusHeight, minWidth, max, max, maxWidth), // up-east
+			Block.makeCuboidShape(minWidth, min, min, maxWidth, minWidth, minPlusHeight), // north-down
+			Block.makeCuboidShape(minWidth, maxWidth, min, maxWidth, max, minPlusHeight), // north-up
+			Block.makeCuboidShape(min, minWidth, min, minWidth, maxWidth, minPlusHeight), //north-west
+			Block.makeCuboidShape(maxWidth, minWidth, min, max, maxWidth, minPlusHeight), // north-east
+			Block.makeCuboidShape(minWidth, min, maxMinusHeight, maxWidth, minWidth, max), // south-down
+			Block.makeCuboidShape(minWidth, maxWidth, maxMinusHeight, maxWidth, max, max), // south-up
+			Block.makeCuboidShape(min, minWidth, maxMinusHeight, minWidth, maxWidth, max), // south-west
+			Block.makeCuboidShape(maxWidth, minWidth, maxMinusHeight, max, maxWidth, max), // south-east
+			Block.makeCuboidShape(min, min, minWidth, minPlusHeight, minWidth, maxWidth), // west-down
+			Block.makeCuboidShape(min, maxWidth, minWidth, minPlusHeight, max, maxWidth), // west-up
+			Block.makeCuboidShape(min, minWidth, min, minPlusHeight, maxWidth, minWidth), // west-north
+			Block.makeCuboidShape(min, minWidth, maxWidth, minPlusHeight, maxWidth, max), // west-south
+			Block.makeCuboidShape(maxMinusHeight, min, minWidth, max, minWidth, maxWidth), // east-down
+			Block.makeCuboidShape(maxMinusHeight, maxWidth, minWidth, max, max, maxWidth), // east-up
+			Block.makeCuboidShape(maxMinusHeight, minWidth, min, max, maxWidth, minWidth), // east-north
+			Block.makeCuboidShape(maxMinusHeight, minWidth, maxWidth, max, maxWidth, max) // east-south
+		};
+		
+		return result;
+	}
+	
+	/**
 	 * 
 	 * @param nodeShapes array of 6 voxelshapes by face direction
 	 * @param lineShapes array of 24 voxelshapes by face direction + secondary direction
@@ -156,6 +238,33 @@ public abstract class AbstractWireBlock extends Block
 			});
 	}
 
+	public static boolean canWireConnectToAdjacentWireOrCable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos thisNeighborPos,
+		BlockState thisNeighborState)
+	{
+		// this wire can connect to an adjacent wire's subwire if
+		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
+		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
+		// and B) this wire is also attached to the same face
+		if (wireFace.getAxis() != directionToWire.getAxis() && thisNeighborState.get(INTERIOR_FACES[wireFace.ordinal()]))
+			return true;
+		
+		// otherwise, check if we can connect through a wire edge
+		Block wireBlock = wireState.getBlock();
+		if (wireBlock == thisNeighborState.getBlock())
+		{
+			BlockPos diagonalPos = thisNeighborPos.offset(wireFace);
+			BlockState diagonalState = world.getBlockState(diagonalPos);
+			if (diagonalState.getBlock() == wireBlock)
+			{
+				if (diagonalState.get(INTERIOR_FACES[directionToWire.ordinal()]))
+				{
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	protected final VoxelShape[] shapesByStateIndex;
 	protected final VoxelShape[] raytraceBackboards;
 	protected final LoadingCache<Long, VoxelShape> voxelCache;
@@ -185,8 +294,9 @@ public abstract class AbstractWireBlock extends Block
 		this.useIndirectPower = useIndirectPower;
 	}
 
+	
+	protected abstract boolean canAdjacentBlockConnectToFace(IBlockReader world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState);
 	protected abstract void updatePower(World world, BlockPos wirePos, BlockState wireState);
-	protected abstract int getPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor, boolean expand);
 	protected abstract void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
 
 	@Override
@@ -611,8 +721,7 @@ public abstract class AbstractWireBlock extends Block
 					BlockState neighborState = world.getBlockState(neighborPos);
 					Block neighborBlock = neighborState.getBlock();
 					// first, check if the neighbor state is a wire that shares this attachment side
-					if (wireConnectors.getOrDefault(neighborBlock, defaultConnector)
-						.canConnectToAdjacentWire(world, pos, state, attachmentDirection, directionToWire, neighborPos, neighborState))
+					if (this.canAdjacentBlockConnectToFace(world, pos, state, neighborBlock, attachmentDirection, directionToWire, neighborPos, neighborState))
 					{
 						result |= (1L << (side*4 + subSide + 6));
 					}

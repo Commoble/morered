@@ -15,8 +15,9 @@ import com.mojang.datafixers.util.Pair;
 
 import commoble.morered.BlockRegistrar;
 import commoble.morered.ItemRegistrar;
+import commoble.morered.datagen.BlockStateDefinitions.MultipartBlockStateDefinition;
+import commoble.morered.datagen.BlockStateDefinitions.MultipartBlockStateDefinition.CaseDefinition;
 import commoble.morered.datagen.JsonDataProvider.ResourceType;
-import commoble.morered.datagen.MultipartBlockStateDefinition.CaseDefinition;
 import commoble.morered.wires.WireCountLootFunction;
 import net.minecraft.block.Block;
 import net.minecraft.data.DataGenerator;
@@ -100,7 +101,7 @@ public class ColoredCablesDataProvider implements IDataProvider
 			ResourceLocation nodeModel = new ResourceLocation(modid, String.format("block/%s_node", blockLocation));
 			ResourceLocation elbowModel = new ResourceLocation(modid, String.format("block/%s_elbow", blockLocation));
 			new JsonDataProvider<MultipartBlockStateDefinition>(generator, ResourceType.ASSETS, "blockstates", MultipartBlockStateDefinition.CODEC)
-				.with(blockid, MultipartBlockStateDefinition.builder()
+				.with(blockid, BlockStateDefinitions.multipartBuilder()
 					.withCase(CaseDefinition.builder(partsModel,0,0))
 					.withCase(CaseDefinition.builder(nodeModel,0,0)
 						.withCondition("down", "true"))

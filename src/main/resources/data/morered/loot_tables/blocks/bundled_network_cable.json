@@ -1,0 +1,28 @@
+{
+	"type": "minecraft:block",
+	"pools": 
+	[
+		{
+			"rolls": 1,
+			"entries": 
+			[
+				{
+					"type": "minecraft:item",
+					"name": "morered:bundled_network_cable",
+					"functions":
+					[
+						{
+							"function": "morered:set_wire_count"
+						}
+					]
+				}
+			],
+			"conditions": 
+			[
+				{
+					"condition": "minecraft:survives_explosion"
+				}
+			]
+		}
+	]
+}

@@ -1,0 +1,21 @@
+{
+	"parent": "block/block",
+	"ambientocclusion": false,
+	"textures": {
+		"wire": "morered:block/bundled_network_cable",
+		"particle": "morered:block/bundled_network_cable"
+	},
+	"elements": [
+		{
+			"from": [5, 0, 5],
+			"to": [11, 4, 11],
+			"faces": {
+				"north": {"uv": [4, 0, 10, 4], "rotation": 180, "texture": "wire"},
+				"east": {"uv": [10, 4, 14, 10], "rotation": 90, "texture": "wire"},
+				"south": {"uv": [4, 10, 10, 14], "texture": "wire"},
+				"west": {"uv": [0, 4, 4, 10], "rotation": 270, "texture": "wire"},
+				"up": {"uv": [4, 4, 10, 10], "texture": "wire"}
+			}
+		}
+	]
+}

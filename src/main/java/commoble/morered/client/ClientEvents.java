@@ -122,8 +122,20 @@ public class ClientEvents
 	
 	public static void onModelBakeEvent(ModelBakeEvent event)
 	{
+		// replace multipart models for wires and cables with wire part models so they can process the wire data correctly
+		// TODO forge added a new model loader hook for multiparts at some point, see if that's useable here
 		Map<ResourceLocation, IBakedModel> registry = event.getModelRegistry();
-		BlockRegistrar.RED_ALLOY_WIRE.get().getStateContainer().getValidStates().forEach(state ->
+		setWirePartModelLoader(registry, BlockRegistrar.RED_ALLOY_WIRE.get());
+		setWirePartModelLoader(registry, BlockRegistrar.BUNDLED_NETWORK_CABLE.get());
+		for (int i=0; i<16; i++)
+		{
+			setWirePartModelLoader(registry, BlockRegistrar.NETWORK_CABLES[i].get());
+		}
+	}
+	
+	static void setWirePartModelLoader(Map<ResourceLocation, IBakedModel> registry, Block block)
+	{
+		block.getStateContainer().getValidStates().forEach(state ->
 		{
 			ModelResourceLocation mrl = BlockModelShapes.getModelLocation(state);
 			IBakedModel model = registry.get(mrl);
@@ -132,18 +144,6 @@ public class ClientEvents
 				registry.put(mrl, new WirePartModelLoader.WireBlockModel(model));
 			}
 		});
-		for (int i=0; i<16; i++)
-		{
-			BlockRegistrar.NETWORK_CABLES[i].get().getStateContainer().getValidStates().forEach(state ->
-			{
-				ModelResourceLocation mrl = BlockModelShapes.getModelLocation(state);
-				IBakedModel model = registry.get(mrl);
-				if (model != null)
-				{
-					registry.put(mrl, new WirePartModelLoader.WireBlockModel(model));
-				}
-			});
-		}
 	}
 	
 	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)

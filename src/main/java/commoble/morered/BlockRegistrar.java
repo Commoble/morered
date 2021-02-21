@@ -8,8 +8,9 @@ import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.wire_post.WirePostBlock;
 import commoble.morered.wire_post.WirePostPlateBlock;
+import commoble.morered.wires.BundledCableBlock;
 import commoble.morered.wires.ColoredCableBlock;
-import commoble.morered.wires.WireBlock;
+import commoble.morered.wires.RedAlloyWireBlock;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
@@ -48,11 +49,14 @@ public class BlockRegistrar
 	public static final RegistryObject<HexidecrubrometerBlock> HEXIDECRUBROMETER = BLOCKS.register(ObjectNames.HEXIDECRUBROMETER,
 		() -> new HexidecrubrometerBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F)));
 
-	public static final RegistryObject<WireBlock> RED_ALLOY_WIRE = BLOCKS.register(ObjectNames.RED_ALLOY_WIRE, 
-		() -> new WireBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.RED).doesNotBlockMovement().zeroHardnessAndResistance()));
+	public static final RegistryObject<RedAlloyWireBlock> RED_ALLOY_WIRE = BLOCKS.register(ObjectNames.RED_ALLOY_WIRE, 
+		() -> new RedAlloyWireBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.RED).doesNotBlockMovement().zeroHardnessAndResistance()));
 
 	public static final RegistryObject<ColoredCableBlock>[] NETWORK_CABLES = Util.make((RegistryObject<ColoredCableBlock>[])new RegistryObject[16], array ->
 		Arrays.setAll(array, i -> BLOCKS.register(ObjectNames.NETWORK_CABLES[i],
 			() -> new ColoredCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, DyeColor.values()[i].getMapColor()).doesNotBlockMovement().zeroHardnessAndResistance(), DyeColor.values()[i]))));
+	
+	public static final RegistryObject<BundledCableBlock> BUNDLED_NETWORK_CABLE = BLOCKS.register(ObjectNames.BUNDLED_NETWORK_CABLE,
+		() -> new BundledCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.BLUE).doesNotBlockMovement().zeroHardnessAndResistance()));
 	
 }

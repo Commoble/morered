@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
+import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
 import commoble.morered.client.ClientEvents;
@@ -28,7 +29,10 @@ import commoble.morered.wire_post.SyncPostsInChunkPacket;
 import commoble.morered.wire_post.WireBreakPacket;
 import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wires.AbstractWireBlock;
-import commoble.morered.wires.WireConnectors;
+import commoble.morered.wires.BundledCableBlock;
+import commoble.morered.wires.ColoredCableBlock;
+import commoble.morered.wires.DefaultWireProperties;
+import commoble.morered.wires.RedAlloyWireBlock;
 import commoble.morered.wires.WireCountLootFunction;
 import commoble.morered.wires.WireUpdateBuffer;
 import commoble.morered.wires.WireUpdatePacket;
@@ -96,6 +100,12 @@ public class MoreRed
 	
 	private Map<Block, WireConnector> wireConnectabilities = new ConcurrentHashMap<>();
 	public Map<Block, WireConnector> getWireConnectabilities() { return this.wireConnectabilities; }
+
+	private Map<Block, ExpandedPowerSupplier> expandedPowerSuppliers = new ConcurrentHashMap<>();
+	public Map<Block, ExpandedPowerSupplier> getExpandedPowerSuppliers() { return this.expandedPowerSuppliers; }
+	
+	private Map<Block, WireConnector> cableConnectabilities = new ConcurrentHashMap<>();
+	public Map<Block, WireConnector> getCableConnectabilities() { return this.cableConnectabilities; }
 	
 	public static ResourceLocation getModRL(String name)
 	{
@@ -160,16 +170,25 @@ public class MoreRed
 	public static void onHighPriorityCommonSetup(FMLCommonSetupEvent event)
 	{
 		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
+		Map<Block, ExpandedPowerSupplier> expandedPowerSuppliers = MoreRedAPI.getExpandedPowerRegistry();
+		Map<Block, WireConnector> cableConnectors = MoreRedAPI.getCableConnectabilityRegistry();
 		
 		// add behaviour for vanilla objects
-		wireConnectors.put(Blocks.REDSTONE_WIRE, WireConnectors::isRedstoneWireConnectable);
+		wireConnectors.put(Blocks.REDSTONE_WIRE, DefaultWireProperties::isRedstoneWireConnectable);
 		
 		// add behaviour for More Red objects
-		MoreRedAPI.getWireConnectabilityRegistry().put(BlockRegistrar.RED_ALLOY_WIRE.get(), BlockRegistrar.RED_ALLOY_WIRE.get());
+		RedAlloyWireBlock redAlloyWireBlock = BlockRegistrar.RED_ALLOY_WIRE.get();
+		wireConnectors.put(redAlloyWireBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
+		expandedPowerSuppliers.put(redAlloyWireBlock, redAlloyWireBlock::getExpandedPower);
 		for (int i=0; i<16; i++)
 		{
-			MoreRedAPI.getWireConnectabilityRegistry().put(BlockRegistrar.NETWORK_CABLES[i].get(), BlockRegistrar.NETWORK_CABLES[i].get());	
+			ColoredCableBlock coloredCableBlock = BlockRegistrar.NETWORK_CABLES[i].get();
+			wireConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
+			expandedPowerSuppliers.put(coloredCableBlock, coloredCableBlock::getExpandedPower);
+			cableConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
 		}
+		BundledCableBlock bundledCableBlock = BlockRegistrar.BUNDLED_NETWORK_CABLE.get();
+		cableConnectors.put(bundledCableBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
 	}
 	
 	public static void onCommonSetup(FMLCommonSetupEvent event)
@@ -215,9 +234,17 @@ public class MoreRed
 
 	void onLoadComplete(FMLLoadCompleteEvent event)
 	{
-		ImmutableMap.Builder<Block, WireConnector> builder = ImmutableMap.builder();
-		this.wireConnectabilities.forEach(builder::put);
-		this.wireConnectabilities = builder.build();
+		// freeze API registries -- convert to immutable maps
+		this.wireConnectabilities = freezeAPIRegistry(this.wireConnectabilities);
+		this.expandedPowerSuppliers = freezeAPIRegistry(this.expandedPowerSuppliers);
+		this.cableConnectabilities = freezeAPIRegistry(this.cableConnectabilities);
+	}
+	
+	static <K,V> Map<K,V> freezeAPIRegistry(Map<K,V> mutableRegistry)
+	{
+		ImmutableMap.Builder<K,V> builder = ImmutableMap.builder();
+		mutableRegistry.forEach(builder::put);
+		return builder.build();
 	}
 	
 	public static void addForgeListeners(IEventBus forgeBus)

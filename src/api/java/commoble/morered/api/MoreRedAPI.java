@@ -3,7 +3,7 @@ package commoble.morered.api;
 import java.util.Map;
 
 import commoble.morered.MoreRed;
-import commoble.morered.wires.WireConnectors;
+import commoble.morered.wires.DefaultWireProperties;
 import net.minecraft.block.Block;
 
 /**
@@ -23,7 +23,7 @@ import net.minecraft.block.Block;
 public final class MoreRedAPI
 {
 	/**
-	 * Retrieves the registry for wire connectabilities.
+	 * Retrieves the registry for wire connectabilities to red alloy wires and colored network cables.
 	 * During modloading, this map is mutable and thread-safe.
 	 * This method is not safe to call during mod constructors.
 	 * Blocks should be registered to this registry in FMLCommonSetupEvent.
@@ -50,6 +50,57 @@ public final class MoreRedAPI
 	 */
 	public static WireConnector getDefaultWireConnector()
 	{
-		return WireConnectors.DEFAULT_WIRE_CONNECTOR;
+		return DefaultWireProperties.DEFAULT_WIRE_CONNECTOR;
+	}
+	
+	/**
+	 * Gets the registry of "expanded power" suppliers.
+	 * An expanded power supplier is defined here as a block that can supply redstone-like power in the [0,31] range instead of [0,15].
+	 * This power behaviour is used by red alloy wires and colored network cables.
+	 * The default behaviour is to simply take the standard weak power of the block and double it.
+	 * This behaviour can be overridden by registering a function to this registry.
+	 * 
+	 * During modloading, this map is mutable and thread-safe.
+	 * This method is not safe to call during mod constructors.
+	 * Blocks should be registered to this registry in FMLCommonSetupEvent.
+	 * After modloading completes, the map becomes immutable.
+	 * @return
+	 */
+	public static Map<Block, ExpandedPowerSupplier> getExpandedPowerRegistry()
+	{
+		return MoreRed.INSTANCE.getExpandedPowerSuppliers();
+	}
+	
+	public static ExpandedPowerSupplier getDefaultExpandedPowerSupplier()
+	{
+		return DefaultWireProperties.DEFAULT_EXPANDED_POWER_SUPPLIER;
+	}
+	
+	/**
+	 * Retrieves the registry for wire connectabilities to bundled cables and colored network cables.
+	 * During modloading, this map is mutable and thread-safe.
+	 * This method is not safe to call during mod constructors.
+	 * Blocks should be registered to this registry in FMLCommonSetupEvent.
+	 * After modloading completes, the map becomes immutable.
+	 * 
+	 * Functions registered to this registry will be queried by cable blocks.
+	 * If the function assigned to a given block returns true, then the cable block will
+	 * A) supply channeled signals to that block when that block is adjacent
+	 * B) receive channeled signals to that block when that block is adjacent
+	 * C) render additional lines of wires attaching to that block.
+	 * 
+	 * It does not affect the result of WireBlock::canConnectRedstone.
+	 * 
+	 * The default behaviour is to always return false from the wireconnector function.
+	 * @return The cable connectability registry
+	 */
+	public static Map<Block, WireConnector> getCableConnectabilityRegistry()
+	{
+		return MoreRed.INSTANCE.getCableConnectabilities();
+	}
+	
+	public static WireConnector getDefaultCableConnector()
+	{
+		return DefaultWireProperties.DEFAULT_CABLE_CONNECTOR;
 	}
 }

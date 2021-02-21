@@ -51,6 +51,9 @@ public class ItemRegistrar
 	public static final RegistryObject<WireBlockItem>[] NETWORK_CABLES = Util.make((RegistryObject<WireBlockItem>[])new RegistryObject[16], array ->
 		Arrays.setAll(array, i -> ITEMS.register(ObjectNames.NETWORK_CABLES[i],
 			() -> new WireBlockItem(BlockRegistrar.NETWORK_CABLES[i].get(), new Item.Properties().group(CREATIVE_TAB)))));
+	
+	public static final RegistryObject<WireBlockItem> BUNDLED_NETWORK_CABLE = ITEMS.register(ObjectNames.BUNDLED_NETWORK_CABLE,
+		() -> new WireBlockItem(BlockRegistrar.BUNDLED_NETWORK_CABLE.get(), new Item.Properties().group(CREATIVE_TAB)));
 
 	
 	public static final RegistryObject<BlockItem> registerBlockItem(String name, RegistryObject<? extends Block> block)
