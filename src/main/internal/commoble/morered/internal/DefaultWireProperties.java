@@ -1,4 +1,4 @@
-package commoble.morered.wires;
+package commoble.morered.internal;
 
 import javax.annotation.Nonnull;
 
@@ -17,6 +17,7 @@ import net.minecraft.world.World;
 
 public class DefaultWireProperties
 {
+	public static final VoxelShape[] SMALL_NODE_SHAPES = WireVoxelHelpers.makeNodeShapes(1,2);
 	public static final WireConnector DEFAULT_WIRE_CONNECTOR = DefaultWireProperties::canGenericBlockConnectToWire;
 	public static final ExpandedPowerSupplier DEFAULT_EXPANDED_POWER_SUPPLIER = DefaultWireProperties::getDefaultExpandedPower;
 	public static final WireConnector DEFAULT_CABLE_CONNECTOR = DefaultWireProperties::canGenericBlockConnectToCable;
@@ -26,7 +27,7 @@ public class DefaultWireProperties
 	{
 		if (!thisNeighborState.canConnectRedstone(world, wirePos, directionToWire.getOpposite()))
 			return false;
-		VoxelShape wireTestShape = RedAlloyWireBlock.NODE_SHAPES_DUNSWE[wireFace.ordinal()];
+		VoxelShape wireTestShape = SMALL_NODE_SHAPES[wireFace.ordinal()];
 		VoxelShape neighborShape = thisNeighborState.getRenderShape(world, thisNeighborPos);
 		VoxelShape projectedNeighborShape = neighborShape.project(directionToWire);
 		// if the projected neighbor shape entirely overlaps the line shape,
@@ -43,12 +44,12 @@ public class DefaultWireProperties
 		return wireFace == Direction.DOWN && directionToWire.getAxis() != Axis.Y;
 	}
 	
-	public static int getDefaultExpandedPower(@Nonnull World world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToThis)
+	private static int getDefaultExpandedPower(@Nonnull World world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToThis)
 	{
 		return thisState.getWeakPower(world, thisPos, directionToThis) * 2;
 	}
 	
-	public static boolean canGenericBlockConnectToCable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos thisNeighborPos, BlockState thisNeighborState)
+	private static boolean canGenericBlockConnectToCable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos thisNeighborPos, BlockState thisNeighborState)
 	{
 		return false;
 	}

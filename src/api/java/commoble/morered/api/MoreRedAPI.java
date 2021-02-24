@@ -2,8 +2,8 @@ package commoble.morered.api;
 
 import java.util.Map;
 
-import commoble.morered.MoreRed;
-import commoble.morered.wires.DefaultWireProperties;
+import commoble.morered.internal.APIRegistries;
+import commoble.morered.internal.DefaultWireProperties;
 import net.minecraft.block.Block;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;
@@ -49,7 +49,7 @@ public final class MoreRedAPI
 	 */
 	public static Map<Block, WireConnector> getWireConnectabilityRegistry()
 	{
-		return MoreRed.INSTANCE.getWireConnectabilities();
+		return APIRegistries.getWireConnectabilities();
 	}
 	
 	/**
@@ -77,7 +77,7 @@ public final class MoreRedAPI
 	 */
 	public static Map<Block, ExpandedPowerSupplier> getExpandedPowerRegistry()
 	{
-		return MoreRed.INSTANCE.getExpandedPowerSuppliers();
+		return APIRegistries.getExpandedPowerSuppliers();
 	}
 	
 	public static ExpandedPowerSupplier getDefaultExpandedPowerSupplier()
@@ -105,7 +105,7 @@ public final class MoreRedAPI
 	 */
 	public static Map<Block, WireConnector> getCableConnectabilityRegistry()
 	{
-		return MoreRed.INSTANCE.getCableConnectabilities();
+		return APIRegistries.getCableConnectabilities();
 	}
 	
 	public static WireConnector getDefaultCableConnector()

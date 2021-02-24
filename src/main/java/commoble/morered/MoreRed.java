@@ -4,12 +4,10 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
@@ -21,6 +19,8 @@ import commoble.morered.api.WireConnector;
 import commoble.morered.client.ClientEvents;
 import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
+import commoble.morered.internal.APIRegistries;
+import commoble.morered.internal.DefaultWireProperties;
 import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.wire_post.IPostsInChunk;
 import commoble.morered.wire_post.PostsInChunk;
@@ -32,7 +32,6 @@ import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wires.AbstractWireBlock;
 import commoble.morered.wires.BundledCableBlock;
 import commoble.morered.wires.ColoredCableBlock;
-import commoble.morered.wires.DefaultWireProperties;
 import commoble.morered.wires.RedAlloyWireBlock;
 import commoble.morered.wires.WireCountLootFunction;
 import commoble.morered.wires.WireUpdateBuffer;
@@ -100,15 +99,6 @@ public class MoreRed
 		() -> CHANNEL_PROTOCOL_VERSION,
 		CHANNEL_PROTOCOL_VERSION::equals,
 		CHANNEL_PROTOCOL_VERSION::equals);
-	
-	private Map<Block, WireConnector> wireConnectabilities = new ConcurrentHashMap<>();
-	public Map<Block, WireConnector> getWireConnectabilities() { return this.wireConnectabilities; }
-
-	private Map<Block, ExpandedPowerSupplier> expandedPowerSuppliers = new ConcurrentHashMap<>();
-	public Map<Block, ExpandedPowerSupplier> getExpandedPowerSuppliers() { return this.expandedPowerSuppliers; }
-	
-	private Map<Block, WireConnector> cableConnectabilities = new ConcurrentHashMap<>();
-	public Map<Block, WireConnector> getCableConnectabilities() { return this.cableConnectabilities; }
 	
 	public static ResourceLocation getModRL(String name)
 	{
@@ -247,16 +237,7 @@ public class MoreRed
 	void onLoadComplete(FMLLoadCompleteEvent event)
 	{
 		// freeze API registries -- convert to immutable maps
-		this.wireConnectabilities = freezeAPIRegistry(this.wireConnectabilities);
-		this.expandedPowerSuppliers = freezeAPIRegistry(this.expandedPowerSuppliers);
-		this.cableConnectabilities = freezeAPIRegistry(this.cableConnectabilities);
-	}
-	
-	static <K,V> Map<K,V> freezeAPIRegistry(Map<K,V> mutableRegistry)
-	{
-		ImmutableMap.Builder<K,V> builder = ImmutableMap.builder();
-		mutableRegistry.forEach(builder::put);
-		return builder.build();
+		APIRegistries.freezeRegistries();
 	}
 	
 	public static void addForgeListeners(IEventBus forgeBus)

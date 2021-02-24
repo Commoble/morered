@@ -12,6 +12,8 @@ import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
+import commoble.morered.internal.DefaultWireProperties;
+import commoble.morered.internal.WireVoxelHelpers;
 import commoble.morered.util.BlockStateUtil;
 import commoble.morered.util.DirectionHelper;
 import net.minecraft.block.Block;
@@ -27,9 +29,9 @@ import net.minecraft.world.World;
 
 public class ColoredCableBlock extends PoweredWireBlock
 {
-	public static final VoxelShape[] NODE_SHAPES_DUNSWE = AbstractWireBlock.makeNodeShapes(2, 3);
-	public static final VoxelShape[] RAYTRACE_BACKBOARDS = AbstractWireBlock.makeRaytraceBackboards(3);
-	public static final VoxelShape[] LINE_SHAPES = AbstractWireBlock.makeLineShapes(2, 3);
+	public static final VoxelShape[] NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(2, 3);
+	public static final VoxelShape[] RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(3);
+	public static final VoxelShape[] LINE_SHAPES = WireVoxelHelpers.makeLineShapes(2, 3);
 	public static final VoxelShape[] SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(NODE_SHAPES_DUNSWE, LINE_SHAPES);
 	public static final LoadingCache<Long, VoxelShape> VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(SHAPES_BY_STATE_INDEX, LINE_SHAPES);
 	

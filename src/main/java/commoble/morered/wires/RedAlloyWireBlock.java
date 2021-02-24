@@ -3,6 +3,7 @@ package commoble.morered.wires;
 import com.google.common.cache.LoadingCache;
 
 import commoble.morered.api.MoreRedAPI;
+import commoble.morered.internal.WireVoxelHelpers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
@@ -12,9 +13,9 @@ import net.minecraft.world.IBlockReader;
 
 public class RedAlloyWireBlock extends PoweredWireBlock
 {
-	public static final VoxelShape[] NODE_SHAPES_DUNSWE = AbstractWireBlock.makeNodeShapes(1,2);
-	public static final VoxelShape[] RAYTRACE_BACKBOARDS = AbstractWireBlock.makeRaytraceBackboards(2);
-	public static final VoxelShape[] LINE_SHAPES = AbstractWireBlock.makeLineShapes(1,2);
+	public static final VoxelShape[] NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(1,2);
+	public static final VoxelShape[] RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(2);
+	public static final VoxelShape[] LINE_SHAPES = WireVoxelHelpers.makeLineShapes(1,2);
 	public static final VoxelShape[] SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(NODE_SHAPES_DUNSWE, LINE_SHAPES);
 	public static final LoadingCache<Long, VoxelShape> VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(SHAPES_BY_STATE_INDEX, LINE_SHAPES);
 
