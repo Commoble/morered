@@ -14,6 +14,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
+import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
@@ -44,6 +45,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.crafting.IRecipeSerializer;
+import net.minecraft.nbt.INBT;
 import net.minecraft.network.play.server.SEntityEquipmentPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -59,6 +61,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.crafting.CraftingHelper;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -214,6 +217,15 @@ public class MoreRed
 		
 		// register capabilities
 		CapabilityManager.INSTANCE.register(IPostsInChunk.class, new PostsInChunkCapability.Storage(), () -> new PostsInChunk(null));
+		CapabilityManager.INSTANCE.register(ChanneledPowerSupplier.class, new Capability.IStorage<ChanneledPowerSupplier>()
+			{
+				@Override
+				public INBT writeNBT(Capability<ChanneledPowerSupplier> capability, ChanneledPowerSupplier instance, Direction side)
+				{throw new UnsupportedOperationException("Default ChanneledPowerSupplier storage not implemented");}
+				@Override
+				public void readNBT(Capability<ChanneledPowerSupplier> capability, ChanneledPowerSupplier instance, Direction side, INBT nbt){}
+			
+			}, () -> { throw new UnsupportedOperationException("Default ChanneledPowerSupplier instance not implemented");});
 		
 		event.enqueueWork(MoreRed::afterCommonSetup);
 	}

@@ -1,6 +1,11 @@
 package commoble.morered;
 
+import java.util.Arrays;
+
 import commoble.morered.wire_post.WirePostTileEntity;
+import commoble.morered.wires.BundledCableTileEntity;
+import commoble.morered.wires.ColoredCableBlock;
+import commoble.morered.wires.ColoredCableTileEntity;
 import commoble.morered.wires.WireTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraftforge.fml.RegistryObject;
@@ -21,5 +26,17 @@ public class TileEntityRegistrar
 	public static final RegistryObject<TileEntityType<WireTileEntity>> WIRE = TILES.register(ObjectNames.WIRE,
 		() -> TileEntityType.Builder.create(WireTileEntity::new,
 			BlockRegistrar.RED_ALLOY_WIRE.get())
+		.build(null));
+	
+	public static final RegistryObject<TileEntityType<ColoredCableTileEntity>> COLORED_NETWORK_CABLE = TILES.register(ObjectNames.COLORED_NETWORK_CABLE,
+		() -> TileEntityType.Builder.create(ColoredCableTileEntity::new,
+			Arrays.stream(BlockRegistrar.NETWORK_CABLES)
+				.map(RegistryObject::get)
+				.toArray(ColoredCableBlock[]::new))
+		.build(null));
+	
+	public static final RegistryObject<TileEntityType<BundledCableTileEntity>> BUNDLED_NETWORK_CABLE = TILES.register(ObjectNames.BUNDLED_NETWORK_CABLE,
+		() -> TileEntityType.Builder.create(BundledCableTileEntity::new,
+			BlockRegistrar.BUNDLED_NETWORK_CABLE.get())
 		.build(null));
 }

@@ -5,6 +5,8 @@ import java.util.Map;
 import commoble.morered.MoreRed;
 import commoble.morered.wires.DefaultWireProperties;
 import net.minecraft.block.Block;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityInject;
 
 /**
  * This class contains some methods that can be used by other mods
@@ -22,6 +24,13 @@ import net.minecraft.block.Block;
  */
 public final class MoreRedAPI
 {
+	/**
+	 * Capability instance for the Channeled Power Handler capability.
+	 * The default instance and default storage are not implemented and will probably cause crashes if they are used.
+	 */
+	@CapabilityInject(ChanneledPowerSupplier.class)
+	public static final Capability<ChanneledPowerSupplier> CHANNELED_POWER_CAPABILITY = null;
+	
 	/**
 	 * Retrieves the registry for wire connectabilities to red alloy wires and colored network cables.
 	 * During modloading, this map is mutable and thread-safe.

@@ -142,20 +142,21 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		return expand ? output : output/2;
 	}
 	
-	public int getExpandedPower(World world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionFromWire, BlockPos thisNeighborPos,
-		BlockState thisNeighborState)
+	public int getExpandedPower(World world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState,
+		Direction wireFace, Direction directionFromWire)
 	{
-		TileEntity te = world.getTileEntity(thisNeighborPos);
+		TileEntity te = world.getTileEntity(thisPos);
 		if (!(te instanceof WireTileEntity))
 			return 0; // if there's no TE then we can't make power
 		WireTileEntity wire = (WireTileEntity)te;
-		return thisNeighborState.get(INTERIOR_FACES[wireFace.ordinal()])
+		return thisState.get(INTERIOR_FACES[wireFace.ordinal()])
 			? wire.getPower(wireFace)
 			: 0;
 	}
 
+
 	@Override
-	protected void updatePower(World world, BlockPos wirePos, BlockState wireState)
+	protected void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState)
 	{
 		TileEntity te = world.getTileEntity(wirePos);
 		if (!(te instanceof WireTileEntity))
@@ -250,7 +251,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 				{
 					ExpandedPowerSupplier expandedPowerSupplier = expandedPowerSuppliers.getOrDefault(neighborBlock, defaultPowerSupplier);
 					// power will always be at least 0 because it started at 0 and we're maxing against that
-					int expandedWeakNeighborPower = expandedPowerSupplier.getExpandedPower(world, wirePos, wireState, attachmentDirection, directionToNeighbor, mutaPos, neighborState);
+					int expandedWeakNeighborPower = expandedPowerSupplier.getExpandedPower(world, mutaPos, neighborState, wirePos, wireState, attachmentDirection, directionToNeighbor);
 					int expandedNeighborPower = this.useIndirectPower && neighborState.shouldCheckWeakPower(world, mutaPos, directionToNeighbor)
 						? Math.max(expandedWeakNeighborPower, world.getStrongPower(mutaPos)*2)
 						: expandedWeakNeighborPower;
@@ -307,16 +308,10 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		Block newBlock = newState.getBlock();
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
 		{
-			// if either the old block or new block emits strong power,
-			// and a given neighbor block conducts strong power,
-			// then we should notify second-degree neighbors as well 
 			for (Direction dir : updateDirections)
 			{
 				BlockPos neighborPos = mutaPos.setAndMove(wirePos, dir);
-				boolean doSecondaryNeighborUpdates = doConductedPowerUpdates && world.getBlockState(neighborPos).shouldCheckWeakPower(world, neighborPos, dir);
 				world.neighborChanged(neighborPos, newBlock, wirePos);
-				if (doSecondaryNeighborUpdates)
-					world.notifyNeighborsOfStateChange(neighborPos, newBlock);
 			}
 		}
 	}

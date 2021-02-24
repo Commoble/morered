@@ -296,7 +296,7 @@ public abstract class AbstractWireBlock extends Block
 
 	
 	protected abstract boolean canAdjacentBlockConnectToFace(IBlockReader world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState);
-	protected abstract void updatePower(World world, BlockPos wirePos, BlockState wireState);
+	protected abstract void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState);
 	protected abstract void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
 
 	@Override
@@ -444,7 +444,7 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		this.updateShapeCache(worldIn, pos);
-		this.updatePower(worldIn, pos, state);
+		this.updatePowerAfterBlockUpdate(worldIn, pos, state);
 		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
@@ -480,7 +480,7 @@ public abstract class AbstractWireBlock extends Block
 		super.onReplaced(oldState, worldIn, pos, newState, isMoving);
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
-			this.updatePower(worldIn, pos, newState);
+			this.updatePowerAfterBlockUpdate(worldIn, pos, newState);
 	}
 
 	// called when a neighboring blockstate changes, not called on the client
@@ -508,7 +508,7 @@ public abstract class AbstractWireBlock extends Block
 		}
 
 		this.updateShapeCache(worldIn, pos);
-		this.updatePower(worldIn, pos, state);
+		this.updatePowerAfterBlockUpdate(worldIn, pos, state);
 		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
 	}
 

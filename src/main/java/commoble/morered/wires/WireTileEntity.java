@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.Direction;
 
 public class WireTileEntity extends TileEntity
@@ -15,7 +16,12 @@ public class WireTileEntity extends TileEntity
 	
 	public WireTileEntity()
 	{
-		super(TileEntityRegistrar.WIRE.get());
+		this(TileEntityRegistrar.WIRE.get());
+	}
+	
+	public WireTileEntity(TileEntityType<? extends WireTileEntity> type)
+	{
+		super(type);
 	}
 
 	/**
