@@ -1,4 +1,4 @@
-package commoble.morered.internal;
+package commoble.morered.api.internal;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;

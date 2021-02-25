@@ -1,4 +1,4 @@
-package commoble.morered.internal;
+package commoble.morered.api.internal;
 
 import net.minecraft.block.Block;
 import net.minecraft.util.math.shapes.VoxelShape;

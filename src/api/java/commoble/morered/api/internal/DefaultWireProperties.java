@@ -1,4 +1,4 @@
-package commoble.morered.internal;
+package commoble.morered.api.internal;
 
 import javax.annotation.Nonnull;
 

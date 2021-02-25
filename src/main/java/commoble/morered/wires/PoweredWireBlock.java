@@ -308,10 +308,16 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		Block newBlock = newState.getBlock();
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
 		{
+			// if either the old block or new block emits strong power,
+			// and a given neighbor block conducts strong power,
+			// then we should notify second-degree neighbors as well
 			for (Direction dir : updateDirections)
 			{
 				BlockPos neighborPos = mutaPos.setAndMove(wirePos, dir);
+				boolean doSecondaryNeighborUpdates = doConductedPowerUpdates && world.getBlockState(neighborPos).shouldCheckWeakPower(world, neighborPos, dir);
 				world.neighborChanged(neighborPos, newBlock, wirePos);
+				if (doSecondaryNeighborUpdates)
+					world.notifyNeighborsOfStateChange(neighborPos, newBlock);
 			}
 		}
 	}

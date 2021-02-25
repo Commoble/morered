@@ -2,8 +2,8 @@ package commoble.morered.api;
 
 import java.util.Map;
 
-import commoble.morered.internal.APIRegistries;
-import commoble.morered.internal.DefaultWireProperties;
+import commoble.morered.api.internal.APIRegistries;
+import commoble.morered.api.internal.DefaultWireProperties;
 import net.minecraft.block.Block;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.CapabilityInject;

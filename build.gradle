@@ -32,7 +32,6 @@ sourceSets
 {
 	main
 	api
-	internal
 	test
 	datagen
 	generated
@@ -55,7 +54,6 @@ minecraft {
                 "morered" {
                     source sourceSets.main
 					source sourceSets.api
-					source sourceSets.internal
                 }
             }
         }
@@ -70,7 +68,6 @@ minecraft {
                 "morered" {
                     source sourceSets.main
 					source sourceSets.api
-					source sourceSets.internal
                 }
             }
         }
@@ -91,7 +88,6 @@ minecraft {
                 "morered" {
                     source sourceSets.main
 					source sourceSets.api
-					source sourceSets.internal
                 }
             }
         }
@@ -114,13 +110,12 @@ repositories {
 	// repo for databuddy
 	maven { url "https://cubicinterpolation.net/maven/" }
 	// local repo for cram until we get a proper maven up
-	// maven { url "file://C:/Users/Joseph/Saved Games/minecraft mods/cram/maven" }
+	maven { url "file://C:/Users/Joseph/Saved Games/minecraft mods/cram/maven" }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
 	implementation sourceSets.api.output
-	implementation sourceSets.internal.output
     
     // jei
 	compileOnly fg.deobf("mezz.jei:${jei_branch}:${jei_version}:api")
@@ -144,10 +139,9 @@ test {
 
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
-	from sourceSets.main.output.classesDirs
-	from sourceSets.api.output.classesDirs
-	from sourceSets.main.output.resourcesDir
-	from sourceSets.internal.output.classesDirs
+	// regular jar gets overwritten by shadowjar
+	// the froms from the shadowjar block are used instead of this block's froms
+	// but the manifest attribtues here are still used
     manifest {
         attributes([
             "Specification-Title": "${modid}",
@@ -166,6 +160,7 @@ shadowJar {
 	classifier = ''
 	configurations = [project.configurations.shade]
 	relocate 'commoble.databuddy', "${project.group}.shadow.commoble.databuddy"
+	from sourceSets.api.output
 }
 
 reobf {
@@ -184,12 +179,13 @@ task sourcesJar(type: Jar) {
 	classifier = "sources"
 	from sourceSets.main.allJava
 	from sourceSets.api.allJava
-	from sourceSets.internal.allJava
 }
 task apiJar(type: Jar) {
 	classifier = "api"
 	from sourceSets.api.output
 	from sourceSets.api.allJava
+	// exclude api internals from canonical public api
+	exclude "commoble/morered/api/internal/"
 }
 
 // full production jar plus attached sources for debugging
@@ -199,8 +195,6 @@ task debugJar(type: Jar) {
 	from sourceSets.main.allJava
 	from sourceSets.api.output
 	from sourceSets.api.allJava
-	from sourceSets.internal.output
-	from sourceSets.internal.allJava
 	// we have to exclude this from the compileOnly dependency,
 	// or mixins from this mod don't apply when we run the depending mod, weirdly
 	exclude "META-INF/mods.toml"

@@ -3,7 +3,7 @@ package commoble.morered.wires;
 import com.google.common.cache.LoadingCache;
 
 import commoble.morered.api.MoreRedAPI;
-import commoble.morered.internal.WireVoxelHelpers;
+import commoble.morered.api.internal.WireVoxelHelpers;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.util.Direction;
