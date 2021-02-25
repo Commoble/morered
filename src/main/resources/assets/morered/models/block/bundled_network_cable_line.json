@@ -13,7 +13,8 @@
 				"north": {"uv": [10, 6, 6, 12], "rotation": 270, "texture": "#wire"},
 				"east": {"uv": [11, 12, 16, 16], "rotation": 180, "texture": "#wire"},
 				"west": {"uv": [6, 12, 11, 16], "texture": "#wire"},
-				"up": {"uv": [6, 6, 11, 12], "rotation": 90, "texture": "#wire"}
+				"up": {"uv": [6, 6, 11, 12], "rotation": 90, "texture": "#wire"},
+				"down": {"uv": [6, 6, 11, 12], "rotation": 270, "texture": "#wire", "cullface": "down"}
 			}
 		}
 	]
