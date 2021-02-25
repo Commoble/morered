@@ -33,7 +33,6 @@ import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockDisplayReader;
-import net.minecraftforge.client.model.BakedModelWrapper;
 import net.minecraftforge.client.model.IModelConfiguration;
 import net.minecraftforge.client.model.IModelLoader;
 import net.minecraftforge.client.model.data.IDynamicBakedModel;
@@ -196,18 +195,6 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 			}
 			
 			return quads;
-		}
-		
-		
-	}
-	
-	// wrapper for replacing the multipart models with (the root models that each specific blockstates have)
-	public static class WireBlockModel extends BakedModelWrapper<IBakedModel>
-	{
-
-		public WireBlockModel(IBakedModel originalModel)
-		{
-			super(originalModel);
 		}
 
 		@Override
