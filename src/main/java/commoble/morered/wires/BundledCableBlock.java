@@ -77,6 +77,35 @@ public class BundledCableBlock extends AbstractWireBlock
 			return;
 		
 		neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionFromNeighbor).ifPresent($ -> this.updatePowerAfterBlockUpdate((World)world, pos, state));
+
+		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
+		long edgeFlags = this.getEdgeFlags(world,pos);
+		if (edgeFlags != 0)
+		{
+			EnumSet<Direction> edgeUpdateDirs = EnumSet.noneOf(Direction.class);
+			Direction directionToNeighbor = directionFromNeighbor.getOpposite();
+			Edge[] edges = Edge.values();
+			for (int edgeFlag = 0; edgeFlag < 12; edgeFlag++)
+			{
+				if ((edgeFlags & (1 << edgeFlag)) != 0)
+				{
+					Edge edge = edges[edgeFlag];
+					if (edge.sideA == directionToNeighbor)
+						edgeUpdateDirs.add(edge.sideB);
+					else if (edge.sideB == directionToNeighbor)
+						edgeUpdateDirs.add(edge.sideA);
+				}
+			}
+			if (!edgeUpdateDirs.isEmpty())
+			{
+				BlockPos.Mutable mutaPos = pos.toMutable();
+				for (Direction dir : edgeUpdateDirs)
+				{
+					BlockPos otherNeighborPos = mutaPos.setAndMove(pos, dir);
+					world.getBlockState(otherNeighborPos).onNeighborChange(world, otherNeighborPos, pos);
+				}
+			}
+		}
 	}
 
 	@Override

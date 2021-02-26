@@ -127,7 +127,7 @@ public class WireTileEntity extends TileEntity
 	
 	public CompoundNBT writeCommonData(CompoundNBT compound)
 	{
-		compound.putIntArray(POWER, this.power);
+		compound.putIntArray(POWER, this.power.clone());
 		return compound;
 	}
 	
@@ -135,6 +135,6 @@ public class WireTileEntity extends TileEntity
 	{
 		int[] newPower = compound.getIntArray(POWER); // returns 0-length array if field not present
 		if (newPower.length == 6)
-			this.power = newPower;
+			this.power = newPower.clone();
 	}
 }

@@ -32,9 +32,6 @@ public class MoreRedDataGen
 			{
 				for (RegistryObject<WireBlockItem> item : ItemRegistrar.NETWORK_CABLES)
 					builder.withObject(item.get());
-			}))
-			.with(new ResourceLocation(MoreRed.MODID, "network_cables"), TagDefinition.builder()
-				.withObject(ItemRegistrar.BUNDLED_NETWORK_CABLE.get())
-				.withTag("morered:colored_network_cables")));
+			})));
 	}
 }

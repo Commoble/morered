@@ -403,12 +403,14 @@ public abstract class AbstractWireBlock extends Block
 
 	// called when a neighboring blockstate changes, not called on the client
 	@Override
-	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
 	{
+		BlockPos offset = fromPos.subtract(pos);
+		Direction directionToNeighbor = Direction.byLong(offset.getX(), offset.getY(), offset.getZ());
+		long edgeFlags = this.getEdgeFlags(worldIn,pos);
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		if (this.isEmptyWireBlock(state))
 		{
-			long edgeFlags = this.getEdgeFlags(worldIn,pos);
 			if (edgeFlags == 0)
 			{
 				worldIn.removeBlock(pos, false);
@@ -417,8 +419,6 @@ public abstract class AbstractWireBlock extends Block
 		// if this is a non-empty wire block and the changed state is an air block
 		else if (worldIn.isAirBlock(fromPos))
 		{
-			BlockPos offset = fromPos.subtract(pos);
-			Direction directionToNeighbor = Direction.byLong(offset.getX(), offset.getY(), offset.getZ());
 			if (directionToNeighbor != null)
 			{
 				this.addEmptyWireToAir(state, worldIn, fromPos, directionToNeighbor);
@@ -427,7 +427,34 @@ public abstract class AbstractWireBlock extends Block
 
 		this.updateShapeCache(worldIn, pos);
 		this.updatePowerAfterBlockUpdate(worldIn, pos, state);
-		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
+		if (edgeFlags != 0)
+		{
+			EnumSet<Direction> edgeUpdateDirs = EnumSet.noneOf(Direction.class);
+			Edge[] edges = Edge.values();
+			for (int edgeFlag = 0; edgeFlag < 12; edgeFlag++)
+			{
+				if ((edgeFlags & (1 << edgeFlag)) != 0)
+				{
+					Edge edge = edges[edgeFlag];
+					if (edge.sideA == directionToNeighbor)
+						edgeUpdateDirs.add(edge.sideB);
+					else if (edge.sideB == directionToNeighbor)
+						edgeUpdateDirs.add(edge.sideA);
+				}
+			}
+			if (!edgeUpdateDirs.isEmpty() && !net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
+			{
+				BlockPos.Mutable mutaPos = pos.toMutable();
+				for (Direction dir : edgeUpdateDirs)
+				{
+					BlockPos neighborPos = mutaPos.setAndMove(pos, dir);
+					worldIn.neighborChanged(neighborPos, this, pos);
+				}
+			}
+		}
+		
+		super.neighborChanged(state, worldIn, pos, neighborBlock, fromPos, isMoving);
 	}
 
 	@Override
@@ -481,10 +508,22 @@ public abstract class AbstractWireBlock extends Block
 		{
 			if (Edge.values()[edge].shouldEdgeRender(world, pos, this))
 			{
-				result |= (1L << (30 + edge));
+				result |= (1L << (edge));
 			}
 		}
 		return result;
+	}
+	
+	/**
+	 * Returns a long containing the edge flags shifted for node-line-edge format
+	 * The first 30 bits will be 0, the next 12 bits contain edge flags in edge-ordinal order
+	 * @param world
+	 * @param pos
+	 * @return
+	 */
+	protected long getEdgeFlagsForNodeLineEdgeFormat(IBlockReader world, BlockPos pos)
+	{
+		return this.getEdgeFlags(world,pos) << 30;
 	}
 	
 	@Nullable
@@ -646,7 +685,7 @@ public abstract class AbstractWireBlock extends Block
 				}
 			}
 		}
-		result = result | this.getEdgeFlags(world,pos);
+		result = result | this.getEdgeFlagsForNodeLineEdgeFormat(world,pos);
 		return result;
 	}
 	

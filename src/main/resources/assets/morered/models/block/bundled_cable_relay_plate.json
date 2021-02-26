@@ -1,0 +1,77 @@
+{
+	"parent": "morered:block/plate_template",
+	"ambientocclusion": false,
+	"textures": {
+		"overlay": "morered:block/bundled_cable_plate_overlay",
+		"upper_plate": "block/hopper_outside",
+		"plate": "minecraft mods:block/smooth_stone",
+		"particle": "block/smooth_stone"
+	},
+	"elements": [
+		{
+			"name": "rod",
+			"from": [6, 5, 6],
+			"to": [10, 11, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [7, 14, 7]},
+			"faces": {
+				"north": {"uv": [0, 5, 4, 11], "texture": "#overlay"},
+				"east": {"uv": [0, 5, 4, 11], "texture": "#overlay"},
+				"south": {"uv": [0, 5, 4, 11], "texture": "#overlay"},
+				"west": {"uv": [0, 5, 4, 11], "texture": "#overlay"}
+			}
+		},
+		{
+			"name": "plate",
+			"from": [0, 0, 0],
+			"to": [16, 4, 16],
+			"faces": {
+				"north": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "north"},
+				"east": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "east"},
+				"south": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "south"},
+				"west": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#plate"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#plate", "cullface": "down"}
+			}
+		},
+		{
+			"name": "plate_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 4, 16],
+			"faces": {
+				"north": {"uv": [0, 16, 16, 12], "texture": "#overlay"},
+				"east": {"uv": [0, 16, 16, 12], "texture": "#overlay"},
+				"south": {"uv": [0, 16, 16, 12], "texture": "#overlay"},
+				"west": {"uv": [0, 16, 16, 12], "texture": "#overlay"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#overlay"}
+			}
+		},
+		{
+			"name": "lower_upper_plate",
+			"from": [4, 4, 4],
+			"to": [12, 5, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 12, 12]},
+			"faces": {
+				"north": {"uv": [4, 12, 12, 13], "texture": "#upper_plate"},
+				"east": {"uv": [4, 12, 12, 13], "texture": "#upper_plate"},
+				"south": {"uv": [4, 12, 12, 13], "texture": "#upper_plate"},
+				"west": {"uv": [4, 12, 12, 13], "texture": "#upper_plate"},
+				"up": {"uv": [4, 4, 12, 12], "texture": "#upper_plate"},
+				"down": {"uv": [0, 0, 8, 8], "texture": "#missing"}
+			}
+		},
+		{
+			"name": "upper_upper_plate",
+			"from": [4, 11, 4],
+			"to": [12, 12, 12],
+			"rotation": {"angle": 0, "axis": "y", "origin": [12, 19, 12]},
+			"faces": {
+				"north": {"uv": [4, 6, 12, 7], "texture": "#upper_plate"},
+				"east": {"uv": [4, 6, 12, 7], "texture": "#upper_plate"},
+				"south": {"uv": [4, 6, 12, 7], "texture": "#upper_plate"},
+				"west": {"uv": [4, 6, 12, 7], "texture": "#upper_plate"},
+				"up": {"uv": [4, 4, 12, 12], "texture": "#upper_plate"},
+				"down": {"uv": [4, 4, 12, 12], "texture": "#upper_plate"}
+			}
+		}
+	]
+}

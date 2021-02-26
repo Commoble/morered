@@ -1,0 +1,12 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients":
+	[
+		{"tag": "morered:bundled_network_cables"},
+		{"tag": "forge:ingots/iron"}
+	],
+	"result": 
+	{
+		"item": "morered:redwire_post"
+	}
+}

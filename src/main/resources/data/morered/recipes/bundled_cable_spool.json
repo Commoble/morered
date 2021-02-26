@@ -13,10 +13,10 @@
       "tag": "forge:ingots/iron"
     },
     "r": {
-      "tag": "morered:red_alloy_wire"
+      "tag": "morered:bundled_network_cables"
     }
   },
   "result": {
-    "item": "morered:redwire_spool"
+    "item": "morered:bundled_cable_spool"
   }
 }

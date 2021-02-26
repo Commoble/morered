@@ -18,6 +18,8 @@
 	"block.morered.redwire_post": "Redwire Post",
 	"block.morered.redwire_post_plate": "Redwire Post Plate",
 	"block.morered.redwire_post_relay_plate": "Redwire Post Relay Plate",
+	"block.morered.bundled_cable_post": "Bundled Cable Post",
+	"block.morered.bundled_cable_relay_plate": "Bundled Cable Relay Plate",
 	"block.morered.hexidecrubrometer": "Hexidecrubrometer",
 	"block.morered.red_alloy_wire": "Red Alloy Wire",
 	"block.morered.white_network_cable": "White Network Cable",
@@ -38,5 +40,6 @@
 	"block.morered.black_network_cable": "Black Network Cable",
 	"block.morered.bundled_network_cable": "Bundled Network Cable",
 	"item.morered.redwire_spool": "Redwire Spool",
+	"item.morered:bundled_cable_spool": "Bundled Cable Spool",
 	"item.morered.red_alloy_ingot": "Red Alloy Ingot"
 }

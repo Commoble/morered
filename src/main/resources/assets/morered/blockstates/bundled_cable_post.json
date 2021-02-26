@@ -1,0 +1,10 @@
+{
+    "variants": {
+        "facing=down":  { "model": "morered:block/bundled_cable_post"},
+        "facing=up":    { "model": "morered:block/bundled_cable_post", "x": 180},
+        "facing=north": { "model": "morered:block/bundled_cable_post", "x": 270},
+        "facing=south": { "model": "morered:block/bundled_cable_post", "x": 90},
+        "facing=west":  { "model": "morered:block/bundled_cable_post", "x": 90, "y": 90},
+        "facing=east":  { "model": "morered:block/bundled_cable_post", "x": 90, "y": 270}
+    }
+}

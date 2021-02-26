@@ -1,0 +1,16 @@
+{
+	"type": "morered:gatecrafting",
+	"ingredients": 
+	[
+		{
+			"tag": "forge:ingots/iron"
+		},
+		{
+			"tag": "morered:bundled_cable"
+		}
+	],
+	"result": 
+	{
+		"item": "morered:bundled_cable_post"
+	}
+}
