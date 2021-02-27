@@ -154,6 +154,12 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 			Vector3d swap = startVec;
 			startVec = endVec;
 			endVec = swap;
+			float swapF = minU;
+			minU = maxU;
+			maxU = swapF;
+			swapF = minV;
+			minV = maxV;
+			maxV = swapF;
 			translateSwap = true;
 		}
 
@@ -179,7 +185,7 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 			Vector3d[] pointList = SlackInterpolator.getInterpolatedDifferences(endVec.subtract(startVec));
 			int points = pointList.length;
 			int lines = points - 1;
-			float cableWidth = 0.1F;//0.025F;
+			float cableWidth = 0.1F;
 			Matrix4f lastMatrix = matrices.getLast().getMatrix();
 			float offsetScale = MathHelper.fastInvSqrt(dx * dx + dz * dz) * cableWidth / 2.0F;
 			float xOffset = dz * offsetScale;
@@ -205,13 +211,12 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 				float y1 = (float) secondPoint.y;
 				float z1 = (float) secondPoint.z;
 				int secondSegmentIndex = segmentIndex+1;
-				int segmentIndexForColor = translateSwap ? lines-segmentIndex + 1 : segmentIndex;
-				int secondSegmentIndexForColor = translateSwap ? lines - secondSegmentIndex + 1 : secondSegmentIndex;
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, lines, segmentIndex, segmentIndexForColor, false, false, xOffset, zOffset, minU, maxU, minV, maxV);
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, lines, secondSegmentIndex, secondSegmentIndexForColor, true, false, xOffset, zOffset, minU, maxU, minV, maxV);
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, lines, segmentIndex, segmentIndexForColor, false, true, xOffset, zOffset, minU, maxU, minV, maxV);
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, lines, secondSegmentIndex, secondSegmentIndexForColor, true, true, xOffset, zOffset, minU, maxU, minV, maxV);
-			
+				
+				addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
+				addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
+				addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
+				addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
+					
 			}
 		}
 
@@ -225,29 +230,10 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 	}
 
 	public static void addVertexPair(IVertexBuilder vertexBuilder, Matrix4f lastMatrix, int packedLight, float x, float y, float z, float cableWidth,
-		float cableWidthOrZero, int maxSegments, int segmentIndex, int segmentIndexForColor, boolean secondVertexPairForQuad, boolean isRotatedQuads, float xOffset, float zOffset,
+		float cableWidthOrZero, int segmentIndex, boolean secondVertexPairForQuad, float xOffset, float zOffset,
 		float minU, float maxU, float minV, float maxV)
 	{
-//		int colorIndex = isRotatedQuads ? (segmentIndexForColor/2) % 3 : (segmentIndexForColor+1)/2 % 3;
-//		int colorIndex = segmentIndexForColor/2 % 3;
-//		float red = 0.5F;
-//		float blue = 0.4F;
-//		float green = 0.3F;
-//		float red = REDS[colorIndex];
-//		float green = GREENS[colorIndex];
-//		float blue = BLUES[colorIndex];
-//		if (segmentIndexForColor % 3 == 0)
-//		{
-//			red *= 0.8F;
-//			blue *= 0.8F;
-//			green *= 0.8F;
-//		}
-//		if (segmentIndexForColor % 2 == 0)
-//		{
-//			red *= 0.9F;
-//			blue *= 0.9F;
-//			green *= 0.9F;
-//		}
+		
 		if (!secondVertexPairForQuad)
 		{
 			vertexBuilder.pos(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
