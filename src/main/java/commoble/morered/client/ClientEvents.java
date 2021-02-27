@@ -76,9 +76,12 @@ public class ClientEvents
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.getCutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.getCutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), RenderType.getCutout());
 
 		ScreenManager.registerFactory(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDWIRE_POST.get(), WirePostRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_POST.get(), BundledCablePostRenderer::new);
+		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), BundledCablePostRenderer::new);
 	}
 	
 	public static void setLogicGateRenderLayer(LogicGateType type)

@@ -23,7 +23,7 @@ public class DefaultWireProperties
 	public static final WireConnector DEFAULT_CABLE_CONNECTOR = DefaultWireProperties::canGenericBlockConnectToCable;
 	public static final ChanneledPowerSupplier NO_POWER_SUPPLIER = (theWorld,pos,state,face,channel) -> 0;
 	
-	private static boolean canGenericBlockConnectToWire(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos thisNeighborPos, BlockState thisNeighborState)
+	private static boolean canGenericBlockConnectToWire(IBlockReader world, BlockPos thisNeighborPos, BlockState thisNeighborState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		if (!thisNeighborState.canConnectRedstone(world, wirePos, directionToWire.getOpposite()))
 			return false;
@@ -38,7 +38,7 @@ public class DefaultWireProperties
 		return !VoxelShapes.compare(projectedNeighborShape, wireTestShape, IBooleanFunction.ONLY_SECOND);
 	}
 	
-	public static boolean isRedstoneWireConnectable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+	public static boolean isRedstoneWireConnectable(IBlockReader world, BlockPos redstonePos, BlockState redstoneState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		// redstone wire can connect to bottom faces of horizontally adjacent wire blocks 
 		return wireFace == Direction.DOWN && directionToWire.getAxis() != Axis.Y;
@@ -49,7 +49,7 @@ public class DefaultWireProperties
 		return thisState.getWeakPower(world, thisPos, directionToThis) * 2;
 	}
 	
-	private static boolean canGenericBlockConnectToCable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos thisNeighborPos, BlockState thisNeighborState)
+	private static boolean canGenericBlockConnectToCable(IBlockReader world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		return false;
 	}

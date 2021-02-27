@@ -14,15 +14,15 @@ import net.minecraft.world.IBlockReader;
 
 import net.minecraft.block.AbstractBlock.Properties;
 
-public class WirePostPlateBlock extends AbstractWirePostBlock
+public class WirePostPlateBlock extends AbstractPoweredWirePostBlock
 {
 	protected static final VoxelShape[] PLATED_POST_SHAPES_DUNSWE = {
-		VoxelShapes.or(AbstractWirePostBlock.POST_SHAPES_DUNSWE[0], PlateBlock.SHAPES_BY_DIRECTION[0]), // down
-		VoxelShapes.or(AbstractWirePostBlock.POST_SHAPES_DUNSWE[1], PlateBlock.SHAPES_BY_DIRECTION[1]), // up
-		VoxelShapes.or(AbstractWirePostBlock.POST_SHAPES_DUNSWE[2], PlateBlock.SHAPES_BY_DIRECTION[2]), // north
-		VoxelShapes.or(AbstractWirePostBlock.POST_SHAPES_DUNSWE[3], PlateBlock.SHAPES_BY_DIRECTION[3]), // south
-		VoxelShapes.or(AbstractWirePostBlock.POST_SHAPES_DUNSWE[4], PlateBlock.SHAPES_BY_DIRECTION[4]), // west
-		VoxelShapes.or(AbstractWirePostBlock.POST_SHAPES_DUNSWE[5], PlateBlock.SHAPES_BY_DIRECTION[5]) // east
+		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[0], PlateBlock.SHAPES_BY_DIRECTION[0]), // down
+		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[1], PlateBlock.SHAPES_BY_DIRECTION[1]), // up
+		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[2], PlateBlock.SHAPES_BY_DIRECTION[2]), // north
+		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[3], PlateBlock.SHAPES_BY_DIRECTION[3]), // south
+		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[4], PlateBlock.SHAPES_BY_DIRECTION[4]), // west
+		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[5], PlateBlock.SHAPES_BY_DIRECTION[5]) // east
 	};
 
 	public WirePostPlateBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
@@ -42,14 +42,14 @@ public class WirePostPlateBlock extends AbstractWirePostBlock
 	
 	public static EnumSet<Direction> getRedstoneConnectionDirectionsForEmptyPlate(BlockState state)
 	{
-		return AbstractWirePostBlock.NO_DIRECTIONS;
+		return AbstractPoweredWirePostBlock.NO_DIRECTIONS;
 	}
 	
 	public static EnumSet<Direction> getRedstoneConnectionDirectionsForRelayPlate(BlockState state)
 	{
 		if (!state.hasProperty(DIRECTION_OF_ATTACHMENT))
 		{
-			return AbstractWirePostBlock.NO_DIRECTIONS;
+			return AbstractPoweredWirePostBlock.NO_DIRECTIONS;
 		}
 		
 		Direction attachmentDir = state.get(DIRECTION_OF_ATTACHMENT);

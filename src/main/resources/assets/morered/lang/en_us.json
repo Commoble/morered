@@ -40,6 +40,6 @@
 	"block.morered.black_network_cable": "Black Network Cable",
 	"block.morered.bundled_network_cable": "Bundled Network Cable",
 	"item.morered.redwire_spool": "Redwire Spool",
-	"item.morered:bundled_cable_spool": "Bundled Cable Spool",
+	"item.morered.bundled_cable_spool": "Bundled Cable Spool",
 	"item.morered.red_alloy_ingot": "Red Alloy Ingot"
 }

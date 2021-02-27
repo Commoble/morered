@@ -10,19 +10,15 @@ import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.util.DirectionHelper;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
-import it.unimi.dsi.fastutil.bytes.ByteList;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.Constants.BlockFlags;
 import net.minecraftforge.common.util.LazyOptional;
 
 public class BundledCableTileEntity extends TileEntity
@@ -31,24 +27,12 @@ public class BundledCableTileEntity extends TileEntity
 	public static final String CHANNEL_FLAGS = "channel_flags";
 	public static final String POWER_BYTES = "power_bytes";
 	
-	protected static byte[][] makeEmptyPowerData()
-	{
-		return new byte[6][];
-	}
-	
 	/**
 	 * Table of power values
 	 * The first index is the direction ordinal of the face of the wire where the power is stored (dunswe order)
 	 * The second index is the power channel ordinal (dye color order)
 	 */
 	protected byte[][] power = new byte[6][16];
-	
-	/**
-	 * The update packet is built as data is updated.
-	 * When it's time to send the update packet, the built nbt is sent, and is replaced in this field with a new compound.
-	 * This minimizes the size of packets that need to be sent to clients.
-	 */
-	protected byte[][] powerUpdateBuffer = makeEmptyPowerData();
 	
 	protected Map<Direction, LazyOptional<ChanneledPowerSupplier>> sidedPowerSuppliers = Util.make(new EnumMap<>(Direction.class), map ->
 	{
@@ -71,13 +55,6 @@ public class BundledCableTileEntity extends TileEntity
 		this.sidedPowerSuppliers.forEach((dir, holder) -> holder.invalidate());
 	}
 
-	protected byte[][] getAndClearUpdateBuffer()
-	{
-		byte[][] buffer = this.powerUpdateBuffer;
-		this.powerUpdateBuffer = makeEmptyPowerData();
-		return buffer;
-	}
-
 	public int getPower(int side, int channel)
 	{
 		return this.power[side][channel];
@@ -98,33 +75,18 @@ public class BundledCableTileEntity extends TileEntity
 		{
 			if (!this.world.isRemote)
 			{
-				byte[] sidedPower = this.getOrCreateUpdateBufferForSide(side);
-				sidedPower[channel] = (byte)newPower;
-				BlockState state = this.getBlockState();
-				this.world.notifyBlockUpdate(this.pos, state, state, BlockFlags.DEFAULT);
 				this.markDirty();
 			}
 			return true;
 		}
 		return false;
 	}
-	
-	protected byte[] getOrCreateUpdateBufferForSide(int side)
-	{
-		byte[] sidedPower = this.powerUpdateBuffer[side];
-		if (sidedPower == null)
-		{
-			sidedPower = new byte[16];
-			this.powerUpdateBuffer[side] = sidedPower;
-		}
-		return sidedPower;
-	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
 	{
-		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY)
+		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY && side != null)
 			return (LazyOptional<T>) this.sidedPowerSuppliers.get(side);
 		return super.getCapability(cap, side);
 	}
@@ -135,7 +97,7 @@ public class BundledCableTileEntity extends TileEntity
 	public CompoundNBT write(CompoundNBT compound)
 	{
 		super.write(compound);
-		this.writeCommonData(compound);
+		this.writeServerData(compound);
 		return compound;
 	}
 	
@@ -144,47 +106,16 @@ public class BundledCableTileEntity extends TileEntity
 	public void read(BlockState state, CompoundNBT compound)
 	{
 		super.read(state, compound);
-		this.readCommonData(compound);
-	}
-
-	// called on server to get the data to send to clients when chunk is loaded for client
-	// defaults to this.writeInternal()
-	@Override
-	public CompoundNBT getUpdateTag()
-	{
-		CompoundNBT compound = super.getUpdateTag();
-		this.writeCommonData(compound);
-		return compound;
-	}
-
-	// called on server when world.notifyBlockUpdate is invoked at this TE's position
-	// generates the packet to send to nearby clients
-	@Override
-	public SUpdateTileEntityPacket getUpdatePacket()
-	{
-		CompoundNBT compound = new CompoundNBT();
-		this.writeUpdatedPowerData(compound);
-		return new SUpdateTileEntityPacket(this.pos, 0, compound); // non-positive ID indicates non-vanilla packet
-	}
-
-	// called on client to read the packet sent by getUpdatePacket
-	@Override
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
-	{
-		CompoundNBT compound = pkt.getNbtCompound();
-		this.readUpdatedPowerData(compound);
-		BlockState state = this.getBlockState();
-		this.world.notifyBlockUpdate(this.pos, state, state, 8);
-		super.onDataPacket(net, pkt);
+		this.readServerData(compound);
 	}
 	
-	public CompoundNBT writeCommonData(CompoundNBT compound)
+	public CompoundNBT writeServerData(CompoundNBT compound)
 	{
 		this.writeAllPowerData(compound);
 		return compound;
 	}
 	
-	public void readCommonData(CompoundNBT compound)
+	public void readServerData(CompoundNBT compound)
 	{
 		this.readUpdatedPowerData(compound);
 	}
@@ -222,46 +153,6 @@ public class BundledCableTileEntity extends TileEntity
 
 		return compound;
 		
-	}
-	
-	public CompoundNBT writeUpdatedPowerData(CompoundNBT compound)
-	{
-		CompoundNBT powerData = new CompoundNBT();
-		byte[][] buffer = this.getAndClearUpdateBuffer();
-		boolean wrotePower = false;
-		for (int side=0; side<6; side++)
-		{
-			byte[] sidedPower = buffer[side];
-			if (sidedPower == null)
-				continue;
-			
-			CompoundNBT sidedPowerTag = new CompoundNBT();
-			boolean wroteSidedPower = false;
-			int channelFlags = 0;
-			ByteList bytes = new ByteArrayList(16);
-			for (int channel = 0; channel < 16; channel++)
-			{
-				byte channelPower = sidedPower[channel];
-				if (channelPower > 0)
-				{
-					channelFlags |= (1 << channel);
-					bytes.add(channelPower);
-					wroteSidedPower = true;
-				}
-			}
-			if (wroteSidedPower)
-			{
-				sidedPowerTag.putShort(CHANNEL_FLAGS, (short)channelFlags);
-				sidedPowerTag.putByteArray(POWER_BYTES, bytes.toByteArray());
-				powerData.put(Direction.byIndex(side).getName2(), sidedPowerTag);
-				wrotePower = true;
-			}
-		}
-		
-		if (wrotePower)
-			compound.put(POWER, powerData);
-		
-		return compound;
 	}
 	
 	public void readUpdatedPowerData(CompoundNBT compound)

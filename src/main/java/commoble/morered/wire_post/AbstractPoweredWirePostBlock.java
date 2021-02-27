@@ -1,8 +1,6 @@
 package commoble.morered.wire_post;
 
 import java.util.EnumSet;
-import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -16,26 +14,19 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.ItemStack;
-import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.IntegerProperty;
 import net.minecraft.state.StateContainer;
 import net.minecraft.state.properties.BlockStateProperties;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
 
-public abstract class AbstractWirePostBlock extends Block
+public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 {
-	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
 	public static final IntegerProperty POWER = BlockStateProperties.POWER_0_15;
 	public static final EnumSet<Direction> NO_DIRECTIONS = EnumSet.noneOf(Direction.class);
 	
@@ -51,11 +42,10 @@ public abstract class AbstractWirePostBlock extends Block
 	// function that gets the connected directions for a given blockstate
 	private final Function<BlockState, EnumSet<Direction>> connectionGetter;
 
-	public AbstractWirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
+	public AbstractPoweredWirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
 	{
 		super(properties);
-		this.setDefaultState(this.stateContainer.getBaseState()
-			.with(DIRECTION_OF_ATTACHMENT, Direction.DOWN)
+		this.setDefaultState(this.getDefaultState()
 			.with(POWER, 0));
 		this.connectionGetter = connectionGetter;
 	}
@@ -65,7 +55,7 @@ public abstract class AbstractWirePostBlock extends Block
 	{
 		return true;
 	}
-	
+
 	@Override
 	public TileEntity createTileEntity(BlockState state, IBlockReader reader)
 	{
@@ -75,15 +65,8 @@ public abstract class AbstractWirePostBlock extends Block
 	@Override
 	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
 	{
-		builder.add(DIRECTION_OF_ATTACHMENT, POWER);
-	}
-
-	@Override
-	@Deprecated
-	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
-	{
-		// we override this to ensure the correct context is used instead of the dummy context
-		return this.canCollide ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
+		super.fillStateContainer(builder);
+		builder.add(POWER);
 	}
 	
 	/**
@@ -117,68 +100,13 @@ public abstract class AbstractWirePostBlock extends Block
 	}
 
 	@Override
-	@Deprecated
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
-	{
-		this.updatePostSet(world, pos, Set<BlockPos>::add);
-		super.onBlockAdded(state, world, pos, oldState, isMoving);
-		this.notifyNeighbors(world, pos, state);
-	}
-
-	@Override
-	@Deprecated
-	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
-	{
-		if (state.getBlock() == newState.getBlock())
-		{
-			// only thing super.onReplaced does is remove the tile entity
-			// if the block stays the same, we specifically do NOT remove the tile entity
-			// so don't do anything here
-		}
-		else
-		{
-			this.updatePostSet(world, pos, Set<BlockPos>::remove);
-			super.onReplaced(state, world, pos, newState, isMoving);
-		}
-		this.notifyNeighbors(world, pos, state);
-	}
-	
-	public void updatePostSet(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
-	{
-		Chunk chunk = world.getChunkAt(pos);
-		if (chunk != null)
-		{
-			chunk.getCapability(PostsInChunkCapability.INSTANCE)
-				.ifPresent(posts -> {
-					Set<BlockPos> set = posts.getPositions();
-					consumer.accept(set, pos);
-					posts.setPositions(set);
-				});
-		}
-	}
-
-	@Override
 	@Nullable
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		BlockState defaultState = this.getDefaultState();
-		World world = context.getWorld();
-		BlockPos pos = context.getPos();
-
-		BlockState bestState = null;
-		for (Direction direction : context.getNearestLookingDirections())
-		{
-			BlockState checkState = defaultState.with(DIRECTION_OF_ATTACHMENT, direction);
-			if (checkState != null && checkState.isValidPosition(world, pos))
-			{
-				bestState = checkState;
-				break;
-			}
-		}
-
-		return bestState != null && world.placedBlockCollides(bestState, pos, ISelectionContext.dummy())
-			? bestState.with(POWER, this.getNewPower(bestState, world, pos))
-			: null;
+		BlockState attachmentState = super.getStateForPlacement(context);
+		return attachmentState == null
+			? null
+			: attachmentState.with(POWER, this.getNewPower(attachmentState, context.getWorld(), context.getPos()));
 	}
 
 	/**
@@ -194,34 +122,6 @@ public abstract class AbstractWirePostBlock extends Block
 	public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos)
 	{
 		return state.with(POWER, this.getNewPower(state, world, pos));
-	}
-
-	/**
-	 * Returns the blockstate with the given rotation from the passed blockstate. If
-	 * inapplicable, returns the passed blockstate.
-	 * 
-	 * @deprecated call via {@link IBlockState#withRotation(Rotation)} whenever
-	 *             possible. Implementing/overriding is fine.
-	 */
-	@Deprecated
-	@Override
-	public BlockState rotate(BlockState state, Rotation rot)
-	{
-		return state.with(DIRECTION_OF_ATTACHMENT, rot.rotate(state.get(DIRECTION_OF_ATTACHMENT)));
-	}
-
-	/**
-	 * Returns the blockstate with the given mirror of the passed blockstate. If
-	 * inapplicable, returns the passed blockstate.
-	 * 
-	 * @deprecated call via {@link IBlockState#withMirror(Mirror)} whenever
-	 *             possible. Implementing/overriding is fine.
-	 */
-	@Deprecated
-	@Override
-	public BlockState mirror(BlockState state, Mirror mirrorIn)
-	{
-		return state.rotate(mirrorIn.toRotation(state.get(DIRECTION_OF_ATTACHMENT)));
 	}
 
 	/**
@@ -301,6 +201,7 @@ public abstract class AbstractWirePostBlock extends Block
 
 
 	
+	@Override
 	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
 	{
 		EnumSet<Direction> neighborDirections = this.connectionGetter.apply(state);

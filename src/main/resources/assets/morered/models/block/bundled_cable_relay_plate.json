@@ -4,7 +4,7 @@
 	"textures": {
 		"overlay": "morered:block/bundled_cable_plate_overlay",
 		"upper_plate": "block/hopper_outside",
-		"plate": "minecraft mods:block/smooth_stone",
+		"plate": "block/smooth_stone",
 		"particle": "block/smooth_stone"
 	},
 	"elements": [

@@ -200,7 +200,7 @@ public class BundledCableBlock extends AbstractWireBlock
 					Block neighborBlock = neighborState.getBlock();
 					// only check orthagonal capabilities if the cable can connect to that block
 					WireConnector connector = connectors.getOrDefault(neighborBlock, defaultConnector);
-					if (connector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
+					if (connector.canConnectToAdjacentWire(world, mutaPos, neighborState, wirePos, wireState, attachmentDirection, directionToWire))
 					{
 						ChanneledPowerSupplier orthagonalPowerSupplier;
 						orthagonalPowerSupplier = neighborPowerSuppliers.get(directionToNeighbor);
@@ -275,7 +275,7 @@ public class BundledCableBlock extends AbstractWireBlock
 	protected boolean canAdjacentBlockConnectToFace(IBlockReader world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
 	{
 		return MoreRedAPI.getCableConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultCableConnector())
-			.canConnectToAdjacentWire(world, thisPos, thisState, attachmentDirection, directionToWire, neighborPos, neighborState);
+			.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);
 	}
 
 }

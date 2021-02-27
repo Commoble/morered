@@ -134,7 +134,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		{
 			int attachmentSide = DirectionHelper.uncompressSecondSide(side, i);
 			Direction attachmentDirection = Direction.byIndex(attachmentSide);
-			if (state.get(INTERIOR_FACES[attachmentSide]) && connector.canConnectToAdjacentWire(world, pos, state, attachmentDirection, directionFromNeighbor, neighborPos, neighborState))
+			if (state.get(INTERIOR_FACES[attachmentSide]) && connector.canConnectToAdjacentWire(world, neighborPos, neighborState, pos, state, attachmentDirection, directionFromNeighbor))
 			{
 				output = Math.max(output, wire.getPower(attachmentSide));
 			}
@@ -247,7 +247,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 				}
 				Block neighborBlock = neighborState.getBlock();
 				WireConnector connector = connectors.getOrDefault(neighborBlock, defaultConnector);
-				if (connector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
+				if (connector.canConnectToAdjacentWire(world, mutaPos, neighborState, wirePos, wireState, attachmentDirection, directionToWire))
 				{
 					ExpandedPowerSupplier expandedPowerSupplier = expandedPowerSuppliers.getOrDefault(neighborBlock, defaultPowerSupplier);
 					// power will always be at least 0 because it started at 0 and we're maxing against that

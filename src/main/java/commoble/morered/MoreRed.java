@@ -22,6 +22,7 @@ import commoble.morered.client.ClientEvents;
 import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import commoble.morered.plate_blocks.LogicGateType;
+import commoble.morered.wire_post.BundledCableRelayPlateBlock;
 import commoble.morered.wire_post.IPostsInChunk;
 import commoble.morered.wire_post.PostsInChunk;
 import commoble.morered.wire_post.PostsInChunkCapability;
@@ -93,7 +94,7 @@ public class MoreRed
 	public static Optional<ClientProxy> CLIENT_PROXY = DistExecutor.unsafeRunForDist(() -> ClientProxy::makeClientProxy, () -> () -> Optional.empty());
 	
 	// the network channel we'll use for sending packets associated with this mod
-	public static final String CHANNEL_PROTOCOL_VERSION = "1";
+	public static final String CHANNEL_PROTOCOL_VERSION = "2";
 	public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
 		new ResourceLocation(MoreRed.MODID, "main"),
 		() -> CHANNEL_PROTOCOL_VERSION,
@@ -182,6 +183,8 @@ public class MoreRed
 		}
 		BundledCableBlock bundledCableBlock = BlockRegistrar.BUNDLED_NETWORK_CABLE.get();
 		cableConnectors.put(bundledCableBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
+		BundledCableRelayPlateBlock cablePlateBlock = BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get();
+		cableConnectors.put(cablePlateBlock, cablePlateBlock::canConnectToAdjacentCable);
 	}
 	
 	public static void onCommonSetup(FMLCommonSetupEvent event)

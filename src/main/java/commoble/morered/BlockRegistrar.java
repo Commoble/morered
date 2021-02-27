@@ -6,6 +6,8 @@ import commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
+import commoble.morered.wire_post.BundledCablePostBlock;
+import commoble.morered.wire_post.BundledCableRelayPlateBlock;
 import commoble.morered.wire_post.WirePostBlock;
 import commoble.morered.wire_post.WirePostPlateBlock;
 import commoble.morered.wires.BundledCableBlock;
@@ -58,5 +60,11 @@ public class BlockRegistrar
 	
 	public static final RegistryObject<BundledCableBlock> BUNDLED_NETWORK_CABLE = BLOCKS.register(ObjectNames.BUNDLED_NETWORK_CABLE,
 		() -> new BundledCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.BLUE).doesNotBlockMovement().zeroHardnessAndResistance()));
+	
+	public static final RegistryObject<BundledCablePostBlock> BUNDLED_CABLE_POST = BLOCKS.register(ObjectNames.BUNDLED_CABLE_POST,
+		() -> new BundledCablePostBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.BLUE).hardnessAndResistance(2F, 5F)));
+	
+	public static final RegistryObject<BundledCableRelayPlateBlock> BUNDLED_CABLE_RELAY_PLATE = BLOCKS.register(ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
+		() -> new BundledCableRelayPlateBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.BLUE).hardnessAndResistance(2F, 5F)));
 	
 }

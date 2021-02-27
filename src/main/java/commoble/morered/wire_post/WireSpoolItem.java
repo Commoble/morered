@@ -6,7 +6,7 @@ import javax.annotation.Nonnull;
 
 import commoble.morered.MoreRed;
 import commoble.morered.ServerConfig;
-import commoble.morered.TileEntityRegistrar;
+import net.minecraft.block.Block;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -17,7 +17,7 @@ import net.minecraft.item.ItemUseContext;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
 import net.minecraft.particles.RedstoneParticleData;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
@@ -27,15 +27,16 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.PacketDistributor;
 
-import net.minecraft.item.Item.Properties;
-
 public class WireSpoolItem extends Item
 {
 	public static final String LAST_POST_POS = "last_post_pos";
 	
-	public WireSpoolItem(Properties properties)
+	protected final ITag<Block> postBlockTag;
+	
+	public WireSpoolItem(Properties properties, ITag<Block> postBlockTag)
 	{
 		super(properties);
+		this.postBlockTag = postBlockTag;
 	}
 
 	/**
@@ -46,9 +47,11 @@ public class WireSpoolItem extends Item
 	{
 		World world = context.getWorld();
 		BlockPos pos = context.getPos();
-		return WirePostTileEntity.getPost(world, pos)
-			.map(post -> this.onUseOnPost(world, pos, post, context.getItem(), context.getPlayer()))
-			.orElseGet(() -> super.onItemUse(context));
+		return world.getBlockState(pos).isIn(this.postBlockTag)
+			? WirePostTileEntity.getPost(world, pos)
+				.map(post -> this.onUseOnPost(world, pos, post, context.getItem(), context.getPlayer()))
+				.orElseGet(() -> super.onItemUse(context))
+			: super.onItemUse(context);
 	}
 	
 	private ActionResultType onUseOnPost(World world, BlockPos pos, @Nonnull WirePostTileEntity post, ItemStack stack, PlayerEntity player)
@@ -127,20 +130,19 @@ public class WireSpoolItem extends Item
 		{
 			Optional.ofNullable(stack.getChildTag(LAST_POST_POS))
 				.map(nbt -> NBTUtil.readBlockPos(nbt))
-				.filter(pos -> shouldRemoveConnection(pos, worldIn, entityIn))
+				.filter(pos -> this.shouldRemoveConnection(pos, worldIn, entityIn))
 				.ifPresent(pos -> breakPendingConnection(stack, pos, entityIn, worldIn));
 		}
 	}
 	
-	public static boolean shouldRemoveConnection(BlockPos connectionPos, World world, Entity holder)
+	public boolean shouldRemoveConnection(BlockPos connectionPos, World world, Entity holder)
 	{
 		double maxDistance = ServerConfig.INSTANCE.max_wire_post_connection_range.get();
 		if (holder.getPositionVec().squareDistanceTo(Vector3d.copyCentered(connectionPos)) > maxDistance*maxDistance)
 		{
 			return true;
 		}
-		TileEntity te = world.getTileEntity(connectionPos);
-		return te == null || te.getType() != TileEntityRegistrar.REDWIRE_POST.get();
+		return !world.getBlockState(connectionPos).isIn(this.postBlockTag);
 	}
 	
 	public static void breakPendingConnection(ItemStack stack, BlockPos connectingPos, Entity holder, World world)

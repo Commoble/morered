@@ -30,6 +30,9 @@ public class ObjectNames
 	public static final String REDWIRE_POST_PLATE = "redwire_post_plate";
 	public static final String REDWIRE_POST_RELAY_PLATE = "redwire_post_relay_plate";
 	
+	public static final String BUNDLED_CABLE_POST = "bundled_cable_post";
+	public static final String BUNDLED_CABLE_RELAY_PLATE = "bundled_cable_relay_plate";
+	
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";
 	public static final String COLORED_NETWORK_CABLE = "colored_network_cable";
@@ -41,6 +44,7 @@ public class ObjectNames
 	// raw items
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
 	public static final String REDWIRE_SPOOL = "redwire_spool";
+	public static final String BUNDLED_CABLE_SPOOL = "bundled_cable_spool";
 	
 	// capabilities
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";

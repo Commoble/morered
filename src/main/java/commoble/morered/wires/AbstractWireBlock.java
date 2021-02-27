@@ -156,21 +156,21 @@ public abstract class AbstractWireBlock extends Block
 			});
 	}
 
-	public static boolean canWireConnectToAdjacentWireOrCable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos thisNeighborPos,
-		BlockState thisNeighborState)
+	public static boolean canWireConnectToAdjacentWireOrCable(IBlockReader world, BlockPos thisPos,
+		BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		// this wire can connect to an adjacent wire's subwire if
 		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
 		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
 		// and B) this wire is also attached to the same face
-		if (wireFace.getAxis() != directionToWire.getAxis() && thisNeighborState.get(INTERIOR_FACES[wireFace.ordinal()]))
+		if (wireFace.getAxis() != directionToWire.getAxis() && thisState.get(INTERIOR_FACES[wireFace.ordinal()]))
 			return true;
 		
 		// otherwise, check if we can connect through a wire edge
 		Block wireBlock = wireState.getBlock();
-		if (wireBlock == thisNeighborState.getBlock())
+		if (wireBlock == thisState.getBlock())
 		{
-			BlockPos diagonalPos = thisNeighborPos.offset(wireFace);
+			BlockPos diagonalPos = thisPos.offset(wireFace);
 			BlockState diagonalState = world.getBlockState(diagonalPos);
 			if (diagonalState.getBlock() == wireBlock)
 			{

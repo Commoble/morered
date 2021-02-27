@@ -2,6 +2,8 @@ package commoble.morered;
 
 import java.util.Arrays;
 
+import commoble.morered.wire_post.BundledCablePostTileEntity;
+import commoble.morered.wire_post.BundledCableRelayPlateTileEntity;
 import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wires.BundledCableTileEntity;
 import commoble.morered.wires.ColoredCableBlock;
@@ -38,5 +40,15 @@ public class TileEntityRegistrar
 	public static final RegistryObject<TileEntityType<BundledCableTileEntity>> BUNDLED_NETWORK_CABLE = TILES.register(ObjectNames.BUNDLED_NETWORK_CABLE,
 		() -> TileEntityType.Builder.create(BundledCableTileEntity::new,
 			BlockRegistrar.BUNDLED_NETWORK_CABLE.get())
+		.build(null));
+	
+	public static final RegistryObject<TileEntityType<BundledCablePostTileEntity>> BUNDLED_CABLE_POST = TILES.register(ObjectNames.BUNDLED_CABLE_POST,
+		() -> TileEntityType.Builder.create(BundledCablePostTileEntity::new,
+			BlockRegistrar.BUNDLED_CABLE_POST.get())
+		.build(null));
+	
+	public static final RegistryObject<TileEntityType<BundledCableRelayPlateTileEntity>> BUNDLED_CABLE_RELAY_PLATE = TILES.register(ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
+		() -> TileEntityType.Builder.create(BundledCableRelayPlateTileEntity::new,
+			BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get())
 		.build(null));
 }

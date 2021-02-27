@@ -49,13 +49,13 @@ public class ColoredCableBlock extends PoweredWireBlock
 		return TileEntityRegistrar.COLORED_NETWORK_CABLE.get().create();
 	}
 
-	public boolean canConnectToAdjacentWireOrCable(IBlockReader world, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire, BlockPos neighborPos,
-		BlockState neighborState)
+	public boolean canConnectToAdjacentWireOrCable(IBlockReader world, BlockPos thisPos,
+		BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		Block wireBlock = wireState.getBlock();
 		return wireBlock instanceof ColoredCableBlock && ((ColoredCableBlock)wireBlock).getDyeColor() != this.getDyeColor()
 			? false
-			: AbstractWireBlock.canWireConnectToAdjacentWireOrCable(world, wirePos, wireState, wireFace, directionToWire, neighborPos, neighborState);
+			: AbstractWireBlock.canWireConnectToAdjacentWireOrCable(world, thisPos, thisState, wirePos, wireState, wireFace, directionToWire);
 	}
 
 	@Override
@@ -63,12 +63,12 @@ public class ColoredCableBlock extends PoweredWireBlock
 	{
 		// do this check first so we don't check the same behaviour twice for colored cable blocks
 		return neighborBlock instanceof ColoredCableBlock
-			? ((ColoredCableBlock)neighborBlock).canConnectToAdjacentWireOrCable(world, thisPos, thisState, attachmentDirection, directionToWire, neighborPos, neighborState)
+			? ((ColoredCableBlock)neighborBlock).canConnectToAdjacentWireOrCable(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire)
 			: MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultWireConnector())
-				.canConnectToAdjacentWire(world, thisPos, thisState, attachmentDirection, directionToWire, neighborPos, neighborState)
+				.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire)
 				||
 				MoreRedAPI.getCableConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultCableConnector())
-				.canConnectToAdjacentWire(world, thisPos, thisState, attachmentDirection, directionToWire, neighborPos, neighborState);
+				.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);
 	}
 	
 	// invoked when an adjacent TE is marked dirty or an adjacent block updates its comparator output
@@ -201,7 +201,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 				}
 				Block neighborBlock = neighborState.getBlock();
 				WireConnector wireConnector = wireConnectors.getOrDefault(neighborBlock, defaultWireConnector);
-				if (wireConnector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
+				if (wireConnector.canConnectToAdjacentWire(world, mutaPos, neighborState, wirePos, wireState, attachmentDirection, directionToWire))
 				{
 					ExpandedPowerSupplier expandedPowerSupplier = expandedPowerSuppliers.getOrDefault(neighborBlock, defaultPowerSupplier);
 					// power will always be at least 0 because it started at 0 and we're maxing against that
@@ -213,7 +213,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 				}
 				// only check orthagonal capabilities if the cable can connect to that block
 				WireConnector cableConnector = cableConnectors.getOrDefault(neighborBlock, defaultCableConnector);
-				if (cableConnector.canConnectToAdjacentWire(world, wirePos, wireState, attachmentDirection, directionToWire, mutaPos, neighborState))
+				if (cableConnector.canConnectToAdjacentWire(world, mutaPos, neighborState, wirePos, wireState, attachmentDirection, directionToWire))
 				{
 					ChanneledPowerSupplier orthagonalPowerSupplier;
 					orthagonalPowerSupplier = neighborPowerSuppliers.get(directionToNeighbor);

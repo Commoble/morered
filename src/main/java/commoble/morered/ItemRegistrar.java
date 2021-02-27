@@ -9,6 +9,7 @@ import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -32,13 +33,16 @@ public class ItemRegistrar
 		}
 	};
 	
-	public static final RegistryObject<WireSpoolItem> REDWIRE_SPOOL = ITEMS.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().group(CREATIVE_TAB).maxDamage(64)));
+	public static final RegistryObject<WireSpoolItem> REDWIRE_SPOOL = ITEMS.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().group(CREATIVE_TAB).maxDamage(64), BlockTags.makeWrapperTag("morered:redwire_posts")));
+	public static final RegistryObject<Item> BUNDLED_CABLE_SPOOL = ITEMS.register(ObjectNames.BUNDLED_CABLE_SPOOL, () -> new WireSpoolItem(new Item.Properties().group(CREATIVE_TAB).maxDamage(64), BlockTags.makeWrapperTag("morered:bundled_cable_posts")));
 	public static final RegistryObject<Item> RED_ALLOY_INGOT = ITEMS.register(ObjectNames.RED_ALLOY_INGOT, () -> new Item(new Item.Properties().group(CREATIVE_TAB)));
 
 	public static final RegistryObject<BlockItem> GATECRAFTING_PLINTH = registerBlockItem(ObjectNames.GATECRAFTING_PLINTH, BlockRegistrar.GATECRAFTING_PLINTH);
 	public static final RegistryObject<BlockItem> REDWIRE_POST = registerBlockItem(ObjectNames.REDWIRE_POST, BlockRegistrar.REDWIRE_POST);
 	public static final RegistryObject<BlockItem> REDWIRE_POST_PLATE = registerBlockItem(ObjectNames.REDWIRE_POST_PLATE, BlockRegistrar.REDWIRE_POST_PLATE);
 	public static final RegistryObject<BlockItem> REDWIRE_POST_RELAY_PLATE = registerBlockItem(ObjectNames.REDWIRE_POST_RELAY_PLATE, BlockRegistrar.REDWIRE_POST_RELAY_PLATE);
+	public static final RegistryObject<BlockItem> BUNDLED_CABLE_POST = registerBlockItem(ObjectNames.BUNDLED_CABLE_POST, BlockRegistrar.BUNDLED_CABLE_POST);
+	public static final RegistryObject<BlockItem> BUNDLED_CABLE_RELAY_PLATE = registerBlockItem(ObjectNames.BUNDLED_CABLE_RELAY_PLATE, BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE);
 	public static final RegistryObject<BlockItem> HEXIDECRUBROMETER = registerBlockItem(ObjectNames.HEXIDECRUBROMETER, BlockRegistrar.HEXIDECRUBROMETER);
 	
 	public static final RegistryObject<BlockItem> STONE_PLATE = registerBlockItem(ObjectNames.STONE_PLATE, BlockRegistrar.STONE_PLATE);

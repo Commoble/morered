@@ -5,8 +5,8 @@ import java.util.Set;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import commoble.morered.wire_post.AbstractPoweredWirePostBlock;
 import commoble.morered.wire_post.SlackInterpolator;
-import commoble.morered.wire_post.AbstractWirePostBlock;
 import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wire_post.WireSpoolItem;
 import net.minecraft.block.BlockState;
@@ -21,7 +21,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NBTUtil;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.BlockPos;
@@ -52,7 +51,7 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 
 		light = Math.max(light, world.getLightFor(LightType.BLOCK, pos));
 		light = MathHelper.clamp(light, 0, 15);
-		int power = state.hasProperty(AbstractWirePostBlock.POWER) ? state.get(AbstractWirePostBlock.POWER) : 0;
+		int power = state.hasProperty(AbstractPoweredWirePostBlock.POWER) ? state.get(AbstractPoweredWirePostBlock.POWER) : 0;
 		double lerpFactor = power / 15D;
 		return (int)MathHelper.lerp(lerpFactor, ColorHandlers.UNLIT_RED, ColorHandlers.LIT_RED) * light / 15;
 	}
@@ -184,27 +183,9 @@ public class WirePostRenderer extends TileEntityRenderer<WirePostTileEntity>
 				vertexBuilder.pos(fourMatrix, (float)firstPoint.getX(), (float)firstPoint.getY(), (float)firstPoint.getZ()).color(red, 0, 0, 255).endVertex();
 				vertexBuilder.pos(fourMatrix, (float)secondPoint.getX(), (float)secondPoint.getY(), (float)secondPoint.getZ()).color(red, 0, 0, 255).endVertex();
 			}
-			
-//			double x = startPos.getX() + pointList[lines].getX();
-//			System.out.println(x);
 		}
 
 		matrices.pop();
-	}
-
-	public static void drawNextLineSegment(float x, float y, float z, IVertexBuilder vertexBuilder, Matrix4f fourMatrix, float lerp, float yLerp, int red)
-	{
-		vertexBuilder.pos(fourMatrix, x * lerp, y * (yLerp), z * lerp).color(red, 0, 0, 255).endVertex();
-	}
-
-	public static void spawnParticleFromTo(World world, Vector3d start, Vector3d end)
-	{
-		double lerp = world.rand.nextDouble();
-		double x = MathHelper.lerp(lerp, start.getX(), end.getX());
-		double y = MathHelper.lerp(lerp, start.getY(), end.getY());
-		double z = MathHelper.lerp(lerp, start.getZ(), end.getZ());
-
-		world.addParticle(ParticleTypes.END_ROD, x, y, z, 0, 0, 0);
 	}
 
 	@Override

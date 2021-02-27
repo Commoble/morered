@@ -22,6 +22,7 @@ import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.NetworkManager;
 import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -47,9 +48,14 @@ public class WirePostTileEntity extends TileEntity
 		NBTUtil::writeBlockPos,
 		NBTUtil::readBlockPos);
 	
+	public WirePostTileEntity(TileEntityType<? extends WirePostTileEntity> type)
+	{
+		super(type);
+	}
+	
 	public WirePostTileEntity()
 	{
-		super(TileEntityRegistrar.REDWIRE_POST.get());
+		this(TileEntityRegistrar.REDWIRE_POST.get());
 	}
 
 	public static Optional<WirePostTileEntity> getPost(IWorld world, BlockPos pos)
@@ -108,7 +114,7 @@ public class WirePostTileEntity extends TileEntity
 	{
 		this.remoteConnections.keySet().forEach(otherPos -> getPost(this.world, otherPos).ifPresent(otherPost -> otherPost.removeConnection(this.pos)));
 		this.remoteConnections = new HashMap<>();
-		this.onDataUpdated();
+		this.onCommonDataUpdated();
 	}
 
 	// removes any connection between two posts to each other
@@ -125,7 +131,7 @@ public class WirePostTileEntity extends TileEntity
 	{
 		this.remoteConnections.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos));
 		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
-		this.onDataUpdated();
+		this.onCommonDataUpdated();
 	}
 
 	private void removeConnection(BlockPos otherPos)
@@ -134,10 +140,14 @@ public class WirePostTileEntity extends TileEntity
 		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
 		if (!this.world.isRemote)
 		{
-			MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(this.pos)),
-				new WireBreakPacket(getConnectionVector(this.pos), getConnectionVector(otherPos)));
+			// only send one break packet when breaking two connections
+			int thisY = this.pos.getY();
+			int otherY = otherPos.getY();
+			if (thisY < otherY || (thisY == otherY && this.pos.hashCode() < otherPos.hashCode())) 
+				MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(this.pos)),
+					new WireBreakPacket(getConnectionVector(this.pos), getConnectionVector(otherPos)));
 		}
-		this.onDataUpdated();
+		this.onCommonDataUpdated();
 	}
 	
 	public void notifyConnections()
@@ -168,7 +178,7 @@ public class WirePostTileEntity extends TileEntity
 			.union(new AxisAlignedBB(startPos));
 	}
 
-	public void onDataUpdated()
+	public void onCommonDataUpdated()
 	{
 		this.markDirty();
 		this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.DEFAULT);
@@ -178,11 +188,11 @@ public class WirePostTileEntity extends TileEntity
 	public void read(BlockState state, CompoundNBT compound)
 	{
 		super.read(state, compound);
-		this.readNBT(compound);
+		this.readCommonData(compound);
 	}
 	
 	@SuppressWarnings("deprecation")
-	protected void readNBT(CompoundNBT compound)
+	protected void readCommonData(CompoundNBT compound)
 	{
 		if (compound.contains(CONNECTIONS))
 		{
@@ -222,7 +232,7 @@ public class WirePostTileEntity extends TileEntity
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
 	{
 		super.onDataPacket(net, pkt);
-		this.readNBT(pkt.getNbtCompound());
+		this.readCommonData(pkt.getNbtCompound());
 	}
 	
 	public NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos otherPos)
