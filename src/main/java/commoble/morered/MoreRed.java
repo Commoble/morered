@@ -299,7 +299,7 @@ public class MoreRed
 								}
 								else
 								{
-									checkedPostPositions.add(postPos);
+									checkedPostPositions.add(postPos.toImmutable());
 								}
 							}
 						}

@@ -33,7 +33,7 @@ public class WireUpdateBuffer extends WorldSavedData
 	public void enqueue(BlockPos pos)
 	{
 		ChunkPos chunkPos = new ChunkPos(pos);
-		this.buffer.computeIfAbsent(chunkPos, $-> new HashSet<BlockPos>()).add(pos);
+		this.buffer.computeIfAbsent(chunkPos, $-> new HashSet<BlockPos>()).add(pos.toImmutable());
 	}
 	
 	public void sendPackets(ServerWorld world)

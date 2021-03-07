@@ -129,7 +129,7 @@ public class WirePostTileEntity extends TileEntity
 
 	private void addConnection(BlockPos otherPos)
 	{
-		this.remoteConnections.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos));
+		this.remoteConnections.put(otherPos.toImmutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
 		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
 		this.onCommonDataUpdated();
 	}

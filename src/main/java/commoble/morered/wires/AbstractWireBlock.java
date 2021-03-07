@@ -1,7 +1,6 @@
 package commoble.morered.wires;
 
 import java.util.EnumSet;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
@@ -10,8 +9,6 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import commoble.morered.api.MoreRedAPI;
-import commoble.morered.api.WireConnector;
 import commoble.morered.util.DirectionHelper;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -657,8 +654,6 @@ public abstract class AbstractWireBlock extends Block
 		// 6*4 = 24, we have 24 boolean properties, so we have 2^24 different possible shapes
 		// we can store these in a bit pattern for efficient keying
 		long result = 0;
-		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
-		WireConnector defaultConnector = MoreRedAPI.getDefaultWireConnector();
 		for (int side = 0; side < 6; side++)
 		{
 			// we have to have a wire attached to a side to connect to secondary sides

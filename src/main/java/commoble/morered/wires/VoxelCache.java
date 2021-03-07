@@ -58,7 +58,7 @@ public class VoxelCache extends WorldSavedData
 	
 	public VoxelShape getWireShape(BlockPos pos)
 	{
-		return this.shapesByPos.getUnchecked(pos);
+		return this.shapesByPos.getUnchecked(pos.toImmutable());
 	}
 
 	@Override

@@ -19,7 +19,7 @@ public class FakeStateWorld implements IBlockReader
 	public FakeStateWorld(IBlockReader delegate, BlockPos pos, BlockState state)
 	{
 		this.delegate = delegate;
-		this.pos = pos;
+		this.pos = pos.toImmutable();
 		this.state = state;
 	}
 
