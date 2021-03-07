@@ -138,6 +138,12 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 		return true;
 	}
 
+	@Override
+	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side)
+	{
+		return side != null && this.getConnectableDirections(state).contains(side.getOpposite());
+	}
+
 	@Deprecated
 	@Override
 	public int getStrongPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side)
@@ -149,7 +155,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	@Override
 	public int getWeakPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction directionOfThisBlockFromCaller)
 	{
-		if (this.connectionGetter.apply(blockState).contains(directionOfThisBlockFromCaller.getOpposite()))
+		if (this.getConnectableDirections(blockState).contains(directionOfThisBlockFromCaller.getOpposite()))
 		{
 			return blockState.get(POWER);
 		}
@@ -157,6 +163,11 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 		{
 			return 0;
 		}
+	}
+	
+	public EnumSet<Direction> getConnectableDirections(BlockState state)
+	{
+		return this.connectionGetter.apply(state);
 	}
 	
 	/**
@@ -176,7 +187,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	{
 		if (world instanceof World)
 		{
-			return this.connectionGetter.apply(state).stream()
+			return this.getConnectableDirections(state).stream()
 				.map(direction -> ((World)world).getRedstonePower(pos.offset(direction), direction))
 				.reduce(0, Math::max);
 		}
@@ -204,7 +215,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	@Override
 	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
 	{
-		EnumSet<Direction> neighborDirections = this.connectionGetter.apply(state);
+		EnumSet<Direction> neighborDirections = this.getConnectableDirections(state);
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), neighborDirections, false).isCanceled())
 		{
 			for (Direction dir : neighborDirections)
