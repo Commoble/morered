@@ -19,8 +19,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class LatchBlock extends RedstonePlateBlock
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
@@ -105,8 +103,17 @@ public class LatchBlock extends RedstonePlateBlock
 	{
 		return INPUT_SIDES;
 	}
-
 	
+	@Override
+	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side)
+	{
+		// latch blocks have two outputs
+		// the superclass checks side == outputDirection.getOpposite() (because the given side is the side of the neighbor block)
+		// so we also check outputDirection here to see if it's the neighbor on the other side
+		return super.canConnectRedstone(state, world, pos, side)
+			|| (side != null && side == PlateBlockStateProperties.getOutputDirection(state));
+	}
+
 	@Override
 	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
 	{

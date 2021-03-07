@@ -2,6 +2,7 @@ package commoble.morered.plate_blocks;
 
 import javax.annotation.Nullable;
 
+import commoble.morered.util.BlockStateUtil;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
@@ -19,8 +20,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
-
-import net.minecraft.block.AbstractBlock.Properties;
 
 public abstract class RedstonePlateBlock extends PlateBlock
 {
@@ -98,6 +97,28 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	public boolean canProvidePower(BlockState state)
 	{
 		return true;
+	}
+	
+	@Override
+	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side)
+	{
+		if (side == null)
+			return false;
+		
+		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(state);
+		if (side == primaryOutputDirection.getOpposite())
+			return true;
+		
+		// check input sides
+		Direction attachmentDirection = state.get(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
+		int baseRotation = state.get(PlateBlockStateProperties.ROTATION);
+		for (InputSide inputSide : this.getInputSides())
+		{
+			Direction inputDirection = BlockStateUtil.getInputDirection(attachmentDirection, baseRotation, inputSide.rotationsFromOutput);
+			if (side == inputDirection.getOpposite())
+				return true;
+		}
+		return false;
 	}
 	
 	/**
