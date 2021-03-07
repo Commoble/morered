@@ -212,11 +212,23 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 				float z1 = (float) secondPoint.z;
 				int secondSegmentIndex = segmentIndex+1;
 				
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
-				addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
-					
+				if (xOffset == 0F && zOffset == 0F) // completely vertical
+				{
+					// render the quads with a different orientation if the cable is completely vertical
+					// (otherwise they have 0 width and are invisible)
+					float width = cableWidth * 0.5F;
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, width, width, minU, maxU, minV, maxV);
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, width, width, minU, maxU, minV, maxV);
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, -width, width, minU, maxU, minV, maxV);
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, -width, width, minU, maxU, minV, maxV);
+				}
+				else
+				{
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
+					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
+				}
 			}
 		}
 
