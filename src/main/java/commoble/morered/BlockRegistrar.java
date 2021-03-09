@@ -20,6 +20,7 @@ import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
 import net.minecraft.item.DyeColor;
 import net.minecraft.util.Util;
+import net.minecraftforge.common.ToolType;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -34,7 +35,7 @@ public class BlockRegistrar
 		() -> new GatecraftingPlinthBlock(AbstractBlock.Properties.create(Material.ROCK).hardnessAndResistance(3.5F).notSolid()));
 
 	public static final RegistryObject<PlateBlock> STONE_PLATE = BLOCKS.register(ObjectNames.STONE_PLATE,
-		() -> new PlateBlock(AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(1.5F).sound(SoundType.WOOD)));
+		() -> new PlateBlock(AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).harvestTool(ToolType.PICKAXE).setRequiresTool().hardnessAndResistance(1.5F).sound(SoundType.WOOD)));
 
 	public static final RegistryObject<LatchBlock> LATCH = BLOCKS.register(ObjectNames.LATCH,
 		() -> new LatchBlock(AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0).sound(SoundType.WOOD)));
