@@ -167,4 +167,9 @@ public class ColorHandlers
 		}
 		return NO_TINT;
 	}
+	
+	public static int getRedAlloyWireItemTint(ItemStack stack, int tintIndex)
+	{
+		return tintIndex >= 0 ? UNLIT : NO_TINT;
+	}
 }

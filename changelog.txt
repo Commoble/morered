@@ -1,0 +1,42 @@
+1.16.5-2.1.0.0
+	Added red alloy wires, colored network cables, bundled cables, bundled cable posts, bundled cable relay plates, and the bundled cable spool
+	Stone Plates can now be mined faster with a pickaxe but require a pickaxe to mine (logic plates can still be broken instantly)
+	Stopped redstone dust from forming connections to logic plates and redwire posts on sides where the block has no input or output
+	Fixed bug where redwire posts and redwire post relay plates weren't conducting power through solid blocks as intended
+	Fixed bug where the Hexidecrubrometer wasn't updating itself correctly after being placed when its placement changed the state of neighboring blocks
+	Fixed potential issues caused by positions being stored incorrectly
+
+1.16.4-2.0.1.3
+	Added zh_cn translations by Zorc
+
+1.16.4-2.0.1.2
+	Upgrade to 1.16.4 and Forge Build 35.1.0
+
+1.16.3-2.0.1.1
+	Fixed potential crashes and other problems that could occur when attempting to place some blocks in places where the block can't be placed
+
+1.16.3-2.0.1.0
+	Fixed a bug that significantly impacted server performance whenever players began tracking chunks
+	Fixed a bug that caused the data used for rendering redwire wires to linger in memory when logging out of one server and logging into another
+	Red Alloy Ingots are now part of the "forge:ingots/redstone_alloy" item tag used by several other mods; More Red's recipes have changed to use this tag. The old "forge:ingots/red_alloy" tag remains, but should be considered deprecated in favor of the other tag
+
+1.16.3-2.0.0.0
+	Added Hexidecrubrometer
+	Renamed Redwire Posts to Redwire Post Relay Plates
+	Added Redwire Posts (without plates) and Redwire Post Plates (without connections to neighbors)
+	Trying to place a block where a redstone wire post wire is is now denied on the client in addition to the server (this will help prevent "phantom blocks" in high-latency situations)
+	Added a new ingredient type: "morered:tag_stack"
+	More Red recipes now use tag ingredients instead of specific items in more places:
+	More Red recipes that previously used redstone dust now use the forge:dusts/redstone tag
+	More Red recipes that previously used stone plates now use the forge:quarter_slabs/smooth_stone tag
+	More Red recipes that previously used smooth stone slabs now use the forge:slabs/smooth_stone tag
+	More Red recipes that previously used smooth stone blocks now use the forge:smooth_stone tag
+	Added stone plates to the forge:quarter_slabs/smooth_stone tag
+	The default datapack included with the mod adds smooth stone and smooth stone slabs to the respective tags mentioned above as well
+
+1.15.2-1.0.1.0
+	Added Redwire Posts, Redwire Spools, and Red Alloy Ingots
+	Added two-input AND and NAND gates from porl! Many thanks to porl.
+
+1.0.0.0
+	added most logic plate blocks and the gatecrafting plinth

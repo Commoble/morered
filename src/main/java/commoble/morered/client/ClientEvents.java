@@ -114,6 +114,7 @@ public class ClientEvents
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_PLATE.get());
 		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_RELAY_PLATE.get());
+		colors.register(ColorHandlers::getRedAlloyWireItemTint, ItemRegistrar.RED_ALLOY_WIRE.get());
 	}
 	
 	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)
