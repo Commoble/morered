@@ -25,6 +25,10 @@ Where
 * `${morered_branch}` is e.g. morered-1.16.5
 * `${morered_version}` is e.g. 2.1.0.0
 
+If your mod uses mixins, you may need to add this to your run configs to use More Red in a dev environment:
+
+`properties 'mixin.env.disableRefMap': 'true'`
+
 The API is only available on branches `morered-1.16.5` or newer and versions `2.1.0.0` or newer.
 
 A debug jar is available with full sources for easier debugging, which can be used by compiling against :debug instead of :api. It is not recommended to compile against the debug jar when building production jars, as binary-breaking changes are more likely to occur with it.
