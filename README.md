@@ -27,7 +27,10 @@ Where
 
 You may need to add this to your run configs to use More Red in a dev environment:
 
-`properties 'mixin.env.disableRefMap': 'true'`
+```
+property 'mixin.env.remapRefMap', 'true'
+property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
+```
 
 The API is only available on branches `morered-1.16.5` or newer and versions `2.1.0.0` or newer.
 
