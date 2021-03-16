@@ -25,7 +25,7 @@ Where
 * `${morered_branch}` is e.g. morered-1.16.5
 * `${morered_version}` is e.g. 2.1.0.0
 
-If your mod uses mixins, you may need to add this to your run configs to use More Red in a dev environment:
+You may need to add this to your run configs to use More Red in a dev environment:
 
 `properties 'mixin.env.disableRefMap': 'true'`
 
