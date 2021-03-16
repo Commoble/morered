@@ -1,10 +1,16 @@
 1.16.5-2.1.0.0
 	Added red alloy wires, colored network cables, bundled cables, bundled cable posts, bundled cable relay plates, and the bundled cable spool
+	Added "morered:redwire_posts" and "morered:bundled_cable_posts" block tags; added relevant blocks to these tags
+	Added item tags for red alloy wires, network cables, colored network cables, bundled network cables, and all the wools
+	Added "morered:set_wire_count" loot function for use with wire blocks
+	Added "morered:wireparts" and "morered:rotate_tints" model loaders for use with wire block models
 	Stone Plates can now be mined faster with a pickaxe but require a pickaxe to mine (logic plates can still be broken instantly)
+	Redwire Spools' recipe now uses Red Alloy Wires as crafting material instead of Red Alloy Ingots
 	Stopped redstone dust from forming connections to logic plates and redwire posts on sides where the block has no input or output
 	Fixed bug where redwire posts and redwire post relay plates weren't conducting power through solid blocks as intended
 	Fixed bug where the Hexidecrubrometer wasn't updating itself correctly after being placed when its placement changed the state of neighboring blocks
 	Fixed potential issues caused by positions being stored incorrectly
+	Fixed incorrect description of previewPlacementOpacity parameter in client config
 
 1.16.4-2.0.1.3
 	Added zh_cn translations by Zorc

@@ -1,7 +1,6 @@
 package commoble.morered.datagen;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
@@ -28,7 +27,6 @@ import net.minecraft.data.LootTableProvider;
 import net.minecraft.data.RecipeProvider;
 import net.minecraft.data.ShapedRecipeBuilder;
 import net.minecraft.item.BlockItem;
-import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.loot.ConstantRange;
@@ -47,11 +45,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ColoredCablesDataProvider implements IDataProvider
 {
-	@SuppressWarnings("unchecked")
-	public static final INamedTag<Item>[] WOOL_TAGS = Util.make((INamedTag<Item>[])new INamedTag[16], array->
-		Arrays.setAll(array, i -> ItemTags.makeWrapperTag("forge:wools/" + DyeColor.values()[i].getTranslationKey())));
-	
-	public static final INamedTag<Item> RED_ALLOY_WIRE_TAG = ItemTags.makeWrapperTag("morered:red_alloy_wire");
+	public static final INamedTag<Item> RED_ALLOY_WIRE_TAG = ItemTags.makeWrapperTag("morered:red_alloy_wires");
 	
 	protected final DataGenerator generator;
 	protected final ExistingFileHelper fileHelper;
@@ -217,7 +211,7 @@ public class ColoredCablesDataProvider implements IDataProvider
 						ImmutableList.of("www", "w#w", "www"),
 						ImmutableMap.<Character,Ingredient>builder()
 							.put('w', Ingredient.fromTag(RED_ALLOY_WIRE_TAG))
-							.put('#', Ingredient.fromTag(WOOL_TAGS[ColoredCableDataProvider.this.colorIndex]))
+							.put('#', Ingredient.fromTag(MoreRedDataGen.WOOL_TAGS[ColoredCableDataProvider.this.colorIndex]))
 							.build(),
 						null,
 						null
