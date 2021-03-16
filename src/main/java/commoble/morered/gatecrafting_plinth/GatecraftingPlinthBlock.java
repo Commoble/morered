@@ -26,14 +26,14 @@ public class GatecraftingPlinthBlock extends Block
 {
 	public static final VoxelShape SHAPE = VoxelShapes.or(
 		// plate
-		Block.makeCuboidShape(0, 14, 0, 16, 16, 16),
+		Block.box(0, 14, 0, 16, 16, 16),
 		// blaze rod
-		Block.makeCuboidShape(6, 0, 6, 10, 14, 10),
+		Block.box(6, 0, 6, 10, 14, 10),
 		// legs
-		Block.makeCuboidShape(0, 0, 0, 4, 14, 4),
-		Block.makeCuboidShape(0, 0, 12, 4, 14, 16),
-		Block.makeCuboidShape(12, 0, 0, 16, 14, 4),
-		Block.makeCuboidShape(12, 0, 12, 16, 14, 16));
+		Block.box(0, 0, 0, 4, 14, 4),
+		Block.box(0, 0, 12, 4, 14, 16),
+		Block.box(12, 0, 0, 16, 14, 4),
+		Block.box(12, 0, 12, 16, 14, 16));
 		
 
 	public GatecraftingPlinthBlock(Properties properties)
@@ -42,12 +42,12 @@ public class GatecraftingPlinthBlock extends Block
 	}
 
 	@Override
-	public ActionResultType onBlockActivated(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
+	public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
 	{
 		if (player instanceof ServerPlayerEntity)
 		{
 			IContainerProvider provider = GatecraftingContainer.getServerContainerProvider(pos);
-			ITextComponent name = new TranslationTextComponent(this.getTranslationKey());
+			ITextComponent name = new TranslationTextComponent(this.getDescriptionId());
 			INamedContainerProvider namedProvider = new SimpleNamedContainerProvider(provider, name);
 			NetworkHooks.openGui((ServerPlayerEntity)player, namedProvider);
 		}

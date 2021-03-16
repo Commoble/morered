@@ -37,7 +37,7 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 {
 	public static final RenderType CABLE_RENDER_TYPE = ExtraRenderTypes.CABLE_RENDER_TYPE;
 
-	public static final RenderMaterial MATERIAL = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS_TEXTURE,new ResourceLocation("morered:block/bundled_network_cable")); 
+	public static final RenderMaterial MATERIAL = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS,new ResourceLocation("morered:block/bundled_network_cable")); 
 
 	public static final float[] REDS = {0.71F, 0.31F, 0.19F};
 	public static final float[] GREENS = {0.19F, 0.48F, 0.29F};
@@ -52,21 +52,21 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 	@Override
 	public void render(WirePostTileEntity post, float partialTicks, MatrixStack matrices, IRenderTypeBuffer buffer, int combinedLightIn, int combinedOverlayIn)
 	{
-		TextureAtlasSprite sprite = MATERIAL.getSprite();
-		float totalMinU = sprite.getMinU();
-		float totalMinV = sprite.getMinV();
-		float totalMaxU = sprite.getMaxU();
-		float totalMaxV = sprite.getMaxV();
+		TextureAtlasSprite sprite = MATERIAL.sprite();
+		float totalMinU = sprite.getU0();
+		float totalMinV = sprite.getV0();
+		float totalMaxU = sprite.getU1();
+		float totalMaxV = sprite.getV1();
 		float texWidth = totalMaxU - totalMinU;
 		float texHeight = totalMaxV - totalMinV;
 		float quadStartU = (11F/16F) * texWidth + totalMinU;
 		float quadEndU = (13F/16F) * texWidth + totalMinU;
 		float quadStartV = (6F/16F) * texHeight + totalMinV;
 		float quadEndV = (12F/16F) * texHeight + totalMinV;
-		BlockPos postPos = post.getPos();
+		BlockPos postPos = post.getBlockPos();
 		Vector3d postVector = WirePostTileEntity.getConnectionVector(postPos);
 		Set<BlockPos> connections = post.getRemoteConnections();
-		World world = post.getWorld();
+		World world = post.getLevel();
 		IVertexBuilder vertexBuilder = buffer.getBuffer(ExtraRenderTypes.CABLE_RENDER_TYPE);
 		for (BlockPos connectionPos : connections)
 		{
@@ -83,23 +83,23 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 		PlayerEntity player = Minecraft.getInstance().player;
 		for (Hand hand : Hand.values())
 		{
-			ItemStack stack = player.getHeldItem(hand);
+			ItemStack stack = player.getItemInHand(hand);
 			if (stack.getItem() instanceof WireSpoolItem)
 			{
-				CompoundNBT nbt = stack.getChildTag(WireSpoolItem.LAST_POST_POS);
+				CompoundNBT nbt = stack.getTagElement(WireSpoolItem.LAST_POST_POS);
 				if (nbt != null)
 				{
-					EntityRendererManager renderManager = Minecraft.getInstance().getRenderManager();
+					EntityRendererManager renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 					BlockPos positionOfCurrentPostOfPlayer = NBTUtil.readBlockPos(nbt);
 
 					if (positionOfCurrentPostOfPlayer.equals(postPos))
 					{
-						Vector3d vectorOfCurrentPostOfPlayer = Vector3d.copyCentered(positionOfCurrentPostOfPlayer);
-						int handSideID = -(hand == Hand.MAIN_HAND ? -1 : 1) * (player.getPrimaryHand() == HandSide.RIGHT ? 1 : -1);
+						Vector3d vectorOfCurrentPostOfPlayer = Vector3d.atCenterOf(positionOfCurrentPostOfPlayer);
+						int handSideID = -(hand == Hand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HandSide.RIGHT ? 1 : -1);
 
-						float swingProgress = player.getSwingProgress(partialTicks);
+						float swingProgress = player.getAttackAnim(partialTicks);
 						float swingZ = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-						float playerAngle = MathHelper.lerp(partialTicks, player.prevRenderYawOffset, player.renderYawOffset) * ((float) Math.PI / 180F);
+						float playerAngle = MathHelper.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
 						double playerAngleX = MathHelper.sin(playerAngle);
 						double playerAngleZ = MathHelper.cos(playerAngle);
 						double handOffset = handSideID * 0.35D;
@@ -109,32 +109,32 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 						float eyeHeight;
 						
 						// first person
-						if ((renderManager.options == null || renderManager.options.getPointOfView() == PointOfView.FIRST_PERSON))
+						if ((renderManager.options == null || renderManager.options.getCameraType() == PointOfView.FIRST_PERSON))
 						{
 							double fov = renderManager.options.fov;
 							fov = fov / 100.0D;
 							Vector3d handVector = new Vector3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
-							handVector = handVector.rotatePitch(-MathHelper.lerp(partialTicks, player.prevRotationPitch, player.rotationPitch) * ((float) Math.PI / 180F));
-							handVector = handVector.rotateYaw(-MathHelper.lerp(partialTicks, player.prevRotationYaw, player.rotationYaw) * ((float) Math.PI / 180F));
-							handVector = handVector.rotateYaw(swingZ * 0.5F);
-							handVector = handVector.rotatePitch(-swingZ * 0.7F);
-							handX = MathHelper.lerp(partialTicks, player.prevPosX, player.getPosX()) + handVector.x;
-							handY = MathHelper.lerp(partialTicks, player.prevPosY, player.getPosY()) + handVector.y;
-							handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) + handVector.z;
+							handVector = handVector.xRot(-MathHelper.lerp(partialTicks, player.xRotO, player.xRot) * ((float) Math.PI / 180F));
+							handVector = handVector.yRot(-MathHelper.lerp(partialTicks, player.yRotO, player.yRot) * ((float) Math.PI / 180F));
+							handVector = handVector.yRot(swingZ * 0.5F);
+							handVector = handVector.xRot(-swingZ * 0.7F);
+							handX = MathHelper.lerp(partialTicks, player.xo, player.getX()) + handVector.x;
+							handY = MathHelper.lerp(partialTicks, player.yo, player.getY()) + handVector.y;
+							handZ = MathHelper.lerp(partialTicks, player.zo, player.getZ()) + handVector.z;
 							eyeHeight = player.getEyeHeight();
 						}
 						
 						// third person
 						else
 						{
-							handX = MathHelper.lerp(partialTicks, player.prevPosX, player.getPosX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
-							handY = -0.2 + player.prevPosY + player.getEyeHeight() + (player.getPosY() - player.prevPosY) * partialTicks - 0.45D;
-							handZ = MathHelper.lerp(partialTicks, player.prevPosZ, player.getPosZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
+							handX = MathHelper.lerp(partialTicks, player.xo, player.getX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
+							handY = -0.2 + player.yo + player.getEyeHeight() + (player.getY() - player.yo) * partialTicks - 0.45D;
+							handZ = MathHelper.lerp(partialTicks, player.zo, player.getZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
 							eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
 						}
 						Vector3d renderPlayerVec = new Vector3d(handX, handY + eyeHeight, handZ);
 							
-						this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, vectorOfCurrentPostOfPlayer, renderPlayerVec, postPos, player.getPosition(), quadStartU, quadEndU, quadStartV, quadEndV);
+						this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, vectorOfCurrentPostOfPlayer, renderPlayerVec, postPos, player.blockPosition(), quadStartU, quadEndU, quadStartV, quadEndV);
 					
 					}
 				}
@@ -146,10 +146,10 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 		MatrixStack matrices, IVertexBuilder vertexBuilder, Vector3d startVec, Vector3d endVec, BlockPos startPos, BlockPos endPos,
 		float minU, float maxU, float minV, float maxV)
 	{
-		matrices.push();
+		matrices.pushPose();
 
 		boolean translateSwap = false;
-		if (startVec.getY() > endVec.getY())
+		if (startVec.y() > endVec.y())
 		{
 			Vector3d swap = startVec;
 			startVec = endVec;
@@ -165,13 +165,13 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 
 		matrices.translate(0.5D, 0.5D, 0.5D);
 
-		double startX = startVec.getX();
-		double startY = startVec.getY();
-		double startZ = startVec.getZ();
+		double startX = startVec.x();
+		double startY = startVec.y();
+		double startZ = startVec.z();
 
-		double endX = endVec.getX();
-		double endY = endVec.getY();
-		double endZ = endVec.getZ();
+		double endX = endVec.x();
+		double endY = endVec.y();
+		double endZ = endVec.z();
 		float dx = (float) (endX - startX);
 		float dy = (float) (endY - startY);
 		float dz = (float) (endZ - startZ);
@@ -186,14 +186,14 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 			int points = pointList.length;
 			int lines = points - 1;
 			float cableWidth = 0.1F;
-			Matrix4f lastMatrix = matrices.getLast().getMatrix();
+			Matrix4f lastMatrix = matrices.last().pose();
 			float offsetScale = MathHelper.fastInvSqrt(dx * dx + dz * dz) * cableWidth / 2.0F;
 			float xOffset = dz * offsetScale;
 			float zOffset = dx * offsetScale;
-			int startBlockLight = world.getLightFor(LightType.BLOCK, startPos);
-			int endBlockLight = world.getLightFor(LightType.BLOCK, endPos);
-			int startSkyLight = world.getLightFor(LightType.SKY, startPos);
-			int endSkyLight = world.getLightFor(LightType.SKY, endPos);
+			int startBlockLight = world.getBrightness(LightType.BLOCK, startPos);
+			int endBlockLight = world.getBrightness(LightType.BLOCK, endPos);
+			int startSkyLight = world.getBrightness(LightType.SKY, startPos);
+			int endSkyLight = world.getBrightness(LightType.SKY, endPos);
 			float maxLerpFactor = lines - 1F;
 
 			for (int segmentIndex = 0; segmentIndex < lines; ++segmentIndex)
@@ -203,7 +203,7 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 				float lerpFactor = segmentIndex / maxLerpFactor;
 				int lerpedBlockLight = (int) MathHelper.lerp(lerpFactor, startBlockLight, endBlockLight);
 				int lerpedSkyLight = (int) MathHelper.lerp(lerpFactor, startSkyLight, endSkyLight);
-				int packedLight = LightTexture.packLight(lerpedBlockLight, lerpedSkyLight);
+				int packedLight = LightTexture.pack(lerpedBlockLight, lerpedSkyLight);
 				float x0 = (float) firstPoint.x;
 				float y0 = (float) firstPoint.y;
 				float z0 = (float) firstPoint.z;
@@ -232,11 +232,11 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 			}
 		}
 
-		matrices.pop();
+		matrices.popPose();
 	}
 
 	@Override
-	public boolean isGlobalRenderer(WirePostTileEntity te)
+	public boolean shouldRenderOffScreen(WirePostTileEntity te)
 	{
 		return true;
 	}
@@ -248,29 +248,29 @@ public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEnt
 		
 		if (!secondVertexPairForQuad)
 		{
-			vertexBuilder.pos(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
+			vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
 				.color(1F, 1F, 1F, 1F)
-				.tex(minU, minV)
-				.lightmap(packedLight)
+				.uv(minU, minV)
+				.uv2(packedLight)
 				.endVertex();
-			vertexBuilder.pos(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
+			vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
 				.color(1F, 1F, 1F, 1F)
-				.tex(minU, maxV)
-				.lightmap(packedLight)
+				.uv(minU, maxV)
+				.uv2(packedLight)
 				.endVertex();
 		}
 		else
 		{
 
-			vertexBuilder.pos(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
+			vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
 				.color(1F, 1F, 1F, 1F)
-				.tex(maxU, maxV)
-				.lightmap(packedLight)
+				.uv(maxU, maxV)
+				.uv2(packedLight)
 				.endVertex();
-			vertexBuilder.pos(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
+			vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
 				.color(1F, 1F, 1F, 1F)
-				.tex(maxU, minV)
-				.lightmap(packedLight)
+				.uv(maxU, minV)
+				.uv2(packedLight)
 				.endVertex();
 		}
 

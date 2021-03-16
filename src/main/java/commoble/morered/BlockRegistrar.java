@@ -32,40 +32,40 @@ public class BlockRegistrar
 	public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, MoreRed.MODID);
 	
 	public static final RegistryObject<GatecraftingPlinthBlock> GATECRAFTING_PLINTH = BLOCKS.register(ObjectNames.GATECRAFTING_PLINTH,
-		() -> new GatecraftingPlinthBlock(AbstractBlock.Properties.create(Material.ROCK).hardnessAndResistance(3.5F).notSolid()));
+		() -> new GatecraftingPlinthBlock(AbstractBlock.Properties.of(Material.STONE).strength(3.5F).noOcclusion()));
 
 	public static final RegistryObject<PlateBlock> STONE_PLATE = BLOCKS.register(ObjectNames.STONE_PLATE,
-		() -> new PlateBlock(AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).harvestTool(ToolType.PICKAXE).setRequiresTool().hardnessAndResistance(1.5F).sound(SoundType.WOOD)));
+		() -> new PlateBlock(AbstractBlock.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL).harvestTool(ToolType.PICKAXE).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD)));
 
 	public static final RegistryObject<LatchBlock> LATCH = BLOCKS.register(ObjectNames.LATCH,
-		() -> new LatchBlock(AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0).sound(SoundType.WOOD)));
+		() -> new LatchBlock(AbstractBlock.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL).strength(0).sound(SoundType.WOOD)));
 
 	public static final RegistryObject<WirePostBlock> REDWIRE_POST = BLOCKS.register(ObjectNames.REDWIRE_POST,
-		() -> new WirePostBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F), WirePostBlock::getRedstoneConnectionDirections));
+		() -> new WirePostBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F), WirePostBlock::getRedstoneConnectionDirections));
 	
 	public static final RegistryObject<WirePostPlateBlock> REDWIRE_POST_PLATE = BLOCKS.register(ObjectNames.REDWIRE_POST_PLATE,
-		() -> new WirePostPlateBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
+		() -> new WirePostPlateBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
 	
 	public static final RegistryObject<WirePostPlateBlock> REDWIRE_POST_RELAY_PLATE = BLOCKS.register(ObjectNames.REDWIRE_POST_RELAY_PLATE,
-		() -> new WirePostPlateBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
+		() -> new WirePostPlateBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
 	
 	public static final RegistryObject<HexidecrubrometerBlock> HEXIDECRUBROMETER = BLOCKS.register(ObjectNames.HEXIDECRUBROMETER,
-		() -> new HexidecrubrometerBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.RED).hardnessAndResistance(2F, 5F)));
+		() -> new HexidecrubrometerBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F)));
 
 	public static final RegistryObject<RedAlloyWireBlock> RED_ALLOY_WIRE = BLOCKS.register(ObjectNames.RED_ALLOY_WIRE, 
-		() -> new RedAlloyWireBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.RED).doesNotBlockMovement().zeroHardnessAndResistance()));
+		() -> new RedAlloyWireBlock(AbstractBlock.Properties.of(Material.DECORATION, MaterialColor.COLOR_RED).noCollission().instabreak()));
 
 	public static final RegistryObject<ColoredCableBlock>[] NETWORK_CABLES = Util.make((RegistryObject<ColoredCableBlock>[])new RegistryObject[16], array ->
 		Arrays.setAll(array, i -> BLOCKS.register(ObjectNames.NETWORK_CABLES[i],
-			() -> new ColoredCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, DyeColor.values()[i].getMapColor()).doesNotBlockMovement().zeroHardnessAndResistance(), DyeColor.values()[i]))));
+			() -> new ColoredCableBlock(AbstractBlock.Properties.of(Material.DECORATION, DyeColor.values()[i].getMaterialColor()).noCollission().instabreak(), DyeColor.values()[i]))));
 	
 	public static final RegistryObject<BundledCableBlock> BUNDLED_NETWORK_CABLE = BLOCKS.register(ObjectNames.BUNDLED_NETWORK_CABLE,
-		() -> new BundledCableBlock(AbstractBlock.Properties.create(Material.MISCELLANEOUS, MaterialColor.BLUE).doesNotBlockMovement().zeroHardnessAndResistance()));
+		() -> new BundledCableBlock(AbstractBlock.Properties.of(Material.DECORATION, MaterialColor.COLOR_BLUE).noCollission().instabreak()));
 	
 	public static final RegistryObject<BundledCablePostBlock> BUNDLED_CABLE_POST = BLOCKS.register(ObjectNames.BUNDLED_CABLE_POST,
-		() -> new BundledCablePostBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.BLUE).hardnessAndResistance(2F, 5F)));
+		() -> new BundledCablePostBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_BLUE).strength(2F, 5F)));
 	
 	public static final RegistryObject<BundledCableRelayPlateBlock> BUNDLED_CABLE_RELAY_PLATE = BLOCKS.register(ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
-		() -> new BundledCableRelayPlateBlock(AbstractBlock.Properties.create(Material.ROCK, MaterialColor.BLUE).hardnessAndResistance(2F, 5F)));
+		() -> new BundledCableRelayPlateBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_BLUE).strength(2F, 5F)));
 	
 }

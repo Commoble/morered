@@ -48,13 +48,13 @@ public class LogicGateType
 	private static RegistryObject<LogicFunctionPlateBlock> registerLogicGate(DeferredRegister<Block> blocks, String name, LogicFunction function, LogicFunctionPlateBlockFactory factory)
 	{
 		return blocks.register(name, () -> factory.makeBlock(function,
-			AbstractBlock.Properties.create(PlateBlockStateProperties.PLATE_MATERIAL).hardnessAndResistance(0F).sound(SoundType.WOOD)));
+			AbstractBlock.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL).strength(0F).sound(SoundType.WOOD)));
 			
 	}
 	
 	private static final RegistryObject<BlockItem> registerBlockItem(DeferredRegister<Item> items, String name, Supplier<? extends Block> blockGetter)
 	{
-		return items.register(name, () -> new BlockItem(blockGetter.get(), new Item.Properties().group(ItemRegistrar.CREATIVE_TAB)));
+		return items.register(name, () -> new BlockItem(blockGetter.get(), new Item.Properties().tab(ItemRegistrar.CREATIVE_TAB)));
 	}
 
 	

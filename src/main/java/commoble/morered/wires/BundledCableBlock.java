@@ -25,6 +25,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class BundledCableBlock extends AbstractWireBlock
 {
 	public static final VoxelShape[] NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(3, 4);
@@ -68,7 +70,7 @@ public class BundledCableBlock extends AbstractWireBlock
 		if (!(world instanceof World))
 			return;
 		
-		TileEntity neighborTE = world.getTileEntity(pos);
+		TileEntity neighborTE = world.getBlockEntity(pos);
 		if (neighborTE == null)
 			return;
 		
@@ -98,10 +100,10 @@ public class BundledCableBlock extends AbstractWireBlock
 			}
 			if (!edgeUpdateDirs.isEmpty())
 			{
-				BlockPos.Mutable mutaPos = pos.toMutable();
+				BlockPos.Mutable mutaPos = pos.mutable();
 				for (Direction dir : edgeUpdateDirs)
 				{
-					BlockPos otherNeighborPos = mutaPos.setAndMove(pos, dir);
+					BlockPos otherNeighborPos = mutaPos.setWithOffset(pos, dir);
 					world.getBlockState(otherNeighborPos).onNeighborChange(world, otherNeighborPos, pos);
 				}
 			}
@@ -111,7 +113,7 @@ public class BundledCableBlock extends AbstractWireBlock
 	@Override
 	protected void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState)
 	{
-		TileEntity te = world.getTileEntity(wirePos);
+		TileEntity te = world.getBlockEntity(wirePos);
 		if (!(te instanceof BundledCableTileEntity))
 			return; // if there's no TE then we can't make any updates
 		BundledCableTileEntity wire = (BundledCableTileEntity)te;
@@ -121,13 +123,13 @@ public class BundledCableBlock extends AbstractWireBlock
 		Map<Block,WireConnector> connectors = MoreRedAPI.getCableConnectabilityRegistry();
 		WireConnector defaultConnector = MoreRedAPI.getDefaultCableConnector();
 		
-		BlockPos.Mutable mutaPos = wirePos.toMutable();
+		BlockPos.Mutable mutaPos = wirePos.mutable();
 		BlockState[] neighborStates = new BlockState[6];
 		Map<Direction,ChanneledPowerSupplier> neighborPowerSuppliers = new EnumMap<>(Direction.class);
 		ChanneledPowerSupplier noPower = DefaultWireProperties.NO_POWER_SUPPLIER;
 		Function<BlockPos, Function<Direction, ChanneledPowerSupplier>> neighborPowerFinder = neighborPos -> directionToNeighbor ->
 		{
-			TileEntity neighborTE = world.getTileEntity(neighborPos);
+			TileEntity neighborTE = world.getBlockEntity(neighborPos);
 			if (neighborTE == null)
 				return noPower;
 			
@@ -143,10 +145,10 @@ public class BundledCableBlock extends AbstractWireBlock
 			boolean attachedFaceStates[] = new boolean[6];
 			for (int attachmentSide=0; attachmentSide<6; attachmentSide++)
 			{
-				if (wireState.get(INTERIOR_FACES[attachmentSide]))
+				if (wireState.getValue(INTERIOR_FACES[attachmentSide]))
 				{
 					attachedFaceStates[attachmentSide] = true;
-					facesNeedingUpdates.add(Direction.byIndex(attachmentSide));
+					facesNeedingUpdates.add(Direction.from3DDataValue(attachmentSide));
 				}
 				else
 				{
@@ -158,7 +160,7 @@ public class BundledCableBlock extends AbstractWireBlock
 			while (!facesNeedingUpdates.isEmpty())
 			{
 				int attachmentSide = (iteration++) % 6;
-				Direction attachmentDirection = Direction.byIndex(attachmentSide);
+				Direction attachmentDirection = Direction.from3DDataValue(attachmentSide);
 				
 				// if the set of remaining faces doesn't contain the face, skip the rest of the iteration
 				if (!facesNeedingUpdates.remove(attachmentDirection)) 
@@ -166,7 +168,7 @@ public class BundledCableBlock extends AbstractWireBlock
 				
 				// we know there's a wire attached to the face because we checked the state before adding
 				// always check the capability of attached faces
-				mutaPos.setAndMove(wirePos, attachmentDirection);
+				mutaPos.setWithOffset(wirePos, attachmentDirection);
 				
 				// get neighbor state and power supplier in this direction, cacheing them for the rest of the method if we haven't yet
 				BlockState attachedNeighborState = neighborStates[attachmentSide];
@@ -187,11 +189,11 @@ public class BundledCableBlock extends AbstractWireBlock
 				for (int orthagonal = 0; orthagonal < 4; orthagonal++)
 				{
 					int neighborSide = DirectionHelper.uncompressSecondSide(attachmentSide, orthagonal);
-					Direction directionToNeighbor = Direction.byIndex(neighborSide);
+					Direction directionToNeighbor = Direction.from3DDataValue(neighborSide);
 
 					Direction directionToWire = directionToNeighbor.getOpposite();
 					BlockState neighborState = neighborStates[neighborSide];
-					mutaPos.setAndMove(wirePos, directionToNeighbor);
+					mutaPos.setWithOffset(wirePos, directionToNeighbor);
 					if (neighborState == null)
 					{
 						neighborState = world.getBlockState(mutaPos);
@@ -217,14 +219,14 @@ public class BundledCableBlock extends AbstractWireBlock
 						power = Math.max(power, wire.getPower(neighborSide, channel) - 1);
 					}
 					// if we should check edge connections
-					if (!attachedFaceStates[neighborSide] && neighborBlock == this && !neighborState.get(INTERIOR_FACES[attachmentSide]))
+					if (!attachedFaceStates[neighborSide] && neighborBlock == this && !neighborState.getValue(INTERIOR_FACES[attachmentSide]))
 					{
 						BlockPos diagonalPos = mutaPos.move(attachmentDirection);
 						BlockState diagonalState = world.getBlockState(mutaPos);
 						int directionToWireSide = directionToWire.ordinal();
-						if (diagonalState.getBlock() == this && diagonalState.get(INTERIOR_FACES[directionToWireSide]))
+						if (diagonalState.getBlock() == this && diagonalState.getValue(INTERIOR_FACES[directionToWireSide]))
 						{
-							TileEntity diagonalTe = world.getTileEntity(diagonalPos);
+							TileEntity diagonalTe = world.getBlockEntity(diagonalPos);
 							if (diagonalTe instanceof BundledCableTileEntity)
 							{
 								power = Math.max(power, ((BundledCableTileEntity)diagonalTe).getPower(directionToWireSide, channel)-1);

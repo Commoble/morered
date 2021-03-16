@@ -39,7 +39,7 @@ public class GatecraftingRecipeButtonPacket
 		ServerPlayerEntity player = context.getSender();
 		if (player != null)
 		{
-			Container container = player.openContainer;
+			Container container = player.containerMenu;
 			if (container instanceof GatecraftingContainer)
 			{
 				((GatecraftingContainer)container).onPlayerChoseRecipe(this.recipeID);

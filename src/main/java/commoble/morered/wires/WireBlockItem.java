@@ -19,6 +19,8 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
+import net.minecraft.item.Item.Properties;
+
 public class WireBlockItem extends BlockItem
 {
 
@@ -28,7 +30,7 @@ public class WireBlockItem extends BlockItem
 	}
 
 	@Override
-	public ActionResultType onItemUse(ItemUseContext context)
+	public ActionResultType useOn(ItemUseContext context)
 	{
 		// we want to be able to add wire states to existing wire blocks
 		// if we've used the item on a solid block
@@ -39,13 +41,13 @@ public class WireBlockItem extends BlockItem
 		BlockItemUseContext blockItemContext = new BlockItemUseContext(context);
 		// placePos is the block adjacent to the block we clicked
 		// unless the block we clicked is replaceable, in which case it's the position of the block we clicked
-		BlockPos placePos = blockItemContext.getPos();
+		BlockPos placePos = blockItemContext.getClickedPos();
 		// we're primarily interested in having clicked a solid face
-		BlockPos activatedPos = context.getPos();
-		World world = context.getWorld();
+		BlockPos activatedPos = context.getClickedPos();
+		World world = context.getLevel();
 		BlockState activatedState = world.getBlockState(activatedPos);
-		Direction activatedFace = context.getFace();
-		if (activatedState.isSolidSide(world, activatedPos, activatedFace))
+		Direction activatedFace = context.getClickedFace();
+		if (activatedState.isFaceSturdy(world, activatedPos, activatedFace))
 		{
 			BlockState existingPlacePosState = world.getBlockState(placePos);
 			Direction attachmentSide = activatedFace.getOpposite();
@@ -54,11 +56,11 @@ public class WireBlockItem extends BlockItem
 			// but we don't have a wire on the given face,
 			if (existingPlacePosState.getBlock() == this.getBlock()
 				&& existingPlacePosState.hasProperty(sideProperty)
-				&& !existingPlacePosState.get(sideProperty))
+				&& !existingPlacePosState.getValue(sideProperty))
 			{
 				// then add the wire to the block and decrement the itemstack and return
 				// (an EntityPlaceBlockEvent is fired by existing forge hooks)
-				BlockState newState = existingPlacePosState.with(sideProperty, true);
+				BlockState newState = existingPlacePosState.setValue(sideProperty, true);
 				// attempt to set the block in the world with standard flags
 				if (!this.placeBlock(blockItemContext, newState))
 				{
@@ -66,9 +68,9 @@ public class WireBlockItem extends BlockItem
 				}
 				// we should have parity with some of the standard blockitem stuff
 				// but we can skip the bits that deal with NBT and tile entities
-				ItemStack stack = context.getItem();
+				ItemStack stack = context.getItemInHand();
 				@Nullable PlayerEntity player = context.getPlayer();
-                newState.getBlock().onBlockPlacedBy(world, placePos, newState, player, stack);
+                newState.getBlock().setPlacedBy(world, placePos, newState, player, stack);
 				if (player instanceof ServerPlayerEntity)
 				{
 					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) player, placePos, stack);
@@ -77,18 +79,18 @@ public class WireBlockItem extends BlockItem
 				SoundType soundtype = newState.getSoundType(world, placePos, player);
 				world.playSound(player, placePos, this.getPlaceSound(newState, world, placePos, player), SoundCategory.BLOCKS,
 					(soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-				if (player == null || !player.abilities.isCreativeMode)
+				if (player == null || !player.abilities.instabuild)
 				{
 					stack.shrink(1);
 				}
 
 				// return SUCCESS for client thread worlds, CONSUME for server thread worlds (same as regular blockitem)
-				return ActionResultType.func_233537_a_(world.isRemote);
+				return ActionResultType.sidedSuccess(world.isClientSide);
 			}
 		}
 		
 		// otherwise, use it like a regular blockitem
-		return super.onItemUse(context);
+		return super.useOn(context);
 	}
 
 	

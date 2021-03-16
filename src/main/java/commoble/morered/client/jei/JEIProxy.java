@@ -74,7 +74,7 @@ public class JEIProxy implements IModPlugin
 
 	public static List<IRecipe<CraftingInventory>> getGatecraftingRecipes()
 	{
-		ClientWorld world = Minecraft.getInstance().world;
+		ClientWorld world = Minecraft.getInstance().level;
 
 		if (world != null)
 		{

@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 
 public class ClientMixinCallbacks
 {
-	public static void onBlockItemUse(ItemUseContext itemContext, CallbackInfoReturnable<ActionResultType> info)
+	public static void onBlockItemUseOn(ItemUseContext itemContext, CallbackInfoReturnable<ActionResultType> info)
 	{
 		MoreRed.CLIENT_PROXY.ifPresent(proxy -> onClientBlockItemUse(proxy, itemContext, info));
 	}
@@ -39,12 +39,12 @@ public class ClientMixinCallbacks
 	@SuppressWarnings("deprecation")
 	private static void onClientBlockItemUse(ClientProxy proxy, ItemUseContext itemContext, CallbackInfoReturnable<ActionResultType> info)
 	{
-		World world = itemContext.getWorld();
-		ItemStack stack = itemContext.getItem();
+		World world = itemContext.getLevel();
+		ItemStack stack = itemContext.getItemInHand();
 		Item item = stack.getItem();
 
 		// we need to check world side because physical clients can have server worlds
-		if (world.isRemote && item instanceof BlockItem)
+		if (world.isClientSide && item instanceof BlockItem)
 		{
 			BlockItem blockItem = (BlockItem)item;
 			BlockItemUseContext context = new BlockItemUseContext(itemContext);
@@ -52,12 +52,12 @@ public class ClientMixinCallbacks
 			{
 				return;
 			}
-			context = blockItem.getBlockItemUseContext(context);	// allow blockItem to transform use context after checking canPlace
+			context = blockItem.updatePlacementContext(context);	// allow blockItem to transform use context after checking canPlace
 			if (context == null) // BlockItem::getBlockItemUseContext is nullable
 			{
 				return;
 			}
-			BlockPos pos = context.getPos();
+			BlockPos pos = context.getClickedPos();
 			BlockState placementState = MoreRedBlockItemHelper.getStateForPlacement(blockItem, context);
 			
 			if (placementState != null)
@@ -69,14 +69,14 @@ public class ClientMixinCallbacks
 				chunkLoop:
 				for (ChunkPos chunkPos : chunkPositions)
 				{
-					if (world.isBlockLoaded(chunkPos.asBlockPos()))
+					if (world.hasChunkAt(chunkPos.getWorldPosition()))
 					{
 						Set<BlockPos> postPositions = proxy.getPostsInChunk(chunkPos);
 
 						Set<BlockPos> checkedPostPositions = new HashSet<BlockPos>();
 						for (BlockPos postPos : postPositions)
 						{
-							TileEntity te = world.getTileEntity(postPos);
+							TileEntity te = world.getBlockEntity(postPos);
 							if (te instanceof WirePostTileEntity)
 							{
 								IBlockReader fakeWorld = new FakeStateWorld(world, pos, placementState);
@@ -86,8 +86,8 @@ public class ClientMixinCallbacks
 									PlayerEntity player = context.getPlayer();
 									if (player != null)
 									{
-										world.addParticle(RedstoneParticleData.REDSTONE_DUST, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
-										player.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
+										world.addParticle(RedstoneParticleData.REDSTONE, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
+										player.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 									}
 									info.setReturnValue(ActionResultType.SUCCESS);
 									break chunkLoop; // "return" here just continues the inner loop

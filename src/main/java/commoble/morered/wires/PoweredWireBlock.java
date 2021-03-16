@@ -22,6 +22,8 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class PoweredWireBlock extends AbstractWireBlock
 {
 	
@@ -44,7 +46,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 	}
 	
 	@Override
-	public boolean canProvidePower(BlockState state)
+	public boolean isSignalSource(BlockState state)
 	{
 		return !this.isEmptyWireBlock(state);
 	}
@@ -59,14 +61,14 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 
 	// get "immediate power"
 	@Override
-	public int getWeakPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
+	public int getSignal(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
 	{
 		return this.getPower(state,world,pos,directionFromNeighbor,false);
 	}
 
 	// get the power that can be conducted through solid blocks
 	@Override
-	public int getStrongPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
+	public int getDirectSignal(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
 	{
 		return this.useIndirectPower ? this.getPower(state,world,pos,directionFromNeighbor,false) : 0;
 	}
@@ -83,7 +85,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		int side = directionToNeighbor.ordinal();
 		
 		// if we have a wire attached to the given side, we can connect
-		if (state.get(INTERIOR_FACES[side]))
+		if (state.getValue(INTERIOR_FACES[side]))
 			return true;
 		
 		// otherwise, check the four orthagonal faces relative to the neighbor block
@@ -96,7 +98,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			// we can test this by doing an ONLY_SECOND comparison on the shapes
 			// if this returns true, then there are places where the second shape is not overlapped by the first
 			// so if this returns false, then we can proceed
-			if (state.get(INTERIOR_FACES[orthagonalSide]))
+			if (state.getValue(INTERIOR_FACES[orthagonalSide]))
 			{
 				return true;
 			}
@@ -110,7 +112,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 //		return 0;
 		// power is stored in the TE (because storing it in 16 states per side is too many state combinations)
 		// if we don't have a TE, we have no power
-		TileEntity te = world.getTileEntity(pos);
+		TileEntity te = world.getBlockEntity(pos);
 		if (!(te instanceof WireTileEntity))
 			return 0;
 		WireTileEntity wire = (WireTileEntity)te;
@@ -119,22 +121,22 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		int side = directionToNeighbor.ordinal();
 		
 		// if we have a wire attached on the given side, always use the power value of that wire
-		if (state.get(INTERIOR_FACES[side]))
+		if (state.getValue(INTERIOR_FACES[side]))
 		{
 			int power = wire.getPower(side);
 			return expand ? power : power/2;
 		}
 		
 		// otherwise, check the four orthagonal attachment faces and use the highest power of the side-connectable wires
-		BlockPos neighborPos = pos.offset(directionToNeighbor);
+		BlockPos neighborPos = pos.relative(directionToNeighbor);
 		BlockState neighborState = world.getBlockState(neighborPos);
 		WireConnector connector = MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborState.getBlock(), MoreRedAPI.getDefaultWireConnector());
 		int output = 0;
 		for (int i=0; i<4; i++)
 		{
 			int attachmentSide = DirectionHelper.uncompressSecondSide(side, i);
-			Direction attachmentDirection = Direction.byIndex(attachmentSide);
-			if (state.get(INTERIOR_FACES[attachmentSide]) && connector.canConnectToAdjacentWire(world, neighborPos, neighborState, pos, state, attachmentDirection, directionFromNeighbor))
+			Direction attachmentDirection = Direction.from3DDataValue(attachmentSide);
+			if (state.getValue(INTERIOR_FACES[attachmentSide]) && connector.canConnectToAdjacentWire(world, neighborPos, neighborState, pos, state, attachmentDirection, directionFromNeighbor))
 			{
 				output = Math.max(output, wire.getPower(attachmentSide));
 			}
@@ -145,11 +147,11 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 	public int getExpandedPower(World world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState,
 		Direction wireFace, Direction directionFromWire)
 	{
-		TileEntity te = world.getTileEntity(thisPos);
+		TileEntity te = world.getBlockEntity(thisPos);
 		if (!(te instanceof WireTileEntity))
 			return 0; // if there's no TE then we can't make power
 		WireTileEntity wire = (WireTileEntity)te;
-		return thisState.get(INTERIOR_FACES[wireFace.ordinal()])
+		return thisState.getValue(INTERIOR_FACES[wireFace.ordinal()])
 			? wire.getPower(wireFace)
 			: 0;
 	}
@@ -158,7 +160,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 	@Override
 	protected void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState)
 	{
-		TileEntity te = world.getTileEntity(wirePos);
+		TileEntity te = world.getBlockEntity(wirePos);
 		if (!(te instanceof WireTileEntity))
 			return; // if there's no TE then we can't make any updates
 		WireTileEntity wire = (WireTileEntity)te;
@@ -169,7 +171,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		WireConnector defaultConnector = MoreRedAPI.getDefaultWireConnector();
 		ExpandedPowerSupplier defaultPowerSupplier = MoreRedAPI.getDefaultExpandedPowerSupplier();
 		
-		BlockPos.Mutable mutaPos = wirePos.toMutable();
+		BlockPos.Mutable mutaPos = wirePos.mutable();
 		BlockState[] neighborStates = new BlockState[6];
 		
 		boolean anyPowerUpdated = false;
@@ -181,10 +183,10 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		boolean attachedFaceStates[] = new boolean[6];
 		for (int attachmentSide=0; attachmentSide<6; attachmentSide++)
 		{
-			if (wireState.get(INTERIOR_FACES[attachmentSide]))
+			if (wireState.getValue(INTERIOR_FACES[attachmentSide]))
 			{
 				attachedFaceStates[attachmentSide] = true;
-				facesNeedingUpdates.add(Direction.byIndex(attachmentSide));
+				facesNeedingUpdates.add(Direction.from3DDataValue(attachmentSide));
 			}
 			else
 			{
@@ -200,7 +202,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		while (!facesNeedingUpdates.isEmpty())
 		{
 			int attachmentSide = (iteration++) % 6;
-			Direction attachmentDirection = Direction.byIndex(attachmentSide);
+			Direction attachmentDirection = Direction.from3DDataValue(attachmentSide);
 			
 			// if the set of remaining faces doesn't contain the face, skip the rest of the iteration
 			if (!facesNeedingUpdates.remove(attachmentDirection)) 
@@ -209,7 +211,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			// we know there's a wire attached to the face because we checked the state before adding
 			int power = 0;
 			// always get power from attached faces, those are full cubes and may supply conducted power
-			mutaPos.setAndMove(wirePos, attachmentDirection);
+			mutaPos.setWithOffset(wirePos, attachmentDirection);
 			BlockState attachedNeighborState;
 			BlockState attachedNeighborStateCheck = neighborStates[attachmentSide];
 			if (attachedNeighborStateCheck == null)
@@ -221,21 +223,21 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			{
 				attachedNeighborState = attachedNeighborStateCheck;
 			}
-			int weakNeighborPower = attachedNeighborState.getWeakPower(world, mutaPos, attachmentDirection);
+			int weakNeighborPower = attachedNeighborState.getSignal(world, mutaPos, attachmentDirection);
 			int neighborPower = this.useIndirectPower && attachedNeighborState.shouldCheckWeakPower(world, mutaPos, attachmentDirection)
-				? Math.max(weakNeighborPower, world.getStrongPower(mutaPos))
+				? Math.max(weakNeighborPower, world.getDirectSignalTo(mutaPos))
 				: weakNeighborPower;
 			power = Math.max(power, neighborPower*2 - 1);
 			// for the four sides that are neither attachmentSide nor its opposite
 			for (int orthagonal = 0; orthagonal < 4; orthagonal++)
 			{
 				int neighborSide = DirectionHelper.uncompressSecondSide(attachmentSide, orthagonal);
-				Direction directionToNeighbor = Direction.byIndex(neighborSide);
+				Direction directionToNeighbor = Direction.from3DDataValue(neighborSide);
 
 				Direction directionToWire = directionToNeighbor.getOpposite();
 				BlockState neighborState;
 				BlockState neighborStateCheck = neighborStates[neighborSide];
-				mutaPos.setAndMove(wirePos, directionToNeighbor);
+				mutaPos.setWithOffset(wirePos, directionToNeighbor);
 				if (neighborStateCheck == null)
 				{
 					neighborState = world.getBlockState(mutaPos);
@@ -253,7 +255,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 					// power will always be at least 0 because it started at 0 and we're maxing against that
 					int expandedWeakNeighborPower = expandedPowerSupplier.getExpandedPower(world, mutaPos, neighborState, wirePos, wireState, attachmentDirection, directionToNeighbor);
 					int expandedNeighborPower = this.useIndirectPower && neighborState.shouldCheckWeakPower(world, mutaPos, directionToNeighbor)
-						? Math.max(expandedWeakNeighborPower, world.getStrongPower(mutaPos)*2)
+						? Math.max(expandedWeakNeighborPower, world.getDirectSignalTo(mutaPos)*2)
 						: expandedWeakNeighborPower;
 					power = Math.max(power, expandedNeighborPower-1);
 				}
@@ -262,14 +264,14 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 					power = Math.max(power, wire.getPower(neighborSide) - 1);
 				}
 				// if we should check edge connections
-				if (!attachedFaceStates[neighborSide] && neighborBlock == this && !neighborState.get(INTERIOR_FACES[attachmentSide]))
+				if (!attachedFaceStates[neighborSide] && neighborBlock == this && !neighborState.getValue(INTERIOR_FACES[attachmentSide]))
 				{
 					BlockPos diagonalPos = mutaPos.move(attachmentDirection);
 					BlockState diagonalState = world.getBlockState(mutaPos);
 					int directionToWireSide = directionToWire.ordinal();
-					if (diagonalState.getBlock() == this && diagonalState.get(INTERIOR_FACES[directionToWireSide]))
+					if (diagonalState.getBlock() == this && diagonalState.getValue(INTERIOR_FACES[directionToWireSide]))
 					{
-						TileEntity diagonalTe = world.getTileEntity(diagonalPos);
+						TileEntity diagonalTe = world.getBlockEntity(diagonalPos);
 						if (diagonalTe instanceof WireTileEntity)
 						{
 							power = Math.max(power, ((WireTileEntity)diagonalTe).getPower(directionToWireSide)-1);
@@ -295,7 +297,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			}
 			
 		}
-		if (anyPowerUpdated && !world.isRemote)
+		if (anyPowerUpdated && !world.isClientSide)
 		{
 			this.notifyNeighbors(world, wirePos, wireState, EnumSet.allOf(Direction.class), true);
 		}
@@ -304,7 +306,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 	@Override
 	protected void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
 	{
-		BlockPos.Mutable mutaPos = wirePos.toMutable();
+		BlockPos.Mutable mutaPos = wirePos.mutable();
 		Block newBlock = newState.getBlock();
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
 		{
@@ -313,11 +315,11 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			// then we should notify second-degree neighbors as well
 			for (Direction dir : updateDirections)
 			{
-				BlockPos neighborPos = mutaPos.setAndMove(wirePos, dir);
+				BlockPos neighborPos = mutaPos.setWithOffset(wirePos, dir);
 				boolean doSecondaryNeighborUpdates = doConductedPowerUpdates && world.getBlockState(neighborPos).shouldCheckWeakPower(world, neighborPos, dir);
 				world.neighborChanged(neighborPos, newBlock, wirePos);
 				if (doSecondaryNeighborUpdates)
-					world.notifyNeighborsOfStateChange(neighborPos, newBlock);
+					world.updateNeighborsAt(neighborPos, newBlock);
 			}
 		}
 	}

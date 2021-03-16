@@ -27,7 +27,7 @@ public class GatecraftingResultSlot extends Slot
 	 * as well as furnace fuel.
 	 */
 	@Override
-	public boolean isItemValid(ItemStack stack)
+	public boolean mayPlace(ItemStack stack)
 	{
 		return false;
 	}
@@ -36,7 +36,7 @@ public class GatecraftingResultSlot extends Slot
 	public ItemStack onTake(PlayerEntity player, ItemStack stack)
 	{
 		// ingredients have already been verified by canTakeStack, we can decrement them now
-		this.onSlotChanged();
+		this.setChanged();
 		this.container.currentRecipe.ifPresent(recipe -> this.removeIngredients(player.inventory, recipe));
 		// set the stack and the container's current recipe accordingly
 		this.verifyRecipeAfterCrafting(player.inventory, this.container.currentRecipe);
@@ -47,7 +47,7 @@ public class GatecraftingResultSlot extends Slot
 	 * Return whether this slot's stack can be taken from this slot.
 	 */
 	@Override
-	public boolean canTakeStack(PlayerEntity player)
+	public boolean mayPickup(PlayerEntity player)
 	{
 		return this.container.currentRecipe.map(recipe -> GatecraftingRecipe.doesPlayerHaveIngredients(player.inventory, recipe))
 			.orElse(false);
@@ -58,16 +58,16 @@ public class GatecraftingResultSlot extends Slot
 		NonNullList<Ingredient> ingredients = recipe.getIngredients();
 		for(Ingredient ingredient : ingredients)
 		{
-			int remainingItemsToRemove = ingredient.getMatchingStacks()[0].getCount();
-			int playerSlots = playerInventory.getSizeInventory();
+			int remainingItemsToRemove = ingredient.getItems()[0].getCount();
+			int playerSlots = playerInventory.getContainerSize();
 			for (int playerSlot=0; playerSlot<playerSlots && remainingItemsToRemove > 0; playerSlot++)
 			{
-				ItemStack stackInSlot = playerInventory.getStackInSlot(playerSlot);
+				ItemStack stackInSlot = playerInventory.getItem(playerSlot);
 				if (ingredient.test(stackInSlot))
 				{
 					int decrementAmount = Math.min(remainingItemsToRemove, stackInSlot.getCount());
 					remainingItemsToRemove -= decrementAmount;
-					playerInventory.decrStackSize(playerSlot, decrementAmount);
+					playerInventory.removeItem(playerSlot, decrementAmount);
 				}
 			}
 		}
@@ -76,7 +76,7 @@ public class GatecraftingResultSlot extends Slot
 	public void verifyRecipeAfterCrafting(PlayerInventory playerInventory, Optional<IRecipe<CraftingInventory>> recipeHolder)
 	{
 		Optional<IRecipe<CraftingInventory>> remainingRecipe = recipeHolder.filter(recipe -> GatecraftingRecipe.doesPlayerHaveIngredients(playerInventory, recipe));
-		this.putStack(remainingRecipe.map(recipe -> recipe.getRecipeOutput().copy()).orElse(ItemStack.EMPTY));
+		this.set(remainingRecipe.map(recipe -> recipe.getResultItem().copy()).orElse(ItemStack.EMPTY));
 		this.container.currentRecipe = remainingRecipe;
 	}
 }

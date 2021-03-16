@@ -17,14 +17,14 @@ public class DirectionUtilTests
 		{
 			for (int subSide = 0; subSide < 6; subSide++)
 			{
-				Direction primaryDir = Direction.byIndex(side);
-				Direction secondaryDir = Direction.byIndex(subSide);
+				Direction primaryDir = Direction.from3DDataValue(side);
+				Direction secondaryDir = Direction.from3DDataValue(subSide);
 				if (primaryDir.getAxis() != secondaryDir.getAxis())
 				{
 //					System.out.println(String.format("testing %d, %d", side,subSide));
 					int compressed = DirectionHelper.getCompressedSecondSide(side, subSide);
 					int uncompressed = DirectionHelper.uncompressSecondSide(side, compressed);
-					Assertions.assertEquals(secondaryDir, Direction.byIndex(uncompressed));
+					Assertions.assertEquals(secondaryDir, Direction.from3DDataValue(uncompressed));
 					if (doContinuityTests)
 					{
 						Assertions.assertEquals((previousCompressed+1) % 4, compressed);

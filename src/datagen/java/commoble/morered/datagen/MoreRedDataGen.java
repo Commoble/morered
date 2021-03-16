@@ -26,7 +26,7 @@ public class MoreRedDataGen
 {
 	@SuppressWarnings("unchecked")
 	public static final INamedTag<Item>[] WOOL_TAGS = Util.make((INamedTag<Item>[])new INamedTag[16], array->
-		Arrays.setAll(array, i -> ItemTags.makeWrapperTag("forge:wools/" + DyeColor.values()[i].getTranslationKey())));
+		Arrays.setAll(array, i -> ItemTags.bind("forge:wools/" + DyeColor.values()[i].getSerializedName())));
 	
 	
 	@SubscribeEvent
@@ -49,7 +49,7 @@ public class MoreRedDataGen
 		// make tags for wool blocks
 		for (int i=0; i<16; i++)
 		{
-			tagProvider.with(WOOL_TAGS[i].getName(), TagDefinition.builder().with(String.format("minecraft:%s_wool", DyeColor.values()[i].getString())));
+			tagProvider.with(WOOL_TAGS[i].getName(), TagDefinition.builder().with(String.format("minecraft:%s_wool", DyeColor.values()[i].getSerializedName())));
 		}
 		
 		generator.addProvider(tagProvider);

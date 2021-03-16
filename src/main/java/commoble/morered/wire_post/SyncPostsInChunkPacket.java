@@ -24,7 +24,7 @@ public class SyncPostsInChunkPacket
 				PostsInChunkCapability.POST_SET_CODEC.fieldOf("tubes").forGetter(SyncPostsInChunkPacket::getPostsInChunk)
 			).apply(instance, SyncPostsInChunkPacket::new));
 	
-	public static final SyncPostsInChunkPacket BAD_PACKET = new SyncPostsInChunkPacket(new ChunkPos(ChunkPos.SENTINEL), ImmutableSet.of());
+	public static final SyncPostsInChunkPacket BAD_PACKET = new SyncPostsInChunkPacket(new ChunkPos(ChunkPos.INVALID_CHUNK_POS), ImmutableSet.of());
 	
 	private final ChunkPos chunkPos;	public ChunkPos getChunkPos() { return this.chunkPos; }
 	private final Set<BlockPos> inChunk;	public Set<BlockPos> getPostsInChunk() { return this.inChunk; }
@@ -37,12 +37,12 @@ public class SyncPostsInChunkPacket
 	
 	public void write(PacketBuffer buffer)
 	{
-		buffer.writeCompoundTag((CompoundNBT)CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElse(new CompoundNBT()));
+		buffer.writeNbt((CompoundNBT)CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElse(new CompoundNBT()));
 	}
 	
 	public static SyncPostsInChunkPacket read(PacketBuffer buffer)
 	{
-		return CODEC.decode(NBTDynamicOps.INSTANCE, buffer.readCompoundTag()).result().map(Pair::getFirst).orElse(BAD_PACKET);
+		return CODEC.decode(NBTDynamicOps.INSTANCE, buffer.readNbt()).result().map(Pair::getFirst).orElse(BAD_PACKET);
 	}
 	
 	public void handle(Supplier<NetworkEvent.Context> contextGetter)

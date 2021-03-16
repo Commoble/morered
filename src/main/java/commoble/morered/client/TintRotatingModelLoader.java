@@ -126,7 +126,7 @@ public class TintRotatingModelLoader implements IModelLoader<TintRotatingModelGe
 		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad)
 		{
 			int newTint = this.rotateTint(baseQuad.getTintIndex());
-			return new BakedQuad(baseQuad.getVertexData(), newTint, baseQuad.getFace(), baseQuad.getSprite(), baseQuad.applyDiffuseLighting());
+			return new BakedQuad(baseQuad.getVertices(), newTint, baseQuad.getDirection(), baseQuad.getSprite(), baseQuad.isShade());
 		}
 		
 		protected int rotateTint(int baseTint)
@@ -140,8 +140,8 @@ public class TintRotatingModelLoader implements IModelLoader<TintRotatingModelGe
 		protected int rotateSide(int baseTint)
 		{
 			int ordinal = baseTint - 1;
-			Direction baseDir = Direction.byIndex(ordinal);
-			Direction newDir = Direction.rotateFace(this.rotation, baseDir);
+			Direction baseDir = Direction.from3DDataValue(ordinal);
+			Direction newDir = Direction.rotate(this.rotation, baseDir);
 			return newDir.ordinal() + 1;
 		}
 		

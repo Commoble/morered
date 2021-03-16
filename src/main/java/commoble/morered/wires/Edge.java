@@ -65,12 +65,12 @@ public enum Edge
 		// can we assume this is true?
 		// if both of the neighboring blocks are wire blocks, then they have non-solid faces, so this is true
 		BooleanProperty propB = AbstractWireBlock.INTERIOR_FACES[this.sideB.ordinal()];
-		BlockState neighborStateA = world.getBlockState(pos.offset(this.sideA));
-		if (neighborStateA.getBlock() == centerWireBlock && neighborStateA.get(propB))
+		BlockState neighborStateA = world.getBlockState(pos.relative(this.sideA));
+		if (neighborStateA.getBlock() == centerWireBlock && neighborStateA.getValue(propB))
 		{
 			BooleanProperty propA = AbstractWireBlock.INTERIOR_FACES[this.sideA.ordinal()];
-			BlockState neighborStateB = world.getBlockState(pos.offset(this.sideB));
-			return neighborStateB.getBlock() == centerWireBlock && neighborStateB.get(propA);
+			BlockState neighborStateB = world.getBlockState(pos.relative(this.sideB));
+			return neighborStateB.getBlock() == centerWireBlock && neighborStateB.getValue(propA);
 		}
 		return false;
 	}

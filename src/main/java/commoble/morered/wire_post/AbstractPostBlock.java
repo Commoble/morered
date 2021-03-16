@@ -22,6 +22,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class AbstractPostBlock extends Block
 {
 	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
@@ -29,16 +31,16 @@ public abstract class AbstractPostBlock extends Block
 	public AbstractPostBlock(Properties properties)
 	{
 		super(properties);
-		this.setDefaultState(this.stateContainer.getBaseState()
-			.with(DIRECTION_OF_ATTACHMENT, Direction.DOWN));
+		this.registerDefaultState(this.stateDefinition.any()
+			.setValue(DIRECTION_OF_ATTACHMENT, Direction.DOWN));
 	}
 	
 	protected abstract void notifyNeighbors(World world, BlockPos pos, BlockState state);
 
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		builder.add(DIRECTION_OF_ATTACHMENT);
 	}
 
@@ -47,21 +49,21 @@ public abstract class AbstractPostBlock extends Block
 	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
 	{
 		// we override this to ensure the correct context is used instead of the dummy context
-		return this.canCollide ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
+		return this.hasCollision ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
 	}
 
 	@Override
 	@Deprecated
-	public void onBlockAdded(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		this.updatePostSet(world, pos, Set<BlockPos>::add);
-		super.onBlockAdded(state, world, pos, oldState, isMoving);
+		super.onPlace(state, world, pos, oldState, isMoving);
 		this.notifyNeighbors(world, pos, state);
 	}
 
 	@Override
 	@Deprecated
-	public void onReplaced(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		if (state.getBlock() == newState.getBlock())
 		{
@@ -72,7 +74,7 @@ public abstract class AbstractPostBlock extends Block
 		else
 		{
 			this.updatePostSet(world, pos, Set<BlockPos>::remove);
-			super.onReplaced(state, world, pos, newState, isMoving);
+			super.onRemove(state, world, pos, newState, isMoving);
 		}
 		this.notifyNeighbors(world, pos, state);
 	}
@@ -95,16 +97,16 @@ public abstract class AbstractPostBlock extends Block
 	@Nullable
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		BlockState defaultState = this.getDefaultState();
-		World world = context.getWorld();
-		BlockPos pos = context.getPos();
+		BlockState defaultState = this.defaultBlockState();
+		World world = context.getLevel();
+		BlockPos pos = context.getClickedPos();
 		
 		for (Direction direction : context.getNearestLookingDirections())
 		{
-			BlockState checkState = defaultState.with(DIRECTION_OF_ATTACHMENT, direction);
-			if (checkState != null && checkState.isValidPosition(world, pos))
+			BlockState checkState = defaultState.setValue(DIRECTION_OF_ATTACHMENT, direction);
+			if (checkState != null && checkState.canSurvive(world, pos))
 			{
-				return world.placedBlockCollides(checkState, pos, ISelectionContext.dummy())
+				return world.isUnobstructed(checkState, pos, ISelectionContext.empty())
 					? checkState
 					: null;
 			}
@@ -124,7 +126,7 @@ public abstract class AbstractPostBlock extends Block
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
-		return state.with(DIRECTION_OF_ATTACHMENT, rot.rotate(state.get(DIRECTION_OF_ATTACHMENT)));
+		return state.setValue(DIRECTION_OF_ATTACHMENT, rot.rotate(state.getValue(DIRECTION_OF_ATTACHMENT)));
 	}
 
 	/**
@@ -138,7 +140,7 @@ public abstract class AbstractPostBlock extends Block
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
-		return state.rotate(mirrorIn.toRotation(state.get(DIRECTION_OF_ATTACHMENT)));
+		return state.rotate(mirrorIn.getRotation(state.getValue(DIRECTION_OF_ATTACHMENT)));
 	}
 
 }

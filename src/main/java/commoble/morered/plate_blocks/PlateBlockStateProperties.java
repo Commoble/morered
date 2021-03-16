@@ -50,8 +50,8 @@ public class PlateBlockStateProperties
 			return Direction.DOWN;
 		}
 		
-		Direction attachmentDirection = state.get(ATTACHMENT_DIRECTION);
-		int rotationIndex = state.get(ROTATION);
+		Direction attachmentDirection = state.getValue(ATTACHMENT_DIRECTION);
+		int rotationIndex = state.getValue(ROTATION);
 		
 		return BlockStateUtil.getOutputDirection(attachmentDirection, rotationIndex);
 	}
@@ -70,10 +70,10 @@ public class PlateBlockStateProperties
 		// this gives more control to the player but might be confusing
 		// we may want to render a preview of the placement somehow
 
-		BlockPos placePos = context.getPos();
-		Direction faceOfAdjacentBlock = context.getFace();
+		BlockPos placePos = context.getClickedPos();
+		Direction faceOfAdjacentBlock = context.getClickedFace();
 		Direction directionTowardAdjacentBlock = faceOfAdjacentBlock.getOpposite();
-		Vector3d relativeHitVec = context.getHitVec().subtract(Vector3d.copy(placePos));
+		Vector3d relativeHitVec = context.getClickLocation().subtract(Vector3d.atLowerCornerOf(placePos));
 		return getStateForPlacedGatePlate(state, placePos, directionTowardAdjacentBlock, relativeHitVec); 
 	}
 	
@@ -84,7 +84,7 @@ public class PlateBlockStateProperties
 		
 		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
 		{
-			return state.with(ATTACHMENT_DIRECTION, directionTowardAdjacentBlock).with(ROTATION, rotationIndex);
+			return state.setValue(ATTACHMENT_DIRECTION, directionTowardAdjacentBlock).setValue(ROTATION, rotationIndex);
 		}
 		else
 		{

@@ -32,7 +32,7 @@ public class GatecraftingCategory implements IRecipeCategory<GatecraftingRecipe>
 	{
 		this.icon = guiHelper.createDrawableIngredient(new ItemStack(ItemRegistrar.GATECRAFTING_PLINTH.get()));
 		this.background = guiHelper.createDrawable(JEI_RECIPE_TEXTURE, 0, 60, 116, 54);
-		this.localizedName = I18n.format("gui.morered.category.gatecrafting");
+		this.localizedName = I18n.get("gui.morered.category.gatecrafting");
 	}
 
 	@Override
@@ -75,7 +75,7 @@ public class GatecraftingCategory implements IRecipeCategory<GatecraftingRecipe>
 		List<Ingredient> inputs = recipe.getIngredients();
 		int maxItems = Math.min(inputs.size(), 9);
 		ingredients.setInputIngredients(recipe.getIngredients().subList(0, maxItems));
-		ingredients.setOutput(VanillaTypes.ITEM, recipe.getRecipeOutput());
+		ingredients.setOutput(VanillaTypes.ITEM, recipe.getResultItem());
 	}
 
 	@Override

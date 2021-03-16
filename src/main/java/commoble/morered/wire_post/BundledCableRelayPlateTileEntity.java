@@ -32,7 +32,7 @@ public class BundledCableRelayPlateTileEntity extends BundledCablePostTileEntity
 	public int getPowerOnChannel(World world, BlockPos wirePos, BlockState wireState, Direction wireFace, int channel)
 	{
 		BlockState thisState = this.getBlockState();
-		return wireFace == null || (thisState.getBlock() instanceof AbstractPostBlock && wireFace == thisState.get(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
+		return wireFace == null || (thisState.getBlock() instanceof AbstractPostBlock && wireFace == thisState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
 			? this.getPower(channel)
 			: 0;
 	}
@@ -61,23 +61,23 @@ public class BundledCableRelayPlateTileEntity extends BundledCablePostTileEntity
 		if (!(block instanceof AbstractPostBlock))
 			return new byte[16];
 		
-		BlockPos pos = this.getPos();
-		Direction attachmentDirection = state.get(AbstractPostBlock.DIRECTION_OF_ATTACHMENT);
+		BlockPos pos = this.getBlockPos();
+		Direction attachmentDirection = state.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT);
 
 		byte[] result = new byte[16];
 		for (int orthagonal = 0; orthagonal < 4; orthagonal++)
 		{
 			int secondarySide = DirectionHelper.uncompressSecondSide(attachmentDirection.ordinal(), orthagonal);
-			Direction orthagonalDirection = Direction.byIndex(secondarySide);
-			BlockPos neighborPos = pos.offset(orthagonalDirection);
-			TileEntity te = this.world.getTileEntity(neighborPos);
+			Direction orthagonalDirection = Direction.from3DDataValue(secondarySide);
+			BlockPos neighborPos = pos.relative(orthagonalDirection);
+			TileEntity te = this.level.getBlockEntity(neighborPos);
 			if (te == null)
 				continue;
 			te.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, orthagonalDirection.getOpposite()).ifPresent(power ->
 			{
 				for (int channel=0; channel<16; channel++)
 				{
-					result[channel] = (byte)Math.max(result[channel], power.getPowerOnChannel(this.world, pos, state, attachmentDirection, channel)-1);
+					result[channel] = (byte)Math.max(result[channel], power.getPowerOnChannel(this.level, pos, state, attachmentDirection, channel)-1);
 				}
 			});
 		}

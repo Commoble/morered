@@ -38,7 +38,7 @@ public class BundledCableTileEntity extends TileEntity
 	{
 		for (int i=0; i<6; i++)
 		{
-			Direction dir = Direction.byIndex(i);
+			Direction dir = Direction.from3DDataValue(i);
 			map.put(dir, LazyOptional.of(() -> new SidedPowerSupplier(dir)));
 		}
 	});
@@ -73,9 +73,9 @@ public class BundledCableTileEntity extends TileEntity
 		this.power[side][channel] = (byte)newPower;
 		if (oldPower != newPower)
 		{
-			if (!this.world.isRemote)
+			if (!this.level.isClientSide)
 			{
-				this.markDirty();
+				this.setChanged();
 			}
 			return true;
 		}
@@ -94,18 +94,18 @@ public class BundledCableTileEntity extends TileEntity
 	// called when TE is serialized to hard drive or whatever
 	// defaults to this.writeInternal()
 	@Override
-	public CompoundNBT write(CompoundNBT compound)
+	public CompoundNBT save(CompoundNBT compound)
 	{
-		super.write(compound);
+		super.save(compound);
 		this.writeServerData(compound);
 		return compound;
 	}
 	
 	// reads the data written by write, called when TE is loaded from hard drive
 	@Override
-	public void read(BlockState state, CompoundNBT compound)
+	public void load(BlockState state, CompoundNBT compound)
 	{
-		super.read(state, compound);
+		super.load(state, compound);
 		this.readServerData(compound);
 	}
 	
@@ -143,7 +143,7 @@ public class BundledCableTileEntity extends TileEntity
 				CompoundNBT sidedPower = new CompoundNBT();
 				sidedPower.putShort(CHANNEL_FLAGS, channelFlags);
 				sidedPower.putByteArray(POWER_BYTES, bytes.toByteArray());
-				powerData.put(Direction.byIndex(side).getName2(), sidedPower);
+				powerData.put(Direction.from3DDataValue(side).getName(), sidedPower);
 				wrotePower = true;
 			}
 		}
@@ -163,7 +163,7 @@ public class BundledCableTileEntity extends TileEntity
 		
 		for (int side=0; side<6; side++)
 		{
-			CompoundNBT sidedPower = powerData.getCompound(Direction.byIndex(side).getName2());
+			CompoundNBT sidedPower = powerData.getCompound(Direction.from3DDataValue(side).getName());
 			if (sidedPower == null)
 				continue;
 			
@@ -209,7 +209,7 @@ public class BundledCableTileEntity extends TileEntity
 
 			// check the power of the wire attached on the capability side first
 			int sideIndex = this.side.ordinal();
-			if (state.get(AbstractWireBlock.INTERIOR_FACES[sideIndex]))
+			if (state.getValue(AbstractWireBlock.INTERIOR_FACES[sideIndex]))
 				return cable.getPower(sideIndex, channel);
 			
 			// otherwise, if the querier needs a specific wire face, get that power
@@ -221,7 +221,7 @@ public class BundledCableTileEntity extends TileEntity
 			for (int subSide = 0; subSide < 4; subSide++)
 			{
 				int actualSubSide = DirectionHelper.uncompressSecondSide(sideIndex, subSide);
-				if (state.get(AbstractWireBlock.INTERIOR_FACES[actualSubSide]))
+				if (state.getValue(AbstractWireBlock.INTERIOR_FACES[actualSubSide]))
 					output = Math.max(output, cable.power[actualSubSide][channel]);
 			}
 			

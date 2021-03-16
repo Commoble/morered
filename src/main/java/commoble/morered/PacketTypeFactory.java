@@ -31,8 +31,8 @@ public class PacketTypeFactory
 
 		final BiConsumer<PACKET,PacketBuffer> encoder = (packet,buffer) -> codec.encodeStart(NBTDynamicOps.INSTANCE, packet)
 			.result()
-			.ifPresent(nbt -> buffer.writeCompoundTag((CompoundNBT)nbt));
-		final Function<PacketBuffer,PACKET> decoder = buffer -> codec.parse(NBTDynamicOps.INSTANCE, buffer.readCompoundTag())
+			.ifPresent(nbt -> buffer.writeNbt((CompoundNBT)nbt));
+		final Function<PacketBuffer,PACKET> decoder = buffer -> codec.parse(NBTDynamicOps.INSTANCE, buffer.readNbt())
 			.result()
 			.orElse(defaultPacket);	// we should return a packet without throwing an error here if we don't want logspam
 		final BiConsumer<PACKET,Supplier<Context>> handler = (packet,context) -> {

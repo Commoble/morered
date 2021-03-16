@@ -138,7 +138,7 @@ public class JsonDataProvider<T> implements IDataProvider
 	 * Alternatively, other data providers can invoke this in their own act methods if they choose to do so.
 	 */
 	@Override
-	public void act(DirectoryCache cache) throws IOException
+	public void run(DirectoryCache cache) throws IOException
 	{
 		Path resourcesFolder = this.generator.getOutputFolder();
 		this.objects.forEach((id,object)->

@@ -10,6 +10,6 @@ public class WorldHelper
 {
 	public static <T extends TileEntity> Optional<T> getTileEntityAt(Class<T> clazz, IWorldReader world, BlockPos pos)
 	{
-		return ClassHelper.as(world.getTileEntity(pos), clazz);
+		return ClassHelper.as(world.getBlockEntity(pos), clazz);
 	}
 }

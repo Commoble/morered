@@ -264,7 +264,7 @@ public class MoreRed
 		BlockPos pos = event.getPos();
 		IWorld iworld = event.getWorld();
 		BlockState state = event.getState();
-		if (iworld instanceof World && !iworld.isRemote())
+		if (iworld instanceof World && !iworld.isClientSide())
 		{
 			World world = (World)iworld;
 			
@@ -272,7 +272,7 @@ public class MoreRed
 			
 			for (ChunkPos chunkPos : chunkPositions)
 			{
-				if (world.isBlockLoaded(chunkPos.asBlockPos()))
+				if (world.hasChunkAt(chunkPos.getWorldPosition()))
 				{
 					Chunk chunk = world.getChunk(chunkPos.x, chunkPos.z);
 					chunk.getCapability(PostsInChunkCapability.INSTANCE).ifPresent(posts ->
@@ -280,7 +280,7 @@ public class MoreRed
 						Set<BlockPos> checkedPostPositions = new HashSet<BlockPos>();
 						for (BlockPos postPos : posts.getPositions())
 						{
-							TileEntity te = world.getTileEntity(postPos);
+							TileEntity te = world.getBlockEntity(postPos);
 							if (te instanceof WirePostTileEntity)
 							{
 								Vector3d hit = SlackInterpolator.doesBlockStateIntersectAnyWireOfPost(world, postPos, pos, state, ((WirePostTileEntity)te).getRemoteConnectionBoxes(), checkedPostPositions);
@@ -291,7 +291,7 @@ public class MoreRed
 									if (entity instanceof ServerPlayerEntity)
 									{
 										ServerPlayerEntity serverPlayer = (ServerPlayerEntity)entity;
-										serverPlayer.connection.sendPacket(new SEntityEquipmentPacket(serverPlayer.getEntityId(), Lists.newArrayList(Pair.of(EquipmentSlotType.MAINHAND, serverPlayer.getHeldItem(Hand.MAIN_HAND)))));
+										serverPlayer.connection.send(new SEntityEquipmentPacket(serverPlayer.getId(), Lists.newArrayList(Pair.of(EquipmentSlotType.MAINHAND, serverPlayer.getItemInHand(Hand.MAIN_HAND)))));
 //										((ServerWorld)world).spawnParticle(serverPlayer, RedstoneParticleData.REDSTONE_DUST, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 //										serverPlayer.playSound(SoundEvents.ENTITY_WANDERING_TRADER_HURT, SoundCategory.BLOCKS, 0.5F, 2F);
 									}
@@ -299,7 +299,7 @@ public class MoreRed
 								}
 								else
 								{
-									checkedPostPositions.add(postPos.toImmutable());
+									checkedPostPositions.add(postPos.immutable());
 								}
 							}
 						}
@@ -323,19 +323,19 @@ public class MoreRed
 		if (!(player instanceof ServerPlayerEntity))
 			return;
 		ServerPlayerEntity serverPlayer = (ServerPlayerEntity)player;
-		boolean blockActionRestricted = player.blockActionRestricted(world, pos, serverPlayer.interactionManager.getGameType());
+		boolean blockActionRestricted = player.blockActionRestricted(world, pos, serverPlayer.gameMode.getGameModeForPlayer());
 		boolean isCreative = player.isCreative();
 		if (!isCreative && (event.getUseItem() == Event.Result.DENY || blockActionRestricted))
 			return;
 		ServerWorld serverWorld = (ServerWorld)world;
-		if (pos.getY() > serverWorld.getServer().getBuildLimit())
+		if (pos.getY() > serverWorld.getServer().getMaxBuildHeight())
 			return;
-		if (!world.isBlockModifiable(player, pos))
+		if (!world.mayInteract(player, pos))
 			return;
 		
-		double dx = player.getPosX() - (pos.getX() + 0.5D);
-		double dy = player.getPosY() - (pos.getY() + 0.5D) + 1.5D;
-		double dz = player.getPosZ() - (pos.getZ() + 0.5D);
+		double dx = player.getX() - (pos.getX() + 0.5D);
+		double dy = player.getY() - (pos.getY() + 0.5D) + 1.5D;
+		double dz = player.getZ() - (pos.getZ() + 0.5D);
 		double distSquared = dx * dx + dy * dy + dz * dz;
 		double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue() + 1;
 		if (distSquared > reachDistance*reachDistance)
@@ -357,14 +357,14 @@ public class MoreRed
 		Direction destroySide = hitNormal.getOpposite();
 		if (!isCreative && (event.getUseBlock() != net.minecraftforge.eventbus.api.Event.Result.DENY))
 		{
-			state.onBlockClicked(world, pos, player);
+			state.attack(world, pos, player);
 		}
 
-		int exp = net.minecraftforge.common.ForgeHooks.onBlockBreakEvent(world, serverPlayer.interactionManager.getGameType(), serverPlayer, pos);
+		int exp = net.minecraftforge.common.ForgeHooks.onBlockBreakEvent(world, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer, pos);
 		if (exp == -1)
 			return;
 		
-		if (player.getHeldItemMainhand().onBlockStartBreak(pos, player))
+		if (player.getMainHandItem().onBlockStartBreak(pos, player))
             return;
 		
 		// checking blockActionRestricted again looks weird, but it's for parity with normal logic

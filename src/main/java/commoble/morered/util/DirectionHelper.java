@@ -48,7 +48,7 @@ public class DirectionHelper
 		for (int i = 0; i < directionCount; i++)
 		{
 			Direction dir = dirs[i];
-			if (dir.getDirectionVec().equals(offset))
+			if (dir.getNormal().equals(offset))
 			{
 				return dir;
 			}

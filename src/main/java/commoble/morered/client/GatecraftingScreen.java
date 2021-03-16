@@ -53,18 +53,18 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 	public GatecraftingScreen(GatecraftingContainer screenContainer, PlayerInventory inv, ITextComponent titleIn)
 	{
 		super(screenContainer, inv, titleIn);
-		this.xSize = 276;
-		this.ySize = 166;
-		this.name = new TranslationTextComponent(BlockRegistrar.GATECRAFTING_PLINTH.get().getTranslationKey()).getString();
+		this.imageWidth = 276;
+		this.imageHeight = 166;
+		this.name = new TranslationTextComponent(BlockRegistrar.GATECRAFTING_PLINTH.get().getDescriptionId()).getString();
 	}
 	
 	@Override
 	public void init()
 	{
 		super.init();
-		int xStart = (this.width - this.xSize) / 2;
-		int yStart = (this.height - this.ySize) / 2;
-		ClientWorld world = this.minecraft.world;
+		int xStart = (this.width - this.imageWidth) / 2;
+		int yStart = (this.height - this.imageHeight) / 2;
+		ClientWorld world = this.minecraft.level;
 		List<IRecipe<CraftingInventory>> recipes = world != null ? RecipeRegistrar.getAllGatecraftingRecipes(world.getRecipeManager()) : ImmutableList.of();
 		this.scrollPanel = new GatecraftingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
 		this.children.add(this.scrollPanel);
@@ -79,21 +79,21 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		{
 			this.scrollPanel.render(matrix, mouseX, mouseY, 0);
 		}
-		this.renderHoveredTooltip(matrix, mouseX, mouseY);
+		this.renderTooltip(matrix, mouseX, mouseY);
 	}
 	
 	public void renderItemStack(ItemStack stack, int x, int y)
 	{
-        this.itemRenderer.renderItemAndEffectIntoGUI(stack, x, y);
-        this.itemRenderer.renderItemOverlays(this.font, stack, x, y);
+        this.itemRenderer.renderAndDecorateItem(stack, x, y);
+        this.itemRenderer.renderGuiItemDecorations(this.font, stack, x, y);
 	}
 
 	@Override
-	protected void renderHoveredTooltip(MatrixStack matrix, int mouseX, int mouseY)
+	protected void renderTooltip(MatrixStack matrix, int mouseX, int mouseY)
 	{
-		if (this.minecraft.player.inventory.getItemStack().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.getHasStack())
+		if (this.minecraft.player.inventory.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
 		{
-			this.renderTooltip(matrix, this.hoveredSlot.getStack(), mouseX, mouseY);
+			this.renderTooltip(matrix, this.hoveredSlot.getItem(), mouseX, mouseY);
 		}
 		else if (this.scrollPanel != null && !this.scrollPanel.tooltipItem.isEmpty())
 		{
@@ -104,23 +104,23 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 
 
 	@Override
-	protected void drawGuiContainerForegroundLayer(MatrixStack matrix, int mouseX, int mouseY)
+	protected void renderLabels(MatrixStack matrix, int mouseX, int mouseY)
 	{
-		String playerName = this.playerInventory.getName().getString();
-		this.font.drawString(matrix, this.name, this.xSize/2 - this.font.getStringWidth(this.name)/2, 6, 4210752);	// y-value and color from dispenser, etc
-		this.font.drawString(matrix, playerName, 107, this.ySize-96+2, 4210752);
+		String playerName = this.inventory.getName().getString();
+		this.font.draw(matrix, this.name, this.imageWidth/2 - this.font.width(this.name)/2, 6, 4210752);	// y-value and color from dispenser, etc
+		this.font.draw(matrix, playerName, 107, this.imageHeight-96+2, 4210752);
 	}
 
 	@Override
-	protected void drawGuiContainerBackgroundLayer(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
+	protected void renderBg(MatrixStack matrix, float partialTicks, int mouseX, int mouseY)
 	{
 		RenderSystem.color4f(1F, 1F, 1F, 1F);
-		int xStart = (this.width - this.xSize) / 2;
-		int yStart = (this.height - this.ySize) / 2;
+		int xStart = (this.width - this.imageWidth) / 2;
+		int yStart = (this.height - this.imageHeight) / 2;
 		
 		// use the trading window as the main background
-		this.minecraft.getTextureManager().bindTexture(TRADING_SCREEN);
-		AbstractGui.blit(matrix, xStart,  yStart, 0, 0, this.xSize, this.ySize, 512, 256);
+		this.minecraft.getTextureManager().bind(TRADING_SCREEN);
+		AbstractGui.blit(matrix, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
 		
 		// stretch the arrow over the crafting slot background
 		int arrowU = 186;
@@ -150,7 +150,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 
 		public RecipeButton(GatecraftingScreen screen, IRecipe<CraftingInventory> recipe, int x, int y, int width)
 		{
-			super(x, y, width, getHeightForRecipe(recipe), new StringTextComponent(""), button -> onButtonClicked(screen.container, recipe));
+			super(x, y, width, getHeightForRecipe(recipe), new StringTextComponent(""), button -> onButtonClicked(screen.menu, recipe));
 			this.baseY = y;
 			this.screen = screen;
 			this.recipe = recipe;
@@ -189,7 +189,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 	            // render ingredients
 	            for (int ingredientIndex=0; ingredientIndex<ingredientCount; ingredientIndex++)
 	            {
-	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).getMatchingStacks());
+	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).getItems());
 
 	            	int itemRow = ingredientIndex / 3;
 	            	int itemColumn = ingredientIndex % 3;
@@ -215,11 +215,11 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 		            int arrowHeight = 9;
 		            int arrowU = 15;
 		            int arrowV = 171;
-		            this.screen.minecraft.textureManager.bindTexture(TRADING_SCREEN);
+		            this.screen.minecraft.textureManager.bind(TRADING_SCREEN);
 		            Screen.blit(matrix, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
-		            ItemStack outputStack = this.recipe.getRecipeOutput();
+		            ItemStack outputStack = this.recipe.getResultItem();
 		            if (!outputStack.isEmpty())
 		            {
 			            int itemX = this.x + 2 + (18*4);
@@ -243,7 +243,7 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 	    	if (variantCount > 0)
 	    	{
             	// if this ingredient has multiple stacks, cycle through them
-            	int variantIndex = (int)((Util.milliTime() / 1000L) / variantCount);
+            	int variantIndex = (int)((Util.getMillis() / 1000L) / variantCount);
             	return variants[MathHelper.clamp(variantIndex, 0, variantCount - 1)];
 	    	}
 	    	else
@@ -275,21 +275,21 @@ public class GatecraftingScreen extends ContainerScreen<GatecraftingContainer>
 			int buttonWidth = 90;
 			
 			int totalButtonHeight = 0;
-			World world = client.world;
+			World world = client.level;
 			if (world != null)
 			{
 				for (IRecipe<CraftingInventory> recipe : RecipeRegistrar.getAllGatecraftingRecipes(world.getRecipeManager()))
 				{
 					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
 					this.buttons.add(recipeButton);
-					totalButtonHeight += recipeButton.getHeightRealms();
+					totalButtonHeight += recipeButton.getHeight();
 				}
 			}
 			this.totalButtonHeight = totalButtonHeight;
 		}
 		
 		@Override
-		public List<? extends IGuiEventListener> getEventListeners()
+		public List<? extends IGuiEventListener> children()
 		{
 			return this.buttons;
 		}

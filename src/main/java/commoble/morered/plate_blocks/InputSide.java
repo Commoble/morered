@@ -41,15 +41,15 @@ public enum InputSide
 			return false;
 		}
 		
-		Direction attachmentDirection = state.get(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
-		int baseRotation = state.get(PlateBlockStateProperties.ROTATION);
+		Direction attachmentDirection = state.getValue(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
+		int baseRotation = state.getValue(PlateBlockStateProperties.ROTATION);
 		
 		Direction inputDirection = BlockStateUtil.getInputDirection(attachmentDirection, baseRotation, this.rotationsFromOutput);
 		
 
-		BlockPos inputPos = pos.offset(inputDirection);
+		BlockPos inputPos = pos.relative(inputDirection);
 
-		int power = world.getRedstonePower(inputPos, inputDirection);
+		int power = world.getSignal(inputPos, inputDirection);
 		if (power > 0)
 		{
 			return true;
@@ -57,7 +57,7 @@ public enum InputSide
 		else
 		{
 			BlockState inputState = world.getBlockState(inputPos);
-			return (inputState.getBlock() == Blocks.REDSTONE_WIRE && inputState.get(RedstoneWireBlock.POWER) > 0);
+			return (inputState.getBlock() == Blocks.REDSTONE_WIRE && inputState.getValue(RedstoneWireBlock.POWER) > 0);
 		}
 	}
 }

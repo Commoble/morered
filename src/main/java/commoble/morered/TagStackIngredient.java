@@ -23,31 +23,31 @@ public class TagStackIngredient
 		@Override
 		public void write(PacketBuffer buffer, Ingredient ingredient)
 		{
-			ItemStack[] items = ingredient.getMatchingStacks();
+			ItemStack[] items = ingredient.getItems();
 			buffer.writeVarInt(items.length);	// tell the packet how long the array is
 			for (ItemStack stack : items)
 			{
-				buffer.writeItemStack(stack);
+				buffer.writeItem(stack);
 			}
 		}
 
 		@Override
 		public Ingredient parse(PacketBuffer buffer)
 		{
-			return Ingredient.fromItemListStream(Stream.generate(() -> new Ingredient.SingleItemList(buffer.readItemStack())).limit(buffer.readVarInt()));
+			return Ingredient.fromValues(Stream.generate(() -> new Ingredient.SingleItemList(buffer.readItem())).limit(buffer.readVarInt()));
 		}
 
 		@Override
 		public Ingredient parse(JsonObject json)
 		{
-			ResourceLocation tagID = new ResourceLocation(JSONUtils.getString(json, "tag")); // throws JsonSyntaxException if no tag field
-			int count = JSONUtils.getInt(json, "count", 1);
-			ITag<Item> tag = TagCollectionManager.getManager().getItemTags().get(tagID); // can return null if tag is invalid
+			ResourceLocation tagID = new ResourceLocation(JSONUtils.getAsString(json, "tag")); // throws JsonSyntaxException if no tag field
+			int count = JSONUtils.getAsInt(json, "count", 1);
+			ITag<Item> tag = TagCollectionManager.getInstance().getItems().getTag(tagID); // can return null if tag is invalid
 			if (tag == null)
 			{
 				throw new JsonSyntaxException("Unknown item tag '" + tagID + "'"); // will get caught and logged during data loading
 			}
-			return Ingredient.fromItemListStream(tag.getAllElements().stream().map(item -> new Ingredient.SingleItemList(new ItemStack(item, count))));
+			return Ingredient.fromValues(tag.getValues().stream().map(item -> new Ingredient.SingleItemList(new ItemStack(item, count))));
 		}
 
 	};

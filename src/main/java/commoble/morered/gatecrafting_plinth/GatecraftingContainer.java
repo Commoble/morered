@@ -50,7 +50,7 @@ public class GatecraftingContainer extends Container
 	{
 		super(ContainerRegistrar.GATECRAFTING.get(), id);
 		this.player = playerInventory.player;
-		this.positionInWorld = IWorldPosCallable.of(this.player.world, pos);
+		this.positionInWorld = IWorldPosCallable.create(this.player.level, pos);
 		
 		// crafting output slot // apparently it's helpful to do this first
 //		this.addSlot(new GatecraftingResultSlot(this, playerInventory.player, this.craftingInventory, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
@@ -76,9 +76,9 @@ public class GatecraftingContainer extends Container
 	 * Determines whether supplied player can use this container
 	 */
 	@Override
-	public boolean canInteractWith(PlayerEntity playerIn)
+	public boolean stillValid(PlayerEntity playerIn)
 	{
-		return isWithinUsableDistance(this.positionInWorld, playerIn, BlockRegistrar.GATECRAFTING_PLINTH.get());
+		return stillValid(this.positionInWorld, playerIn, BlockRegistrar.GATECRAFTING_PLINTH.get());
 	}
 
 		/**
@@ -87,7 +87,7 @@ public class GatecraftingContainer extends Container
 		 * was double-clicked.
 		 */
 	@Override
-	public boolean canMergeSlot(ItemStack stack, Slot slotIn)
+	public boolean canTakeItemForPickAll(ItemStack stack, Slot slotIn)
 	{
 		return false;
 	}
@@ -97,23 +97,23 @@ public class GatecraftingContainer extends Container
 	 * moves the stack between the player inventory and the other inventory(s).
 	 */
 	@Override
-	public ItemStack transferStackInSlot(PlayerEntity playerIn, int slotIndex)
+	public ItemStack quickMoveStack(PlayerEntity playerIn, int slotIndex)
 	{
 		ItemStack copiedStack = ItemStack.EMPTY;
-		Slot slot = this.inventorySlots.get(slotIndex);
-		if (slot != null && slot.getHasStack())
+		Slot slot = this.slots.get(slotIndex);
+		if (slot != null && slot.hasItem())
 		{
-			ItemStack stackInSlot = slot.getStack();
+			ItemStack stackInSlot = slot.getItem();
 			copiedStack = stackInSlot.copy();
 			// if the output slot was clicked
 			if (slotIndex == OUTPUT_SLOT_ID)
 			{
-				if (!this.mergeItemStack(stackInSlot, FIRST_PLAYER_INVENTORY_SLOT_ID, FIRST_PLAYER_INVENTORY_SLOT_ID + PLAYER_INVENTORY_SLOT_COUNT, true))
+				if (!this.moveItemStackTo(stackInSlot, FIRST_PLAYER_INVENTORY_SLOT_ID, FIRST_PLAYER_INVENTORY_SLOT_ID + PLAYER_INVENTORY_SLOT_COUNT, true))
 				{
 					return ItemStack.EMPTY;
 				}
 
-				slot.onSlotChange(stackInSlot, copiedStack);
+				slot.onQuickCraft(stackInSlot, copiedStack);
 			}
 			// if a player inventory slot was clicked, try to move it from the hotbar to the backpack or vice-versa
 			else if (slotIndex >= FIRST_PLAYER_INVENTORY_SLOT_ID)
@@ -121,7 +121,7 @@ public class GatecraftingContainer extends Container
 				// if it was not a hotbar slot, try to merge it into the hotbar first
 				if (slotIndex < FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID)
 				{
-					if (!this.mergeItemStack(stackInSlot, FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID, FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID + PLAYER_INVENTORY_SLOT_COLUMNS, false))
+					if (!this.moveItemStackTo(stackInSlot, FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID, FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID + PLAYER_INVENTORY_SLOT_COLUMNS, false))
 					{
 						return ItemStack.EMPTY;
 					}
@@ -129,7 +129,7 @@ public class GatecraftingContainer extends Container
 				// if it was a hotbar slot, try to merge it to the player's backpack
 				else if (slotIndex >= FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID
 					&& slotIndex < FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID + PLAYER_INVENTORY_SLOT_COLUMNS
-					&& !this.mergeItemStack(stackInSlot, FIRST_PLAYER_INVENTORY_SLOT_ID, FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID, false))
+					&& !this.moveItemStackTo(stackInSlot, FIRST_PLAYER_INVENTORY_SLOT_ID, FIRST_PLAYER_INVENTORY_HOTBAR_SLOT_ID, false))
 				{
 					return ItemStack.EMPTY;
 				}
@@ -137,11 +137,11 @@ public class GatecraftingContainer extends Container
 
 			if (stackInSlot.isEmpty())
 			{
-				slot.putStack(ItemStack.EMPTY);
+				slot.set(ItemStack.EMPTY);
 			}
 			else
 			{
-				slot.onSlotChanged();
+				slot.setChanged();
 			}
 
 			if (stackInSlot.getCount() == copiedStack.getCount())
@@ -157,7 +157,7 @@ public class GatecraftingContainer extends Container
 	
 	public void onPlayerChoseRecipe(ResourceLocation recipeID)
 	{
-		this.attemptRecipeAssembly(RecipeRegistrar.getGatecraftingRecipe(this.player.world.getRecipeManager(), recipeID));
+		this.attemptRecipeAssembly(RecipeRegistrar.getGatecraftingRecipe(this.player.level.getRecipeManager(), recipeID));
 	}
 	
 	/**
@@ -177,6 +177,6 @@ public class GatecraftingContainer extends Container
 	public void updateRecipeAndResult(Optional<IRecipe<CraftingInventory>> recipeHolder)
 	{
 		this.currentRecipe = recipeHolder;
-		this.craftResult.setInventorySlotContents(0, recipeHolder.map(recipe -> recipe.getRecipeOutput().copy()).orElse(ItemStack.EMPTY));
+		this.craftResult.setItem(0, recipeHolder.map(recipe -> recipe.getResultItem().copy()).orElse(ItemStack.EMPTY));
 	}
 }

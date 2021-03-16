@@ -18,7 +18,7 @@ public class GatecraftingRecipe extends ShapelessRecipe
 {
 	public GatecraftingRecipe(ShapelessRecipe baseRecipe)
 	{
-		super(baseRecipe.getId(), baseRecipe.getGroup(), baseRecipe.getRecipeOutput(), baseRecipe.getIngredients());
+		super(baseRecipe.getId(), baseRecipe.getGroup(), baseRecipe.getResultItem(), baseRecipe.getIngredients());
 	}
 
 	@Override
@@ -40,11 +40,11 @@ public class GatecraftingRecipe extends ShapelessRecipe
 		NonNullList<Ingredient> ingredients = recipe.getIngredients();
 		for (Ingredient ingredient : ingredients)
 		{
-			int remainingItems = ingredient.getMatchingStacks()[0].getCount();
-			int playerSlots = playerInventory.getSizeInventory();
+			int remainingItems = ingredient.getItems()[0].getCount();
+			int playerSlots = playerInventory.getContainerSize();
 			for (int playerSlot = 0; playerSlot < playerSlots && remainingItems > 0; playerSlot++)
 			{
-				ItemStack stackInSlot = playerInventory.getStackInSlot(playerSlot);
+				ItemStack stackInSlot = playerInventory.getItem(playerSlot);
 				if (ingredient.test(stackInSlot))
 				{
 					remainingItems -= stackInSlot.getCount();

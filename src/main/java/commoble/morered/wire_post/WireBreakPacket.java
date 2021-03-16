@@ -28,12 +28,12 @@ public class WireBreakPacket
 		nbt.putDouble("endX", this.end.x);
 		nbt.putDouble("endY", this.end.y);
 		nbt.putDouble("endZ", this.end.z);
-		buffer.writeCompoundTag(nbt);
+		buffer.writeNbt(nbt);
 	}
 	
 	public static WireBreakPacket read(PacketBuffer buffer)
 	{
-		CompoundNBT nbt = buffer.readCompoundTag();
+		CompoundNBT nbt = buffer.readNbt();
 		if (nbt == null)
 		{
 			return new WireBreakPacket(Vector3d.ZERO, Vector3d.ZERO);

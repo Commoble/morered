@@ -16,10 +16,10 @@ public class ChunkManagerMixin
 {
 	@Inject(
 		at = @At(value = "RETURN"),
-		method = "sendChunkData")
-	public void afterSendChunkData(ServerPlayerEntity player, IPacket<?>[] packetCache, Chunk chunkIn, CallbackInfo ci)
+		method = "playerLoadedChunk")
+	public void afterPlayerLoadedChunk(ServerPlayerEntity player, IPacket<?>[] packetCache, Chunk chunkIn, CallbackInfo ci)
 	{
 		// sync redwire post positions to clients when a chunk needs to be loaded on the client
-		MixinCallbacks.afterSendChunkData(player, chunkIn);
+		MixinCallbacks.afterPlayerLoadedChunk(player, chunkIn);
 	}
 }

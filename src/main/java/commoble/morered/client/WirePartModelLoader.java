@@ -53,8 +53,8 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 	@Override
 	public WirePartModelLoader.WirePartGeometry read(JsonDeserializationContext context, JsonObject modelContents)
 	{
-        BlockModel lineModel = context.deserialize(JSONUtils.getJsonObject(modelContents, "line"), BlockModel.class);
-        BlockModel edgeModel = context.deserialize(JSONUtils.getJsonObject(modelContents, "edge"), BlockModel.class);
+        BlockModel lineModel = context.deserialize(JSONUtils.getAsJsonObject(modelContents, "line"), BlockModel.class);
+        BlockModel edgeModel = context.deserialize(JSONUtils.getAsJsonObject(modelContents, "edge"), BlockModel.class);
         return new WirePartGeometry(lineModel, edgeModel);
 	}
 	
@@ -84,7 +84,7 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 				{
 					int index = side*4 + subSide;
 					IModelTransform transform = FaceRotation.getFaceRotation(side, subSide);
-					lineModels[index] = this.lineModel.bakeModel(bakery, this.lineModel, spriteGetter, transform, modelLocation, isSideLit);
+					lineModels[index] = this.lineModel.bake(bakery, this.lineModel, spriteGetter, transform, modelLocation, isSideLit);
 				}
 			}
 			
@@ -95,11 +95,11 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 				// down comes first, then up, then the sides
 				// the "default" edge with no rotation has to be on the middle sides to ignore the z-axis, we'll use bottom-west
 				IModelTransform transform = EdgeRotation.EDGE_ROTATIONS[edge];
-				edgeModels[edge] = this.edgeModel.bakeModel(bakery, this.edgeModel, spriteGetter, transform, modelLocation, isSideLit);
+				edgeModels[edge] = this.edgeModel.bake(bakery, this.edgeModel, spriteGetter, transform, modelLocation, isSideLit);
 			}
 			
 			return new WirePartModelLoader.WirePartModel(owner.useSmoothLighting(), owner.isShadedInGui(), owner.isSideLit(),
-				spriteGetter.apply(this.lineModel.resolveTextureName("particle")),
+				spriteGetter.apply(this.lineModel.getMaterial("particle")),
 				lineModels,
 				edgeModels);
 		}
@@ -108,8 +108,8 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors)
 		{
 	        Set<RenderMaterial> textures = new HashSet<>();
-	        textures.addAll(this.lineModel.getTextures(modelGetter, missingTextureErrors));
-	        textures.addAll(this.edgeModel.getTextures(modelGetter, missingTextureErrors));
+	        textures.addAll(this.lineModel.getMaterials(modelGetter, missingTextureErrors));
+	        textures.addAll(this.edgeModel.getMaterials(modelGetter, missingTextureErrors));
 	        return textures;
 		}
 	}
@@ -136,7 +136,7 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		}
 
 		@Override
-		public boolean isAmbientOcclusion()
+		public boolean useAmbientOcclusion()
 		{
 			return this.isAmbientOcclusion;
 		}
@@ -148,19 +148,19 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		}
 
 		@Override
-		public boolean isSideLit()
+		public boolean usesBlockLight()
 		{
 			return this.isSideLit;
 		}
 
 		@Override
-		public boolean isBuiltInRenderer()
+		public boolean isCustomRenderer()
 		{
 			return false;
 		}
 
 		@Override
-		public TextureAtlasSprite getParticleTexture()
+		public TextureAtlasSprite getParticleIcon()
 		{
 			return this.particle;
 		}

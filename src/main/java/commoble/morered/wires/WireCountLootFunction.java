@@ -28,7 +28,7 @@ public class WireCountLootFunction implements ILootFunction, ILootSerializer<Wir
 	@Override
 	public ItemStack apply(ItemStack input, LootContext context)
 	{
-		BlockState state = context.get(LootParameters.BLOCK_STATE);
+		BlockState state = context.getParamOrNull(LootParameters.BLOCK_STATE);
 		Block block = state.getBlock();
 		if (block instanceof AbstractWireBlock)
 		{
@@ -38,13 +38,13 @@ public class WireCountLootFunction implements ILootFunction, ILootSerializer<Wir
 	}
 
 	@Override
-	public LootFunctionType getFunctionType()
+	public LootFunctionType getType()
 	{
 		return TYPE;
 	}
 	
 	@Override
-	public Set<LootParameter<?>> getRequiredParameters()
+	public Set<LootParameter<?>> getReferencedContextParams()
 	{
 		return ImmutableSet.of(LootParameters.BLOCK_STATE);
 	}

@@ -27,13 +27,13 @@ public class WirePostBlock extends AbstractPoweredWirePostBlock
 		// if we're raytracing a wire, ignore the post (the plate can still block the raytrace)
 		return context instanceof WireRayTraceSelectionContext && ((WireRayTraceSelectionContext)context).shouldIgnoreBlock(pos)
 			? VoxelShapes.empty()
-			: AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
+			: AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.getValue(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
 	}
 	
 	public static EnumSet<Direction> getRedstoneConnectionDirections(BlockState state)
 	{
 		return state.hasProperty(DIRECTION_OF_ATTACHMENT)
-			? EnumSet.of(state.get(DIRECTION_OF_ATTACHMENT))
+			? EnumSet.of(state.getValue(DIRECTION_OF_ATTACHMENT))
 			: AbstractPoweredWirePostBlock.NO_DIRECTIONS;
 	}
 

@@ -13,23 +13,23 @@ import net.minecraft.util.math.BlockPos;
 public interface ClientPlayerControllerAccess
 {
 	@Accessor
-	public void setBlockHitDelay(int ticks);
+	public void setDestroyDelay(int ticks);
 	
 	@Accessor
-	public BlockPos getCurrentBlock();
+	public BlockPos getDestroyBlockPos();
 	
 	@Accessor
-	public void setIsHittingBlock(boolean is);
+	public void setIsDestroying(boolean is);
 	
 	@Accessor
-	public void setCurBlockDamageMP(float damage);
+	public void setDestroyProgress(float damage);
 	
 	@Accessor
-	public void setStepSoundTickCounter(float count);
+	public void setDestroyTicks(float count);
 	
 	@Invoker
-	public boolean callIsHittingPosition(BlockPos pos);
+	public boolean callSameDestroyTarget(BlockPos pos);
 	
 	@Invoker
-	public void callSendDiggingPacket(CPlayerDiggingPacket.Action action, BlockPos pos, Direction dir);
+	public void callSendBlockAction(CPlayerDiggingPacket.Action action, BlockPos pos, Direction dir);
 }

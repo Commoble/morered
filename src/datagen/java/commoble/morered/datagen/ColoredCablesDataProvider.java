@@ -45,7 +45,7 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 
 public class ColoredCablesDataProvider implements IDataProvider
 {
-	public static final INamedTag<Item> RED_ALLOY_WIRE_TAG = ItemTags.makeWrapperTag("morered:red_alloy_wires");
+	public static final INamedTag<Item> RED_ALLOY_WIRE_TAG = ItemTags.bind("morered:red_alloy_wires");
 	
 	protected final DataGenerator generator;
 	protected final ExistingFileHelper fileHelper;
@@ -57,7 +57,7 @@ public class ColoredCablesDataProvider implements IDataProvider
 	}
 
 	@Override
-	public void act(DirectoryCache cache) throws IOException
+	public void run(DirectoryCache cache) throws IOException
 	{
 		for (int i=0; i<16; i++)
 		{
@@ -145,7 +145,7 @@ public class ColoredCablesDataProvider implements IDataProvider
 					.withCase(CaseDefinition.builder(elbowModel,180,270)
 						.withCondition("up", "true")
 						.withCondition("south", "true")))
-				.act(cache);
+				.run(cache);
 			
 			// generate block models
 			// generate the simple models for the block
@@ -155,19 +155,19 @@ public class ColoredCablesDataProvider implements IDataProvider
 					provider.with(new ResourceLocation(modid, String.format("%s_%s", blockLocation, modelType)),
 						SimpleModel.builder(String.format("morered:block/colored_network_cable_%s_template", modelType))
 							.withTexture("wire",blockTexture))))
-			.act(cache);
+			.run(cache);
 			// generate the parts model for the block
 			new JsonDataProvider<WirePartModelDefinition>(generator, ResourceType.ASSETS, "models/block", WirePartModelDefinition.CODEC)
 				.with(new ResourceLocation(modid, String.format("%s_parts", blockLocation)), new WirePartModelDefinition(
 					SimpleModel.builder(String.format("morered:block/%s_line", blockLocation)),
 					SimpleModel.builder(String.format("morered:block/%s_edge", blockLocation))))
-				.act(cache);
+				.run(cache);
 			
 			// generate item models
 			new JsonDataProvider<SimpleModel>(generator, ResourceType.ASSETS, "models/item", SimpleModel.CODEC)
 				.with(item.getRegistryName(), SimpleModel.builder("morered:item/colored_network_cable_template")
 					.withTexture("wire", String.format("morered:block/%s", block.getRegistryName().getPath())))
-				.act(cache);
+				.run(cache);
 			
 			// generate loot table
 			new LootTableProvider(generator)
@@ -177,11 +177,11 @@ public class ColoredCablesDataProvider implements IDataProvider
 				protected List<Pair<Supplier<Consumer<BiConsumer<ResourceLocation, LootTable.Builder>>>, LootParameterSet>> getTables()
 				{
 					return ImmutableList.of(Pair.of(
-						() -> context -> context.accept(new ResourceLocation(modid, "blocks/"+blockLocation), LootTable.builder()
-							.addLootPool(LootPool.builder().rolls(ConstantRange.of(1))
-								.addEntry(ItemLootEntry.builder(item)
-									.acceptFunction(() -> WireCountLootFunction.INSTANCE))
-								.acceptCondition(SurvivesExplosion.builder()))),
+						() -> context -> context.accept(new ResourceLocation(modid, "blocks/"+blockLocation), LootTable.lootTable()
+							.withPool(LootPool.lootPool().setRolls(ConstantRange.exactly(1))
+								.add(ItemLootEntry.lootTableItem(item)
+									.apply(() -> WireCountLootFunction.INSTANCE))
+								.when(SurvivesExplosion.survivesExplosion()))),
 						LootParameterSets.BLOCK
 						));
 				}
@@ -193,13 +193,13 @@ public class ColoredCablesDataProvider implements IDataProvider
 				}
 				
 			}
-			.act(cache);
+			.run(cache);
 			
 			// generate recipe
 			new RecipeProvider(generator)
 			{
 				@Override
-				protected void registerRecipes(Consumer<IFinishedRecipe> consumer)
+				protected void buildShapelessRecipes(Consumer<IFinishedRecipe> consumer)
 				{
 					// override the recipe builder to not validate advancements
 					ShapedRecipeBuilder builder = new ShapedRecipeBuilder(item,8);
@@ -210,22 +210,22 @@ public class ColoredCablesDataProvider implements IDataProvider
 						"",
 						ImmutableList.of("www", "w#w", "www"),
 						ImmutableMap.<Character,Ingredient>builder()
-							.put('w', Ingredient.fromTag(RED_ALLOY_WIRE_TAG))
-							.put('#', Ingredient.fromTag(MoreRedDataGen.WOOL_TAGS[ColoredCableDataProvider.this.colorIndex]))
+							.put('w', Ingredient.of(RED_ALLOY_WIRE_TAG))
+							.put('#', Ingredient.of(MoreRedDataGen.WOOL_TAGS[ColoredCableDataProvider.this.colorIndex]))
 							.build(),
 						null,
 						null
 						)
 						{
 							@Override
-							public JsonObject getAdvancementJson()
+							public JsonObject serializeAdvancement()
 							{
 								return null;
 							}
 						});
 				}
 			}
-			.act(cache);
+			.run(cache);
 		}
 	}
 	

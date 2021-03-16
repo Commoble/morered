@@ -45,7 +45,7 @@ public class ColorHandlers
 		Item item = stack.getItem();
 		if (item instanceof BlockItem)
 		{
-			return getLogicFunctionBlockStateTint(((BlockItem)item).getBlock().getDefaultState(), tintIndex);
+			return getLogicFunctionBlockStateTint(((BlockItem)item).getBlock().defaultBlockState(), tintIndex);
 		}
 		else
 		{
@@ -77,18 +77,18 @@ public class ColorHandlers
 	
 	public static int getLatchItemTint(ItemStack stack, int tintIndex)
 	{
-		return getLatchTint(BlockRegistrar.LATCH.get().getDefaultState(), tintIndex);
+		return getLatchTint(BlockRegistrar.LATCH.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getLatchTint(BlockState state, int tintIndex)
 	{
 		if (tintIndex == LogicFunctions.SET_LATCH)
 		{
-			return state.get(LatchBlock.POWERED) && !state.get(LatchBlock.INPUT_C) ? LIT : UNLIT;
+			return state.getValue(LatchBlock.POWERED) && !state.getValue(LatchBlock.INPUT_C) ? LIT : UNLIT;
 		}
 		else if (tintIndex == LogicFunctions.UNSET_LATCH)
 		{
-			return !state.get(LatchBlock.POWERED) && !state.get(LatchBlock.INPUT_A) ? LIT : UNLIT;
+			return !state.getValue(LatchBlock.POWERED) && !state.getValue(LatchBlock.INPUT_A) ? LIT : UNLIT;
 		}
 		else
 		{
@@ -105,14 +105,14 @@ public class ColorHandlers
 	
 	public static int getRedwirePostItemTint(ItemStack stack, int tintIndex)
 	{
-		return getRedwirePostTint(BlockRegistrar.REDWIRE_POST.get().getDefaultState(), tintIndex);
+		return getRedwirePostTint(BlockRegistrar.REDWIRE_POST.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getRedwirePostTint(BlockState state, int tintIndex)
 	{
 		if (tintIndex == 1)
 		{
-			int power = state.get(AbstractPoweredWirePostBlock.POWER);
+			int power = state.getValue(AbstractPoweredWirePostBlock.POWER);
 			double lerpFactor = power / 15D;
 			return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 		}
@@ -128,7 +128,7 @@ public class ColorHandlers
 			return NO_TINT;
 		if (tintIndex == 0) // reserved for particle, particle tint is hardcoded to 0
 			return UNLIT;
-		TileEntity te = world.getTileEntity(pos);
+		TileEntity te = world.getBlockEntity(pos);
 		if (te instanceof WireTileEntity)
 		{
 			WireTileEntity wire = (WireTileEntity)te;
@@ -145,14 +145,14 @@ public class ColorHandlers
 				int edgeIndex = tintIndex - 7;
 				Edge edge = Edge.values()[edgeIndex];
 				Direction directionA = edge.sideA;
-				BlockPos neighborPosA = pos.offset(directionA);
-				TileEntity neighborTileA = world.getTileEntity(neighborPosA);
+				BlockPos neighborPosA = pos.relative(directionA);
+				TileEntity neighborTileA = world.getBlockEntity(neighborPosA);
 				if (neighborTileA instanceof WireTileEntity)
 				{
 					WireTileEntity neighborWireA = (WireTileEntity)neighborTileA;
 					Direction directionB = edge.sideB;
-					BlockPos neighborPosB = pos.offset(directionB);
-					TileEntity neighborTileB = world.getTileEntity(neighborPosB);
+					BlockPos neighborPosB = pos.relative(directionB);
+					TileEntity neighborTileB = world.getBlockEntity(neighborPosB);
 					if (neighborTileB instanceof WireTileEntity)
 					{
 						WireTileEntity neighborWireB = (WireTileEntity)neighborTileB;

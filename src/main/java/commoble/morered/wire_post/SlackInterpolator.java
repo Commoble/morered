@@ -29,9 +29,9 @@ public class SlackInterpolator
 		int points = 17; // 16 segments
 		Vector3d[] list = new Vector3d[points];
 
-		double dx = vector.getX();
-		double dy = vector.getY();
-		double dz = vector.getZ();
+		double dx = vector.x();
+		double dy = vector.y();
+		double dz = vector.z();
 
 		for (int point = 0; point < points; point++)
 		{
@@ -96,9 +96,9 @@ public class SlackInterpolator
 	public static Vector3d doesBlockStateIntersectConnection(BlockPos startPos, BlockPos endPos, BlockPos placePos, BlockState placeState, NestedBoundingBox box, IBlockReader world)
 	{
 		VoxelShape shape = placeState.getCollisionShape(world, placePos);
-		for (AxisAlignedBB aabb : shape.toBoundingBoxList())
+		for (AxisAlignedBB aabb : shape.toAabbs())
 		{
-			if (box.intersects(aabb.offset(placePos)))
+			if (box.intersects(aabb.move(placePos)))
 			{
 				// if we confirm the AABB intersects, do a raytrace as well
 				boolean lastPosIsHigher = startPos.getY() < endPos.getY();
@@ -125,7 +125,7 @@ public class SlackInterpolator
 			BlockRayTraceResult result = rayTraceBlocks(world, context);
 			if (result.getType() != RayTraceResult.Type.MISS)
 			{
-				return result.getHitVec();
+				return result.getLocation();
 			}
 		}
 		
@@ -144,7 +144,7 @@ public class SlackInterpolator
 			Vector3d startVec = rayTraceContext.getStartVec();
 			Vector3d endVec = rayTraceContext.getEndVec();
 			VoxelShape shape = rayTraceContext.getBlockShape(state, world, pos);
-			BlockRayTraceResult result = world.rayTraceBlocks(startVec, endVec, pos, shape, state);
+			BlockRayTraceResult result = world.clipWithInteractionOverride(startVec, endVec, pos, shape, state);
 //			VoxelShape fluidShape = rayTraceContext.getFluidShape(fluidState, world, pos);
 //			BlockRayTraceResult fluidResult = fluidShape.rayTrace(startVec, endVec, pos);
 //			double resultDistance = result == null ? Double.MAX_VALUE : rayTraceContext.getStartVec().squareDistanceTo(result.getHitVec());
@@ -152,7 +152,7 @@ public class SlackInterpolator
 			return result;
 		}, (rayTraceContext) -> {
 			Vector3d difference = rayTraceContext.getStartVec().subtract(rayTraceContext.getEndVec());
-			return BlockRayTraceResult.createMiss(rayTraceContext.getEndVec(), Direction.getFacingFromVector(difference.x, difference.y, difference.z), new BlockPos(rayTraceContext.getEndVec()));
+			return BlockRayTraceResult.miss(rayTraceContext.getEndVec(), Direction.getNearest(difference.x, difference.y, difference.z), new BlockPos(rayTraceContext.getEndVec()));
 		});
 	}
 
@@ -186,9 +186,9 @@ public class SlackInterpolator
 				double dx = endX - startX;
 				double dy = endY - startY;
 				double dz = endZ - startZ;
-				int xSign = MathHelper.signum(dx);
-				int ySign = MathHelper.signum(dy);
-				int zSign = MathHelper.signum(dz);
+				int xSign = MathHelper.sign(dx);
+				int ySign = MathHelper.sign(dy);
+				int zSign = MathHelper.sign(dz);
 				double reciprocalX = xSign == 0 ? Double.MAX_VALUE : xSign / dx;
 				double reciprocalY = ySign == 0 ? Double.MAX_VALUE : ySign / dy;
 				double reciprocalZ = zSign == 0 ? Double.MAX_VALUE : zSign / dz;
@@ -222,7 +222,7 @@ public class SlackInterpolator
 						calcZ += reciprocalZ;
 					}
 
-					T fallbackResult = rayTracer.apply(context, mutaPos.setPos(startXInt, startYInt, startZInt));
+					T fallbackResult = rayTracer.apply(context, mutaPos.set(startXInt, startYInt, startZInt));
 					if (fallbackResult != null)
 					{
 						return fallbackResult;

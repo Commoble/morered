@@ -58,14 +58,14 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 		super(properties);
 		this.function = function;
 		
-		BlockState baseState = this.getDefaultState();
+		BlockState baseState = this.defaultBlockState();
 		
 		for (InputSide side : this.getInputSides())
 		{
-			baseState = baseState.with(side.property, false);
+			baseState = baseState.setValue(side.property, false);
 		}
 		
-		this.setDefaultState(baseState);
+		this.registerDefaultState(baseState);
 	}
 	
 	/**
@@ -79,9 +79,9 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	public abstract InputSide[] getInputSides();
 
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		for (InputSide side : this.getInputSides())
 		{
 			builder.add(side.property);
@@ -95,7 +95,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	 */
 	@Deprecated
 	@Override
-	public int getWeakPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
+	public int getSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
 	{
 		if (InputState.getInput(blockState).applyLogic(this.function)
 			&& PlateBlockStateProperties.getOutputDirection(blockState) == sideOfAdjacentBlock.getOpposite())
@@ -114,7 +114,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 		BlockState newBlockState = InputState.getUpdatedBlockState(world, oldBlockState, pos);
 		if (newBlockState != oldBlockState)
 		{
-			world.setBlockState(pos, newBlockState, 2);
+			world.setBlock(pos, newBlockState, 2);
 		}
 	}
 
@@ -124,11 +124,11 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
 	{
 		Direction outputDirection = PlateBlockStateProperties.getOutputDirection(state);
-		BlockPos outputPos = pos.offset(outputDirection);
+		BlockPos outputPos = pos.relative(outputDirection);
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), java.util.EnumSet.of(outputDirection), false).isCanceled())
 		{
 			world.neighborChanged(outputPos, this, pos);
-			world.notifyNeighborsOfStateExcept(outputPos, this, outputDirection);
+			world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection);
 		}
 	}
 

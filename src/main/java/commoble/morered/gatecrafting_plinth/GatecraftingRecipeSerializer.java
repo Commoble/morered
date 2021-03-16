@@ -9,16 +9,16 @@ import net.minecraft.util.ResourceLocation;
 public class GatecraftingRecipeSerializer extends ShapelessRecipe.Serializer
 {
 	@Override
-	public ShapelessRecipe read(ResourceLocation recipeId, JsonObject json)
+	public ShapelessRecipe fromJson(ResourceLocation recipeId, JsonObject json)
 	{
-		ShapelessRecipe baseRecipe = super.read(recipeId, json);
+		ShapelessRecipe baseRecipe = super.fromJson(recipeId, json);
 		return new GatecraftingRecipe(baseRecipe);
 	}
 
 	@Override
-	public ShapelessRecipe read(ResourceLocation recipeId, PacketBuffer buffer)
+	public ShapelessRecipe fromNetwork(ResourceLocation recipeId, PacketBuffer buffer)
 	{
-		ShapelessRecipe baseRecipe = super.read(recipeId, buffer);
+		ShapelessRecipe baseRecipe = super.fromNetwork(recipeId, buffer);
 		return new GatecraftingRecipe(baseRecipe);
 	}
 }

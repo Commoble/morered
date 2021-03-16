@@ -75,8 +75,8 @@ public class WirePostTileEntity extends TileEntity
 	// returns true if attempt to add a connection was successful
 	public static boolean addConnection(IWorld world, @Nonnull WirePostTileEntity postA, @Nonnull WirePostTileEntity postB)
 	{
-		postA.addConnection(postB.pos);
-		postB.addConnection(postA.pos);
+		postA.addConnection(postB.worldPosition);
+		postB.addConnection(postA.worldPosition);
 		return true;
 	}
 	
@@ -96,10 +96,10 @@ public class WirePostTileEntity extends TileEntity
 	}
 
 	@Override
-	public void remove()
+	public void setRemoved()
 	{
 		this.clearRemoteConnections();
-		super.remove();
+		super.setRemoved();
 	}
 
 	// returns true if post TEs exist at the given locations and both have a
@@ -112,7 +112,7 @@ public class WirePostTileEntity extends TileEntity
 
 	public void clearRemoteConnections()
 	{
-		this.remoteConnections.keySet().forEach(otherPos -> getPost(this.world, otherPos).ifPresent(otherPost -> otherPost.removeConnection(this.pos)));
+		this.remoteConnections.keySet().forEach(otherPos -> getPost(this.level, otherPos).ifPresent(otherPost -> otherPost.removeConnection(this.worldPosition)));
 		this.remoteConnections = new HashMap<>();
 		this.onCommonDataUpdated();
 	}
@@ -129,23 +129,23 @@ public class WirePostTileEntity extends TileEntity
 
 	private void addConnection(BlockPos otherPos)
 	{
-		this.remoteConnections.put(otherPos.toImmutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
-		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
+		this.remoteConnections.put(otherPos.immutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
+		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
 		this.onCommonDataUpdated();
 	}
 
 	private void removeConnection(BlockPos otherPos)
 	{
 		this.remoteConnections.remove(otherPos);
-		this.world.neighborChanged(this.pos, this.getBlockState().getBlock(), otherPos);
-		if (!this.world.isRemote)
+		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
+		if (!this.level.isClientSide)
 		{
 			// only send one break packet when breaking two connections
-			int thisY = this.pos.getY();
+			int thisY = this.worldPosition.getY();
 			int otherY = otherPos.getY();
-			if (thisY < otherY || (thisY == otherY && this.pos.hashCode() < otherPos.hashCode())) 
-				MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.world.getChunkAt(this.pos)),
-					new WireBreakPacket(getConnectionVector(this.pos), getConnectionVector(otherPos)));
+			if (thisY < otherY || (thisY == otherY && this.worldPosition.hashCode() < otherPos.hashCode())) 
+				MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)),
+					new WireBreakPacket(getConnectionVector(this.worldPosition), getConnectionVector(otherPos)));
 		}
 		this.onCommonDataUpdated();
 	}
@@ -153,7 +153,7 @@ public class WirePostTileEntity extends TileEntity
 	public void notifyConnections()
 	{
 		this.getRemoteConnections()
-			.forEach(connectionPos -> this.world.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.pos));
+			.forEach(connectionPos -> this.level.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.worldPosition));
 //			world.notifyNeighborsOfStateExcept(neighborPos, this, dir);
 			
 	}
@@ -174,20 +174,20 @@ public class WirePostTileEntity extends TileEntity
 	{
 		return theRest.stream()
 			.map(AxisAlignedBB::new)
-			.reduce(EMPTY_AABB, AxisAlignedBB::union, AxisAlignedBB::union)
-			.union(new AxisAlignedBB(startPos));
+			.reduce(EMPTY_AABB, AxisAlignedBB::minmax, AxisAlignedBB::minmax)
+			.minmax(new AxisAlignedBB(startPos));
 	}
 
 	public void onCommonDataUpdated()
 	{
-		this.markDirty();
-		this.world.notifyBlockUpdate(this.pos, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.DEFAULT);
+		this.setChanged();
+		this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.DEFAULT);
 	}
 
 	@Override
-	public void read(BlockState state, CompoundNBT compound)
+	public void load(BlockState state, CompoundNBT compound)
 	{
-		super.read(state, compound);
+		super.load(state, compound);
 		this.readCommonData(compound);
 	}
 	
@@ -201,14 +201,14 @@ public class WirePostTileEntity extends TileEntity
 			positions.forEach(otherPos -> newMap.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos)));
 			this.remoteConnections = newMap;
 		}
-		this.renderAABB = getAABBContainingAllBlockPos(this.pos, this.remoteConnections.keySet());
+		this.renderAABB = getAABBContainingAllBlockPos(this.worldPosition, this.remoteConnections.keySet());
 	}
 
 	@SuppressWarnings("deprecation")
 	@Override
-	public CompoundNBT write(CompoundNBT compound)
+	public CompoundNBT save(CompoundNBT compound)
 	{
-		super.write(compound);
+		super.save(compound);
 		BLOCKPOS_LISTER.write(Lists.newArrayList(this.remoteConnections.keySet()), compound);
 		return compound;
 	}
@@ -217,14 +217,14 @@ public class WirePostTileEntity extends TileEntity
 	// called on server when client loads chunk with TE in it
 	public CompoundNBT getUpdateTag()
 	{
-		return this.write(new CompoundNBT()); // supermethods of write() and getUpdateTag() both call writeInternal
+		return this.save(new CompoundNBT()); // supermethods of write() and getUpdateTag() both call writeInternal
 	}
 
 	@Override
 	// generate packet on server to send to client
 	public SUpdateTileEntityPacket getUpdatePacket()
 	{
-		return new SUpdateTileEntityPacket(this.pos, 1, this.write(new CompoundNBT()));
+		return new SUpdateTileEntityPacket(this.worldPosition, 1, this.save(new CompoundNBT()));
 	}
 
 	@Override
@@ -232,12 +232,12 @@ public class WirePostTileEntity extends TileEntity
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
 	{
 		super.onDataPacket(net, pkt);
-		this.readCommonData(pkt.getNbtCompound());
+		this.readCommonData(pkt.getTag());
 	}
 	
 	public NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos otherPos)
 	{
-		Vector3d thisVec = getConnectionVector(this.pos);
+		Vector3d thisVec = getConnectionVector(this.worldPosition);
 		Vector3d otherVec = getConnectionVector(otherPos);
 		boolean otherHigher = otherVec.y > thisVec.y;
 		Vector3d higherVec = otherHigher ? otherVec : thisVec;

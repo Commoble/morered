@@ -27,13 +27,13 @@ public class WireUpdateBuffer extends WorldSavedData
 
 	public static WireUpdateBuffer get(ServerWorld world)
 	{
-		return world.getSavedData().getOrCreate(WireUpdateBuffer::new, ID);
+		return world.getDataStorage().computeIfAbsent(WireUpdateBuffer::new, ID);
 	}
 	
 	public void enqueue(BlockPos pos)
 	{
 		ChunkPos chunkPos = new ChunkPos(pos);
-		this.buffer.computeIfAbsent(chunkPos, $-> new HashSet<BlockPos>()).add(pos.toImmutable());
+		this.buffer.computeIfAbsent(chunkPos, $-> new HashSet<BlockPos>()).add(pos.immutable());
 	}
 	
 	public void sendPackets(ServerWorld world)
@@ -43,7 +43,7 @@ public class WireUpdateBuffer extends WorldSavedData
 			this.buffer.forEach((chunkPos, positions) ->
 			{
 				// ignore and discard unloaded chunks
-				if (world.chunkExists(chunkPos.x, chunkPos.z))
+				if (world.hasChunk(chunkPos.x, chunkPos.z))
 				{
 					PacketTarget target = PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(chunkPos.x, chunkPos.z));
 					WireUpdatePacket packet = new WireUpdatePacket(positions);
@@ -56,13 +56,13 @@ public class WireUpdateBuffer extends WorldSavedData
 	}
 
 	@Override
-	public void read(CompoundNBT nbt)
+	public void load(CompoundNBT nbt)
 	{
 		//noop
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound)
+	public CompoundNBT save(CompoundNBT compound)
 	{
 		return compound; //noop
 	}

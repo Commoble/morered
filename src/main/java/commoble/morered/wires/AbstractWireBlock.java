@@ -40,6 +40,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class AbstractWireBlock extends Block
 {
 	
@@ -107,7 +109,7 @@ public abstract class AbstractWireBlock extends Block
 		int sideCount = INTERIOR_FACES.length;
 		for (int side=0; side < sideCount; side++)
 		{
-			if (state.get(INTERIOR_FACES[side]))
+			if (state.getValue(INTERIOR_FACES[side]))
 			{
 				index |= 1 << side;
 			}
@@ -160,18 +162,18 @@ public abstract class AbstractWireBlock extends Block
 		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
 		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
 		// and B) this wire is also attached to the same face
-		if (wireFace.getAxis() != directionToWire.getAxis() && thisState.get(INTERIOR_FACES[wireFace.ordinal()]))
+		if (wireFace.getAxis() != directionToWire.getAxis() && thisState.getValue(INTERIOR_FACES[wireFace.ordinal()]))
 			return true;
 		
 		// otherwise, check if we can connect through a wire edge
 		Block wireBlock = wireState.getBlock();
 		if (wireBlock == thisState.getBlock())
 		{
-			BlockPos diagonalPos = thisPos.offset(wireFace);
+			BlockPos diagonalPos = thisPos.relative(wireFace);
 			BlockState diagonalState = world.getBlockState(diagonalPos);
 			if (diagonalState.getBlock() == wireBlock)
 			{
-				if (diagonalState.get(INTERIOR_FACES[directionToWire.ordinal()]))
+				if (diagonalState.getValue(INTERIOR_FACES[directionToWire.ordinal()]))
 				{
 					return true;
 				}
@@ -195,13 +197,13 @@ public abstract class AbstractWireBlock extends Block
 	{
 		super(properties);
 		// the "default" state has to be the empty state so we can build it up one face at a time
-		this.setDefaultState(this.getStateContainer().getBaseState()
-			.with(DOWN, false)
-			.with(UP, false)
-			.with(NORTH, false)
-			.with(SOUTH, false)
-			.with(WEST, false)
-			.with(EAST, false)
+		this.registerDefaultState(this.getStateDefinition().any()
+			.setValue(DOWN, false)
+			.setValue(UP, false)
+			.setValue(NORTH, false)
+			.setValue(SOUTH, false)
+			.setValue(WEST, false)
+			.setValue(EAST, false)
 			);
 		this.shapesByStateIndex = shapesByStateIndex;
 		this.raytraceBackboards = raytraceBackboards;
@@ -215,9 +217,9 @@ public abstract class AbstractWireBlock extends Block
 	protected abstract void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
 
 	@Override
-	protected void fillStateContainer(Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		builder.add(DOWN,UP,NORTH,SOUTH,WEST,EAST);
 	}
 
@@ -231,30 +233,30 @@ public abstract class AbstractWireBlock extends Block
 
 	// overriding this so we don't delegate to getShape for the render shape (to reduce lookups of the extended shape)
 	@Override
-	public VoxelShape getRenderShape(BlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getOcclusionShape(BlockState state, IBlockReader worldIn, BlockPos pos)
 	{
 		return this.shapesByStateIndex[getShapeIndex(state)];
 	}
 
 	@Override
-	public boolean isReplaceable(BlockState state, BlockItemUseContext useContext)
+	public boolean canBeReplaced(BlockState state, BlockItemUseContext useContext)
 	{
 		return this.isEmptyWireBlock(state);
 	}
 
 	@Override
-	public BlockState updatePostPlacement(BlockState thisState, Direction directionToNeighbor, BlockState neighborState, IWorld world, BlockPos thisPos, BlockPos neighborPos)
+	public BlockState updateShape(BlockState thisState, Direction directionToNeighbor, BlockState neighborState, IWorld world, BlockPos thisPos, BlockPos neighborPos)
 	{
 		BooleanProperty sideProperty = INTERIOR_FACES[directionToNeighbor.ordinal()];
-		if (thisState.get(sideProperty)) // if wire is attached on the relevant face, check if it should be disattached
+		if (thisState.getValue(sideProperty)) // if wire is attached on the relevant face, check if it should be disattached
 		{
 			Direction neighborSide = directionToNeighbor.getOpposite();
-			boolean isNeighborSideSolid = neighborState.isSolidSide(world, neighborPos, neighborSide);
+			boolean isNeighborSideSolid = neighborState.isFaceSturdy(world, neighborPos, neighborSide);
 			if (!isNeighborSideSolid && world instanceof ServerWorld)
 			{
-				Block.spawnDrops(this.getDefaultState().with(sideProperty, true), (ServerWorld)world, thisPos);
+				Block.dropResources(this.defaultBlockState().setValue(sideProperty, true), (ServerWorld)world, thisPos);
 			}
-			return thisState.with(sideProperty, isNeighborSideSolid);
+			return thisState.setValue(sideProperty, isNeighborSideSolid);
 		}
 		else
 		{
@@ -263,18 +265,18 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	@Override
-	public boolean isValidPosition(BlockState state, IWorldReader world, BlockPos pos)
+	public boolean canSurvive(BlockState state, IWorldReader world, BlockPos pos)
 	{
 		Direction[] dirs = Direction.values();
 		for (int side=0; side<6; side++)
 		{
-			if (state.get(INTERIOR_FACES[side]))
+			if (state.getValue(INTERIOR_FACES[side]))
 			{
 				Direction dir = dirs[side];
-				BlockPos neighborPos = pos.offset(dir);
+				BlockPos neighborPos = pos.relative(dir);
 				BlockState neighborState = world.getBlockState(neighborPos);
 				Direction neighborSide = dir.getOpposite();
-				if (!neighborState.isSolidSide(world, neighborPos, neighborSide))
+				if (!neighborState.isFaceSturdy(world, neighborPos, neighborSide))
 				{
 					return false;
 				}
@@ -292,17 +294,17 @@ public abstract class AbstractWireBlock extends Block
 	@Nullable
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		World world = context.getWorld();
-		Direction sideOfNeighbor = context.getFace();
+		World world = context.getLevel();
+		Direction sideOfNeighbor = context.getClickedFace();
 		Direction directionToNeighbor = sideOfNeighbor.getOpposite();
 		// with standard BlockItemUseContext rules,
 		// if replacing a block, this is the position of the block we're replacing
 		// otherwise, it's the position adjacent to the clicked block (offset by sideOfNeighbor)
-		BlockPos placePos = context.getPos();
-		BlockPos neighborPos = placePos.offset(directionToNeighbor);
+		BlockPos placePos = context.getClickedPos();
+		BlockPos neighborPos = placePos.relative(directionToNeighbor);
 		BlockState neighborState = world.getBlockState(neighborPos);
-		return neighborState.isSolidSide(world, neighborPos, sideOfNeighbor)
-			? this.getDefaultState().with(INTERIOR_FACES[directionToNeighbor.ordinal()], true)
+		return neighborState.isFaceSturdy(world, neighborPos, sideOfNeighbor)
+			? this.defaultBlockState().setValue(INTERIOR_FACES[directionToNeighbor.ordinal()], true)
 			: null;
 	}
 
@@ -335,22 +337,22 @@ public abstract class AbstractWireBlock extends Block
 	// only called on server
 	// called after previous block and TE are removed, but before this block's TE is added
 	@Override
-	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		this.updateShapeCache(worldIn, pos);
-		super.onBlockAdded(state, worldIn, pos, oldState, isMoving);
+		super.onPlace(state, worldIn, pos, oldState, isMoving);
 	}
 
 	// called when a player places this block or adds a wire to a wire block
 	// also called on the client of the placing player
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		if (!worldIn.isRemote)
+		if (!worldIn.isClientSide)
 		{
 			for (Direction directionToNeighbor : Direction.values())
 			{
-				BlockPos neighborPos = pos.offset(directionToNeighbor);
+				BlockPos neighborPos = pos.relative(directionToNeighbor);
 				BlockState neighborState = worldIn.getBlockState(neighborPos);
 				if (neighborState.isAir())
 				{
@@ -360,14 +362,14 @@ public abstract class AbstractWireBlock extends Block
 		}
 		this.updateShapeCache(worldIn, pos);
 		this.updatePowerAfterBlockUpdate(worldIn, pos, state);
-		super.onBlockPlacedBy(worldIn, pos, state, placer, stack);
+		super.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
 	// called when the blockstate at the given pos changes
 	// only called on servers
 	// oldState is a state of this block, newState may or may not be
 	@Override
-	public void onReplaced(BlockState oldState, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onRemove(BlockState oldState, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		boolean doPowerUpdate = true;
@@ -392,7 +394,7 @@ public abstract class AbstractWireBlock extends Block
 			doPowerUpdate = false;
 		}
 		this.updateShapeCache(worldIn, pos);
-		super.onReplaced(oldState, worldIn, pos, newState, isMoving);
+		super.onRemove(oldState, worldIn, pos, newState, isMoving);
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
 			this.updatePowerAfterBlockUpdate(worldIn, pos, newState);
@@ -403,7 +405,7 @@ public abstract class AbstractWireBlock extends Block
 	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
 	{
 		BlockPos offset = fromPos.subtract(pos);
-		Direction directionToNeighbor = Direction.byLong(offset.getX(), offset.getY(), offset.getZ());
+		Direction directionToNeighbor = Direction.fromNormal(offset.getX(), offset.getY(), offset.getZ());
 		long edgeFlags = this.getEdgeFlags(worldIn,pos);
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		if (this.isEmptyWireBlock(state))
@@ -414,7 +416,7 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		// if this is a non-empty wire block and the changed state is an air block
-		else if (worldIn.isAirBlock(fromPos))
+		else if (worldIn.isEmptyBlock(fromPos))
 		{
 			if (directionToNeighbor != null)
 			{
@@ -442,10 +444,10 @@ public abstract class AbstractWireBlock extends Block
 			}
 			if (!edgeUpdateDirs.isEmpty() && !net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
 			{
-				BlockPos.Mutable mutaPos = pos.toMutable();
+				BlockPos.Mutable mutaPos = pos.mutable();
 				for (Direction dir : edgeUpdateDirs)
 				{
-					BlockPos neighborPos = mutaPos.setAndMove(pos, dir);
+					BlockPos neighborPos = mutaPos.setWithOffset(pos, dir);
 					worldIn.neighborChanged(neighborPos, this, pos);
 				}
 			}
@@ -460,9 +462,9 @@ public abstract class AbstractWireBlock extends Block
 		BlockState result = state;
 		for (int i=0; i<4; i++) // rotations only rotated about the y-axis, we only need to rotated the horizontal faces
 		{
-			Direction dir = Direction.byHorizontalIndex(i);
+			Direction dir = Direction.from2DDataValue(i);
 			Direction newDir = rot.rotate(dir);
-			result = result.with(INTERIOR_FACES[newDir.ordinal()], state.get(INTERIOR_FACES[dir.ordinal()]));
+			result = result.setValue(INTERIOR_FACES[newDir.ordinal()], state.getValue(INTERIOR_FACES[dir.ordinal()]));
 		}
 		return result;
 	}
@@ -473,9 +475,9 @@ public abstract class AbstractWireBlock extends Block
 		BlockState result = state;
 		for (int i=0; i<4; i++) // only horizontal sides get mirrored
 		{
-			Direction dir = Direction.byHorizontalIndex(i);
+			Direction dir = Direction.from2DDataValue(i);
 			Direction newDir = mirrorIn.mirror(dir);
-			result = result.with(INTERIOR_FACES[newDir.ordinal()], state.get(INTERIOR_FACES[dir.ordinal()]));
+			result = result.setValue(INTERIOR_FACES[newDir.ordinal()], state.getValue(INTERIOR_FACES[dir.ordinal()]));
 		}
 		return result;
 	}
@@ -485,7 +487,7 @@ public abstract class AbstractWireBlock extends Block
 		int count = 0;
 		for (int side=0; side<6; side++)
 		{
-			if (state.get(INTERIOR_FACES[side]))
+			if (state.getValue(INTERIOR_FACES[side]))
 			{
 				count++;
 			}
@@ -495,7 +497,7 @@ public abstract class AbstractWireBlock extends Block
 	
 	public boolean isEmptyWireBlock(BlockState state)
 	{
-		return state == this.getDefaultState();
+		return state == this.defaultBlockState();
 	}
 	
 	protected long getEdgeFlags(IBlockReader world, BlockPos pos)
@@ -534,23 +536,23 @@ public abstract class AbstractWireBlock extends Block
 		// then compare the hit vector to the six face cuboids
 		// and see if any of them contain the hit vector
 		// we'll need the player to not be null though
-		Vector3d lookOffset = player.getLook(partialTicks); // unit normal vector in look direction
-		Vector3d hitVec = raytrace.getHitVec();
+		Vector3d lookOffset = player.getViewVector(partialTicks); // unit normal vector in look direction
+		Vector3d hitVec = raytrace.getLocation();
 		Vector3d relativeHitVec = hitVec
-			.add(lookOffset.mul(0.001D, 0.001D, 0.001D))
+			.add(lookOffset.multiply(0.001D, 0.001D, 0.001D))
 			.subtract(pos.getX(), pos.getY(), pos.getZ()); // we're also wanting this to be relative to the voxel
 		for (int side=0; side<6; side++)
 		{
-			if (state.get(INTERIOR_FACES[side]))
+			if (state.getValue(INTERIOR_FACES[side]))
 			{
 				// figure out which part of the shape we clicked
 				VoxelShape faceShape = this.raytraceBackboards[side];
 				
-				for (AxisAlignedBB aabb : faceShape.toBoundingBoxList())
+				for (AxisAlignedBB aabb : faceShape.toAabbs())
 				{
 					if (aabb.contains(relativeHitVec))
 					{
-						return Direction.byIndex(side);
+						return Direction.from3DDataValue(side);
 					}
 				}
 			}
@@ -566,7 +568,7 @@ public abstract class AbstractWireBlock extends Block
 		cache.invalidate(pos);
 		for (int i=0; i<6; i++)
 		{
-			cache.invalidate(pos.offset(Direction.byIndex(i)));
+			cache.invalidate(pos.relative(Direction.from3DDataValue(i)));
 		}
 		if (world instanceof ServerWorld)
 		{
@@ -582,14 +584,14 @@ public abstract class AbstractWireBlock extends Block
 			if (dir != directionToNeighbor && dir != directionFromNeighbor)
 			{
 				BooleanProperty thisAttachmentFace = INTERIOR_FACES[dir.ordinal()];
-				if (thisState.get(thisAttachmentFace))
+				if (thisState.getValue(thisAttachmentFace))
 				{
-					BlockPos diagonalNeighbor = neighborAirPos.offset(dir);
+					BlockPos diagonalNeighbor = neighborAirPos.relative(dir);
 					BooleanProperty neighborAttachmentFace = INTERIOR_FACES[directionFromNeighbor.ordinal()];
 					BlockState diagonalState = world.getBlockState(diagonalNeighbor);
-					if (diagonalState.getBlock() == this.getBlock() && diagonalState.get(neighborAttachmentFace))
+					if (diagonalState.getBlock() == this.getBlock() && diagonalState.getValue(neighborAttachmentFace))
 					{
-						world.setBlockState(neighborAirPos, this.getDefaultState());
+						world.setBlockAndUpdate(neighborAirPos, this.defaultBlockState());
 						break; // we don't need to set the wire block more than once
 					}
 				}
@@ -601,33 +603,33 @@ public abstract class AbstractWireBlock extends Block
 	{
 		int side = interiorFace.ordinal();
 		BooleanProperty sideProperty = INTERIOR_FACES[side];
-		if (state.get(sideProperty))
+		if (state.getValue(sideProperty))
 		{
-			BlockState newState = state.with(sideProperty, false);
+			BlockState newState = state.setValue(sideProperty, false);
 			Block newBlock = newState.getBlock();
-			BlockState removedState = newBlock.getDefaultState().with(sideProperty, true);
+			BlockState removedState = newBlock.defaultBlockState().setValue(sideProperty, true);
 			Block removedBlock = removedState.getBlock();
 			if (dropItems)
 			{
 				// add player stats and spawn drops
-				removedBlock.harvestBlock(world, player, pos, removedState, null, player.getHeldItemMainhand().copy());
+				removedBlock.playerDestroy(world, player, pos, removedState, null, player.getMainHandItem().copy());
 			}
-			if (world.isRemote)
+			if (world.isClientSide)
 			{
 				// on the server world, onBlockHarvested will play the break effects for each player except the player given
 				// and also anger piglins at that player, so we do want to give it the player
 				// on the client world, willHarvest is always false, so we need to manually play the effects for that player
-				world.playEvent(player, 2001, pos, Block.getStateId(removedState));
+				world.levelEvent(player, 2001, pos, Block.getId(removedState));
 			}
 			else
 			{
 				// plays the break event for every nearby player except the breaking player
-				removedBlock.onBlockHarvested(world, pos, removedState, player);
+				removedBlock.playerWillDestroy(world, pos, removedState, player);
 			}
 			// default and rerender flags are used when block is broken on client
-			if (world.setBlockState(pos, newState, BlockFlags.DEFAULT_AND_RERENDER))
+			if (world.setBlock(pos, newState, BlockFlags.DEFAULT_AND_RERENDER))
 			{
-				removedBlock.onPlayerDestroy(world, pos, removedState);
+				removedBlock.destroy(world, pos, removedState);
 			}
 		}
 		
@@ -658,18 +660,18 @@ public abstract class AbstractWireBlock extends Block
 		{
 			// we have to have a wire attached to a side to connect to secondary sides
 			BooleanProperty attachmentSide = INTERIOR_FACES[side];
-			if (state.get(attachmentSide))
+			if (state.getValue(attachmentSide))
 			{
 				result |= (1L << side);
-				Direction attachmentDirection = Direction.byIndex(side);
+				Direction attachmentDirection = Direction.from3DDataValue(side);
 				for (int subSide = 0; subSide < 4; subSide++)
 				{
 					int secondaryOrdinal = DirectionHelper.uncompressSecondSide(side, subSide);
-					if (state.get(INTERIOR_FACES[secondaryOrdinal]))
+					if (state.getValue(INTERIOR_FACES[secondaryOrdinal]))
 						continue; // dont add lines if the state already has an elbow here
-					Direction secondaryDir = Direction.byIndex(secondaryOrdinal);
+					Direction secondaryDir = Direction.from3DDataValue(secondaryOrdinal);
 					Direction directionToWire = secondaryDir.getOpposite();
-					BlockPos neighborPos = pos.offset(secondaryDir);
+					BlockPos neighborPos = pos.relative(secondaryDir);
 					BlockState neighborState = world.getBlockState(neighborPos);
 					Block neighborBlock = neighborState.getBlock();
 					// first, check if the neighbor state is a wire that shares this attachment side

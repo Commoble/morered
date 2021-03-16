@@ -45,7 +45,7 @@ public class WireRayTraceContext
 
 	public VoxelShape getFluidShape(FluidState stateIn, IBlockReader worldIn, BlockPos pos)
 	{
-		return this.fluidMode.test(stateIn) ? stateIn.getShape(worldIn, pos) : VoxelShapes.empty();
+		return this.fluidMode.canPick(stateIn) ? stateIn.getShape(worldIn, pos) : VoxelShapes.empty();
 	}
 
 }

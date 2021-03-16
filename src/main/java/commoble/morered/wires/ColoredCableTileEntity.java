@@ -25,7 +25,7 @@ public class ColoredCableTileEntity extends WireTileEntity
 	{
 		for (int i=0; i<6; i++)
 		{
-			Direction dir = Direction.byIndex(i);
+			Direction dir = Direction.from3DDataValue(i);
 			map.put(dir, LazyOptional.of(() -> new SidedPowerSupplier(dir)));
 		}
 	});
@@ -79,7 +79,7 @@ public class ColoredCableTileEntity extends WireTileEntity
 
 			// check the power of the wire attached on the capability side first
 			int sideIndex = this.side.ordinal();
-			if (state.get(AbstractWireBlock.INTERIOR_FACES[sideIndex]))
+			if (state.getValue(AbstractWireBlock.INTERIOR_FACES[sideIndex]))
 				return cable.getPower(sideIndex);
 			
 			// otherwise, if the querier needs a specific wire face, get that power
@@ -91,7 +91,7 @@ public class ColoredCableTileEntity extends WireTileEntity
 			for (int subSide = 0; subSide < 4; subSide++)
 			{
 				int actualSubSide = DirectionHelper.uncompressSecondSide(sideIndex, subSide);
-				if (state.get(AbstractWireBlock.INTERIOR_FACES[actualSubSide]))
+				if (state.getValue(AbstractWireBlock.INTERIOR_FACES[actualSubSide]))
 					output = Math.max(output, cable.getPower(actualSubSide));
 			}
 			

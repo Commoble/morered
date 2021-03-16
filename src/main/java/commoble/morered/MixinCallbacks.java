@@ -10,7 +10,7 @@ import net.minecraftforge.fml.network.PacketDistributor;
 public class MixinCallbacks
 {
 	// sync redwire post positions to clients when a chunk needs to be loaded on the client
-	public static void afterSendChunkData(ServerPlayerEntity player, Chunk chunk)
+	public static void afterPlayerLoadedChunk(ServerPlayerEntity player, Chunk chunk)
 	{
 		ChunkPos pos = chunk.getPos();
 		chunk.getCapability(PostsInChunkCapability.INSTANCE).ifPresent(cap -> 

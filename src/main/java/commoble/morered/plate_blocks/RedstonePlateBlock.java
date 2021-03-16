@@ -21,6 +21,8 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class RedstonePlateBlock extends PlateBlock
 {
 	public static final int OUTPUT_STRENGTH = 15;
@@ -39,11 +41,11 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	 * logic
 	 */
 	@Override
-	public void onBlockPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
 		if (this.hasInputPower(worldIn, state, pos))
 		{
-			worldIn.getPendingBlockTicks().scheduleTick(pos, this, 1);
+			worldIn.getBlockTicks().scheduleTick(pos, this, 1);
 		}
 
 	}
@@ -52,12 +54,12 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		World world = context.getWorld();
-		BlockPos pos = context.getPos();
+		World world = context.getLevel();
+		BlockPos pos = context.getClickedPos();
 		BlockState state = super.getStateForPlacement(context);
 		for (InputSide side : this.getInputSides())
 		{
-			state = state.with(side.property, side.isBlockReceivingPower(world, state, pos));
+			state = state.setValue(side.property, side.isBlockReceivingPower(world, state, pos));
 		}
 		return state;
 	}
@@ -66,20 +68,20 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	
 	@Override
 	@Deprecated
-	public ActionResultType onBlockActivated(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
+	public ActionResultType use(BlockState state, World worldIn, BlockPos pos, PlayerEntity player, Hand handIn, BlockRayTraceResult hit)
 	{
-		boolean isPlayerHoldingStick = STICK.contains(player.getHeldItem(handIn).getItem());
+		boolean isPlayerHoldingStick = STICK.contains(player.getItemInHand(handIn).getItem());
 		
 		// rotate the block when the player pokes it with a stick
-		if (isPlayerHoldingStick && !worldIn.isRemote)
+		if (isPlayerHoldingStick && !worldIn.isClientSide)
 		{
-			int newRotation = (state.get(ROTATION) + 1) % 4;
-			BlockState newState = state.with(ROTATION, newRotation);
+			int newRotation = (state.getValue(ROTATION) + 1) % 4;
+			BlockState newState = state.setValue(ROTATION, newRotation);
 			for (InputSide side : this.getInputSides())
 			{
-				newState = newState.with(side.property, side.isBlockReceivingPower(worldIn, newState, pos));
+				newState = newState.setValue(side.property, side.isBlockReceivingPower(worldIn, newState, pos));
 			}
-			worldIn.setBlockState(pos, newState);
+			worldIn.setBlockAndUpdate(pos, newState);
 		}
 		
 		return isPlayerHoldingStick ? ActionResultType.SUCCESS : ActionResultType.PASS;
@@ -94,7 +96,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	 */
 	@Deprecated
 	@Override
-	public boolean canProvidePower(BlockState state)
+	public boolean isSignalSource(BlockState state)
 	{
 		return true;
 	}
@@ -110,8 +112,8 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			return true;
 		
 		// check input sides
-		Direction attachmentDirection = state.get(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
-		int baseRotation = state.get(PlateBlockStateProperties.ROTATION);
+		Direction attachmentDirection = state.getValue(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
+		int baseRotation = state.getValue(PlateBlockStateProperties.ROTATION);
 		for (InputSide inputSide : this.getInputSides())
 		{
 			Direction inputDirection = BlockStateUtil.getInputDirection(attachmentDirection, baseRotation, inputSide.rotationsFromOutput);
@@ -128,26 +130,26 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	 */
 	@Deprecated
 	@Override
-	public int getStrongPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side)
+	public int getDirectSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side)
 	{
-		return blockState.getWeakPower(blockAccess, pos, side);
+		return blockState.getSignal(blockAccess, pos, side);
 	}
 	
 	@Override
 	@Deprecated
-	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		super.onBlockAdded(state, worldIn, pos, oldState, isMoving);
+		super.onPlace(state, worldIn, pos, oldState, isMoving);
 		this.notifyNeighbors(worldIn, pos, state);
 	}
 	
 	@Override
 	@Deprecated
-	public void onReplaced(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onRemove(BlockState state, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		if (!isMoving && state.getBlock() != newState.getBlock())
 		{
-			super.onReplaced(state, worldIn, pos, newState, isMoving);
+			super.onRemove(state, worldIn, pos, newState, isMoving);
 			this.notifyNeighbors(worldIn, pos, state);
 		}
 	}
@@ -160,10 +162,10 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		// if any inputs changed, schedule a tick
 		InputState oldInputState = InputState.getInput(state);
 		InputState newInputState = InputState.getWorldPowerState(worldIn, state, pos);
-		if (oldInputState != newInputState && !worldIn.getPendingBlockTicks().isTickPending(pos, this))
+		if (oldInputState != newInputState && !worldIn.getBlockTicks().willTickThisTick(pos, this))
 		{
 			// we have to have a 1-tick delay to avoid infinite loops
-			worldIn.getPendingBlockTicks().scheduleTick(pos, this, TICK_DELAY, TickPriority.HIGH);
+			worldIn.getBlockTicks().scheduleTick(pos, this, TICK_DELAY, TickPriority.HIGH);
 		}
 	}
 	

@@ -37,7 +37,7 @@ public class RecipeRegistrar
 		Map<ResourceLocation, IRecipe<CraftingInventory>> map = (Map)manager.recipes.getOrDefault(GATECRAFTING_RECIPE_TYPE, Collections.emptyMap());
 			return map.entrySet().stream()
 			.map(Entry::getValue)
-			.sorted(Comparator.comparing(recipe -> recipe.getRecipeOutput().getTranslationKey()))
+			.sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId()))
 			.collect(Collectors.toList());
 	}
 

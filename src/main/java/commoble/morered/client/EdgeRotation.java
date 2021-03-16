@@ -33,8 +33,8 @@ public class EdgeRotation
 	{
 		Direction sideA = oldEdge.sideA;
 		Direction sideB = oldEdge.sideB;
-		Direction newSideA = Direction.rotateFace(rotation, sideA);
-		Direction newSideB = Direction.rotateFace(rotation, sideB);
+		Direction newSideA = Direction.rotate(rotation, sideA);
+		Direction newSideB = Direction.rotate(rotation, sideB);
 		if (newSideA == newSideB || newSideA == newSideB.getOpposite())
 			return oldEdge;
 		

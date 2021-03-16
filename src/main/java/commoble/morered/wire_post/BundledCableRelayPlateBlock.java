@@ -16,15 +16,17 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class BundledCableRelayPlateBlock extends AbstractChanneledCablePostBlock
 {
 	protected static final VoxelShape[] CABLE_PLATE_SHAPES_DUNSWE = {
-		Block.makeCuboidShape(0D,0D,0D,16D,4D,16D),
-		Block.makeCuboidShape(0D,12D,0D,16D,16D,16D),
-		Block.makeCuboidShape(0D,0D,0D,16D,16D,4D),
-		Block.makeCuboidShape(0D,0D,12D,16D,16D,16D),
-		Block.makeCuboidShape(0D,0D,0D,4D,16D,16D),
-		Block.makeCuboidShape(12D,0D,0D,16D,16D,16D)
+		Block.box(0D,0D,0D,16D,4D,16D),
+		Block.box(0D,12D,0D,16D,16D,16D),
+		Block.box(0D,0D,0D,16D,16D,4D),
+		Block.box(0D,0D,12D,16D,16D,16D),
+		Block.box(0D,0D,0D,4D,16D,16D),
+		Block.box(12D,0D,0D,16D,16D,16D)
 	};
 	
 	protected static final VoxelShape[] PLATED_CABLE_POST_SHAPES_DUNSWE = {
@@ -60,12 +62,12 @@ public class BundledCableRelayPlateBlock extends AbstractChanneledCablePostBlock
 		VoxelShape[] shapeTable = context instanceof WireRayTraceSelectionContext && ((WireRayTraceSelectionContext)context).shouldIgnoreBlock(pos)
 			? CABLE_PLATE_SHAPES_DUNSWE
 			: PLATED_CABLE_POST_SHAPES_DUNSWE;
-		return shapeTable[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
+		return shapeTable[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.getValue(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
 	}
 	
 	public boolean canConnectToAdjacentCable(@Nonnull IBlockReader world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToWire)
 	{
-		Direction postAttachmentDir = thisState.get(AbstractPostBlock.DIRECTION_OF_ATTACHMENT);
+		Direction postAttachmentDir = thisState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT);
 		return directionToWire != postAttachmentDir && directionToWire != postAttachmentDir.getOpposite() && postAttachmentDir == wireFace;
 	}
 	/**
@@ -73,9 +75,9 @@ public class BundledCableRelayPlateBlock extends AbstractChanneledCablePostBlock
 	 * logic
 	 */
 	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+	public void setPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		super.onBlockPlacedBy(world, pos, state, placer, stack);
+		super.setPlacedBy(world, pos, state, placer, stack);
 		this.updatePower(world, pos);
 	}
 }

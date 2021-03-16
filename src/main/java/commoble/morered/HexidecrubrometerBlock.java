@@ -17,10 +17,12 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class HexidecrubrometerBlock extends Block
 {
-	public static final IntegerProperty POWER = BlockStateProperties.POWER_0_15;
-	public static final EnumProperty<AttachFace> READING_FACE = BlockStateProperties.FACE;
+	public static final IntegerProperty POWER = BlockStateProperties.POWER;
+	public static final EnumProperty<AttachFace> READING_FACE = BlockStateProperties.ATTACH_FACE;
 	
 	// when horizontal, this is the direction that the display faces
 	// when vertical, this rotates the display face
@@ -32,59 +34,59 @@ public class HexidecrubrometerBlock extends Block
 	public HexidecrubrometerBlock(Properties properties)
 	{
 		super(properties);
-		this.setDefaultState(this.stateContainer.getBaseState()
-			.with(POWER,0)
-			.with(READING_FACE, AttachFace.WALL)
-			.with(ROTATION, Direction.NORTH));
+		this.registerDefaultState(this.stateDefinition.any()
+			.setValue(POWER,0)
+			.setValue(READING_FACE, AttachFace.WALL)
+			.setValue(ROTATION, Direction.NORTH));
 	}
 
 	@Override
-	protected void fillStateContainer(Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		builder.add(POWER, READING_FACE, ROTATION);
 	}
 
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		World world = context.getWorld();
-		BlockPos pos = context.getPos();
+		World world = context.getLevel();
+		BlockPos pos = context.getClickedPos();
 		Direction attachDirection = context.getNearestLookingDirection();
-		Direction horizontalDirectionAwayFromPlayer = context.getPlacementHorizontalFacing();
+		Direction horizontalDirectionAwayFromPlayer = context.getHorizontalDirection();
 		AttachFace attachFace = attachDirection == Direction.DOWN ? AttachFace.FLOOR
 			: attachDirection == Direction.UP ? AttachFace.CEILING
 			: AttachFace.WALL;
 		Direction readingDirection = getReadingDirection(attachFace, horizontalDirectionAwayFromPlayer);
 		int power = getInputValue(world, pos, readingDirection);
-		return this.getDefaultState()
-			.with(READING_FACE, attachFace)
-			.with(ROTATION, horizontalDirectionAwayFromPlayer.getOpposite())
-			.with(POWER, power);
+		return this.defaultBlockState()
+			.setValue(READING_FACE, attachFace)
+			.setValue(ROTATION, horizontalDirectionAwayFromPlayer.getOpposite())
+			.setValue(POWER, power);
 	}
 
 	// called on the client and server when this block is added to the world
 	// we want to make sure we update our power after this to react to changes in nearby blocks
 	@Override
-	public void onBlockAdded(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		if (oldState.getBlock() != this)
 		{
-			int oldPower = state.get(POWER);
+			int oldPower = state.getValue(POWER);
 			int newPower = getInputValue(worldIn,pos,state);
 			if (newPower != oldPower)
 			{
-				worldIn.setBlockState(pos, state.with(POWER, newPower));
+				worldIn.setBlockAndUpdate(pos, state.setValue(POWER, newPower));
 			}
 		}
-		super.onBlockAdded(state, worldIn, pos, oldState, isMoving);
+		super.onPlace(state, worldIn, pos, oldState, isMoving);
 	}
 
 	// forge method, called when a neighbor calls updateComparatorOutputLevel
 	@Override
 	public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor)
 	{
-		if (!world.isRemote() && pos.offset(getReadingDirection(state)).equals(neighbor))
+		if (!world.isClientSide() && pos.relative(getReadingDirection(state)).equals(neighbor))
 		{
 	          state.neighborChanged((World)world, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
 		}
@@ -94,10 +96,10 @@ public class HexidecrubrometerBlock extends Block
 	public void neighborChanged(BlockState state, World world, BlockPos pos, Block fromBlock, BlockPos fromPos, boolean isMoving)
 	{
 		int newValue = getInputValue(world,pos,state);
-		int oldValue = state.get(POWER);
+		int oldValue = state.getValue(POWER);
 		if (newValue != oldValue)
 		{
-			world.setBlockState(pos, state.with(POWER, newValue));
+			world.setBlockAndUpdate(pos, state.setValue(POWER, newValue));
 		}
 	}
 	
@@ -109,12 +111,12 @@ public class HexidecrubrometerBlock extends Block
 	
 	public static int getInputValue(World world, BlockPos pos, Direction direction)
 	{
-		BlockPos neighborPos = pos.offset(direction);
+		BlockPos neighborPos = pos.relative(direction);
 		BlockState neighborState = world.getBlockState(neighborPos);
-		int comparatorPower = neighborState.getComparatorInputOverride(world, neighborPos);
-		int canonicalRedstonePower = world.getRedstonePower(neighborPos, direction);
+		int comparatorPower = neighborState.getAnalogOutputSignal(world, neighborPos);
+		int canonicalRedstonePower = world.getSignal(neighborPos, direction);
 		int redstonePower = canonicalRedstonePower > 0 ? canonicalRedstonePower
-			: neighborState.getBlock() instanceof RedstoneWireBlock ? neighborState.get(BlockStateProperties.POWER_0_15)
+			: neighborState.getBlock() instanceof RedstoneWireBlock ? neighborState.getValue(BlockStateProperties.POWER)
 			: 0;
 		return Math.max(redstonePower, comparatorPower);
 	      
@@ -123,8 +125,8 @@ public class HexidecrubrometerBlock extends Block
 	// assumes state has the correct properties
 	public static Direction getReadingDirection(BlockState state)
 	{
-		AttachFace face = state.get(READING_FACE);
-		Direction directionAwayFromDisplay = state.get(ROTATION).getOpposite();
+		AttachFace face = state.getValue(READING_FACE);
+		Direction directionAwayFromDisplay = state.getValue(ROTATION).getOpposite();
 		return getReadingDirection(face, directionAwayFromDisplay);
 	}
 	
@@ -152,13 +154,13 @@ public class HexidecrubrometerBlock extends Block
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
-		return state.with(ROTATION, rot.rotate(state.get(ROTATION)));
+		return state.setValue(ROTATION, rot.rotate(state.getValue(ROTATION)));
 	}
 
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirror)
 	{
-		return state.with(ROTATION, mirror.mirror(state.get(ROTATION)));
+		return state.setValue(ROTATION, mirror.mirror(state.getValue(ROTATION)));
 	}
 
 }

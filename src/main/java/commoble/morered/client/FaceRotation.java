@@ -58,8 +58,8 @@ public class FaceRotation implements IModelTransform
 	FaceRotation(int x, int y, int z)
 	{
 		Quaternion quaternion = new Quaternion(new Vector3f(0.0F, 0.0F, 1.0F), (-z), true);
-		quaternion.multiply(new Quaternion(new Vector3f(0.0F, 1.0F, 0.0F), (-y), true));
-		quaternion.multiply(new Quaternion(new Vector3f(1.0F, 0.0F, 0.0F), (-x), true));
+		quaternion.mul(new Quaternion(new Vector3f(0.0F, 1.0F, 0.0F), (-y), true));
+		quaternion.mul(new Quaternion(new Vector3f(1.0F, 0.0F, 0.0F), (-x), true));
 		this.transformation = new TransformationMatrix((Vector3f)null, quaternion, (Vector3f)null, (Quaternion)null);
 	}
 

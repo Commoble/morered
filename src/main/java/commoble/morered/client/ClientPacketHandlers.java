@@ -20,20 +20,20 @@ public class ClientPacketHandlers
 	public static void onWireBreakPacket(NetworkEvent.Context context, WireBreakPacket packet)
 	{
 		Minecraft mc = Minecraft.getInstance();
-		ClientWorld world = mc.world;
+		ClientWorld world = mc.level;
 		
 		if (world != null)
 		{
 			Vector3d[] points = SlackInterpolator.getInterpolatedPoints(packet.start, packet.end);
-			ParticleManager manager = mc.particles;
-			BlockState state = Blocks.REDSTONE_WIRE.getDefaultState();
+			ParticleManager manager = mc.particleEngine;
+			BlockState state = Blocks.REDSTONE_WIRE.defaultBlockState();
 			
 			for (Vector3d point : points)
 			{
 				BlockPos pos = new BlockPos(point);
-				manager.addEffect(
+				manager.add(
 					new DiggingParticle(world, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
-						.setBlockPos(pos).multiplyVelocity(0.2F).multiplyParticleScaleBy(0.6F));
+						.init(pos).setPower(0.2F).scale(0.6F));
 			}
 		}
 	}
@@ -41,7 +41,7 @@ public class ClientPacketHandlers
 	public static void onWireUpdatePacket(WireUpdatePacket packet)
 	{
 		@SuppressWarnings("resource")
-		ClientWorld world = Minecraft.getInstance().world;
+		ClientWorld world = Minecraft.getInstance().level;
 		if (world != null)
 		{
 			VoxelCache.get(world).shapesByPos.invalidateAll(packet.getPositions());

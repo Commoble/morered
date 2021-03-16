@@ -19,14 +19,14 @@ public class FakeStateWorld implements IBlockReader
 	public FakeStateWorld(IBlockReader delegate, BlockPos pos, BlockState state)
 	{
 		this.delegate = delegate;
-		this.pos = pos.toImmutable();
+		this.pos = pos.immutable();
 		this.state = state;
 	}
 
 	@Override
-	public TileEntity getTileEntity(BlockPos pos)
+	public TileEntity getBlockEntity(BlockPos pos)
 	{
-		return this.delegate.getTileEntity(pos);
+		return this.delegate.getBlockEntity(pos);
 	}
 
 	@Override

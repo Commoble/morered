@@ -21,7 +21,7 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 
 	public static Optional<BundledCablePostTileEntity> getCablePost(IBlockReader world, BlockPos pos)
 	{
-		TileEntity te = world.getTileEntity(pos);
+		TileEntity te = world.getBlockEntity(pos);
 		return Optional.ofNullable(te instanceof BundledCablePostTileEntity ? (BundledCablePostTileEntity)te : null);
 	}
 	
@@ -58,9 +58,9 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 				updated = true;
 			}
 		}
-		if (updated && !this.world.isRemote)
+		if (updated && !this.level.isClientSide)
 		{
-			this.markDirty();
+			this.setChanged();
 			this.notifyConnections();
 			return true;
 		}
@@ -81,9 +81,9 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 		this.power[channel] = (byte)newPower;
 		if (oldPower != newPower)
 		{
-			if (!this.world.isRemote)
+			if (!this.level.isClientSide)
 			{
-				this.markDirty();
+				this.setChanged();
 				this.notifyConnections();
 			}
 			return true;
@@ -92,9 +92,9 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound)
+	public CompoundNBT save(CompoundNBT compound)
 	{
-		super.write(compound);
+		super.save(compound);
 		compound.putByteArray(POWER, this.power.clone());
 		return compound;
 	}
@@ -110,7 +110,7 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 	
 	public void updatePower()
 	{
-		World world = this.getWorld();
+		World world = this.getLevel();
 		Set<BlockPos> remoteConnectionPositions = this.getRemoteConnections();
 		List<BundledCablePostTileEntity> remoteConnections = new ArrayList<>();
 		for (BlockPos pos : remoteConnectionPositions)

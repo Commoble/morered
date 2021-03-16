@@ -73,12 +73,12 @@ public class ClientEvents
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.getCutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.cutout());
+		RenderTypeLookup.setRenderLayer(BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), RenderType.cutout());
 
-		ScreenManager.registerFactory(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
+		ScreenManager.register(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDWIRE_POST.get(), WirePostRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_POST.get(), BundledCablePostRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), BundledCablePostRenderer::new);
@@ -86,7 +86,7 @@ public class ClientEvents
 	
 	public static void setLogicGateRenderLayer(LogicGateType type)
 	{
-		RenderTypeLookup.setRenderLayer(type.blockGetter.get(), RenderType.getCutout());
+		RenderTypeLookup.setRenderLayer(type.blockGetter.get(), RenderType.cutout());
 	}
 	
 	public static void onRegisterModelLoaders(ModelRegistryEvent event)
@@ -137,34 +137,34 @@ public class ClientEvents
 		{
 			@SuppressWarnings("resource")
 			ClientPlayerEntity player = Minecraft.getInstance().player;
-			if (player != null && player.world != null)
+			if (player != null && player.level != null)
 			{
-				Hand hand = player.getActiveHand();
-				Item item = player.getHeldItem(hand == null ? Hand.MAIN_HAND : hand).getItem();
+				Hand hand = player.getUsedItemHand();
+				Item item = player.getItemInHand(hand == null ? Hand.MAIN_HAND : hand).getItem();
 				if (item instanceof BlockItem)
 				{
 					Block block = ((BlockItem)item).getBlock();
 					if (block instanceof PlateBlock)
 					{
-						World world = player.world;
+						World world = player.level;
 						BlockRayTraceResult rayTrace = event.getTarget();
-						Direction directionAwayFromTargetedBlock = rayTrace.getFace();
-						BlockPos placePos = rayTrace.getPos().offset(directionAwayFromTargetedBlock);
+						Direction directionAwayFromTargetedBlock = rayTrace.getDirection();
+						BlockPos placePos = rayTrace.getBlockPos().relative(directionAwayFromTargetedBlock);
 						
 						BlockState existingState = world.getBlockState(placePos);
 						if (existingState.isAir(world, placePos) || existingState.getMaterial().isReplaceable())
 						{
 							// only render the preview if we know it would make sense for the block to be placed where we expect it to be
-							Vector3d hitVec = rayTrace.getHitVec();
+							Vector3d hitVec = rayTrace.getLocation();
 							
 							Direction attachmentDirection = directionAwayFromTargetedBlock.getOpposite();
-							Vector3d relativeHitVec = hitVec.subtract(Vector3d.copy(placePos));
+							Vector3d relativeHitVec = hitVec.subtract(Vector3d.atLowerCornerOf(placePos));
 							
 							Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentDirection);
 							BlockStateUtil.getRotationIndexForDirection(attachmentDirection, outputDirection);
-							BlockState state = PlateBlockStateProperties.getStateForPlacedGatePlate(block.getDefaultState(), placePos, attachmentDirection, relativeHitVec);
+							BlockState state = PlateBlockStateProperties.getStateForPlacedGatePlate(block.defaultBlockState(), placePos, attachmentDirection, relativeHitVec);
 							
-							BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getInfo().getProjectedView(), event.getMatrix(), event.getBuffers());
+							BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getInfo().getPosition(), event.getMatrix(), event.getBuffers());
 							
 						}
 					}
@@ -182,13 +182,13 @@ public class ClientEvents
 		// but we can do this by sending our own digging packet and bypassing the vanilla behaviour
 		// (it helps that wire blocks are instant-break blocks)
 		Minecraft mc = Minecraft.getInstance();
-		RayTraceResult rayTraceResult = mc.objectMouseOver;
-		ClientWorld world = mc.world;
+		RayTraceResult rayTraceResult = mc.hitResult;
+		ClientWorld world = mc.level;
 		ClientPlayerEntity player = mc.player;
-		if (rayTraceResult != null && rayTraceResult.getHitVec() != null && world != null && player != null && event.isAttack() && rayTraceResult.getType() == RayTraceResult.Type.BLOCK)
+		if (rayTraceResult != null && rayTraceResult.getLocation() != null && world != null && player != null && event.isAttack() && rayTraceResult.getType() == RayTraceResult.Type.BLOCK)
 		{
 			BlockRayTraceResult blockResult = (BlockRayTraceResult) rayTraceResult;
-			BlockPos pos = blockResult.getPos();
+			BlockPos pos = blockResult.getBlockPos();
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();
 			if (block instanceof AbstractWireBlock)
@@ -197,37 +197,37 @@ public class ClientEvents
 				event.setCanceled(true);
 				
 				AbstractWireBlock wireBlock = (AbstractWireBlock)block;
-				PlayerController controller = mc.playerController;
+				PlayerController controller = mc.gameMode;
 				ClientPlayerControllerAccess controllerAccess = (ClientPlayerControllerAccess)controller;
-				GameType gameType = controller.getCurrentGameType();
+				GameType gameType = controller.getPlayerMode();
 				// now run over all the permissions checking that would normally happen here
 				if (player.blockActionRestricted(world, pos, gameType))
 					return;
-				if (!world.getWorldBorder().contains(pos))
+				if (!world.getWorldBorder().isWithinBounds(pos))
 					return;
-				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getRenderPartialTicks());
+				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getFrameTime());
 				if (faceToBreak == null)
 					return;
 				Direction hitNormal = faceToBreak.getOpposite();
 				if (gameType.isCreative())
 				{
-					controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
+					controllerAccess.callSendBlockAction(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
 					// TODO do stuff from onPlayerDestroyBlock here
 					if (!net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player, pos, hitNormal).isCanceled())
 					{
 						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
 					}
-					controllerAccess.setBlockHitDelay(5);
+					controllerAccess.setDestroyDelay(5);
 				}
-				else if (!controller.getIsHittingBlock() || !controllerAccess.callIsHittingPosition(pos))
+				else if (!controller.isDestroying() || !controllerAccess.callSameDestroyTarget(pos))
 				{
-					if (controller.getIsHittingBlock())
+					if (controller.isDestroying())
 					{
-						controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.ABORT_DESTROY_BLOCK, controllerAccess.getCurrentBlock(), blockResult.getFace());
+						controllerAccess.callSendBlockAction(CPlayerDiggingPacket.Action.ABORT_DESTROY_BLOCK, controllerAccess.getDestroyBlockPos(), blockResult.getDirection());
 					}
 					PlayerInteractEvent.LeftClickBlock leftClickBlockEvent = net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player,pos,hitNormal);
 
-					controllerAccess.callSendDiggingPacket(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
+					controllerAccess.callSendBlockAction(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
 					if (!leftClickBlockEvent.isCanceled() && leftClickBlockEvent.getUseItem() != Event.Result.DENY)
 					{
 						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
@@ -242,15 +242,15 @@ public class ClientEvents
 	// the existing code checks some things that are already checked above, so we'll skip those
 	private static void destroyClickedWireBlock(AbstractWireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, ClientPlayerControllerAccess controllerAccess, Direction interiorSide)
 	{
-		ItemStack heldItemStack = player.getHeldItemMainhand();
+		ItemStack heldItemStack = player.getMainHandItem();
 		if (heldItemStack.onBlockStartBreak(pos, player))
 			return;
-		if (!heldItemStack.getItem().canPlayerBreakBlockWhileHolding(state, world, pos, player))
+		if (!heldItemStack.getItem().canAttackBlock(state, world, pos, player))
             return;
-		controllerAccess.setIsHittingBlock(false);
+		controllerAccess.setIsDestroying(false);
 		block.destroyClickedSegment(state, world, pos, player, interiorSide, false);
-		controllerAccess.setCurBlockDamageMP(0F);
-        controllerAccess.setStepSoundTickCounter(0F);
+		controllerAccess.setDestroyProgress(0F);
+        controllerAccess.setDestroyTicks(0F);
 		
 	}
 	

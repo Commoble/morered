@@ -16,7 +16,7 @@ public class WireRayTraceSelectionContext extends EntitySelectionContext
 	public WireRayTraceSelectionContext(BlockPos start, BlockPos end)
 	{
 		super(false, -Double.MAX_VALUE, Items.AIR, fluid -> false); // same as EntitySelectionContext.DUMMY
-		this.ignoreSet = ImmutableSet.of(start.toImmutable(), end.toImmutable());
+		this.ignoreSet = ImmutableSet.of(start.immutable(), end.immutable());
 	}
 	
 	public boolean shouldIgnoreBlock(BlockPos pos)

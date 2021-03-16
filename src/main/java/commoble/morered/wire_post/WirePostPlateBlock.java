@@ -37,7 +37,7 @@ public class WirePostPlateBlock extends AbstractPoweredWirePostBlock
 		VoxelShape[] shapeTable = context instanceof WireRayTraceSelectionContext && ((WireRayTraceSelectionContext)context).shouldIgnoreBlock(pos)
 			? PlateBlock.SHAPES_BY_DIRECTION
 			: PLATED_POST_SHAPES_DUNSWE;
-		return shapeTable[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.get(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
+		return shapeTable[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.getValue(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
 	}
 	
 	public static EnumSet<Direction> getRedstoneConnectionDirectionsForEmptyPlate(BlockState state)
@@ -52,7 +52,7 @@ public class WirePostPlateBlock extends AbstractPoweredWirePostBlock
 			return AbstractPoweredWirePostBlock.NO_DIRECTIONS;
 		}
 		
-		Direction attachmentDir = state.get(DIRECTION_OF_ATTACHMENT);
+		Direction attachmentDir = state.getValue(DIRECTION_OF_ATTACHMENT);
 		return EnumSet.complementOf(EnumSet.of(attachmentDir, attachmentDir.getOpposite()));
 	}
 

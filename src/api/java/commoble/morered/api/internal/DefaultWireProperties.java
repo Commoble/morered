@@ -28,14 +28,14 @@ public class DefaultWireProperties
 		if (!thisNeighborState.canConnectRedstone(world, wirePos, directionToWire.getOpposite()))
 			return false;
 		VoxelShape wireTestShape = SMALL_NODE_SHAPES[wireFace.ordinal()];
-		VoxelShape neighborShape = thisNeighborState.getRenderShape(world, thisNeighborPos);
-		VoxelShape projectedNeighborShape = neighborShape.project(directionToWire);
+		VoxelShape neighborShape = thisNeighborState.getBlockSupportShape(world, thisNeighborPos);
+		VoxelShape projectedNeighborShape = neighborShape.getFaceShape(directionToWire);
 		// if the projected neighbor shape entirely overlaps the line shape,
 		// then the neighbor shape can be connected to by the wire
 		// we can test this by doing an ONLY_SECOND comparison on the shapes
 		// if this returns true, then there are places where the second shape is not overlapped by the first
 		// so if this returns false, then we can proceed
-		return !VoxelShapes.compare(projectedNeighborShape, wireTestShape, IBooleanFunction.ONLY_SECOND);
+		return !VoxelShapes.joinIsNotEmpty(projectedNeighborShape, wireTestShape, IBooleanFunction.ONLY_SECOND);
 	}
 	
 	public static boolean isRedstoneWireConnectable(IBlockReader world, BlockPos redstonePos, BlockState redstoneState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
@@ -46,7 +46,7 @@ public class DefaultWireProperties
 	
 	private static int getDefaultExpandedPower(@Nonnull World world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToThis)
 	{
-		return thisState.getWeakPower(world, thisPos, directionToThis) * 2;
+		return thisState.getSignal(world, thisPos, directionToThis) * 2;
 	}
 	
 	private static boolean canGenericBlockConnectToCable(IBlockReader world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)

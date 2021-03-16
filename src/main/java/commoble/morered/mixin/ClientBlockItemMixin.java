@@ -19,9 +19,9 @@ public class ClientBlockItemMixin extends Item
 		super(properties);
 	}
 
-	@Inject(method="onItemUse", at=@At("HEAD"), cancellable = true)
-	public void whenOnItemUse(ItemUseContext context, CallbackInfoReturnable<ActionResultType> info)
+	@Inject(method="useOn", at=@At("HEAD"), cancellable = true)
+	public void whenUseOn(ItemUseContext context, CallbackInfoReturnable<ActionResultType> info)
 	{
-			ClientMixinCallbacks.onBlockItemUse(context, info);
+			ClientMixinCallbacks.onBlockItemUseOn(context, info);
 	}
 }

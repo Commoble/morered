@@ -7,6 +7,6 @@ public final class MoreRedBlockItemHelper
 {
 	public static BlockState getStateForPlacement(BlockItem item, BlockItemUseContext context)
 	{
-		return item.getStateForPlacement(context);
+		return item.getPlacementState(context);
 	}
 }

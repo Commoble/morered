@@ -9,16 +9,18 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorldReader;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class AbstractChanneledCablePostBlock extends AbstractPostBlock
 {
 
 	protected static final VoxelShape[] CABLE_POST_SHAPES_DUNSWE = {
-		Block.makeCuboidShape(4D, 0D, 4D, 12D, 12D, 12D),
-		Block.makeCuboidShape(4D, 16D, 4D, 12D, 4D, 12D),
-		Block.makeCuboidShape(4D, 4D, 0D, 12D, 12D, 12D),
-		Block.makeCuboidShape(4D, 4D, 4D, 12D, 12D, 16D),
-		Block.makeCuboidShape(0D, 4D, 4D, 12D, 12D, 12D),
-		Block.makeCuboidShape(4D, 4D, 4D, 16D, 12D, 12D)
+		Block.box(4D, 0D, 4D, 12D, 12D, 12D),
+		Block.box(4D, 16D, 4D, 12D, 4D, 12D),
+		Block.box(4D, 4D, 0D, 12D, 12D, 12D),
+		Block.box(4D, 4D, 4D, 12D, 12D, 16D),
+		Block.box(0D, 4D, 4D, 12D, 12D, 12D),
+		Block.box(4D, 4D, 4D, 16D, 12D, 12D)
 	};
 	
 	public AbstractChanneledCablePostBlock(Properties properties)

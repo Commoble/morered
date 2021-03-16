@@ -25,25 +25,25 @@ public class PlateBlock extends Block
 	public static final IntegerProperty ROTATION = PlateBlockStateProperties.ROTATION;
 
 	public static final VoxelShape[] SHAPES_BY_DIRECTION = { // DUNSWE, direction of attachment
-		Block.makeCuboidShape(0, 0, 0, 16, 2, 16), Block.makeCuboidShape(0, 14, 0, 16, 16, 16), Block.makeCuboidShape(0, 0, 0, 16, 16, 2),
-		Block.makeCuboidShape(0, 0, 14, 16, 16, 16), Block.makeCuboidShape(0, 0, 0, 2, 16, 16), Block.makeCuboidShape(14, 0, 0, 16, 16, 16) };
+		Block.box(0, 0, 0, 16, 2, 16), Block.box(0, 14, 0, 16, 16, 16), Block.box(0, 0, 0, 16, 16, 2),
+		Block.box(0, 0, 14, 16, 16, 16), Block.box(0, 0, 0, 2, 16, 16), Block.box(14, 0, 0, 16, 16, 16) };
 	
 
 	public PlateBlock(Properties properties)
 	{
 		super(properties);
 		
-		BlockState baseState = this.getStateContainer().getBaseState()
-			.with(ATTACHMENT_DIRECTION, Direction.DOWN)
-			.with(ROTATION, 0);
+		BlockState baseState = this.getStateDefinition().any()
+			.setValue(ATTACHMENT_DIRECTION, Direction.DOWN)
+			.setValue(ROTATION, 0);
 		
-		this.setDefaultState(baseState);
+		this.registerDefaultState(baseState);
 	}
 
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		builder.add(ATTACHMENT_DIRECTION, ROTATION);
 	}
 
@@ -51,7 +51,7 @@ public class PlateBlock extends Block
 	@Override
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
-		return PlateBlockStateProperties.getStateForPlacedGatePlate(this.getDefaultState(), context);
+		return PlateBlockStateProperties.getStateForPlacedGatePlate(this.defaultBlockState(), context);
 	}
 
 	@Override
@@ -59,7 +59,7 @@ public class PlateBlock extends Block
 	{
 		if (state.hasProperty(ATTACHMENT_DIRECTION))
 		{
-			return SHAPES_BY_DIRECTION[state.get(ATTACHMENT_DIRECTION).ordinal()];
+			return SHAPES_BY_DIRECTION[state.getValue(ATTACHMENT_DIRECTION).ordinal()];
 		}
 		else
 		{
@@ -80,13 +80,13 @@ public class PlateBlock extends Block
 	{
 		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
 		{
-			Direction attachmentDirection = state.get(ATTACHMENT_DIRECTION);
-			int rotationIndex = state.get(ROTATION);
+			Direction attachmentDirection = state.getValue(ATTACHMENT_DIRECTION);
+			int rotationIndex = state.getValue(ROTATION);
 
 			Direction newAttachmentDirection = rotation.rotate(attachmentDirection);
 			int newRotationIndex = BlockStateUtil.getRotatedRotation(attachmentDirection, rotationIndex, rotation);
 
-			return state.with(ATTACHMENT_DIRECTION, newAttachmentDirection).with(ROTATION, newRotationIndex);
+			return state.setValue(ATTACHMENT_DIRECTION, newAttachmentDirection).setValue(ROTATION, newRotationIndex);
 		}
 		else
 		{
@@ -107,13 +107,13 @@ public class PlateBlock extends Block
 	{
 		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
 		{
-			Direction attachmentDirection = state.get(ATTACHMENT_DIRECTION);
-			int rotationIndex = state.get(ROTATION);
+			Direction attachmentDirection = state.getValue(ATTACHMENT_DIRECTION);
+			int rotationIndex = state.getValue(ROTATION);
 
 			Direction newAttachmentDirection = mirror.mirror(attachmentDirection);
 			int newRotationIndex = BlockStateUtil.getMirroredRotation(attachmentDirection, rotationIndex, mirror);
 
-			return state.with(ATTACHMENT_DIRECTION, newAttachmentDirection).with(ROTATION, newRotationIndex);
+			return state.setValue(ATTACHMENT_DIRECTION, newAttachmentDirection).setValue(ROTATION, newRotationIndex);
 		}
 		else
 		{

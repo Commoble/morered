@@ -39,7 +39,7 @@ public class VoxelCache extends WorldSavedData
 	{
 		if (world instanceof ServerWorld)
 		{
-			return ((ServerWorld)world).getSavedData().getOrCreate(() -> new VoxelCache(world), ID);
+			return ((ServerWorld)world).getDataStorage().computeIfAbsent(() -> new VoxelCache(world), ID);
 		}
 		else
 		{
@@ -58,17 +58,17 @@ public class VoxelCache extends WorldSavedData
 	
 	public VoxelShape getWireShape(BlockPos pos)
 	{
-		return this.shapesByPos.getUnchecked(pos.toImmutable());
+		return this.shapesByPos.getUnchecked(pos.immutable());
 	}
 
 	@Override
-	public void read(CompoundNBT nbt)
+	public void load(CompoundNBT nbt)
 	{
 		//noop
 	}
 
 	@Override
-	public CompoundNBT write(CompoundNBT compound)
+	public CompoundNBT save(CompoundNBT compound)
 	{
 		return compound; //noop
 	}

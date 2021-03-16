@@ -36,12 +36,12 @@ public class WireTileEntity extends TileEntity
 		this.power[side] = newPower;
 		if (oldPower != newPower)
 		{
-			this.markDirty();
+			this.setChanged();
 			BlockState state = this.getBlockState();
 			// what do the block flags do here?
 			// client world: only flag 8 (bit 4) is checked (rerender on main thread)
 			// server world: none of the flags are checked
-			this.world.notifyBlockUpdate(this.pos, state, state, 0);
+			this.level.sendBlockUpdated(this.worldPosition, state, state, 0);
 			return true;
 		}
 		return false;
@@ -71,18 +71,18 @@ public class WireTileEntity extends TileEntity
 	// called when TE is serialized to hard drive or whatever
 	// defaults to this.writeInternal()
 	@Override
-	public CompoundNBT write(CompoundNBT compound)
+	public CompoundNBT save(CompoundNBT compound)
 	{
-		super.write(compound);
+		super.save(compound);
 		this.writeCommonData(compound);
 		return compound;
 	}
 	
 	// reads the data written by write, called when TE is loaded from hard drive
 	@Override
-	public void read(BlockState state, CompoundNBT compound)
+	public void load(BlockState state, CompoundNBT compound)
 	{
-		super.read(state, compound);
+		super.load(state, compound);
 		this.readCommonData(compound);
 	}
 
@@ -111,17 +111,17 @@ public class WireTileEntity extends TileEntity
 	{
 		CompoundNBT compound = new CompoundNBT();
 		this.writeCommonData(compound);
-		return new SUpdateTileEntityPacket(this.pos, 0, compound); // non-positive ID indicates non-vanilla packet
+		return new SUpdateTileEntityPacket(this.worldPosition, 0, compound); // non-positive ID indicates non-vanilla packet
 	}
 
 	// called on client to read the packet sent by getUpdatePacket
 	@Override
 	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
 	{
-		CompoundNBT compound = pkt.getNbtCompound();
+		CompoundNBT compound = pkt.getTag();
 		this.readCommonData(compound);
 		BlockState state = this.getBlockState();
-		this.world.notifyBlockUpdate(this.pos, state, state, 8);
+		this.level.sendBlockUpdated(this.worldPosition, state, state, 8);
 		super.onDataPacket(net, pkt);
 	}
 	

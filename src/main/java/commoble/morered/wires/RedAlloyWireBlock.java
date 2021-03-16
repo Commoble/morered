@@ -11,6 +11,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class RedAlloyWireBlock extends PoweredWireBlock
 {
 	public static final VoxelShape[] NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(1,2);

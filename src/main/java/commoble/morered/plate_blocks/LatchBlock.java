@@ -19,6 +19,8 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public class LatchBlock extends RedstonePlateBlock
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
@@ -33,17 +35,17 @@ public class LatchBlock extends RedstonePlateBlock
 	public LatchBlock(Properties properties)
 	{
 		super(properties);
-		BlockState baseState = this.getDefaultState();
-		this.setDefaultState(baseState
-			.with(INPUT_A, false)
-			.with(INPUT_C, false)
-			.with(POWERED, false));
+		BlockState baseState = this.defaultBlockState();
+		this.registerDefaultState(baseState
+			.setValue(INPUT_A, false)
+			.setValue(INPUT_C, false)
+			.setValue(POWERED, false));
 	}
 
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		builder.add(INPUT_A, INPUT_C, POWERED);
 		
 	}
@@ -54,9 +56,9 @@ public class LatchBlock extends RedstonePlateBlock
 	public BlockState getStateForPlacement(BlockItemUseContext context)
 	{
 		BlockState state = super.getStateForPlacement(context);
-		if (state.get(INPUT_C))
+		if (state.getValue(INPUT_C))
 		{
-			state = state.with(POWERED, true);
+			state = state.setValue(POWERED, true);
 		}
 		return state;
 	}
@@ -68,15 +70,15 @@ public class LatchBlock extends RedstonePlateBlock
 	 */
 	@Deprecated
 	@Override
-	public int getWeakPower(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
+	public int getSignal(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
 	{
 		// if both inputs are active, both outputs are off
-		if (state.get(INPUT_A) && state.get(INPUT_C))
+		if (state.getValue(INPUT_A) && state.getValue(INPUT_C))
 		{
 			return 0;
 		}
 		
-		boolean powered = state.get(POWERED);
+		boolean powered = state.getValue(POWERED);
 		Direction outputDirectionWhenPowered = PlateBlockStateProperties.getOutputDirection(state);
 		return (powered && sideOfAdjacentBlock == outputDirectionWhenPowered.getOpposite()
 			|| !powered && sideOfAdjacentBlock == outputDirectionWhenPowered)
@@ -89,12 +91,12 @@ public class LatchBlock extends RedstonePlateBlock
 	{
 		BlockState stateWithNewInput = InputState.getUpdatedBlockState(world, oldBlockState, pos);
 		InputState newInputState = InputState.getWorldPowerState(world, stateWithNewInput, pos);
-		boolean wasPowered = oldBlockState.get(POWERED);
+		boolean wasPowered = oldBlockState.getValue(POWERED);
 		boolean isPowered = ((wasPowered && !newInputState.c) || (!wasPowered && newInputState.a));
-		BlockState newBlockState = stateWithNewInput.with(POWERED, isPowered);
+		BlockState newBlockState = stateWithNewInput.setValue(POWERED, isPowered);
 		if (newBlockState != oldBlockState)
 		{
-			world.setBlockState(pos, newBlockState, 2);
+			world.setBlock(pos, newBlockState, 2);
 		}
 	}
 	
@@ -124,12 +126,12 @@ public class LatchBlock extends RedstonePlateBlock
 		{
 			for (Direction outputDirection : outputDirections)
 			{
-				BlockPos outputPos = pos.offset(outputDirection);
+				BlockPos outputPos = pos.relative(outputDirection);
 				
 				{
 					world.neighborChanged(outputPos, this, pos);
 				}
-				world.notifyNeighborsOfStateExcept(outputPos, this, outputDirection);
+				world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection);
 			}
 		}
 	}

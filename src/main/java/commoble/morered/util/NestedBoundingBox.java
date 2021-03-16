@@ -22,7 +22,7 @@ public class NestedBoundingBox
 	public NestedBoundingBox(@Nonnull NestedBoundingBox boxA, @Nonnull NestedBoundingBox boxB)
 	{
 		this.subBoxes = Collections.unmodifiableList(Lists.newArrayList(boxA, boxB));
-		this.superBox = boxA.superBox.union(boxB.superBox);
+		this.superBox = boxA.superBox.minmax(boxB.superBox);
 //		BlockPos[] blockPosArray = new BlockPos[5];
 //		ArrayList<AxisAlignedBB> list = Arrays.stream(blockPosArray).map(AxisAlignedBB::new).collect(Collectors.toCollection(ArrayList::new));
 	}

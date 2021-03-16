@@ -25,18 +25,20 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
+import net.minecraft.block.AbstractBlock.Properties;
+
 public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 {
-	public static final IntegerProperty POWER = BlockStateProperties.POWER_0_15;
+	public static final IntegerProperty POWER = BlockStateProperties.POWER;
 	public static final EnumSet<Direction> NO_DIRECTIONS = EnumSet.noneOf(Direction.class);
 	
 	protected static final VoxelShape[] POST_SHAPES_DUNSWE = {
-		Block.makeCuboidShape(6D, 0D, 6D, 10D, 10D, 10D),
-		Block.makeCuboidShape(6D, 16D, 6D, 10D, 6D, 10D),
-		Block.makeCuboidShape(6D, 6D, 0D, 10D, 10D, 10D),
-		Block.makeCuboidShape(6D, 6D, 6D, 10D, 10D, 16D),
-		Block.makeCuboidShape(0D, 6D, 6D, 10D, 10D, 10D),
-		Block.makeCuboidShape(6D, 6D, 6D, 16D, 10D, 10D)
+		Block.box(6D, 0D, 6D, 10D, 10D, 10D),
+		Block.box(6D, 16D, 6D, 10D, 6D, 10D),
+		Block.box(6D, 6D, 0D, 10D, 10D, 10D),
+		Block.box(6D, 6D, 6D, 10D, 10D, 16D),
+		Block.box(0D, 6D, 6D, 10D, 10D, 10D),
+		Block.box(6D, 6D, 6D, 16D, 10D, 10D)
 	};
 	
 	// function that gets the connected directions for a given blockstate
@@ -45,8 +47,8 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	public AbstractPoweredWirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
 	{
 		super(properties);
-		this.setDefaultState(this.getDefaultState()
-			.with(POWER, 0));
+		this.registerDefaultState(this.defaultBlockState()
+			.setValue(POWER, 0));
 		this.connectionGetter = connectionGetter;
 	}
 	
@@ -63,9 +65,9 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	}
 
 	@Override
-	protected void fillStateContainer(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
 	{
-		super.fillStateContainer(builder);
+		super.createBlockStateDefinition(builder);
 		builder.add(POWER);
 	}
 	
@@ -74,13 +76,13 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	 * logic
 	 */
 	@Override
-	public void onBlockPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+	public void setPlacedBy(World world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		int oldPower = state.get(POWER);
+		int oldPower = state.getValue(POWER);
 		int newPower = this.getNewPower(state, world, pos);
 		if (oldPower != newPower)
 		{
-			world.setBlockState(pos, state.with(POWER, newPower), 2);
+			world.setBlock(pos, state.setValue(POWER, newPower), 2);
 		}
 
 	}
@@ -90,11 +92,11 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	public void neighborChanged(BlockState state, World world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
 		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
-		int oldPower = state.get(POWER);
+		int oldPower = state.getValue(POWER);
 		int newPower = this.getNewPower(state, world, pos);
 		if (oldPower != newPower)
 		{
-			world.setBlockState(pos, state.with(POWER, newPower), 2);
+			world.setBlock(pos, state.setValue(POWER, newPower), 2);
 		}
 
 	}
@@ -106,7 +108,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 		BlockState attachmentState = super.getStateForPlacement(context);
 		return attachmentState == null
 			? null
-			: attachmentState.with(POWER, this.getNewPower(attachmentState, context.getWorld(), context.getPos()));
+			: attachmentState.setValue(POWER, this.getNewPower(attachmentState, context.getLevel(), context.getClickedPos()));
 	}
 
 	/**
@@ -119,9 +121,9 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	 * only the specific face passed in.
 	 */
 	@Override
-	public BlockState updatePostPlacement(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos)
+	public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, IWorld world, BlockPos pos, BlockPos facingPos)
 	{
-		return state.with(POWER, this.getNewPower(state, world, pos));
+		return state.setValue(POWER, this.getNewPower(state, world, pos));
 	}
 
 	/**
@@ -133,7 +135,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	 */
 	@Deprecated
 	@Override
-	public boolean canProvidePower(BlockState state)
+	public boolean isSignalSource(BlockState state)
 	{
 		return true;
 	}
@@ -146,18 +148,18 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 
 	@Deprecated
 	@Override
-	public int getStrongPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side)
+	public int getDirectSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side)
 	{
-		return blockState.getWeakPower(blockAccess, pos, side);
+		return blockState.getSignal(blockAccess, pos, side);
 	}
 	
 	@Deprecated
 	@Override
-	public int getWeakPower(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction directionOfThisBlockFromCaller)
+	public int getSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction directionOfThisBlockFromCaller)
 	{
 		if (this.getConnectableDirections(blockState).contains(directionOfThisBlockFromCaller.getOpposite()))
 		{
-			return blockState.get(POWER);
+			return blockState.getValue(POWER);
 		}
 		else
 		{
@@ -188,7 +190,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 		if (world instanceof World)
 		{
 			return this.getConnectableDirections(state).stream()
-				.map(direction -> ((World)world).getRedstonePower(pos.offset(direction), direction))
+				.map(direction -> ((World)world).getSignal(pos.relative(direction), direction))
 				.reduce(0, Math::max);
 		}
 		else
@@ -205,7 +207,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 			.orElse(ImmutableSet.of())
 			.stream()
 			.map(tePos -> world.getBlockState(tePos))
-			.map(otherState -> otherState.hasProperty(POWER) ? otherState.get(POWER) : 0)
+			.map(otherState -> otherState.hasProperty(POWER) ? otherState.getValue(POWER) : 0)
 			.reduce(0, Math::max);
 	}
 
@@ -220,9 +222,9 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 		{
 			for (Direction dir : neighborDirections)
 			{
-				BlockPos neighborPos = pos.offset(dir);
+				BlockPos neighborPos = pos.relative(dir);
 				world.neighborChanged(neighborPos, this, pos);
-				world.notifyNeighborsOfStateExcept(neighborPos, this, dir.getOpposite());
+				world.updateNeighborsAtExceptFromFacing(neighborPos, this, dir.getOpposite());
 			}
 			WorldHelper.getTileEntityAt(WirePostTileEntity.class, world, pos).ifPresent(te -> te.notifyConnections());
 		}
