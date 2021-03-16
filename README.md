@@ -16,8 +16,8 @@ repositories {
 }
 
 dependencies {
-	compileOnly fg.deobf("commoble.looot:${morered_branch}:${morered_version}:api")
-	runtimeOnly fg.deobf("commoble.looot:${morered_branch}:${morered_version}")
+	compileOnly fg.deobf("commoble.morered:${morered_branch}:${morered_version}:api")
+	runtimeOnly fg.deobf("commoble.morered:${morered_branch}:${morered_version}")
 }
 ```
 
