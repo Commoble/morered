@@ -25,8 +25,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 {
 	public static final IntegerProperty POWER = BlockStateProperties.POWER;
@@ -130,8 +128,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	 * Can this block provide power. Only wire currently seems to have this change
 	 * based on its state.
 	 * 
-	 * @deprecated call via {@link IBlockState#canProvidePower()} whenever possible.
-	 *             Implementing/overriding is fine.
+	 * @param state A blockstate of this block
 	 */
 	@Deprecated
 	@Override
@@ -174,17 +171,23 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 	
 	/**
 	 * Returns a power level equal to one less than the highest power level among the blocks that this block can connect to
-	 * @param state
-	 * @param world
-	 * @param pos
-	 * @return
+	 * @param state The blockstate of this block
+	 * @param world The world where the blockstate lives
+	 * @param pos The position of the blockstate in the world
+	 * @return The new power level to be used by this block
 	 */
 	public int getNewPower(BlockState state, IWorld world, BlockPos pos)
 	{
 		return Math.max(0, Math.max(this.getNeighborPower(state, world, pos), this.getConnectionPower(state, world, pos)) -1);
 	}
 	
-	/** Returns the highest redstone power level among the neighbors adjacent to this block's redstone-connecting sides **/
+	/**
+	 * Returns the highest redstone power level among the neighbors adjacent to this block's redstone-connecting sides
+	 * @param state The blockstate of this block
+	 * @param world The world where the blockstate lives
+	 * @param pos The position of the state in the world
+	 * @return The highest redstone power level among the relevant neighbors adjacent to this block
+	 **/
 	public int getNeighborPower(BlockState state, IWorld world, BlockPos pos)
 	{
 		if (world instanceof World)
@@ -199,7 +202,13 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock
 		}
 	}
 	
-	/** Returns the highest redstone power level among the posts connected to this post **/
+	/**
+	 * Returns the highest redstone power level among the posts connected to this post
+	 * @param state The blockstate of this post block
+	 * @param world The world object the blockstate lives in
+	 * @param pos The position of the blockstate in the world
+	 * @return The highest emitted redstone power level among the posts connected to this post
+	 **/
 	public int getConnectionPower(BlockState state, IWorld world, BlockPos pos)
 	{
 		return WorldHelper.getTileEntityAt(WirePostTileEntity.class, world, pos)

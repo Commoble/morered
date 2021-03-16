@@ -42,7 +42,7 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 	
 	/**
 	 * 
-	 * @param newPower An array of 16 values in the range 0-31. This will be copied.
+	 * @param newPowers An array of 16 values in the range 0-31. This will be copied.
 	 * @return true if any values changed, false otherwise
 	 */
 	public boolean setPower(byte[] newPowers)
@@ -70,7 +70,6 @@ public class BundledCablePostTileEntity extends WirePostTileEntity
 	/**
 	 * Sets the power value and marks the block and TE updated if the power changed on the server
 	 * use setPower(int[]) where possible to minimize neighbor updates
-	 * @param side The attachment side to set the power of, in the range [0,5]
 	 * @param channel The channel to set the power of, in the range [0,15]
 	 * @param newPower The power value to set the power of, in the range [0,31]
 	 * @return True if the power changed, false otherwise

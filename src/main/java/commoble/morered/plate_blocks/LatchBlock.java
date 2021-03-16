@@ -19,8 +19,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class LatchBlock extends RedstonePlateBlock
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
@@ -63,11 +61,6 @@ public class LatchBlock extends RedstonePlateBlock
 		return state;
 	}
 
-	/**
-	 * @deprecated call via
-	 *             {@link IBlockState#getWeakPower(IBlockAccess,BlockPos,EnumFacing)}
-	 *             whenever possible. Implementing/overriding is fine.
-	 */
 	@Deprecated
 	@Override
 	public int getSignal(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)

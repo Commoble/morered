@@ -155,16 +155,15 @@ public class GatecraftingContainer extends Container
 		return copiedStack;
 	}
 	
+	
 	public void onPlayerChoseRecipe(ResourceLocation recipeID)
 	{
 		this.attemptRecipeAssembly(RecipeRegistrar.getGatecraftingRecipe(this.player.level.getRecipeManager(), recipeID));
 	}
 	
 	/**
-	 * Tries to match the player's current inventory to the given gatecrafting recipe,
-	 * returns false if it cannot or the recipe is not a gatecrafting recipe.
-	 * @param recipe
-	 * @return the recipe if it was successful, the empty optional otherwise
+	 * Attempts to assemble the given recipe and updates crafting result if successful
+	 * @param recipeHolder recipe holder
 	 */
 	public void attemptRecipeAssembly(Optional<IRecipe<CraftingInventory>> recipeHolder)
 	{

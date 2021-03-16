@@ -21,8 +21,6 @@ import net.minecraft.world.TickPriority;
 import net.minecraft.world.World;
 import net.minecraftforge.common.Tags;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public abstract class RedstonePlateBlock extends PlateBlock
 {
 	public static final int OUTPUT_STRENGTH = 15;
@@ -87,13 +85,6 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		return isPlayerHoldingStick ? ActionResultType.SUCCESS : ActionResultType.PASS;
 	}
 
-	/**
-	 * Can this block provide power. Only wire currently seems to have this change
-	 * based on its state.
-	 * 
-	 * @deprecated call via {@link IBlockState#canProvidePower()} whenever possible.
-	 *             Implementing/overriding is fine.
-	 */
 	@Deprecated
 	@Override
 	public boolean isSignalSource(BlockState state)
@@ -122,12 +113,8 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		}
 		return false;
 	}
-	
-	/**
-	 * @deprecated call via
-	 *             {@link IBlockState#getStrongPower(IBlockAccess,BlockPos,EnumFacing)}
-	 *             whenever possible. Implementing/overriding is fine.
-	 */
+
+	// Get the redstone power output that can be conducted indirectly through solid cubes
 	@Deprecated
 	@Override
 	public int getDirectSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction side)
@@ -171,10 +158,10 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	
 	/**
 	 * Return true if any of the three input directions are receiving power
-	 * @param world
-	 * @param state
-	 * @param pos
-	 * @return
+	 * @param world The world the state is in
+	 * @param state A blockstate of this block
+	 * @param pos The position of the state in the world
+	 * @return Whether any of the block's input directions are receiving power
 	 */
 	public boolean hasInputPower(World world, BlockState state, BlockPos pos)
 	{

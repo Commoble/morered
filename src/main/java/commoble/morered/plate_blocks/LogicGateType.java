@@ -8,6 +8,7 @@ import commoble.morered.ItemRegistrar;
 import commoble.morered.MoreRed;
 import commoble.morered.ObjectNames;
 import commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.SoundType;
 import net.minecraft.item.BlockItem;
@@ -15,8 +16,6 @@ import net.minecraft.item.Item;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
-
-import net.minecraft.block.AbstractBlock;
 
 public class LogicGateType
 {
@@ -36,7 +35,7 @@ public class LogicGateType
 		registerLogicGateType(MoreRed.MODID, name, blocks, items, function, inputs);
 	}
 	
-	/** Call from mod constructor **/
+	// Call from mod constructor
 	public static void registerLogicGateType(String modid, String name, DeferredRegister<Block> blocks, DeferredRegister<Item> items, LogicFunction function, LogicFunctionPlateBlockFactory factory)
 	{
 		ResourceLocation id = new ResourceLocation(modid, name);
@@ -58,7 +57,7 @@ public class LogicGateType
 	}
 
 	
-	/** Called from MoreRed mod constructor **/
+	// Called from MoreRed mod constructor
 	public static void registerLogicGateTypes(DeferredRegister<Block> blocks, DeferredRegister<Item> items)
 	{
 		registerLogicGateType(ObjectNames.DIODE, blocks, items, LogicFunctions.INPUT_B, LogicFunctionPlateBlock.LINEAR_INPUT);

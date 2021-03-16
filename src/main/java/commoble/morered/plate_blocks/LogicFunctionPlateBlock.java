@@ -2,6 +2,7 @@ package commoble.morered.plate_blocks;
 
 import java.util.Random;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.state.DirectionProperty;
@@ -12,9 +13,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.AbstractBlock.Properties;
 
 public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 {
@@ -87,12 +85,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 			builder.add(side.property);
 		}
 	}
-
-	/**
-	 * @deprecated call via
-	 *             {@link IBlockState#getWeakPower(IBlockAccess,BlockPos,EnumFacing)}
-	 *             whenever possible. Implementing/overriding is fine.
-	 */
+	
 	@Deprecated
 	@Override
 	public int getSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
@@ -121,6 +114,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 
 
 	
+	@Override
 	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
 	{
 		Direction outputDirection = PlateBlockStateProperties.getOutputDirection(state);

@@ -163,7 +163,13 @@ public class BlockStateUtil
 		return getOutputDirection(attachmentDirection, (outputRotationIndex + rotationsFromOutput) % 4);
 	}
 	
-	/** Get the rotation index for a gate plate state after rotating the blockstate **/
+	/**
+	 * Get the rotation index for a gate plate state after rotating the blockstate around the y-axis
+	 * @param attachmentFace The attachment direction of a plate state
+	 * @param rotationIndex How many 90-degree rotations from the primary rotation we have
+	 * @param mirror The y-axis-rotation type
+	 * @return The new rotation index after rotating the blockstate
+	 **/
 	public static int getRotatedRotation(Direction attachmentFace, int rotationIndex, Rotation rotation)
 	{
 		if (attachmentFace == Direction.DOWN)
@@ -180,7 +186,13 @@ public class BlockStateUtil
 		}
 	}
 	
-	/** Get the rotation index for a gate plate state after mirroring the blockstate **/
+	/**
+	 * Get the rotation index for a gate plate state after mirroring the blockstate
+	 * @param attachmentFace The attachment direction of a plate state
+	 * @param rotationIndex How many 90-degree rotations from the primary rotation we have
+	 * @param mirror The mirroring type
+	 * @return The new rotation index after mirroring the blockstate
+	 **/
 	public static int getMirroredRotation(Direction attachmentFace, int rotationIndex, Mirror mirror)
 	{
 		if (mirror == Mirror.NONE)

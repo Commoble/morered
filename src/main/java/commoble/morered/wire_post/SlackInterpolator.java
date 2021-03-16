@@ -66,9 +66,12 @@ public class SlackInterpolator
 	}
 	
 	/**
-	 * Checks if a placed block would intersect any of this block's connections.
+	 * Checks if a placed block would intersect any of a given post block's connections.
+	 * @param world The world object
+	 * @param postPos the position of the post block whose connections we want to check the intersections of
 	 * @param placePos The position the block is being placed at
 	 * @param placeState The blockstate being placed
+	 * @param remoteConnections The remote connections of the post block
 	 * @param checkedPostPositions The positions of wire posts that have already been checked.
 	 * Any posts in this list that this post is connected to is also connected to this post, and this connection has been
 	 * verified to not intersect the placed block, so we don't need to check again.

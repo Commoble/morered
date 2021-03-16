@@ -40,8 +40,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.util.Constants.BlockFlags;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public abstract class AbstractWireBlock extends Block
 {
 	
@@ -57,7 +55,7 @@ public abstract class AbstractWireBlock extends Block
 	 * 
 	 * @param nodeShapes array of 6 voxelshapes by face direction
 	 * @param lineShapes array of 24 voxelshapes by face direction + secondary direction
-	 * @return
+	 * @return An array of 64 voxelshapes for wire nodes and elbows (the shapes that can be determined just from blockstate combinations and no worldpos context)
 	 */
 	public static VoxelShape[] makeVoxelShapes(VoxelShape[] nodeShapes, VoxelShape[] lineShapes)
 	{
@@ -192,6 +190,8 @@ public abstract class AbstractWireBlock extends Block
 	 * @param properties block properties
 	 * @param shapesByStateIndex Array of 64 voxelshapes, the voxels for the canonical blockstates
 	 * @param raytraceBackboards Array of 6 voxelshapes (by attachment face direction) used for subwire raytrace checking
+	 * @param voxelCache The cache to use for this block's voxels given world context
+	 * @param useIndirectPower Whether this block is allowed to send or receive power conducted indirectly through solid cubes
 	 */
 	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower)
 	{
@@ -317,7 +317,7 @@ public abstract class AbstractWireBlock extends Block
 	 *
 	 * @param state
 	 *            The current state
-	 * @param world
+	 * @param worldObj
 	 *            The current world
 	 * @param target
 	 *            The target the player is looking at {x/y/z/side/sub}
@@ -516,9 +516,9 @@ public abstract class AbstractWireBlock extends Block
 	/**
 	 * Returns a long containing the edge flags shifted for node-line-edge format
 	 * The first 30 bits will be 0, the next 12 bits contain edge flags in edge-ordinal order
-	 * @param world
-	 * @param pos
-	 * @return
+	 * @param world The world for worldpos context
+	 * @param pos The position for worldpos context
+	 * @return A set of edge flags where the 30 least-significant bits are 0 and the next 12 bits contain edge flags in edge-ordinal order
 	 */
 	protected long getEdgeFlagsForNodeLineEdgeFormat(IBlockReader world, BlockPos pos)
 	{

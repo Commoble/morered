@@ -28,10 +28,10 @@ public enum InputSide
 	 * Returns true if a given block with the relevant blockstate properties is receiving power from the
 	 * direction associated with this input side. Returns false if not, or if the block lacks the
 	 * relevant properties.
-	 * @param world
-	 * @param state
-	 * @param pos
-	 * @return
+	 * @param world The world where the state lives
+	 * @param state A blockstate of this block
+	 * @param pos The position of the state in the world
+	 * @return Whether the block is receiving power
 	 */
 	public boolean isBlockReceivingPower(World world, BlockState state, BlockPos pos)
 	{

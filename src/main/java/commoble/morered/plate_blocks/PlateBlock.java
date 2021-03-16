@@ -17,8 +17,6 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public class PlateBlock extends Block
 {
 	public static final DirectionProperty ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
@@ -67,13 +65,6 @@ public class PlateBlock extends Block
 		}
 	}
 	
-	/**
-	 * Returns the blockstate with the given rotation from the passed blockstate. If
-	 * inapplicable, returns the passed blockstate.
-	 * 
-	 * @deprecated call via {@link IBlockState#withRotation(Rotation)} whenever
-	 *             possible. Implementing/overriding is fine.
-	 */
 	@Override
 	@Deprecated
 	public BlockState rotate(BlockState state, Rotation rotation)
@@ -94,13 +85,6 @@ public class PlateBlock extends Block
 		}
 	}
 
-	/**
-	 * Returns the blockstate with the given mirror of the passed blockstate. If
-	 * inapplicable, returns the passed blockstate.
-	 * 
-	 * @deprecated call via {@link IBlockState#withMirror(Mirror)} whenever
-	 *             possible. Implementing/overriding is fine.
-	 */
 	@Override
 	@Deprecated
 	public BlockState mirror(BlockState state, Mirror mirror)

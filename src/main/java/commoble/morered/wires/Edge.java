@@ -51,9 +51,9 @@ public enum Edge
 	}
 	
 	/**
-	 * @param betweenState a state from a WireBlock
 	 * @param world world
 	 * @param pos The position of a wire or air block
+	 * @param centerWireBlock The wire block we want to render an edge for (connecting two neighbor wires)
 	 * @return true if this edge should be rendered for this block
 	 */
 	public boolean shouldEdgeRender(IBlockReader world, BlockPos pos, AbstractWireBlock centerWireBlock)

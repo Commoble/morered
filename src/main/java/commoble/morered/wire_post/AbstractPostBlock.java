@@ -22,8 +22,6 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public abstract class AbstractPostBlock extends Block
 {
 	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
@@ -115,13 +113,6 @@ public abstract class AbstractPostBlock extends Block
 		return null;
 	}
 
-	/**
-	 * Returns the blockstate with the given rotation from the passed blockstate. If
-	 * inapplicable, returns the passed blockstate.
-	 * 
-	 * @deprecated call via {@link IBlockState#withRotation(Rotation)} whenever
-	 *             possible. Implementing/overriding is fine.
-	 */
 	@Deprecated
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
@@ -129,13 +120,6 @@ public abstract class AbstractPostBlock extends Block
 		return state.setValue(DIRECTION_OF_ATTACHMENT, rot.rotate(state.getValue(DIRECTION_OF_ATTACHMENT)));
 	}
 
-	/**
-	 * Returns the blockstate with the given mirror of the passed blockstate. If
-	 * inapplicable, returns the passed blockstate.
-	 * 
-	 * @deprecated call via {@link IBlockState#withMirror(Mirror)} whenever
-	 *             possible. Implementing/overriding is fine.
-	 */
 	@Deprecated
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
