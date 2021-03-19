@@ -1,3 +1,6 @@
+1.16.5-2.1.0.1
+ * Fixed a bug where red alloy wires weren't causing block updates correctly for certain blocks (mostly pistons)
+
 1.16.5-2.1.0.0
 	Added red alloy wires, colored network cables, bundled cables, bundled cable posts, bundled cable relay plates, and the bundled cable spool
 	Added "morered:redwire_posts" and "morered:bundled_cable_posts" block tags; added relevant blocks to these tags

@@ -22,8 +22,6 @@ import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
 public abstract class PoweredWireBlock extends AbstractWireBlock
 {
 	
@@ -306,7 +304,6 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 	@Override
 	protected void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
 	{
-		BlockPos.Mutable mutaPos = wirePos.mutable();
 		Block newBlock = newState.getBlock();
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
 		{
@@ -315,7 +312,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 			// then we should notify second-degree neighbors as well
 			for (Direction dir : updateDirections)
 			{
-				BlockPos neighborPos = mutaPos.setWithOffset(wirePos, dir);
+				BlockPos neighborPos = wirePos.relative(dir);
 				boolean doSecondaryNeighborUpdates = doConductedPowerUpdates && world.getBlockState(neighborPos).shouldCheckWeakPower(world, neighborPos, dir);
 				world.neighborChanged(neighborPos, newBlock, wirePos);
 				if (doSecondaryNeighborUpdates)
