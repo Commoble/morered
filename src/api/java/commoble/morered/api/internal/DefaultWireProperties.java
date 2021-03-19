@@ -5,7 +5,14 @@ import javax.annotation.Nonnull;
 import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.WireConnector;
+import net.minecraft.block.AbstractButtonBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.HorizontalBlock;
+import net.minecraft.block.HorizontalFaceBlock;
+import net.minecraft.block.LeverBlock;
+import net.minecraft.state.properties.AttachFace;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.BlockPos;
@@ -25,6 +32,21 @@ public class DefaultWireProperties
 	
 	private static boolean canGenericBlockConnectToWire(IBlockReader world, BlockPos thisNeighborPos, BlockState thisNeighborState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
+		// if block is a wire or button, let the wire connect if it shares an attachment face
+		// use instanceof instead of tags because base class implies block properties but tags don't
+		Block neighborBlock = thisNeighborState.getBlock();
+		if (neighborBlock instanceof LeverBlock || neighborBlock instanceof AbstractButtonBlock)
+		{
+			AttachFace attachFace = thisNeighborState.getValue(HorizontalFaceBlock.FACE);
+			return attachFace == AttachFace.FLOOR && wireFace == Direction.DOWN
+				|| attachFace == AttachFace.CEILING && wireFace == Direction.UP
+				|| attachFace == AttachFace.WALL && thisNeighborState.getValue(HorizontalBlock.FACING).getOpposite() == wireFace;
+		}
+		
+		// we can use the tag for pressure plates since we don't need to check any properties
+		if (thisNeighborState.is(BlockTags.PRESSURE_PLATES))
+			return wireFace == Direction.DOWN;
+		
 		if (!thisNeighborState.canConnectRedstone(world, wirePos, directionToWire.getOpposite()))
 			return false;
 		VoxelShape wireTestShape = SMALL_NODE_SHAPES[wireFace.ordinal()];
