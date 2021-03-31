@@ -72,16 +72,24 @@ public class ClientEvents
 	
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
+		// render layer setting is synchronized, safe to do during multithreading
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.cutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.cutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.cutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), RenderType.cutout());
-
-		ScreenManager.register(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
+		
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDWIRE_POST.get(), WirePostRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_POST.get(), BundledCablePostRenderer::new);
 		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), BundledCablePostRenderer::new);
+		
+		event.enqueueWork(ClientEvents::afterClientSetup);
+	}
+	
+	static void afterClientSetup()
+	{
+		// not threadsafe, do this on main thread
+		ScreenManager.register(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
 	}
 	
 	public static void setLogicGateRenderLayer(LogicGateType type)

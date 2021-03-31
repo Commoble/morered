@@ -1,5 +1,6 @@
 1.16.5-2.1.0.2
  * Fixed a bug where logic plates didn't correctly cause block updates when conducting output signals through solid cubes
+ * Fixed a potential multithreading crash when registering screens during modloading
 
 1.16.5-2.1.0.1
  * Red Alloy Wires can now connect to levers, buttons, and pressure plates
