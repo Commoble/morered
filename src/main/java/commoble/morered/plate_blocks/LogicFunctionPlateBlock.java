@@ -122,7 +122,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), java.util.EnumSet.of(outputDirection), false).isCanceled())
 		{
 			world.neighborChanged(outputPos, this, pos);
-			world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection);
+			world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite());
 		}
 	}
 

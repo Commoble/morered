@@ -1,3 +1,6 @@
+1.16.5-2.1.0.2
+ * Fixed a bug where logic plates didn't correctly cause block updates when conducting output signals through solid cubes
+
 1.16.5-2.1.0.1
  * Red Alloy Wires can now connect to levers, buttons, and pressure plates
  * Fixed a bug where red alloy wires weren't causing block updates correctly for certain blocks (mostly pistons)

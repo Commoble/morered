@@ -124,7 +124,7 @@ public class LatchBlock extends RedstonePlateBlock
 				{
 					world.neighborChanged(outputPos, this, pos);
 				}
-				world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection);
+				world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite());
 			}
 		}
 	}
