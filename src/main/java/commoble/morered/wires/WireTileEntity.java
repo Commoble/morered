@@ -48,6 +48,15 @@ public class WireTileEntity extends TileEntity
 	}
 	
 	/**
+	 * Sets a power array without causing updates
+	 * @param power array of power values (be wary of reference-type problems)
+	 */
+	public void setPowerRaw(int[] power)
+	{
+		this.power = power;
+	}
+	
+	/**
 	 * Sets the power on a given interior face
 	 * @param direction The attachment direction of the subwire to set the power of
 	 * @param newPower The power value to set the subwire's power to

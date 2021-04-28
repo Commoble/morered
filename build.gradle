@@ -126,6 +126,9 @@ dependencies {
 	compile fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	shade fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	
+	compileOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}:api")
+	runtimeOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}")
+	
 	// cram dependencies
 	//compileOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}:debug")
 	//runtimeOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}")

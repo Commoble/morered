@@ -18,6 +18,7 @@ import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
 import commoble.morered.api.internal.APIRegistries;
 import commoble.morered.api.internal.DefaultWireProperties;
+import commoble.morered.bagofyurting.BagOfYurtingProxy;
 import commoble.morered.client.ClientEvents;
 import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
@@ -74,6 +75,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
@@ -220,6 +222,14 @@ public class MoreRed
 			
 			}, () -> { throw new UnsupportedOperationException("Default ChanneledPowerSupplier instance not implemented");});
 		
+		// do mod compat
+		ModList modList = ModList.get();
+		if (modList.isLoaded("bagofyurting"))
+		{
+			BagOfYurtingProxy.addBagOfYurtingCompat();
+		}
+		
+		// run thread-sensitive stuff on main thread
 		event.enqueueWork(MoreRed::afterCommonSetup);
 	}
 	

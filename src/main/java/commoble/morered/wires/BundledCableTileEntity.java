@@ -61,6 +61,16 @@ public class BundledCableTileEntity extends TileEntity
 	}
 	
 	/**
+	 * Returns the power for all channels on the given side
+	 * @param side Directional ordinal
+	 * @return The power array for all channels on the given side (be sure to clone before storing)
+	 */
+	public byte[] getPowerChannels(int side)
+	{
+		return this.power[side];
+	}
+	
+	/**
 	 * Sets the power value and marks the block and TE updated if the power changed on the server
 	 * @param side The attachment side to set the power of, in the range [0,5]
 	 * @param channel The channel to set the power of, in the range [0,15]
@@ -80,6 +90,11 @@ public class BundledCableTileEntity extends TileEntity
 			return true;
 		}
 		return false;
+	}
+	
+	public void setPowerRaw(byte[][] newPower)
+	{
+		this.power= newPower;
 	}
 
 	@SuppressWarnings("unchecked")

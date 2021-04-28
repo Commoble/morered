@@ -80,6 +80,11 @@ public class WirePostTileEntity extends TileEntity
 		return true;
 	}
 	
+	public void setConnectionsRaw(Map<BlockPos, NestedBoundingBox> connections)
+	{
+		this.remoteConnections = connections;
+	}
+	
 	public Set<BlockPos> getRemoteConnections()
 	{
 		return ImmutableSet.copyOf(this.remoteConnections.keySet());

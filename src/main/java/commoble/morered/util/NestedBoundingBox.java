@@ -19,6 +19,8 @@ public class NestedBoundingBox
 		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
 		Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 	
+	public static final NestedBoundingBox EMPTY = new NestedBoundingBox(EMPTY_AABB);
+	
 	public NestedBoundingBox(@Nonnull NestedBoundingBox boxA, @Nonnull NestedBoundingBox boxB)
 	{
 		this.subBoxes = Collections.unmodifiableList(Lists.newArrayList(boxA, boxB));
