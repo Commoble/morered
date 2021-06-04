@@ -51,7 +51,7 @@ public class ColoredCableTileEntity extends WireTileEntity
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
 	{
-		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY)
+		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY && side != null)
 			return (LazyOptional<T>) this.sidedPowerSuppliers.get(side);
 		return super.getCapability(cap, side);
 	}

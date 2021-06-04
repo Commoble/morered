@@ -1,0 +1,56 @@
+{
+	"parent": "morered:block/plate_template",
+	"ambientocclusion": false,
+	"textures": {
+		"particle": "block/smooth_stone",
+		"plate": "block/smooth_stone",
+		"quartz": "block/quartz_block_top",
+		"cable_overlay": "morered:block/unary_cable_operator_overlay"
+	},
+	"elements":
+	[
+		{
+			"name": "plate",
+			"from": [0, 0, 0],
+			"to": [16, 4, 16],
+			"faces": {
+				"north": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "north"},
+				"east": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "east"},
+				"south": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "south"},
+				"west": {"uv": [0, 12, 16, 16], "texture": "#plate", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#plate"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#plate", "cullface": "down"}
+			}
+		},
+		{
+			"name": "lower_upper_plate",
+			"from": [2, 4, 2],
+			"to": [14, 5, 14],
+			"faces": {
+				"north": {"uv": [2, 12, 14, 13], "texture": "#quartz"},
+				"east": {"uv": [2, 12, 14, 13], "texture": "#quartz"},
+				"south": {"uv": [2, 12, 14, 13], "texture": "#quartz"},
+				"west": {"uv": [2, 12, 14, 13], "texture": "#quartz"},
+				"up": {"uv": [2, 2, 14, 14], "texture": "#quartz"}
+			}
+		},
+		{
+			"name": "lower_upper_plate_overlay",
+			"from": [2, 4, 2],
+			"to": [14, 5, 14],
+			"faces": {
+				"up": {"uv": [2, 2, 14, 14], "texture": "#symbol"}
+			}
+		},
+		{
+			"name": "plate_overlay",
+			"from": [0, 0, 0],
+			"to": [16, 4, 16],
+			"faces": {
+				"north": {"uv": [0, 16, 16, 12], "texture": "#cable_overlay", "cullface": "north"},
+				"south": {"uv": [0, 16, 16, 12], "texture": "#cable_overlay", "cullface": "south"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#cable_overlay"}
+			}
+		}
+	]
+}

@@ -2,6 +2,8 @@ package commoble.morered;
 
 import java.util.Arrays;
 
+import commoble.morered.bitwise_logic.ChanneledPowerStorageTileEntity;
+import commoble.morered.plate_blocks.LogicGateType;
 import commoble.morered.wire_post.BundledCablePostTileEntity;
 import commoble.morered.wire_post.BundledCableRelayPlateTileEntity;
 import commoble.morered.wire_post.WirePostTileEntity;
@@ -9,7 +11,9 @@ import commoble.morered.wires.BundledCableTileEntity;
 import commoble.morered.wires.ColoredCableBlock;
 import commoble.morered.wires.ColoredCableTileEntity;
 import commoble.morered.wires.WireTileEntity;
+import net.minecraft.block.Block;
 import net.minecraft.tileentity.TileEntityType;
+import net.minecraft.util.Util;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -51,4 +55,15 @@ public class TileEntityRegistrar
 		() -> TileEntityType.Builder.of(BundledCableRelayPlateTileEntity::new,
 			BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get())
 		.build(null));
+	
+	public static final RegistryObject<TileEntityType<ChanneledPowerStorageTileEntity>> BITWISE_LOGIC_PLATE = TILES.register(ObjectNames.BITWISE_LOGIC_PLATE,
+		() -> TileEntityType.Builder.of(ChanneledPowerStorageTileEntity::new,
+			Util.make(() ->
+			{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
+				return LogicGateType.BITWISE_TYPES.values().stream()
+					.map(type -> type.blockGetter.get())
+					.toArray(Block[]::new);
+			}))
+		.build(null));
+	
 }

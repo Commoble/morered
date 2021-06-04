@@ -1,0 +1,6 @@
+{
+	"parent": "morered:block/single_input_bitwise_logic_plate_template",
+	"textures": {
+		"symbol": "morered:block/not_gate_symbol"
+	}
+}

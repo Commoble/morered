@@ -67,5 +67,4 @@ public class BlockRegistrar
 	
 	public static final RegistryObject<BundledCableRelayPlateBlock> BUNDLED_CABLE_RELAY_PLATE = BLOCKS.register(ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
 		() -> new BundledCableRelayPlateBlock(AbstractBlock.Properties.of(Material.STONE, MaterialColor.COLOR_BLUE).strength(2F, 5F)));
-	
 }

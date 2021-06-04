@@ -1,3 +1,7 @@
+1.16.5-2.1.1.0
+ * Added Bitwise Diodes, Bitwise NOT Gates, Bitwise AND Gates, Bitwise OR Gates, Bitwise XOR Gates, and Bitwise XNOR Gates
+ * Fixed a bug where bundled cables would load incorrectly, causing them to have incorrect internal data after being loaded until their internal state updated
+
 1.16.5-2.1.0.3
  * Added support for the Bag of Yurting mod; wires, cables, and wire/cable posts can now be correctly moved by Bags of Yurting
 

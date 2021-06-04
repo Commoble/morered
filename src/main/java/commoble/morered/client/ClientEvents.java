@@ -74,6 +74,8 @@ public class ClientEvents
 	{
 		// render layer setting is synchronized, safe to do during multithreading
 		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
+		LogicGateType.BITWISE_TYPES.values()
+			.forEach(pair -> RenderTypeLookup.setRenderLayer(pair.blockGetter.get(), RenderType.cutout()));
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.cutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.cutout());
 		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.cutout());

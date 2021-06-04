@@ -187,6 +187,11 @@ public class MoreRed
 		cableConnectors.put(bundledCableBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
 		BundledCableRelayPlateBlock cablePlateBlock = BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get();
 		cableConnectors.put(cablePlateBlock, cablePlateBlock::canConnectToAdjacentCable);
+		LogicGateType.BITWISE_TYPES.values().stream()
+			.map(pair -> pair.blockGetter.get())
+			// eclipse compiler allows a method reference to canConnectToAdjacentCable in the put here
+			// but javac doesn't like the generics, but accepts a lambda here
+			.forEach(block -> cableConnectors.put(block, (world,thisPos,thisState,wirePos,wireState,wireFace,directionToWire)->block.canConnectToAdjacentCable(world, thisPos, thisState, wirePos, wireState, wireFace, directionToWire)));
 	}
 	
 	public static void onCommonSetup(FMLCommonSetupEvent event)

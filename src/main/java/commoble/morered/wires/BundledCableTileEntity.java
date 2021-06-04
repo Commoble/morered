@@ -196,7 +196,7 @@ public class BundledCableTileEntity extends TileEntity
 					break channelLoop;
 				
 				int channelFlag = (1 << channel);
-				if ((channels | channelFlag) != 0)
+				if ((channels & channelFlag) != 0)
 				{
 					this.power[side][channel] = powerValues[powerByteIndex++];
 				}

@@ -58,7 +58,7 @@ by poking them with a stick.
     versionRange="[1.16.5,1.17)"
     ordering="NONE"
     side="BOTH"
-[[dependencies.tubesreloaded]]
+[[dependencies.morered]]
 	modId="bagofyurting"
 	mandatory=false
 	versionRange="[1.2.0.0,)"

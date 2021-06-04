@@ -40,6 +40,14 @@ public class ObjectNames
 	public static final String BUNDLED_NETWORK_CABLE = "bundled_network_cable";
 	
 	public static final String HEXIDECRUBROMETER = "hexidecrubrometer";
+	
+	public static final String BITWISE_LOGIC_PLATE = "bitwise_logic_plate";
+	public static final String BITWISE_DIODE = "bitwise_diode";
+	public static final String BITWISE_NOT_GATE = "bitwise_not_gate";
+	public static final String BITWISE_OR_GATE = "bitwise_or_gate";
+	public static final String BITWISE_AND_GATE = "bitwise_and_gate";
+	public static final String BITWISE_XOR_GATE = "bitwise_xor_gate";
+	public static final String BITWISE_XNOR_GATE = "bitwise_xnor_gate";
 
 	// raw items
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
