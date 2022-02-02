@@ -2,12 +2,11 @@
 buildscript {
     repositories {
         maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
         mavenCentral()
         maven {url='https://repo.spongepowered.org/repository/maven-public/'}
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
@@ -126,8 +125,8 @@ dependencies {
 	compile fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	shade fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	
-	compileOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}:api")
-	runtimeOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}")
+	//compileOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}:api")
+	//runtimeOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}")
 	
 	// cram dependencies
 	//compileOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}:debug")
