@@ -7,59 +7,52 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.loot.ILootSerializer;
-import net.minecraft.loot.LootContext;
-import net.minecraft.loot.LootFunctionType;
-import net.minecraft.loot.LootParameter;
-import net.minecraft.loot.LootParameters;
-import net.minecraft.loot.functions.ILootFunction;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.Serializer;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 // loot function to set the count of a wire block's loot's dropped wire items
 // multiple wire blockitems can be placed into a block,
 // so we want the block to drop the correct number of wires based on its state
-public class WireCountLootFunction implements ILootFunction, ILootSerializer<WireCountLootFunction>
-{
-	public static final WireCountLootFunction INSTANCE = new WireCountLootFunction();
-	public static final LootFunctionType TYPE = new LootFunctionType(INSTANCE);
+public class WireCountLootFunction implements LootItemFunction, Serializer<WireCountLootFunction> {
+    public static final WireCountLootFunction INSTANCE = new WireCountLootFunction();
+    public static final LootItemFunctionType TYPE = new LootItemFunctionType(INSTANCE);
 
-	@Override
-	public ItemStack apply(ItemStack input, LootContext context)
-	{
-		BlockState state = context.getParamOrNull(LootParameters.BLOCK_STATE);
-		Block block = state.getBlock();
-		if (block instanceof AbstractWireBlock)
-		{
-			input.setCount(((AbstractWireBlock)block).getWireCount(state));
-		}
-		return input;
-	}
+    @Override
+    public ItemStack apply(ItemStack input, LootContext context) {
+        BlockState state = context.getParamOrNull(LootContextParams.BLOCK_STATE);
+        Block block = state.getBlock();
+        if (block instanceof AbstractWireBlock) {
+            input.setCount(((AbstractWireBlock) block).getWireCount(state));
+        }
+        return input;
+    }
 
-	@Override
-	public LootFunctionType getType()
-	{
-		return TYPE;
-	}
-	
-	@Override
-	public Set<LootParameter<?>> getReferencedContextParams()
-	{
-		return ImmutableSet.of(LootParameters.BLOCK_STATE);
-	}
+    @Override
+    public LootItemFunctionType getType() {
+        return TYPE;
+    }
 
-	// we can put the serializer on the same class as there's no data here
-	@Override
-	public void serialize(JsonObject json, WireCountLootFunction function, JsonSerializationContext context)
-	{
-		// noop, no data
-	}
+    @Override
+    public Set<LootContextParam<?>> getReferencedContextParams() {
+        return ImmutableSet.of(LootContextParams.BLOCK_STATE);
+    }
 
-	@Override
-	public WireCountLootFunction deserialize(JsonObject json, JsonDeserializationContext context)
-	{
-		// noop, no data
-		return INSTANCE;
-	}
+    // we can put the serializer on the same class as there's no data here
+    @Override
+    public void serialize(JsonObject json, WireCountLootFunction function, JsonSerializationContext context) {
+        // noop, no data
+    }
+
+    @Override
+    public WireCountLootFunction deserialize(JsonObject json, JsonDeserializationContext context) {
+        // noop, no data
+        return INSTANCE;
+    }
 }

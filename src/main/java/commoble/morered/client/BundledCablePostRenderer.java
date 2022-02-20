@@ -2,278 +2,275 @@ package commoble.morered.client;
 
 import java.util.Set;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
-
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.WirePostTileEntity;
 import commoble.morered.wire_post.WireSpoolItem;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.AtlasTexture;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderDispatcher;
+import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
+import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
-import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
-import net.minecraft.client.settings.PointOfView;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.util.Hand;
-import net.minecraft.util.HandSide;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.Vec3;
 
-public class BundledCablePostRenderer extends TileEntityRenderer<WirePostTileEntity>
-{
-	public static final RenderType CABLE_RENDER_TYPE = ExtraRenderTypes.CABLE_RENDER_TYPE;
+public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostTileEntity> {
+    public static final RenderType CABLE_RENDER_TYPE = ExtraRenderTypes.CABLE_RENDER_TYPE;
 
-	public static final RenderMaterial MATERIAL = new RenderMaterial(AtlasTexture.LOCATION_BLOCKS,new ResourceLocation("morered:block/bundled_network_cable")); 
+    public static final Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS, new ResourceLocation("morered" +
+            ":block/bundled_network_cable"));
 
-	public static final float[] REDS = {0.71F, 0.31F, 0.19F};
-	public static final float[] GREENS = {0.19F, 0.48F, 0.29F};
-	public static final float[] BLUES = {0.12F, 0.16F, 0.66F};
-	
-	public BundledCablePostRenderer(TileEntityRendererDispatcher rendererDispatcherIn)
-	{
-		super(rendererDispatcherIn);
-	}
+    public static final float[] REDS = {0.71F, 0.31F, 0.19F};
+    public static final float[] GREENS = {0.19F, 0.48F, 0.29F};
+    public static final float[] BLUES = {0.12F, 0.16F, 0.66F};
 
-	// heavily based on fishing rod line renderer
-	@Override
-	public void render(WirePostTileEntity post, float partialTicks, MatrixStack matrices, IRenderTypeBuffer buffer, int combinedLightIn, int combinedOverlayIn)
-	{
-		TextureAtlasSprite sprite = MATERIAL.sprite();
-		float totalMinU = sprite.getU0();
-		float totalMinV = sprite.getV0();
-		float totalMaxU = sprite.getU1();
-		float totalMaxV = sprite.getV1();
-		float texWidth = totalMaxU - totalMinU;
-		float texHeight = totalMaxV - totalMinV;
-		float quadStartU = (11F/16F) * texWidth + totalMinU;
-		float quadEndU = (13F/16F) * texWidth + totalMinU;
-		float quadStartV = (6F/16F) * texHeight + totalMinV;
-		float quadEndV = (12F/16F) * texHeight + totalMinV;
-		BlockPos postPos = post.getBlockPos();
-		Vector3d postVector = WirePostTileEntity.getConnectionVector(postPos);
-		Set<BlockPos> connections = post.getRemoteConnections();
-		World world = post.getLevel();
-		IVertexBuilder vertexBuilder = buffer.getBuffer(ExtraRenderTypes.CABLE_RENDER_TYPE);
-		for (BlockPos connectionPos : connections)
-		{
-			int startY = postPos.getY();
-			int endY = connectionPos.getY();
-			// ensure that for each pair of connections, only one cable is rendered (from the lower post if possible)
-			if (startY < endY || (startY == endY && postPos.hashCode() < connectionPos.hashCode()))
-			{
-				this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, postVector, WirePostTileEntity.getConnectionVector(connectionPos), postPos, connectionPos, quadStartU, quadEndU, quadStartV, quadEndV);
-			}
-		}
+    public BundledCablePostRenderer(BlockEntityRendererProvider.Context context) {
+    }
 
-		@SuppressWarnings("resource")
-		PlayerEntity player = Minecraft.getInstance().player;
-		for (Hand hand : Hand.values())
-		{
-			ItemStack stack = player.getItemInHand(hand);
-			if (stack.getItem() instanceof WireSpoolItem)
-			{
-				CompoundNBT nbt = stack.getTagElement(WireSpoolItem.LAST_POST_POS);
-				if (nbt != null)
-				{
-					EntityRendererManager renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
-					BlockPos positionOfCurrentPostOfPlayer = NBTUtil.readBlockPos(nbt);
+    // heavily based on fishing rod line renderer
+    @Override
+    public void render(WirePostTileEntity post, float partialTicks, PoseStack matrices, MultiBufferSource buffer,
+                       int combinedLightIn, int combinedOverlayIn) {
+        TextureAtlasSprite sprite = MATERIAL.sprite();
+        float totalMinU = sprite.getU0();
+        float totalMinV = sprite.getV0();
+        float totalMaxU = sprite.getU1();
+        float totalMaxV = sprite.getV1();
+        float texWidth = totalMaxU - totalMinU;
+        float texHeight = totalMaxV - totalMinV;
+        float quadStartU = (11F / 16F) * texWidth + totalMinU;
+        float quadEndU = (13F / 16F) * texWidth + totalMinU;
+        float quadStartV = (6F / 16F) * texHeight + totalMinV;
+        float quadEndV = (12F / 16F) * texHeight + totalMinV;
+        BlockPos postPos = post.getBlockPos();
+        Vec3 postVector = WirePostTileEntity.getConnectionVector(postPos);
+        Set<BlockPos> connections = post.getRemoteConnections();
+        Level world = post.getLevel();
+        VertexConsumer vertexBuilder = buffer.getBuffer(ExtraRenderTypes.CABLE_RENDER_TYPE);
+        for (BlockPos connectionPos : connections) {
+            int startY = postPos.getY();
+            int endY = connectionPos.getY();
+            // ensure that for each pair of connections, only one cable is rendered (from the lower post if possible)
+            if (startY < endY || (startY == endY && postPos.hashCode() < connectionPos.hashCode())) {
+                this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, postVector,
+                        WirePostTileEntity.getConnectionVector(connectionPos), postPos, connectionPos, quadStartU,
+                        quadEndU, quadStartV, quadEndV);
+            }
+        }
 
-					if (positionOfCurrentPostOfPlayer.equals(postPos))
-					{
-						Vector3d vectorOfCurrentPostOfPlayer = Vector3d.atCenterOf(positionOfCurrentPostOfPlayer);
-						int handSideID = -(hand == Hand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HandSide.RIGHT ? 1 : -1);
+        @SuppressWarnings("resource")
+        Player player = Minecraft.getInstance().player;
+        for (InteractionHand hand : InteractionHand.values()) {
+            ItemStack stack = player.getItemInHand(hand);
+            if (stack.getItem() instanceof WireSpoolItem) {
+                CompoundTag nbt = stack.getTagElement(WireSpoolItem.LAST_POST_POS);
+                if (nbt != null) {
+                    EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+                    BlockPos positionOfCurrentPostOfPlayer = NbtUtils.readBlockPos(nbt);
 
-						float swingProgress = player.getAttackAnim(partialTicks);
-						float swingZ = MathHelper.sin(MathHelper.sqrt(swingProgress) * (float) Math.PI);
-						float playerAngle = MathHelper.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
-						double playerAngleX = MathHelper.sin(playerAngle);
-						double playerAngleZ = MathHelper.cos(playerAngle);
-						double handOffset = handSideID * 0.35D;
-						double handX;
-						double handY;
-						double handZ;
-						float eyeHeight;
-						
-						// first person
-						if ((renderManager.options == null || renderManager.options.getCameraType() == PointOfView.FIRST_PERSON))
-						{
-							double fov = renderManager.options.fov;
-							fov = fov / 100.0D;
-							Vector3d handVector = new Vector3d(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
-							handVector = handVector.xRot(-MathHelper.lerp(partialTicks, player.xRotO, player.xRot) * ((float) Math.PI / 180F));
-							handVector = handVector.yRot(-MathHelper.lerp(partialTicks, player.yRotO, player.yRot) * ((float) Math.PI / 180F));
-							handVector = handVector.yRot(swingZ * 0.5F);
-							handVector = handVector.xRot(-swingZ * 0.7F);
-							handX = MathHelper.lerp(partialTicks, player.xo, player.getX()) + handVector.x;
-							handY = MathHelper.lerp(partialTicks, player.yo, player.getY()) + handVector.y;
-							handZ = MathHelper.lerp(partialTicks, player.zo, player.getZ()) + handVector.z;
-							eyeHeight = player.getEyeHeight();
-						}
-						
-						// third person
-						else
-						{
-							handX = MathHelper.lerp(partialTicks, player.xo, player.getX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
-							handY = -0.2 + player.yo + player.getEyeHeight() + (player.getY() - player.yo) * partialTicks - 0.45D;
-							handZ = MathHelper.lerp(partialTicks, player.zo, player.getZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
-							eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
-						}
-						Vector3d renderPlayerVec = new Vector3d(handX, handY + eyeHeight, handZ);
-							
-						this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, vectorOfCurrentPostOfPlayer, renderPlayerVec, postPos, player.blockPosition(), quadStartU, quadEndU, quadStartV, quadEndV);
-					
-					}
-				}
-			}
-		}
-	}
+                    if (positionOfCurrentPostOfPlayer.equals(postPos)) {
+                        Vec3 vectorOfCurrentPostOfPlayer = Vec3.atCenterOf(positionOfCurrentPostOfPlayer);
+                        int handSideID =
+                                -(hand == InteractionHand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1);
 
-	private void renderConnection(WirePostTileEntity post, World world, float partialTicks,
-		MatrixStack matrices, IVertexBuilder vertexBuilder, Vector3d startVec, Vector3d endVec, BlockPos startPos, BlockPos endPos,
-		float minU, float maxU, float minV, float maxV)
-	{
-		matrices.pushPose();
+                        float swingProgress = player.getAttackAnim(partialTicks);
+                        float swingZ = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
+                        float playerAngle =
+                                Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
+                        double playerAngleX = Mth.sin(playerAngle);
+                        double playerAngleZ = Mth.cos(playerAngle);
+                        double handOffset = handSideID * 0.35D;
+                        double handX;
+                        double handY;
+                        double handZ;
+                        float eyeHeight;
 
-		boolean translateSwap = false;
-		if (startVec.y() > endVec.y())
-		{
-			Vector3d swap = startVec;
-			startVec = endVec;
-			endVec = swap;
-			float swapF = minU;
-			minU = maxU;
-			maxU = swapF;
-			swapF = minV;
-			minV = maxV;
-			maxV = swapF;
-			translateSwap = true;
-		}
+                        // first person
+                        if (renderManager.options.getCameraType() == CameraType.FIRST_PERSON) {
+                            double fov = renderManager.options.fov;
+                            fov = fov / 100.0D;
+                            Vec3 handVector = new Vec3(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
+                            handVector =
+                                    handVector.xRot(-Mth.lerp(partialTicks, player.xRotO, player.getXRot()) * ((float) Math.PI / 180F));
+                            handVector =
+                                    handVector.yRot(-Mth.lerp(partialTicks, player.yRotO, player.getXRot()) * ((float) Math.PI / 180F));
+                            handVector = handVector.yRot(swingZ * 0.5F);
+                            handVector = handVector.xRot(-swingZ * 0.7F);
+                            handX = Mth.lerp(partialTicks, player.xo, player.getX()) + handVector.x;
+                            handY = Mth.lerp(partialTicks, player.yo, player.getY()) + handVector.y;
+                            handZ = Mth.lerp(partialTicks, player.zo, player.getZ()) + handVector.z;
+                            eyeHeight = player.getEyeHeight();
+                        }
 
-		matrices.translate(0.5D, 0.5D, 0.5D);
+                        // third person
+                        else {
+                            handX = Mth.lerp(partialTicks, player.xo, player.getX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
+                            handY = -0.2 + player.yo + player.getEyeHeight() + (player.getY() - player.yo) * partialTicks - 0.45D;
+                            handZ = Mth.lerp(partialTicks, player.zo, player.getZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
+                            eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
+                        }
+                        Vec3 renderPlayerVec = new Vec3(handX, handY + eyeHeight, handZ);
 
-		double startX = startVec.x();
-		double startY = startVec.y();
-		double startZ = startVec.z();
+                        this.renderConnection(post, world, partialTicks, matrices, vertexBuilder,
+                                vectorOfCurrentPostOfPlayer, renderPlayerVec, postPos, player.blockPosition(),
+                                quadStartU, quadEndU, quadStartV, quadEndV);
 
-		double endX = endVec.x();
-		double endY = endVec.y();
-		double endZ = endVec.z();
-		float dx = (float) (endX - startX);
-		float dy = (float) (endY - startY);
-		float dz = (float) (endZ - startZ);
-		if (translateSwap)
-		{
-			matrices.translate(-dx, -dy, -dz);
-		}
+                    }
+                }
+            }
+        }
+    }
 
-		if (startY <= endY)
-		{
-			Vector3d[] pointList = SlackInterpolator.getInterpolatedDifferences(endVec.subtract(startVec));
-			int points = pointList.length;
-			int lines = points - 1;
-			float cableWidth = 0.1F;
-			Matrix4f lastMatrix = matrices.last().pose();
-			float offsetScale = MathHelper.fastInvSqrt(dx * dx + dz * dz) * cableWidth / 2.0F;
-			float xOffset = dz * offsetScale;
-			float zOffset = dx * offsetScale;
-			int startBlockLight = world.getBrightness(LightType.BLOCK, startPos);
-			int endBlockLight = world.getBrightness(LightType.BLOCK, endPos);
-			int startSkyLight = world.getBrightness(LightType.SKY, startPos);
-			int endSkyLight = world.getBrightness(LightType.SKY, endPos);
-			float maxLerpFactor = lines - 1F;
+    private void renderConnection(WirePostTileEntity post, Level world, float partialTicks,
+                                  PoseStack matrices, VertexConsumer vertexBuilder, Vec3 startVec, Vec3 endVec,
+                                  BlockPos startPos, BlockPos endPos,
+                                  float minU, float maxU, float minV, float maxV) {
+        matrices.pushPose();
 
-			for (int segmentIndex = 0; segmentIndex < lines; ++segmentIndex)
-			{
-				Vector3d firstPoint = pointList[segmentIndex];
-				Vector3d secondPoint = pointList[segmentIndex+1];
-				float lerpFactor = segmentIndex / maxLerpFactor;
-				int lerpedBlockLight = (int) MathHelper.lerp(lerpFactor, startBlockLight, endBlockLight);
-				int lerpedSkyLight = (int) MathHelper.lerp(lerpFactor, startSkyLight, endSkyLight);
-				int packedLight = LightTexture.pack(lerpedBlockLight, lerpedSkyLight);
-				float x0 = (float) firstPoint.x;
-				float y0 = (float) firstPoint.y;
-				float z0 = (float) firstPoint.z;
-				float x1 = (float) secondPoint.x;
-				float y1 = (float) secondPoint.y;
-				float z1 = (float) secondPoint.z;
-				int secondSegmentIndex = segmentIndex+1;
-				
-				if (xOffset == 0F && zOffset == 0F) // completely vertical
-				{
-					// render the quads with a different orientation if the cable is completely vertical
-					// (otherwise they have 0 width and are invisible)
-					float width = cableWidth * 0.5F;
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, width, width, minU, maxU, minV, maxV);
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, width, width, minU, maxU, minV, maxV);
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, -width, width, minU, maxU, minV, maxV);
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, -width, width, minU, maxU, minV, maxV);
-				}
-				else
-				{
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
-					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, xOffset, zOffset, minU, maxU, minV, maxV);
-				}
-			}
-		}
+        boolean translateSwap = false;
+        if (startVec.y() > endVec.y()) {
+            Vec3 swap = startVec;
+            startVec = endVec;
+            endVec = swap;
+            float swapF = minU;
+            minU = maxU;
+            maxU = swapF;
+            swapF = minV;
+            minV = maxV;
+            maxV = swapF;
+            translateSwap = true;
+        }
 
-		matrices.popPose();
-	}
+        matrices.translate(0.5D, 0.5D, 0.5D);
 
-	@Override
-	public boolean shouldRenderOffScreen(WirePostTileEntity te)
-	{
-		return true;
-	}
+        double startX = startVec.x();
+        double startY = startVec.y();
+        double startZ = startVec.z();
 
-	public static void addVertexPair(IVertexBuilder vertexBuilder, Matrix4f lastMatrix, int packedLight, float x, float y, float z, float cableWidth,
-		float cableWidthOrZero, int segmentIndex, boolean secondVertexPairForQuad, float xOffset, float zOffset,
-		float minU, float maxU, float minV, float maxV)
-	{
-		
-		if (!secondVertexPairForQuad)
-		{
-			vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(minU, minV)
-				.uv2(packedLight)
-				.endVertex();
-			vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(minU, maxV)
-				.uv2(packedLight)
-				.endVertex();
-		}
-		else
-		{
+        double endX = endVec.x();
+        double endY = endVec.y();
+        double endZ = endVec.z();
+        float dx = (float) (endX - startX);
+        float dy = (float) (endY - startY);
+        float dz = (float) (endZ - startZ);
+        if (translateSwap) {
+            matrices.translate(-dx, -dy, -dz);
+        }
 
-			vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(maxU, maxV)
-				.uv2(packedLight)
-				.endVertex();
-			vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(maxU, minV)
-				.uv2(packedLight)
-				.endVertex();
-		}
+        if (startY <= endY) {
+            Vec3[] pointList = SlackInterpolator.getInterpolatedDifferences(endVec.subtract(startVec));
+            int points = pointList.length;
+            int lines = points - 1;
+            float cableWidth = 0.1F;
+            Matrix4f lastMatrix = matrices.last().pose();
+            float offsetScale = Mth.fastInvSqrt(dx * dx + dz * dz) * cableWidth / 2.0F;
+            float xOffset = dz * offsetScale;
+            float zOffset = dx * offsetScale;
+            int startBlockLight = world.getBrightness(LightLayer.BLOCK, startPos);
+            int endBlockLight = world.getBrightness(LightLayer.BLOCK, endPos);
+            int startSkyLight = world.getBrightness(LightLayer.SKY, startPos);
+            int endSkyLight = world.getBrightness(LightLayer.SKY, endPos);
+            float maxLerpFactor = lines - 1F;
 
-	}
+            for (int segmentIndex = 0; segmentIndex < lines; ++segmentIndex) {
+                Vec3 firstPoint = pointList[segmentIndex];
+                Vec3 secondPoint = pointList[segmentIndex + 1];
+                float lerpFactor = segmentIndex / maxLerpFactor;
+                int lerpedBlockLight = (int) Mth.lerp(lerpFactor, startBlockLight, endBlockLight);
+                int lerpedSkyLight = (int) Mth.lerp(lerpFactor, startSkyLight, endSkyLight);
+                int packedLight = LightTexture.pack(lerpedBlockLight, lerpedSkyLight);
+                float x0 = (float) firstPoint.x;
+                float y0 = (float) firstPoint.y;
+                float z0 = (float) firstPoint.z;
+                float x1 = (float) secondPoint.x;
+                float y1 = (float) secondPoint.y;
+                float z1 = (float) secondPoint.z;
+                int secondSegmentIndex = segmentIndex + 1;
+
+                if (xOffset == 0F && zOffset == 0F) // completely vertical
+                {
+                    // render the quads with a different orientation if the cable is completely vertical
+                    // (otherwise they have 0 width and are invisible)
+                    float width = cableWidth * 0.5F;
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth,
+                            segmentIndex, false, width, width, minU, maxU, minV, maxV);
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth,
+                            secondSegmentIndex, true, width, width, minU, maxU, minV, maxV);
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex,
+                            false, -width, width, minU, maxU, minV, maxV);
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F,
+                            secondSegmentIndex, true, -width, width, minU, maxU, minV, maxV);
+                } else {
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth,
+                            segmentIndex, false, xOffset, zOffset, minU, maxU, minV, maxV);
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true,
+                            xOffset, zOffset, minU, maxU, minV, maxV);
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, xOffset,
+                            zOffset, minU, maxU, minV, maxV);
+                    addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, 0F, secondSegmentIndex, true, xOffset,
+                            zOffset, minU, maxU, minV, maxV);
+                }
+            }
+        }
+
+        matrices.popPose();
+    }
+
+    @Override
+    public boolean shouldRenderOffScreen(WirePostTileEntity te) {
+        return true;
+    }
+
+    public static void addVertexPair(VertexConsumer vertexBuilder, Matrix4f lastMatrix, int packedLight, float x, float y, float z,
+                                     float cableWidth,
+                                     float cableWidthOrZero, int segmentIndex, boolean secondVertexPairForQuad, float xOffset,
+                                     float zOffset,
+                                     float minU, float maxU, float minV, float maxV) {
+
+        if (!secondVertexPairForQuad) {
+            vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
+                    .color(1F, 1F, 1F, 1F)
+                    .uv(minU, minV)
+                    .uv2(packedLight)
+                    .endVertex();
+            vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
+                    .color(1F, 1F, 1F, 1F)
+                    .uv(minU, maxV)
+                    .uv2(packedLight)
+                    .endVertex();
+        } else {
+
+            vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
+                    .color(1F, 1F, 1F, 1F)
+                    .uv(maxU, maxV)
+                    .uv2(packedLight)
+                    .endVertex();
+            vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
+                    .color(1F, 1F, 1F, 1F)
+                    .uv(maxU, minV)
+                    .uv2(packedLight)
+                    .endVertex();
+        }
+
+    }
 
 }

@@ -1,7 +1,6 @@
 {
-	"parent": "morered:block/hexidecrubrometer_template",
-	"textures":
-	{
-		"display": "morered:block/hexidecrubrometer_15"
-	}
+  "parent": "morered:block/hexidecrubrometer_template",
+  "textures": {
+    "display": "morered:block/hexidecrubrometer_15"
+  }
 }

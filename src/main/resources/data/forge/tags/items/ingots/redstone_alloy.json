@@ -1,7 +1,6 @@
 {
-	"replace": false,
-	"values": 
-	[
-		"morered:red_alloy_ingot"
-	]
+  "replace": false,
+  "values": [
+    "morered:red_alloy_ingot"
+  ]
 }

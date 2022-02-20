@@ -1,12 +1,14 @@
 {
-	"type": "minecraft:crafting_shapeless",
-	"ingredients":
-	[
-		{"tag": "morered:bundled_network_cables"},
-		{"tag": "forge:ingots/iron"}
-	],
-	"result": 
-	{
-		"item": "morered:bundled_cable_post"
-	}
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "tag": "morered:bundled_network_cables"
+    },
+    {
+      "tag": "forge:ingots/iron"
+    }
+  ],
+  "result": {
+    "item": "morered:bundled_cable_post"
+  }
 }

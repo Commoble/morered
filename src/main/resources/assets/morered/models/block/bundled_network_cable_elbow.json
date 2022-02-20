@@ -1,31 +1,127 @@
 {
-	"parent": "block/block",
-	"ambientocclusion": false,
-	"textures": {
-		"particle": "morered:block/bundled_network_cable",
-		"wire": "morered:block/bundled_network_cable"
-	},
-	"elements": [
-		{
-			"from": [0, 0, 5],
-			"to": [5, 4, 11],
-			"faces": {
-				"north": {"uv": [11, 12, 16, 16], "rotation": 180, "texture": "#wire"},
-				"south": {"uv": [6, 12, 11, 16], "texture": "#wire"},
-				"west": {"uv": [10, 6, 6, 12], "rotation": 90, "texture": "#wire", "cullface": "west"},
-				"up": {"uv": [6, 6, 11, 12], "texture": "#wire"},
-				"down": {"uv": [6, 6, 11, 12], "texture": "#wire", "cullface": "down"}
-			}
-		},
-		{
-			"from": [0, 4, 5],
-			"to": [4, 5, 11],
-			"faces": {
-				"north": {"uv": [11, 15, 15, 16], "rotation": 180, "texture": "#wire"},
-				"east": {"uv": [10, 6, 11, 12], "rotation": 90, "texture": "#wire"},
-				"south": {"uv": [6, 12, 10, 13], "texture": "#wire"},
-				"west": {"uv": [10, 6, 11, 12], "rotation": 90, "texture": "#wire", "cullface": "west"}
-			}
-		}
-	]
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "morered:block/bundled_network_cable",
+    "wire": "morered:block/bundled_network_cable"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        5
+      ],
+      "to": [
+        5,
+        4,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            11,
+            12,
+            16,
+            16
+          ],
+          "rotation": 180,
+          "texture": "#wire"
+        },
+        "south": {
+          "uv": [
+            6,
+            12,
+            11,
+            16
+          ],
+          "texture": "#wire"
+        },
+        "west": {
+          "uv": [
+            10,
+            6,
+            6,
+            12
+          ],
+          "rotation": 90,
+          "texture": "#wire",
+          "cullface": "west"
+        },
+        "up": {
+          "uv": [
+            6,
+            6,
+            11,
+            12
+          ],
+          "texture": "#wire"
+        },
+        "down": {
+          "uv": [
+            6,
+            6,
+            11,
+            12
+          ],
+          "texture": "#wire",
+          "cullface": "down"
+        }
+      }
+    },
+    {
+      "from": [
+        0,
+        4,
+        5
+      ],
+      "to": [
+        4,
+        5,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            11,
+            15,
+            15,
+            16
+          ],
+          "rotation": 180,
+          "texture": "#wire"
+        },
+        "east": {
+          "uv": [
+            10,
+            6,
+            11,
+            12
+          ],
+          "rotation": 90,
+          "texture": "#wire"
+        },
+        "south": {
+          "uv": [
+            6,
+            12,
+            10,
+            13
+          ],
+          "texture": "#wire"
+        },
+        "west": {
+          "uv": [
+            10,
+            6,
+            11,
+            12
+          ],
+          "rotation": 90,
+          "texture": "#wire",
+          "cullface": "west"
+        }
+      }
+    }
+  ]
 }

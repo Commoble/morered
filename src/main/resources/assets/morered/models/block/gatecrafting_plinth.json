@@ -1,128 +1,624 @@
 {
-	"credit": "Made with Blockbench",
-	"parent": "block/block",
-	"textures": {
-		"particle": "block/red_nether_bricks",
-		"nether_bricks": "block/red_nether_bricks",
-		"plate": "block/smooth_stone",
-		"core": "block/brewing_stand"
-	},
-	"elements": [
-		{
-			"name": "plate",
-			"from": [0, 14, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"north": {"uv": [0, 0, 16, 2], "texture": "#plate"},
-				"east": {"uv": [0, 0, 16, 2], "texture": "#plate"},
-				"south": {"uv": [0, 0, 16, 2], "texture": "#plate"},
-				"west": {"uv": [0, 0, 16, 2], "texture": "#plate"},
-				"up": {"uv": [0, 0, 16, 16], "texture": "#plate"},
-				"down": {"uv": [0, 0, 16, 16], "texture": "#plate"}
-			}
-		},
-		{
-			"name": "legA",
-			"from": [0, 0, 0],
-			"to": [4, 14, 4],
-			"faces": {
-				"north": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"east": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"south": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"west": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"down": {"uv": [12, 0, 16, 4], "texture": "#nether_bricks"}
-			}
-		},
-		{
-			"name": "legB",
-			"from": [12, 0, 0],
-			"to": [16, 14, 4],
-			"rotation": {"angle": 0, "axis": "y", "origin": [20, 8, 8]},
-			"faces": {
-				"north": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"east": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"south": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"west": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"down": {"uv": [0, 0, 4, 4], "texture": "#nether_bricks"}
-			}
-		},
-		{
-			"name": "legC",
-			"from": [0, 0, 12],
-			"to": [4, 14, 16],
-			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 20]},
-			"faces": {
-				"north": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"east": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"south": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"west": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"down": {"uv": [12, 12, 16, 16], "texture": "#nether_bricks"}
-			}
-		},
-		{
-			"name": "legD",
-			"from": [12, 0, 12],
-			"to": [16, 14, 16],
-			"rotation": {"angle": 0, "axis": "y", "origin": [20, 8, 20]},
-			"faces": {
-				"north": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"east": {"uv": [0, 2, 4, 16], "texture": "#nether_bricks"},
-				"south": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"west": {"uv": [12, 2, 16, 16], "texture": "#nether_bricks"},
-				"down": {"uv": [0, 12, 4, 16], "texture": "#nether_bricks"}
-			}
-		},
-		{
-			"name": "rodA",
-			"from": [6, 0, 6],
-			"to": [8, 14, 8],
-			"rotation": {"angle": 0, "axis": "y", "origin": [14, 8, 14]},
-			"faces": {
-				"north": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"east": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"south": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"west": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"down": {"uv": [7, 5, 9, 7], "texture": "#core"}
-			}
-		},
-		{
-			"name": "rodB",
-			"from": [8, 0, 6],
-			"to": [10, 14, 8],
-			"rotation": {"angle": 0, "axis": "y", "origin": [16, 8, 14]},
-			"faces": {
-				"north": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"east": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"south": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"west": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"down": {"uv": [7, 5, 9, 7], "texture": "#core"}
-			}
-		},
-		{
-			"name": "rodC",
-			"from": [6, 0, 8],
-			"to": [8, 14, 10],
-			"rotation": {"angle": 0, "axis": "y", "origin": [14, 8, 16]},
-			"faces": {
-				"north": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"east": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"south": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"west": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"down": {"uv": [7, 5, 9, 7], "texture": "#core"}
-			}
-		},
-		{
-			"name": "rodD",
-			"from": [8, 0, 8],
-			"to": [10, 14, 10],
-			"rotation": {"angle": 0, "axis": "y", "origin": [16, 8, 16]},
-			"faces": {
-				"north": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"east": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"south": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"west": {"uv": [7, 16, 9, 2], "texture": "#core"},
-				"down": {"uv": [7, 5, 9, 7], "texture": "#core"}
-			}
-		}
-	]
+  "credit": "Made with Blockbench",
+  "parent": "block/block",
+  "textures": {
+    "particle": "block/red_nether_bricks",
+    "nether_bricks": "block/red_nether_bricks",
+    "plate": "block/smooth_stone",
+    "core": "block/brewing_stand"
+  },
+  "elements": [
+    {
+      "name": "plate",
+      "from": [
+        0,
+        14,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#plate"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#plate"
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#plate"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            2
+          ],
+          "texture": "#plate"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        }
+      }
+    },
+    {
+      "name": "legA",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        4,
+        14,
+        4
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "east": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "south": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "west": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "down": {
+          "uv": [
+            12,
+            0,
+            16,
+            4
+          ],
+          "texture": "#nether_bricks"
+        }
+      }
+    },
+    {
+      "name": "legB",
+      "from": [
+        12,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        14,
+        4
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          20,
+          8,
+          8
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "east": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "south": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "west": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            4,
+            4
+          ],
+          "texture": "#nether_bricks"
+        }
+      }
+    },
+    {
+      "name": "legC",
+      "from": [
+        0,
+        0,
+        12
+      ],
+      "to": [
+        4,
+        14,
+        16
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          20
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "east": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "south": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "west": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "down": {
+          "uv": [
+            12,
+            12,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        }
+      }
+    },
+    {
+      "name": "legD",
+      "from": [
+        12,
+        0,
+        12
+      ],
+      "to": [
+        16,
+        14,
+        16
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          20,
+          8,
+          20
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "east": {
+          "uv": [
+            0,
+            2,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "south": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "west": {
+          "uv": [
+            12,
+            2,
+            16,
+            16
+          ],
+          "texture": "#nether_bricks"
+        },
+        "down": {
+          "uv": [
+            0,
+            12,
+            4,
+            16
+          ],
+          "texture": "#nether_bricks"
+        }
+      }
+    },
+    {
+      "name": "rodA",
+      "from": [
+        6,
+        0,
+        6
+      ],
+      "to": [
+        8,
+        14,
+        8
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          14,
+          8,
+          14
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "east": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "south": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "west": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "down": {
+          "uv": [
+            7,
+            5,
+            9,
+            7
+          ],
+          "texture": "#core"
+        }
+      }
+    },
+    {
+      "name": "rodB",
+      "from": [
+        8,
+        0,
+        6
+      ],
+      "to": [
+        10,
+        14,
+        8
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          16,
+          8,
+          14
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "east": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "south": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "west": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "down": {
+          "uv": [
+            7,
+            5,
+            9,
+            7
+          ],
+          "texture": "#core"
+        }
+      }
+    },
+    {
+      "name": "rodC",
+      "from": [
+        6,
+        0,
+        8
+      ],
+      "to": [
+        8,
+        14,
+        10
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          14,
+          8,
+          16
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "east": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "south": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "west": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "down": {
+          "uv": [
+            7,
+            5,
+            9,
+            7
+          ],
+          "texture": "#core"
+        }
+      }
+    },
+    {
+      "name": "rodD",
+      "from": [
+        8,
+        0,
+        8
+      ],
+      "to": [
+        10,
+        14,
+        10
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          16,
+          8,
+          16
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "east": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "south": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "west": {
+          "uv": [
+            7,
+            16,
+            9,
+            2
+          ],
+          "texture": "#core"
+        },
+        "down": {
+          "uv": [
+            7,
+            5,
+            9,
+            7
+          ],
+          "texture": "#core"
+        }
+      }
+    }
+  ]
 }

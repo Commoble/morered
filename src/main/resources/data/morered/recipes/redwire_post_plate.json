@@ -1,28 +1,22 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": 
-	[
-		" F ",
-		" R ",
-		"###"
-	],
-	"key": 
-	{
-		"#": 
-		{
-			"tag": "forge:quarter_slabs/smooth_stone"
-		},
-		"R": 
-		{
-			"tag": "forge:ingots/redstone_alloy"
-		},
-		"F": 
-		{
-			"tag": "forge:ingots/iron"
-		}
-	},
-	"result": 
-	{
-		"item": "morered:redwire_post_plate"
-	}
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    " R ",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "tag": "forge:quarter_slabs/smooth_stone"
+    },
+    "R": {
+      "tag": "forge:ingots/redstone_alloy"
+    },
+    "F": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "result": {
+    "item": "morered:redwire_post_plate"
+  }
 }

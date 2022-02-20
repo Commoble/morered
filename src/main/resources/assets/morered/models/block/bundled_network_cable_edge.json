@@ -1,21 +1,71 @@
 {
-	"parent": "block/block",
-	"ambientocclusion": false,
-	"textures": {
-		"particle": "morered:block/bundled_network_cable",
-		"wire": "morered:block/bundled_network_cable"
-	},
-	"elements": [
-		{
-			"from": [0, 0, 5],
-			"to": [4, 4, 11],
-			"faces": {
-				"north": {"uv": [6, 0, 10, 4], "texture": "#wire"},
-				"east": {"uv": [11, 6, 15, 12], "rotation": 270, "texture": "#wire"},
-				"south": {"uv": [6, 10, 10, 14], "rotation": 270, "texture": "#wire"},
-				"up": {"uv": [11, 6, 15, 12], "texture": "#wire"},
-				"down": {"uv": [0, 0, 0, 0], "texture": "#wire"}
-			}
-		}
-	]
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "morered:block/bundled_network_cable",
+    "wire": "morered:block/bundled_network_cable"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        5
+      ],
+      "to": [
+        4,
+        4,
+        11
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            6,
+            0,
+            10,
+            4
+          ],
+          "texture": "#wire"
+        },
+        "east": {
+          "uv": [
+            11,
+            6,
+            15,
+            12
+          ],
+          "rotation": 270,
+          "texture": "#wire"
+        },
+        "south": {
+          "uv": [
+            6,
+            10,
+            10,
+            14
+          ],
+          "rotation": 270,
+          "texture": "#wire"
+        },
+        "up": {
+          "uv": [
+            11,
+            6,
+            15,
+            12
+          ],
+          "texture": "#wire"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            0,
+            0
+          ],
+          "texture": "#wire"
+        }
+      }
+    }
+  ]
 }

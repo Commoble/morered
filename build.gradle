@@ -1,24 +1,25 @@
 
 buildscript {
     repositories {
-        maven { url = 'https://files.minecraftforge.net/maven' }
-        jcenter()
-        mavenCentral()
+        maven { url = 'https://maven.minecraftforge.net' }
         maven {url='https://repo.spongepowered.org/repository/maven-public/'}
+        mavenCentral()
     }
     dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '3.+', changing: true
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
     }
 }
+
 plugins {
 	// this version works on gradle 4.9
 	// more recent versions of shadow work on more recent versions of gradle
-	id 'com.github.johnrengelman.shadow' version '4.0.4'
+	id 'com.github.johnrengelman.shadow' version '7.1.0'
 }
+
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'com.github.johnrengelman.shadow'
-apply plugin: 'java' // java plugin is needed for the shadow plugin to work
+apply plugin: 'java'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
@@ -26,12 +27,12 @@ version = "${mod_version}"
 group = "commoble.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = "${modid}-${mc_version}"
 
-sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+//sourceCompatibility = targetCompatibility = compileJava.sourceCompatibility = compileJava.targetCompatibility = '1.8' // Need this here so eclipse task generates correctly.
 
-sourceSets
-{
+sourceSets {
 	main
-	api
+//	api
 	test
 	datagen
 	generated
@@ -46,35 +47,41 @@ minecraft {
     runs {
         client {
             workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
             properties 'mixin.env.disableRefMap': 'true'
             arg "-mixin.config="+"morered"+".mixins.json"
 
             mods {
-                "morered" {
+                morered {
                     source sourceSets.main
-					source sourceSets.api
+//					source sourceSets.api
                 }
             }
         }
 
         server {
             workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
             properties 'mixin.env.disableRefMap': 'true'
             arg "-mixin.config="+"morered"+".mixins.json"
 
             mods {
-                "morered" {
+                morered {
                     source sourceSets.main
-					source sourceSets.api
+//					source sourceSets.api
                 }
             }
         }
 
         data {
             workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+
             properties 'mixin.env.disableRefMap': 'true'
             arg "-mixin.config="+"morered"+".mixins.json"
 
@@ -85,9 +92,9 @@ minecraft {
                 {
 					source sourceSets.datagen
                 }
-                "morered" {
+                morered {
                     source sourceSets.main
-					source sourceSets.api
+//					source sourceSets.api
                 }
             }
         }
@@ -96,16 +103,15 @@ minecraft {
 
 configurations {
 	shade
-	apiCompile.extendsFrom(compile)
+//	apiCompile.extendsFrom(compile)
 	debugCompile.extendsFrom(compile)
 }
 
 repositories {
 	// jei maven and backup maven
 	maven {url = "https://dvs1.progwml6.com/files/maven/"}
-	maven {url = "https://modmaven.k-4u.nl"}
+	maven {url = "https://modmaven.dev"}
 	// repos for mixin
-	jcenter()
 	mavenCentral()
 	// repo for databuddy
 	maven { url "https://cubicinterpolation.net/maven/" }
@@ -113,25 +119,27 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
-	implementation sourceSets.api.output
+
+//	implementation sourceSets.api.output
     
     // jei
-	compileOnly fg.deobf("mezz.jei:${jei_branch}:${jei_version}:api")
-	runtimeOnly fg.deobf("mezz.jei:${jei_branch}:${jei_version}")
+	compileOnly fg.deobf("mezz.jei:jei-${jei_branch}:${jei_version}:api")
+	runtimeOnly fg.deobf("mezz.jei:jei-${jei_branch}:${jei_version}")
 
 	// junit dependencies
 	testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
 	
 	// databuddy shadowjar
-	compile fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
+	implementation fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	shade fg.deobf("commoble.databuddy:${databuddy_branch}:${databuddy_version}")
 	
-	compileOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}:api")
-	runtimeOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}")
+//	compileOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}:api")
+//	runtimeOnly fg.deobf("commoble.bagofyurting:${bagofyurting_branch}:${bagofyurting_version}")
 	
 	// cram dependencies
 	//compileOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}:debug")
 	//runtimeOnly fg.deobf("commoble.cram:${cram_branch}:${cram_version}")
+    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
 test {
@@ -161,7 +169,7 @@ shadowJar {
 	classifier = ''
 	configurations = [project.configurations.shade]
 	relocate 'commoble.databuddy', "${project.group}.shadow.commoble.databuddy"
-	from sourceSets.api.output
+//	from sourceSets.api.output
 }
 
 reobf {
@@ -177,45 +185,46 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
 }
 
 task sourcesJar(type: Jar) {
-	classifier = "sources"
+    archiveClassifier.set("sources")
 	from sourceSets.main.allJava
-	from sourceSets.api.allJava
+//	from sourceSets.api.allJava
 }
-task apiJar(type: Jar) {
-	classifier = "api"
-	from sourceSets.api.output
-	from sourceSets.api.allJava
-	// exclude api internals from canonical public api
-	exclude "commoble/morered/api/internal/"
-}
+//task apiJar(type: Jar) {
+//    archiveClassifier.set("api")
+//	from sourceSets.api.output
+//	from sourceSets.api.allJava
+//	// exclude api internals from canonical public api
+//	exclude "commoble/morered/api/internal/"
+//}
 
 // full production jar plus attached sources for debugging
 task debugJar(type: Jar) {
 	classifier = "debug"
 	from sourceSets.main.output
 	from sourceSets.main.allJava
-	from sourceSets.api.output
-	from sourceSets.api.allJava
+//	from sourceSets.api.output
+//	from sourceSets.api.allJava
 	// we have to exclude this from the compileOnly dependency,
 	// or mixins from this mod don't apply when we run the depending mod, weirdly
 	exclude "META-INF/mods.toml"
 }
 
 artifacts {
-	archives javadocJar
-	archives sourcesJar
-	archives apiJar
-	archives debugJar
+    archives jar, sourcesJar, javadocJar
+//	archives javadocJar
+//	archives sourcesJar
+//	archives apiJar
+//	archives debugJar
 }
 
-// run "gradlew build publish" to build jars and generate a maven repo for them
-// run "gradlew build" to build the jars without mavening them
+// run "gradlew_old build publish" to build jars and generate a maven repo for them
+// run "gradlew_old build" to build the jars without mavening them
 publishing {
     publications {
         mavenJava(MavenPublication) {
 			artifactId project.archivesBaseName
             artifact jar
-			artifact apiJar
+//			artifact apiJar
 			artifact sourcesJar
 			//artifact javadocJar
 			artifact debugJar

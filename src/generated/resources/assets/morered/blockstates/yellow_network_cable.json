@@ -1,1 +1,190 @@
-{"multipart":[{"apply":{"model":"morered:block/yellow_network_cable_parts"}},{"when":{"down":"true"},"apply":{"model":"morered:block/yellow_network_cable_node"}},{"when":{"up":"true"},"apply":{"model":"morered:block/yellow_network_cable_node","x":180}},{"when":{"south":"true"},"apply":{"model":"morered:block/yellow_network_cable_node","x":90}},{"when":{"west":"true"},"apply":{"y":90,"model":"morered:block/yellow_network_cable_node","x":90}},{"when":{"north":"true"},"apply":{"y":180,"model":"morered:block/yellow_network_cable_node","x":90}},{"when":{"east":"true"},"apply":{"y":270,"model":"morered:block/yellow_network_cable_node","x":90}},{"when":{"west":"true","down":"true"},"apply":{"model":"morered:block/yellow_network_cable_elbow"}},{"when":{"north":"true","down":"true"},"apply":{"y":90,"model":"morered:block/yellow_network_cable_elbow"}},{"when":{"east":"true","down":"true"},"apply":{"y":180,"model":"morered:block/yellow_network_cable_elbow"}},{"when":{"south":"true","down":"true"},"apply":{"y":270,"model":"morered:block/yellow_network_cable_elbow"}},{"when":{"south":"true","west":"true"},"apply":{"model":"morered:block/yellow_network_cable_elbow","x":90}},{"when":{"north":"true","west":"true"},"apply":{"y":90,"model":"morered:block/yellow_network_cable_elbow","x":90}},{"when":{"east":"true","north":"true"},"apply":{"y":180,"model":"morered:block/yellow_network_cable_elbow","x":90}},{"when":{"east":"true","south":"true"},"apply":{"y":270,"model":"morered:block/yellow_network_cable_elbow","x":90}},{"when":{"west":"true","up":"true"},"apply":{"model":"morered:block/yellow_network_cable_elbow","x":180}},{"when":{"north":"true","up":"true"},"apply":{"y":90,"model":"morered:block/yellow_network_cable_elbow","x":180}},{"when":{"east":"true","up":"true"},"apply":{"y":180,"model":"morered:block/yellow_network_cable_elbow","x":180}},{"when":{"south":"true","up":"true"},"apply":{"y":270,"model":"morered:block/yellow_network_cable_elbow","x":180}}]}
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "morered:block/yellow_network_cable_parts"
+      }
+    },
+    {
+      "when": {
+        "down": "true"
+      },
+      "apply": {
+        "model": "morered:block/yellow_network_cable_node"
+      }
+    },
+    {
+      "when": {
+        "up": "true"
+      },
+      "apply": {
+        "model": "morered:block/yellow_network_cable_node",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true"
+      },
+      "apply": {
+        "model": "morered:block/yellow_network_cable_node",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "west": "true"
+      },
+      "apply": {
+        "y": 90,
+        "model": "morered:block/yellow_network_cable_node",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "north": "true"
+      },
+      "apply": {
+        "y": 180,
+        "model": "morered:block/yellow_network_cable_node",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true"
+      },
+      "apply": {
+        "y": 270,
+        "model": "morered:block/yellow_network_cable_node",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "down": "true"
+      },
+      "apply": {
+        "model": "morered:block/yellow_network_cable_elbow"
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "down": "true"
+      },
+      "apply": {
+        "y": 90,
+        "model": "morered:block/yellow_network_cable_elbow"
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "down": "true"
+      },
+      "apply": {
+        "y": 180,
+        "model": "morered:block/yellow_network_cable_elbow"
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "down": "true"
+      },
+      "apply": {
+        "y": 270,
+        "model": "morered:block/yellow_network_cable_elbow"
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "west": "true"
+      },
+      "apply": {
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "west": "true"
+      },
+      "apply": {
+        "y": 90,
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "north": "true"
+      },
+      "apply": {
+        "y": 180,
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "south": "true"
+      },
+      "apply": {
+        "y": 270,
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 90
+      }
+    },
+    {
+      "when": {
+        "west": "true",
+        "up": "true"
+      },
+      "apply": {
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "north": "true",
+        "up": "true"
+      },
+      "apply": {
+        "y": 90,
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "east": "true",
+        "up": "true"
+      },
+      "apply": {
+        "y": 180,
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 180
+      }
+    },
+    {
+      "when": {
+        "south": "true",
+        "up": "true"
+      },
+      "apply": {
+        "y": 270,
+        "model": "morered:block/yellow_network_cable_elbow",
+        "x": 180
+      }
+    }
+  ]
+}

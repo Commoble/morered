@@ -1,23 +1,18 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": 
-	[
-		"F",
-		"R"
-	],
-	"key": 
-	{
-		"R": 
-		{
-			"tag": "forge:ingots/redstone_alloy"
-		},
-		"F": 
-		{
-			"tag": "forge:ingots/iron"
-		}
-	},
-	"result": 
-	{
-		"item": "morered:redwire_post"
-	}
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "F",
+    "R"
+  ],
+  "key": {
+    "R": {
+      "tag": "forge:ingots/redstone_alloy"
+    },
+    "F": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "result": {
+    "item": "morered:redwire_post"
+  }
 }

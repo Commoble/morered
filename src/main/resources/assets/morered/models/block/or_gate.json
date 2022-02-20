@@ -1,118 +1,463 @@
 {
-	"credit": "Made with Blockbench",
-	"parent": "morered:block/plate_template",
-	"ambientocclusion": false,
-	"textures": {
-		"output_overlay": "morered:block/or_gate_output_overlay",
-		"particle": "block/smooth_stone",
-		"plate": "block/smooth_stone",
-		"plate_overlay": "morered:block/plate_overlay",
-		"plate_torch": "morered:block/plate_torch",
-		"input_a_overlay": "morered:block/nor_gate_input_a_overlay",
-		"edge": "morered:block/not_gate_input_overlay",
-		"diode": "block/stone"
-	},
-	"elements": [
-		{
-			"name": "plate",
-			"from": [0, 0, 0],
-			"to": [16, 2, 16],
-			"faces": {
-				"north": {"uv": [0, 14, 16, 16], "texture": "#plate"},
-				"east": {"uv": [0, 14, 16, 16], "texture": "#plate"},
-				"south": {"uv": [0, 14, 16, 16], "texture": "#plate"},
-				"west": {"uv": [0, 14, 16, 16], "texture": "#plate"},
-				"up": {"uv": [0, 0, 16, 16], "texture": "#plate"},
-				"down": {"uv": [0, 0, 16, 16], "texture": "#plate"}
-			}
-		},
-		{
-			"name": "plate_overlay",
-			"from": [0, 0, 0],
-			"to": [16, 2, 16],
-			"faces": {
-				"up": {"uv": [0, 0, 16, 16], "texture": "#plate_overlay"}
-			}
-		},
-		{
-			"name": "diode",
-			"from": [7, 0, 7],
-			"to": [9, 4, 9],
-			"faces": {
-				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "texture": "#diode"},
-				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
-				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
-			}
-		},
-		{
-			"name": "output_diode",
-			"from": [7, 0, 3],
-			"to": [9, 4, 5],
-			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 4]},
-			"faces": {
-				"east": {"uv": [14, 12, 16, 16], "texture": "#diode"},
-				"west": {"uv": [14, 12, 16, 16], "texture": "#diode"},
-				"up": {"uv": [2, 1, 4, 3], "texture": "#diode"}
-			}
-		},
-		{
-			"name": "torch",
-			"from": [7, 0, 5],
-			"to": [9, 4, 7],
-			"faces": {
-				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 12},
-				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 12},
-				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 12}
-			}
-		},
-		{
-			"name": "output_torch",
-			"from": [7, 0, 1],
-			"to": [9, 4, 3],
-			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 4]},
-			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "texture": "#plate_torch", "tintindex": 11},
-				"east": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 11},
-				"west": {"uv": [2, 0, 0, 4], "texture": "#plate_torch", "tintindex": 11},
-				"up": {"uv": [0, 0, 2, 2], "texture": "#plate_torch", "tintindex": 11}
-			}
-		},
-		{
-			"name": "input_a_overlay",
-			"from": [0, 0, 0],
-			"to": [16, 2, 16],
-			"faces": {
-				"east": {"uv": [0, 14, 16, 16], "texture": "#edge", "tintindex": 3},
-				"up": {"uv": [0, 0, 16, 16], "texture": "#input_a_overlay", "tintindex": 3}
-			}
-		},
-		{
-			"name": "input_b_overlay",
-			"from": [0, 0, 0],
-			"to": [16, 2, 16],
-			"faces": {
-				"south": {"uv": [0, 14, 16, 16], "texture": "#edge", "tintindex": 4},
-				"up": {"uv": [0, 0, 16, 16], "rotation": 90, "texture": "#input_a_overlay", "tintindex": 4}
-			}
-		},
-		{
-			"name": "input_c_overlay",
-			"from": [0, 0, 0],
-			"to": [16, 2, 16],
-			"faces": {
-				"west": {"uv": [0, 14, 16, 16], "texture": "#edge", "tintindex": 5},
-				"up": {"uv": [0, 0, 16, 16], "rotation": 180, "texture": "#input_a_overlay", "tintindex": 5}
-			}
-		},
-		{
-			"name": "output_overlay",
-			"from": [0, 0, 0],
-			"to": [16, 2, 16],
-			"faces": {
-				"north": {"uv": [0, 14, 16, 16], "texture": "#edge", "tintindex": 11},
-				"up": {"uv": [0, 0, 16, 16], "texture": "#output_overlay", "tintindex": 11}
-			}
-		}
-	]
+  "credit": "Made with Blockbench",
+  "parent": "morered:block/plate_template",
+  "ambientocclusion": false,
+  "textures": {
+    "output_overlay": "morered:block/or_gate_output_overlay",
+    "particle": "block/smooth_stone",
+    "plate": "block/smooth_stone",
+    "plate_overlay": "morered:block/plate_overlay",
+    "plate_torch": "morered:block/plate_torch",
+    "input_a_overlay": "morered:block/nor_gate_input_a_overlay",
+    "edge": "morered:block/not_gate_input_overlay",
+    "diode": "block/stone"
+  },
+  "elements": [
+    {
+      "name": "plate",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        },
+        "east": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        },
+        "south": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        },
+        "west": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        },
+        "down": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#plate"
+        }
+      }
+    },
+    {
+      "name": "plate_overlay",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#plate_overlay"
+        }
+      }
+    },
+    {
+      "name": "diode",
+      "from": [
+        7,
+        0,
+        7
+      ],
+      "to": [
+        9,
+        4,
+        9
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "texture": "#diode"
+        },
+        "south": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "texture": "#diode"
+        },
+        "west": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "texture": "#diode"
+        },
+        "up": {
+          "uv": [
+            2,
+            1,
+            4,
+            3
+          ],
+          "texture": "#diode"
+        }
+      }
+    },
+    {
+      "name": "output_diode",
+      "from": [
+        7,
+        0,
+        3
+      ],
+      "to": [
+        9,
+        4,
+        5
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          4
+        ]
+      },
+      "faces": {
+        "east": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "texture": "#diode"
+        },
+        "west": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "texture": "#diode"
+        },
+        "up": {
+          "uv": [
+            2,
+            1,
+            4,
+            3
+          ],
+          "texture": "#diode"
+        }
+      }
+    },
+    {
+      "name": "torch",
+      "from": [
+        7,
+        0,
+        5
+      ],
+      "to": [
+        9,
+        4,
+        7
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 12
+        },
+        "west": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 12
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 12
+        }
+      }
+    },
+    {
+      "name": "output_torch",
+      "from": [
+        7,
+        0,
+        1
+      ],
+      "to": [
+        9,
+        4,
+        3
+      ],
+      "rotation": {
+        "angle": 0,
+        "axis": "y",
+        "origin": [
+          8,
+          8,
+          4
+        ]
+      },
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 11
+        },
+        "east": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 11
+        },
+        "west": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 11
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "texture": "#plate_torch",
+          "tintindex": 11
+        }
+      }
+    },
+    {
+      "name": "input_a_overlay",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "east": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#edge",
+          "tintindex": 3
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#input_a_overlay",
+          "tintindex": 3
+        }
+      }
+    },
+    {
+      "name": "input_b_overlay",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "south": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#edge",
+          "tintindex": 4
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#input_a_overlay",
+          "tintindex": 4
+        }
+      }
+    },
+    {
+      "name": "input_c_overlay",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#edge",
+          "tintindex": 5
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 180,
+          "texture": "#input_a_overlay",
+          "tintindex": 5
+        }
+      }
+    },
+    {
+      "name": "output_overlay",
+      "from": [
+        0,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        2,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "texture": "#edge",
+          "tintindex": 11
+        },
+        "up": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "texture": "#output_overlay",
+          "tintindex": 11
+        }
+      }
+    }
+  ]
 }

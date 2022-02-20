@@ -1,20 +1,16 @@
 {
-	"required": true,
-	"package": "commoble.morered.mixin",
-	"compatibilityLevel": "JAVA_8",
-	"refmap": "morered.refmap.json",
-	"mixins": 
-	[
-		"ChunkManagerMixin"
-	],
-	"client": 
-	[
-		"ClientBlockItemMixin",
-		"ClientPlayerControllerAccess"
-	],
-	"injectors": 
-	{
-		"defaultRequire": 1
-	},
-	"minVersion": "0.8"
+  "required": true,
+  "package": "commoble.morered.mixin",
+  "compatibilityLevel": "JAVA_8",
+  "refmap": "morered.refmap.json",
+  "mixins": [
+    "ChunkManagerMixin"
+  ],
+  "client": [
+    "ClientBlockItemMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "minVersion": "0.8"
 }

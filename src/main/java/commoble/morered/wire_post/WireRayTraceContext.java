@@ -1,51 +1,48 @@
 package commoble.morered.wire_post;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-/** RayTraceContext but without requiring an entity **/
-public class WireRayTraceContext
-{
-	public final Vector3d startVec;
-	public final Vector3d endVec;
-	public final RayTraceContext.BlockMode blockMode;
-	public final RayTraceContext.FluidMode fluidMode;
-	public final ISelectionContext context;
+/**
+ * RayTraceContext but without requiring an entity
+ **/
+public class WireRayTraceContext {
+    public final Vec3 startVec;
+    public final Vec3 endVec;
+    public final ClipContext.Block blockMode;
+    public final ClipContext.Fluid fluidMode;
+    public final CollisionContext context;
 
-	public WireRayTraceContext(WireRayTraceSelectionContext selectionContext, Vector3d startVecIn, Vector3d endVecIn, RayTraceContext.BlockMode blockModeIn, RayTraceContext.FluidMode fluidModeIn)
-	{
-		this.startVec = startVecIn;
-		this.endVec = endVecIn;
-		this.blockMode = blockModeIn;
-		this.fluidMode = fluidModeIn;
-		this.context = selectionContext;
-	}
+    public WireRayTraceContext(WireRayTraceSelectionContext selectionContext, Vec3 startVecIn, Vec3 endVecIn,
+                               ClipContext.Block blockModeIn, ClipContext.Fluid fluidModeIn) {
+        this.startVec = startVecIn;
+        this.endVec = endVecIn;
+        this.blockMode = blockModeIn;
+        this.fluidMode = fluidModeIn;
+        this.context = selectionContext;
+    }
 
-	public Vector3d getEndVec()
-	{
-		return this.endVec;
-	}
+    public Vec3 getEndVec() {
+        return this.endVec;
+    }
 
-	public Vector3d getStartVec()
-	{
-		return this.startVec;
-	}
+    public Vec3 getStartVec() {
+        return this.startVec;
+    }
 
-	public VoxelShape getBlockShape(BlockState blockStateIn, IBlockReader worldIn, BlockPos pos)
-	{
-		return this.blockMode.get(blockStateIn, worldIn, pos, this.context);
-	}
+    public VoxelShape getBlockShape(BlockState blockStateIn, BlockGetter worldIn, BlockPos pos) {
+        return this.blockMode.get(blockStateIn, worldIn, pos, this.context);
+    }
 
-	public VoxelShape getFluidShape(FluidState stateIn, IBlockReader worldIn, BlockPos pos)
-	{
-		return this.fluidMode.canPick(stateIn) ? stateIn.getShape(worldIn, pos) : VoxelShapes.empty();
-	}
+    public VoxelShape getFluidShape(FluidState stateIn, BlockGetter worldIn, BlockPos pos) {
+        return this.fluidMode.canPick(stateIn) ? stateIn.getShape(worldIn, pos) : Shapes.empty();
+    }
 
 }

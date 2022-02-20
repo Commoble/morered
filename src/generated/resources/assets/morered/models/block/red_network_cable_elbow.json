@@ -1,1 +1,6 @@
-{"parent":"morered:block/colored_network_cable_elbow_template","textures":{"wire":"morered:block/red_network_cable"}}
+{
+  "parent": "morered:block/colored_network_cable_elbow_template",
+  "textures": {
+    "wire": "morered:block/red_network_cable"
+  }
+}

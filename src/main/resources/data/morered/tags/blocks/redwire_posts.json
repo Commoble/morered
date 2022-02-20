@@ -1,9 +1,8 @@
 {
-	"replace": false,
-	"values":
-	[
-		"morered:redwire_post",
-		"morered:redwire_post_plate",
-		"morered:redwire_post_relay_plate"
-	]
+  "replace": false,
+  "values": [
+    "morered:redwire_post",
+    "morered:redwire_post_plate",
+    "morered:redwire_post_relay_plate"
+  ]
 }

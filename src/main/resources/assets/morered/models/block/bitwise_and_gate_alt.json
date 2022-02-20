@@ -1,6 +1,6 @@
 {
-	"parent": "morered:block/two_input_bitwise_logic_plate_template_alt",
-	"textures": {
-		"symbol": "morered:block/and_gate_symbol"
-	}
+  "parent": "morered:block/two_input_bitwise_logic_plate_template_alt",
+  "textures": {
+    "symbol": "morered:block/and_gate_symbol"
+  }
 }

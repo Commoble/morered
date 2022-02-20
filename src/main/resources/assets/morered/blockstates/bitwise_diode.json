@@ -1,35 +1,119 @@
 {
-	"variants":
-	{
-		"facing=down,rotation=0": {"model":"morered:block/bitwise_diode"},
-		"facing=down,rotation=1": {"model":"morered:block/bitwise_diode", "y": 90},
-		"facing=down,rotation=2": {"model":"morered:block/bitwise_diode", "y": 180},
-		"facing=down,rotation=3": {"model":"morered:block/bitwise_diode", "y": 270},
-		
-		"facing=up,rotation=0": {"model":"morered:block/bitwise_diode", "x": 180, "y": 180},
-		"facing=up,rotation=1": {"model":"morered:block/bitwise_diode", "x": 180, "y": 90},
-		"facing=up,rotation=2": {"model":"morered:block/bitwise_diode", "x": 180, "y": 0},
-		"facing=up,rotation=3": {"model":"morered:block/bitwise_diode", "x": 180, "y": 270},
-		
-		"facing=north,rotation=0": {"model":"morered:block/bitwise_diode", "x": 270, "y": 0},
-		"facing=north,rotation=1": {"model":"morered:block/bitwise_diode_alt", "x": 180, "y": 270},
-		"facing=north,rotation=2": {"model":"morered:block/bitwise_diode", "x": 90, "y": 180},
-		"facing=north,rotation=3": {"model":"morered:block/bitwise_diode_alt", "x": 0, "y": 270},
-		
-		"facing=south,rotation=0": {"model":"morered:block/bitwise_diode", "x": 270, "y": 180},
-		"facing=south,rotation=1": {"model":"morered:block/bitwise_diode_alt", "x": 180, "y": 90},
-		"facing=south,rotation=2": {"model":"morered:block/bitwise_diode", "x": 90, "y": 0},
-		"facing=south,rotation=3": {"model":"morered:block/bitwise_diode_alt", "x": 0, "y": 90},
-		
-		"facing=west,rotation=0": {"model":"morered:block/bitwise_diode", "x": 270, "y": 270},
-		"facing=west,rotation=1": {"model":"morered:block/bitwise_diode_alt", "x": 180, "y": 180},
-		"facing=west,rotation=2": {"model":"morered:block/bitwise_diode", "x": 90, "y": 90},
-		"facing=west,rotation=3": {"model":"morered:block/bitwise_diode_alt", "x": 0, "y": 180},
-		
-		"facing=east,rotation=0": {"model":"morered:block/bitwise_diode", "x": 270, "y": 90},
-		"facing=east,rotation=1": {"model":"morered:block/bitwise_diode_alt", "x": 180, "y": 0},
-		"facing=east,rotation=2": {"model":"morered:block/bitwise_diode", "x": 90, "y": 270},
-		"facing=east,rotation=3": {"model":"morered:block/bitwise_diode_alt", "x": 0, "y": 0}
-		
-	}
+  "variants": {
+    "facing=down,rotation=0": {
+      "model": "morered:block/bitwise_diode"
+    },
+    "facing=down,rotation=1": {
+      "model": "morered:block/bitwise_diode",
+      "y": 90
+    },
+    "facing=down,rotation=2": {
+      "model": "morered:block/bitwise_diode",
+      "y": 180
+    },
+    "facing=down,rotation=3": {
+      "model": "morered:block/bitwise_diode",
+      "y": 270
+    },
+    "facing=up,rotation=0": {
+      "model": "morered:block/bitwise_diode",
+      "x": 180,
+      "y": 180
+    },
+    "facing=up,rotation=1": {
+      "model": "morered:block/bitwise_diode",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,rotation=2": {
+      "model": "morered:block/bitwise_diode",
+      "x": 180,
+      "y": 0
+    },
+    "facing=up,rotation=3": {
+      "model": "morered:block/bitwise_diode",
+      "x": 180,
+      "y": 270
+    },
+    "facing=north,rotation=0": {
+      "model": "morered:block/bitwise_diode",
+      "x": 270,
+      "y": 0
+    },
+    "facing=north,rotation=1": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 180,
+      "y": 270
+    },
+    "facing=north,rotation=2": {
+      "model": "morered:block/bitwise_diode",
+      "x": 90,
+      "y": 180
+    },
+    "facing=north,rotation=3": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 0,
+      "y": 270
+    },
+    "facing=south,rotation=0": {
+      "model": "morered:block/bitwise_diode",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,rotation=1": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 180,
+      "y": 90
+    },
+    "facing=south,rotation=2": {
+      "model": "morered:block/bitwise_diode",
+      "x": 90,
+      "y": 0
+    },
+    "facing=south,rotation=3": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 0,
+      "y": 90
+    },
+    "facing=west,rotation=0": {
+      "model": "morered:block/bitwise_diode",
+      "x": 270,
+      "y": 270
+    },
+    "facing=west,rotation=1": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 180,
+      "y": 180
+    },
+    "facing=west,rotation=2": {
+      "model": "morered:block/bitwise_diode",
+      "x": 90,
+      "y": 90
+    },
+    "facing=west,rotation=3": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 0,
+      "y": 180
+    },
+    "facing=east,rotation=0": {
+      "model": "morered:block/bitwise_diode",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,rotation=1": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 180,
+      "y": 0
+    },
+    "facing=east,rotation=2": {
+      "model": "morered:block/bitwise_diode",
+      "x": 90,
+      "y": 270
+    },
+    "facing=east,rotation=3": {
+      "model": "morered:block/bitwise_diode_alt",
+      "x": 0,
+      "y": 0
+    }
+  }
 }

@@ -1,19 +1,60 @@
 {
-	"parent": "block/block",
-	"ambientocclusion": false,
-	"textures": {
-		"particle": "#wire"
-	},
-	"elements": [
-		{
-			"from": [0, 0, 6],
-			"to": [3, 3, 10],
-			"faces": {
-				"north": {"uv": [3, 6, 0, 9], "texture": "#wire"},
-				"east": {"uv": [6, 3, 10, 6], "texture": "#wire"},
-				"south": {"uv": [0, 6, 3, 9], "texture": "#wire"},
-				"up": {"uv": [6, 3, 10, 6], "rotation": 90, "texture": "#wire"}
-			}
-		}
-	]
+  "parent": "block/block",
+  "ambientocclusion": false,
+  "textures": {
+    "particle": "#wire"
+  },
+  "elements": [
+    {
+      "from": [
+        0,
+        0,
+        6
+      ],
+      "to": [
+        3,
+        3,
+        10
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            3,
+            6,
+            0,
+            9
+          ],
+          "texture": "#wire"
+        },
+        "east": {
+          "uv": [
+            6,
+            3,
+            10,
+            6
+          ],
+          "texture": "#wire"
+        },
+        "south": {
+          "uv": [
+            0,
+            6,
+            3,
+            9
+          ],
+          "texture": "#wire"
+        },
+        "up": {
+          "uv": [
+            6,
+            3,
+            10,
+            6
+          ],
+          "rotation": 90,
+          "texture": "#wire"
+        }
+      }
+    }
+  ]
 }

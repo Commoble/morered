@@ -1,187 +1,848 @@
 {
-	"credit": "Made with Blockbench",
-	"parent": "morered:block/plate_template",
-	"ambientocclusion": false,
-	"textures": {
-		"7": "morered:block/xnor_gate_output_overlay",
-		"input_a_overlay": "morered:block/xor_gate_input_a_overlay",
-		"middle_overlay": "morered:block/xor_gate_middle_overlay",
-		"particle": "block/smooth_stone",
-		"plate": "block/smooth_stone",
-		"plate_overlay": "morered:block/plate_overlay",
-		"plate_torch": "morered:block/plate_torch",
-		"edge": "morered:block/not_gate_input_overlay",
-		"diode": "block/stone",
-		"suboutput_a_overlay": "morered:block/xnor_gate_suboutput_a_overlay"
-	},
-	"elements": [
-		{
-			"name": "plate",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"north": {"uv": [0, 14, 16, 16], "rotation": 90, "texture": "#plate"},
-				"east": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#plate"},
-				"south": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#plate"},
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#plate"},
-				"up": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#plate"},
-				"down": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#plate"}
-			}
-		},
-		{
-			"name": "plate_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#plate_overlay"}
-			}
-		},
-		{
-			"name": "diode_a",
-			"from": [12, 11, 7],
-			"to": [16, 13, 9],
-			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
-				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
-			}
-		},
-		{
-			"name": "torch_a",
-			"from": [12, 11, 5],
-			"to": [16, 13, 7],
-			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 16},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 16},
-				"west": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 16},
-				"up": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 16},
-				"down": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 16}
-			}
-		},
-		{
-			"name": "diode_c",
-			"from": [12, 3, 7],
-			"to": [16, 5, 9],
-			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
-				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
-			}
-		},
-		{
-			"name": "torch_c",
-			"from": [12, 3, 5],
-			"to": [16, 5, 7],
-			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 17},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 17},
-				"west": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 17},
-				"up": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 17},
-				"down": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 17}
-			}
-		},
-		{
-			"name": "nor_diode",
-			"from": [12, 7, 13],
-			"to": [16, 9, 15],
-			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
-				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
-			}
-		},
-		{
-			"name": "nor_torch",
-			"from": [12, 7, 11],
-			"to": [16, 9, 13],
-			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 12},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 12},
-				"west": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 12},
-				"up": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 12},
-				"down": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 12}
-			}
-		},
-		{
-			"name": "xnor_diode",
-			"from": [12, 7, 5],
-			"to": [16, 9, 7],
-			"faces": {
-				"north": {"uv": [14, 12, 16, 16], "rotation": 90, "texture": "#diode"},
-				"south": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"west": {"uv": [2, 1, 4, 3], "rotation": 270, "texture": "#diode"},
-				"up": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"},
-				"down": {"uv": [14, 12, 16, 16], "rotation": 270, "texture": "#diode"}
-			}
-		},
-		{
-			"name": "xnor_torch",
-			"from": [12, 7, 3],
-			"to": [16, 9, 5],
-			"faces": {
-				"north": {"uv": [0, 0, 2, 4], "rotation": 90, "texture": "#plate_torch", "tintindex": 14},
-				"south": {"uv": [0, 0, 2, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 14},
-				"west": {"uv": [0, 0, 2, 2], "rotation": 270, "texture": "#plate_torch", "tintindex": 14},
-				"up": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 14},
-				"down": {"uv": [2, 0, 0, 4], "rotation": 270, "texture": "#plate_torch", "tintindex": 14}
-			}
-		},
-		{
-			"name": "input_a_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#input_a_overlay", "tintindex": 3},
-				"up": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#edge", "tintindex": 3}
-			}
-		},
-		{
-			"name": "input_c_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"west": {"uv": [16, 0, 0, 16], "rotation": 270, "texture": "#input_a_overlay", "tintindex": 5},
-				"down": {"uv": [0, 14, 16, 16], "rotation": 270, "texture": "#edge", "tintindex": 5}
-			}
-		},
-		{
-			"name": "middle_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#middle_overlay", "tintindex": 12}
-			}
-		},
-		{
-			"name": "suboutput_a_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#suboutput_a_overlay", "tintindex": 16}
-			}
-		},
-		{
-			"name": "suboutput_c_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"west": {"uv": [16, 0, 0, 16], "rotation": 270, "texture": "#suboutput_a_overlay", "tintindex": 17}
-			}
-		},
-		{
-			"name": "output_overlay",
-			"from": [14, 0, 0],
-			"to": [16, 16, 16],
-			"faces": {
-				"north": {"uv": [0, 14, 16, 16], "rotation": 90, "texture": "#edge", "tintindex": 14},
-				"west": {"uv": [0, 0, 16, 16], "rotation": 270, "texture": "#7", "tintindex": 14}
-			}
-		}
-	]
+  "credit": "Made with Blockbench",
+  "parent": "morered:block/plate_template",
+  "ambientocclusion": false,
+  "textures": {
+    "7": "morered:block/xnor_gate_output_overlay",
+    "input_a_overlay": "morered:block/xor_gate_input_a_overlay",
+    "middle_overlay": "morered:block/xor_gate_middle_overlay",
+    "particle": "block/smooth_stone",
+    "plate": "block/smooth_stone",
+    "plate_overlay": "morered:block/plate_overlay",
+    "plate_torch": "morered:block/plate_torch",
+    "edge": "morered:block/not_gate_input_overlay",
+    "diode": "block/stone",
+    "suboutput_a_overlay": "morered:block/xnor_gate_suboutput_a_overlay"
+  },
+  "elements": [
+    {
+      "name": "plate",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#plate"
+        },
+        "east": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#plate"
+        },
+        "south": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#plate"
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#plate"
+        },
+        "up": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#plate"
+        },
+        "down": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#plate"
+        }
+      }
+    },
+    {
+      "name": "plate_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#plate_overlay"
+        }
+      }
+    },
+    {
+      "name": "diode_a",
+      "from": [
+        12,
+        11,
+        7
+      ],
+      "to": [
+        16,
+        13,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#diode"
+        },
+        "south": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "west": {
+          "uv": [
+            2,
+            1,
+            4,
+            3
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "up": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "down": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        }
+      }
+    },
+    {
+      "name": "torch_a",
+      "from": [
+        12,
+        11,
+        5
+      ],
+      "to": [
+        16,
+        13,
+        7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 90,
+          "texture": "#plate_torch",
+          "tintindex": 16
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 16
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 16
+        },
+        "up": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 16
+        },
+        "down": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 16
+        }
+      }
+    },
+    {
+      "name": "diode_c",
+      "from": [
+        12,
+        3,
+        7
+      ],
+      "to": [
+        16,
+        5,
+        9
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#diode"
+        },
+        "south": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "west": {
+          "uv": [
+            2,
+            1,
+            4,
+            3
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "up": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "down": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        }
+      }
+    },
+    {
+      "name": "torch_c",
+      "from": [
+        12,
+        3,
+        5
+      ],
+      "to": [
+        16,
+        5,
+        7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 90,
+          "texture": "#plate_torch",
+          "tintindex": 17
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 17
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 17
+        },
+        "up": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 17
+        },
+        "down": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 17
+        }
+      }
+    },
+    {
+      "name": "nor_diode",
+      "from": [
+        12,
+        7,
+        13
+      ],
+      "to": [
+        16,
+        9,
+        15
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#diode"
+        },
+        "south": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "west": {
+          "uv": [
+            2,
+            1,
+            4,
+            3
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "up": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "down": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        }
+      }
+    },
+    {
+      "name": "nor_torch",
+      "from": [
+        12,
+        7,
+        11
+      ],
+      "to": [
+        16,
+        9,
+        13
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 90,
+          "texture": "#plate_torch",
+          "tintindex": 12
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 12
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 12
+        },
+        "up": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 12
+        },
+        "down": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 12
+        }
+      }
+    },
+    {
+      "name": "xnor_diode",
+      "from": [
+        12,
+        7,
+        5
+      ],
+      "to": [
+        16,
+        9,
+        7
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#diode"
+        },
+        "south": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "west": {
+          "uv": [
+            2,
+            1,
+            4,
+            3
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "up": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        },
+        "down": {
+          "uv": [
+            14,
+            12,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#diode"
+        }
+      }
+    },
+    {
+      "name": "xnor_torch",
+      "from": [
+        12,
+        7,
+        3
+      ],
+      "to": [
+        16,
+        9,
+        5
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 90,
+          "texture": "#plate_torch",
+          "tintindex": 14
+        },
+        "south": {
+          "uv": [
+            0,
+            0,
+            2,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 14
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            2,
+            2
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 14
+        },
+        "up": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 14
+        },
+        "down": {
+          "uv": [
+            2,
+            0,
+            0,
+            4
+          ],
+          "rotation": 270,
+          "texture": "#plate_torch",
+          "tintindex": 14
+        }
+      }
+    },
+    {
+      "name": "input_a_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#input_a_overlay",
+          "tintindex": 3
+        },
+        "up": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#edge",
+          "tintindex": 3
+        }
+      }
+    },
+    {
+      "name": "input_c_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#input_a_overlay",
+          "tintindex": 5
+        },
+        "down": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#edge",
+          "tintindex": 5
+        }
+      }
+    },
+    {
+      "name": "middle_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#middle_overlay",
+          "tintindex": 12
+        }
+      }
+    },
+    {
+      "name": "suboutput_a_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#suboutput_a_overlay",
+          "tintindex": 16
+        }
+      }
+    },
+    {
+      "name": "suboutput_c_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "west": {
+          "uv": [
+            16,
+            0,
+            0,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#suboutput_a_overlay",
+          "tintindex": 17
+        }
+      }
+    },
+    {
+      "name": "output_overlay",
+      "from": [
+        14,
+        0,
+        0
+      ],
+      "to": [
+        16,
+        16,
+        16
+      ],
+      "faces": {
+        "north": {
+          "uv": [
+            0,
+            14,
+            16,
+            16
+          ],
+          "rotation": 90,
+          "texture": "#edge",
+          "tintindex": 14
+        },
+        "west": {
+          "uv": [
+            0,
+            0,
+            16,
+            16
+          ],
+          "rotation": 270,
+          "texture": "#7",
+          "tintindex": 14
+        }
+      }
+    }
+  ]
 }

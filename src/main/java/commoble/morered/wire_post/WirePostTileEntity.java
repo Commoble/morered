@@ -16,244 +16,225 @@ import commoble.morered.MoreRed;
 import commoble.morered.TileEntityRegistrar;
 import commoble.morered.util.NestedBoundingBox;
 import commoble.morered.util.WorldHelper;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTUtil;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IWorld;
+import commoble.morered.wires.WireTileEntity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
+import org.checkerframework.checker.units.qual.C;
 
-public class WirePostTileEntity extends TileEntity
-{
-	public static final String CONNECTIONS = "connections";
-	public static final AxisAlignedBB EMPTY_AABB = new AxisAlignedBB(0,0,0,0,0,0);
+public class WirePostTileEntity extends BlockEntity {
+    public static final String CONNECTIONS = "connections";
+    public static final AABB EMPTY_AABB = new AABB(0, 0, 0, 0, 0, 0);
 
-	private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
-	
-	private AxisAlignedBB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
+    private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
 
-	@SuppressWarnings("deprecation")
-	public static final NBTListCodec<BlockPos, CompoundNBT> BLOCKPOS_LISTER = new NBTListCodec<>(
-		CONNECTIONS,
-		NBTListCodec.ListNBTType.COMPOUND,
-		NBTUtil::writeBlockPos,
-		NBTUtil::readBlockPos);
-	
-	public WirePostTileEntity(TileEntityType<? extends WirePostTileEntity> type)
-	{
-		super(type);
-	}
-	
-	public WirePostTileEntity()
-	{
-		this(TileEntityRegistrar.REDWIRE_POST.get());
-	}
+    private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
 
-	public static Optional<WirePostTileEntity> getPost(IWorld world, BlockPos pos)
-	{
-		return WorldHelper.getTileEntityAt(WirePostTileEntity.class, world, pos);
-	}
+    @SuppressWarnings("deprecation")
+    public static final NBTListCodec<BlockPos, CompoundTag> BLOCKPOS_LISTER = new NBTListCodec<>(
+            CONNECTIONS,
+            NBTListCodec.ListTagType.COMPOUND,
+            NbtUtils::writeBlockPos,
+            NbtUtils::readBlockPos);
 
-	// connects two post TEs
-	// returns whether the attempt to add a connection was successful
-	public static boolean addConnection(IWorld world, BlockPos posA, BlockPos posB)
-	{
-		// if two post TEs exist at the given locations, connect them and return true
-		// otherwise return false
-		return getPost(world, posA).flatMap(postA -> getPost(world, posB).map(postB -> addConnection(world, postA, postB))).orElse(false);
-	}
+    public WirePostTileEntity(BlockPos pos, BlockState state) {
+        super(TileEntityRegistrar.REDWIRE_POST.get(), pos, state);
+    }
 
-	// returns true if attempt to add a connection was successful
-	public static boolean addConnection(IWorld world, @Nonnull WirePostTileEntity postA, @Nonnull WirePostTileEntity postB)
-	{
-		postA.addConnection(postB.worldPosition);
-		postB.addConnection(postA.worldPosition);
-		return true;
-	}
-	
-	public void setConnectionsRaw(Map<BlockPos, NestedBoundingBox> connections)
-	{
-		this.remoteConnections = connections;
-	}
-	
-	public Set<BlockPos> getRemoteConnections()
-	{
-		return ImmutableSet.copyOf(this.remoteConnections.keySet());
-	}
-	
-	public Map<BlockPos, NestedBoundingBox> getRemoteConnectionBoxes()
-	{
-		return this.remoteConnections;
-	}
+    public WirePostTileEntity(BlockEntityType<? extends WirePostTileEntity> type, BlockPos pos, BlockState state) {
+        super(type, pos, state);
+    }
 
-	public boolean hasRemoteConnection(BlockPos otherPos)
-	{
-		return this.remoteConnections.keySet().contains(otherPos);
-	}
+//	public WirePostTileEntity()
+//	{
+//		this(TileEntityRegistrar.REDWIRE_POST.get());
+//	}
 
-	@Override
-	public void setRemoved()
-	{
-		this.clearRemoteConnections();
-		super.setRemoved();
-	}
+    public static Optional<WirePostTileEntity> getPost(LevelAccessor world, BlockPos pos) {
+        return WorldHelper.getTileEntityAt(WirePostTileEntity.class, world, pos);
+    }
 
-	// returns true if post TEs exist at the given locations and both have a
-	// connection to the other
-	public static boolean arePostsConnected(IWorld world, BlockPos posA, BlockPos posB)
-	{
-		return getPost(world, posA).flatMap(postA -> getPost(world, posB).map(postB -> postA.hasRemoteConnection(posB) && postB.hasRemoteConnection(posA)))
-			.orElse(false);
-	}
+    // connects two post TEs
+    // returns whether the attempt to add a connection was successful
+    public static boolean addConnection(Level world, BlockPos posA, BlockPos posB) {
+        // if two post TEs exist at the given locations, connect them and return true
+        // otherwise return false
+        return getPost(world, posA).flatMap(postA -> getPost(world, posB).map(postB -> addConnection(world, postA,
+                postB))).orElse(false);
+    }
 
-	public void clearRemoteConnections()
-	{
-		this.remoteConnections.keySet().forEach(otherPos -> getPost(this.level, otherPos).ifPresent(otherPost -> otherPost.removeConnection(this.worldPosition)));
-		this.remoteConnections = new HashMap<>();
-		this.onCommonDataUpdated();
-	}
+    // returns true if attempt to add a connection was successful
+    public static boolean addConnection(Level world, @Nonnull WirePostTileEntity postA,
+                                        @Nonnull WirePostTileEntity postB) {
+        postA.addConnection(postB.worldPosition);
+        postB.addConnection(postA.worldPosition);
+        return true;
+    }
 
-	// removes any connection between two posts to each other
-	// if only one post exists for some reason, or only one post has a
-	// connection to the other,
-	// it will still attempt to remove its connection
-	public static void removeConnection(IWorld world, BlockPos posA, BlockPos posB)
-	{
-		getPost(world, posA).ifPresent(post -> post.removeConnection(posB));
-		getPost(world, posB).ifPresent(post -> post.removeConnection(posA));
-	}
+    public void setConnectionsRaw(Map<BlockPos, NestedBoundingBox> connections) {
+        this.remoteConnections = connections;
+    }
 
-	private void addConnection(BlockPos otherPos)
-	{
-		this.remoteConnections.put(otherPos.immutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
-		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
-		this.onCommonDataUpdated();
-	}
+    public Set<BlockPos> getRemoteConnections() {
+        return ImmutableSet.copyOf(this.remoteConnections.keySet());
+    }
 
-	private void removeConnection(BlockPos otherPos)
-	{
-		this.remoteConnections.remove(otherPos);
-		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
-		if (!this.level.isClientSide)
-		{
-			// only send one break packet when breaking two connections
-			int thisY = this.worldPosition.getY();
-			int otherY = otherPos.getY();
-			if (thisY < otherY || (thisY == otherY && this.worldPosition.hashCode() < otherPos.hashCode())) 
-				MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)),
-					new WireBreakPacket(getConnectionVector(this.worldPosition), getConnectionVector(otherPos)));
-		}
-		this.onCommonDataUpdated();
-	}
-	
-	public void notifyConnections()
-	{
-		this.getRemoteConnections()
-			.forEach(connectionPos -> this.level.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.worldPosition));
+    public Map<BlockPos, NestedBoundingBox> getRemoteConnectionBoxes() {
+        return this.remoteConnections;
+    }
+
+    public boolean hasRemoteConnection(BlockPos otherPos) {
+        return this.remoteConnections.containsKey(otherPos);
+    }
+
+    @Override
+    public void setRemoved() {
+        this.clearRemoteConnections();
+        super.setRemoved();
+    }
+
+    // returns true if post TEs exist at the given locations and both have a
+    // connection to the other
+    public static boolean arePostsConnected(Level world, BlockPos posA, BlockPos posB) {
+        return getPost(world, posA).flatMap(postA -> getPost(world, posB).map(postB -> postA.hasRemoteConnection(posB) && postB.hasRemoteConnection(posA)))
+                .orElse(false);
+    }
+
+    public void clearRemoteConnections() {
+        this.remoteConnections.keySet().forEach(otherPos -> getPost(this.level, otherPos).ifPresent(otherPost -> otherPost.removeConnection(this.worldPosition)));
+        this.remoteConnections = new HashMap<>();
+        this.onCommonDataUpdated();
+    }
+
+    // removes any connection between two posts to each other
+    // if only one post exists for some reason, or only one post has a
+    // connection to the other,
+    // it will still attempt to remove its connection
+    public static void removeConnection(Level world, BlockPos posA, BlockPos posB) {
+        getPost(world, posA).ifPresent(post -> post.removeConnection(posB));
+        getPost(world, posB).ifPresent(post -> post.removeConnection(posA));
+    }
+
+    private void addConnection(BlockPos otherPos) {
+        this.remoteConnections.put(otherPos.immutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
+        this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
+        this.onCommonDataUpdated();
+    }
+
+    private void removeConnection(BlockPos otherPos) {
+        this.remoteConnections.remove(otherPos);
+        this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
+        if (!this.level.isClientSide) {
+            // only send one break packet when breaking two connections
+            int thisY = this.worldPosition.getY();
+            int otherY = otherPos.getY();
+            if (thisY < otherY || (thisY == otherY && this.worldPosition.hashCode() < otherPos.hashCode()))
+                MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)),
+                        new WireBreakPacket(getConnectionVector(this.worldPosition), getConnectionVector(otherPos)));
+        }
+        this.onCommonDataUpdated();
+    }
+
+    public void notifyConnections() {
+        this.getRemoteConnections()
+                .forEach(connectionPos -> this.level.neighborChanged(connectionPos, this.getBlockState().getBlock(),
+                        this.worldPosition));
 //			world.notifyNeighborsOfStateExcept(neighborPos, this, dir);
-			
-	}
-	
-	public static Vector3d getConnectionVector(BlockPos pos)
-	{
-		return new Vector3d(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
-	}
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
-	public AxisAlignedBB getRenderBoundingBox()
-	{
-		return this.renderAABB;
-	}
-	
-	public static AxisAlignedBB getAABBContainingAllBlockPos(BlockPos startPos, Set<BlockPos> theRest)
-	{
-		return theRest.stream()
-			.map(AxisAlignedBB::new)
-			.reduce(EMPTY_AABB, AxisAlignedBB::minmax, AxisAlignedBB::minmax)
-			.minmax(new AxisAlignedBB(startPos));
-	}
+    }
 
-	public void onCommonDataUpdated()
-	{
-		this.setChanged();
-		this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Constants.BlockFlags.DEFAULT);
-	}
+    public static Vec3 getConnectionVector(BlockPos pos) {
+        return new Vec3(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
+    }
 
-	@Override
-	public void load(BlockState state, CompoundNBT compound)
-	{
-		super.load(state, compound);
-		this.readCommonData(compound);
-	}
-	
-	@SuppressWarnings("deprecation")
-	protected void readCommonData(CompoundNBT compound)
-	{
-		if (compound.contains(CONNECTIONS))
-		{
-			List<BlockPos> positions = BLOCKPOS_LISTER.read(compound);
-			Map<BlockPos, NestedBoundingBox> newMap = new HashMap<>();
-			positions.forEach(otherPos -> newMap.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos)));
-			this.remoteConnections = newMap;
-		}
-		this.renderAABB = getAABBContainingAllBlockPos(this.worldPosition, this.remoteConnections.keySet());
-	}
+    @Override
+    @OnlyIn(Dist.CLIENT)
+    public AABB getRenderBoundingBox() {
+        return this.renderAABB;
+    }
 
-	@SuppressWarnings("deprecation")
-	@Override
-	public CompoundNBT save(CompoundNBT compound)
-	{
-		super.save(compound);
-		BLOCKPOS_LISTER.write(Lists.newArrayList(this.remoteConnections.keySet()), compound);
-		return compound;
-	}
+    public static AABB getAABBContainingAllBlockPos(BlockPos startPos, Set<BlockPos> theRest) {
+        return theRest.stream()
+                .map(AABB::new)
+                .reduce(EMPTY_AABB, AABB::minmax, AABB::minmax)
+                .minmax(new AABB(startPos));
+    }
 
-	@Override
-	// called on server when client loads chunk with TE in it
-	public CompoundNBT getUpdateTag()
-	{
-		return this.save(new CompoundNBT()); // supermethods of write() and getUpdateTag() both call writeInternal
-	}
+    public void onCommonDataUpdated() {
+        this.setChanged();
+        this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), Block.UPDATE_ALL);
+    }
 
-	@Override
-	// generate packet on server to send to client
-	public SUpdateTileEntityPacket getUpdatePacket()
-	{
-		return new SUpdateTileEntityPacket(this.worldPosition, 1, this.save(new CompoundNBT()));
-	}
+    @Override
+    public void load(CompoundTag compound) {
+        super.load(compound);
+        this.readCommonData(compound);
+    }
 
-	@Override
-	// read packet on client
-	public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt)
-	{
-		super.onDataPacket(net, pkt);
-		this.readCommonData(pkt.getTag());
-	}
-	
-	public NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos otherPos)
-	{
-		Vector3d thisVec = getConnectionVector(this.worldPosition);
-		Vector3d otherVec = getConnectionVector(otherPos);
-		boolean otherHigher = otherVec.y > thisVec.y;
-		Vector3d higherVec = otherHigher ? otherVec : thisVec;
-		Vector3d lowerVec = otherHigher ? thisVec : otherVec;
-		Vector3d[] points = SlackInterpolator.getInterpolatedPoints(lowerVec, higherVec);
-		int segmentCount = points.length - 1;
-		AxisAlignedBB[] boxes = new AxisAlignedBB[segmentCount];
-		for (int i=0; i<segmentCount; i++)
-		{
-			boxes[i] = new AxisAlignedBB(points[i], points[i+1]);
-		}
-		return NestedBoundingBox.fromAABBs(boxes);
-	}
+    @SuppressWarnings("deprecation")
+    protected void readCommonData(CompoundTag compound) {
+        if (compound.contains(CONNECTIONS)) {
+            List<BlockPos> positions = BLOCKPOS_LISTER.read(compound);
+            Map<BlockPos, NestedBoundingBox> newMap = new HashMap<>();
+            positions.forEach(otherPos -> newMap.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos)));
+            this.remoteConnections = newMap;
+        }
+        this.renderAABB = getAABBContainingAllBlockPos(this.worldPosition, this.remoteConnections.keySet());
+    }
+
+    @SuppressWarnings("deprecation")
+    @Override
+    public void saveAdditional(CompoundTag compound) {
+        BLOCKPOS_LISTER.write(Lists.newArrayList(this.remoteConnections.keySet()), compound);
+    }
+
+    // TODO unsure if this change will break server
+    @Override
+    // called on server when client loads chunk with TE in it
+    public CompoundTag getUpdateTag() {
+        return super.getUpdateTag(); // supermethods of write() and getUpdateTag() both call writeInternal
+    }
+
+    @Override
+    // generate packet on server to send to client
+    // TODO unsure if this is the correct way
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return ClientboundBlockEntityDataPacket.create(this);
+    }
+
+    @Override
+    // read packet on client
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        super.onDataPacket(net, pkt);
+        CompoundTag tag = pkt.getTag();
+        this.readCommonData(tag == null ? new CompoundTag() : tag);
+    }
+
+    public NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos otherPos) {
+        Vec3 thisVec = getConnectionVector(this.worldPosition);
+        Vec3 otherVec = getConnectionVector(otherPos);
+        boolean otherHigher = otherVec.y > thisVec.y;
+        Vec3 higherVec = otherHigher ? otherVec : thisVec;
+        Vec3 lowerVec = otherHigher ? thisVec : otherVec;
+        Vec3[] points = SlackInterpolator.getInterpolatedPoints(lowerVec, higherVec);
+        int segmentCount = points.length - 1;
+        AABB[] boxes = new AABB[segmentCount];
+        for (int i = 0; i < segmentCount; i++) {
+            boxes[i] = new AABB(points[i], points[i + 1]);
+        }
+        return NestedBoundingBox.fromAABBs(boxes);
+    }
 }

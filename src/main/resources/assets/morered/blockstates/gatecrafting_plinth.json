@@ -1,5 +1,7 @@
 {
-    "variants": {
-        "": { "model": "morered:block/gatecrafting_plinth" }
+  "variants": {
+    "": {
+      "model": "morered:block/gatecrafting_plinth"
     }
+  }
 }

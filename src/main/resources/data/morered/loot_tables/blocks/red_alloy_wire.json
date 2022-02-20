@@ -1,28 +1,24 @@
 {
-	"type": "minecraft:block",
-	"pools": 
-	[
-		{
-			"rolls": 1,
-			"entries": 
-			[
-				{
-					"type": "minecraft:item",
-					"name": "morered:red_alloy_wire",
-					"functions":
-					[
-						{
-							"function": "morered:set_wire_count"
-						}
-					]
-				}
-			],
-			"conditions": 
-			[
-				{
-					"condition": "minecraft:survives_explosion"
-				}
-			]
-		}
-	]
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "rolls": 1,
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "morered:red_alloy_wire",
+          "functions": [
+            {
+              "function": "morered:set_wire_count"
+            }
+          ]
+        }
+      ],
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ]
+    }
+  ]
 }

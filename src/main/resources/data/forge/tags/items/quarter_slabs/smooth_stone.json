@@ -1,7 +1,6 @@
 {
-	"replace": false,
-	"values":
-	[
-		"morered:stone_plate"
-	]
+  "replace": false,
+  "values": [
+    "morered:stone_plate"
+  ]
 }

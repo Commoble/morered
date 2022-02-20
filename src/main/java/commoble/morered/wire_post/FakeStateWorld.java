@@ -1,44 +1,48 @@
 package commoble.morered.wire_post;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.fluid.FluidState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FluidState;
 
 /**
  * IBlockReader that delegates to another reader for most purposes,
  * except that a state at a given position will appear to be a different given state
  */
-public class FakeStateWorld implements IBlockReader
-{
-	private final IBlockReader delegate;
-	private final BlockPos pos;
-	private final BlockState state;
-	
-	public FakeStateWorld(IBlockReader delegate, BlockPos pos, BlockState state)
-	{
-		this.delegate = delegate;
-		this.pos = pos.immutable();
-		this.state = state;
-	}
+public class FakeStateWorld implements BlockGetter {
+    private final BlockGetter delegate;
+    private final BlockPos pos;
+    private final BlockState state;
 
-	@Override
-	public TileEntity getBlockEntity(BlockPos pos)
-	{
-		return this.delegate.getBlockEntity(pos);
-	}
+    public FakeStateWorld(BlockGetter delegate, BlockPos pos, BlockState state) {
+        this.delegate = delegate;
+        this.pos = pos.immutable();
+        this.state = state;
+    }
 
-	@Override
-	public BlockState getBlockState(BlockPos pos)
-	{
-		return pos.equals(this.pos) ? this.state : this.delegate.getBlockState(pos); 
-	}
+    @Override
+    public BlockEntity getBlockEntity(BlockPos pos) {
+        return this.delegate.getBlockEntity(pos);
+    }
 
-	@Override
-	public FluidState getFluidState(BlockPos pos)
-	{
-		return this.delegate.getFluidState(pos);
-	}
-	
+    @Override
+    public BlockState getBlockState(BlockPos pos) {
+        return pos.equals(this.pos) ? this.state : this.delegate.getBlockState(pos);
+    }
+
+    @Override
+    public FluidState getFluidState(BlockPos pos) {
+        return this.delegate.getFluidState(pos);
+    }
+
+    @Override
+    public int getHeight() {
+        return 0;
+    }
+
+    @Override
+    public int getMinBuildHeight() {
+        return 0;
+    }
 }

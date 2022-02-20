@@ -1,10 +1,29 @@
 {
-    "variants": {
-        "facing=down":  { "model": "morered:block/redwire_post_relay_plate"},
-        "facing=up":    { "model": "morered:block/redwire_post_relay_plate", "x": 180},
-        "facing=north": { "model": "morered:block/redwire_post_relay_plate", "x": 270},
-        "facing=south": { "model": "morered:block/redwire_post_relay_plate", "x": 90},
-        "facing=west":  { "model": "morered:block/redwire_post_relay_plate", "x": 90, "y": 90},
-        "facing=east":  { "model": "morered:block/redwire_post_relay_plate", "x": 90, "y": 270}
+  "variants": {
+    "facing=down": {
+      "model": "morered:block/redwire_post_relay_plate"
+    },
+    "facing=up": {
+      "model": "morered:block/redwire_post_relay_plate",
+      "x": 180
+    },
+    "facing=north": {
+      "model": "morered:block/redwire_post_relay_plate",
+      "x": 270
+    },
+    "facing=south": {
+      "model": "morered:block/redwire_post_relay_plate",
+      "x": 90
+    },
+    "facing=west": {
+      "model": "morered:block/redwire_post_relay_plate",
+      "x": 90,
+      "y": 90
+    },
+    "facing=east": {
+      "model": "morered:block/redwire_post_relay_plate",
+      "x": 90,
+      "y": 270
     }
+  }
 }

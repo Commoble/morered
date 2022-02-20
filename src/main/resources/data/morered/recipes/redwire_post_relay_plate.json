@@ -1,32 +1,25 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": 
-	[
-		" F ",
-		"rRr",
-		"###"
-	],
-	"key": 
-	{
-		"#": 
-		{
-			"tag": "forge:quarter_slabs/smooth_stone"
-		},
-		"r": 
-		{
-			"tag": "forge:dusts/redstone"
-		},
-		"R": 
-		{
-			"tag": "forge:ingots/redstone_alloy"
-		},
-		"F": 
-		{
-			"tag": "forge:ingots/iron"
-		}
-	},
-	"result": 
-	{
-		"item": "morered:redwire_post_relay_plate"
-	}
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " F ",
+    "rRr",
+    "###"
+  ],
+  "key": {
+    "#": {
+      "tag": "forge:quarter_slabs/smooth_stone"
+    },
+    "r": {
+      "tag": "forge:dusts/redstone"
+    },
+    "R": {
+      "tag": "forge:ingots/redstone_alloy"
+    },
+    "F": {
+      "tag": "forge:ingots/iron"
+    }
+  },
+  "result": {
+    "item": "morered:redwire_post_relay_plate"
+  }
 }

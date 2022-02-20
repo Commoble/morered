@@ -1,18 +1,16 @@
 {
-	"type": "morered:gatecrafting",
-	"ingredients": 
-	[
-		{
-			"tag": "forge:quarter_slabs/smooth_stone"
-		},
-		{
-			"type": "morered:tag_stack",
-			"tag": "forge:dusts/redstone",
-			"count": 3
-		}
-	],
-	"result": 
-	{
-		"item": "morered:or_gate"
-	}
+  "type": "morered:gatecrafting",
+  "ingredients": [
+    {
+      "tag": "forge:quarter_slabs/smooth_stone"
+    },
+    {
+      "type": "morered:tag_stack",
+      "tag": "forge:dusts/redstone",
+      "count": 3
+    }
+  ],
+  "result": {
+    "item": "morered:or_gate"
+  }
 }

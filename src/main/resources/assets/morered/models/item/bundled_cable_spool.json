@@ -1,8 +1,7 @@
 {
-    "parent": "item/handheld",
-    "textures":
-    {
-        "layer0": "minecraft:item/stick",
-        "layer1": "morered:item/bundled_cable_spool"
-    }
+  "parent": "item/handheld",
+  "textures": {
+    "layer0": "minecraft:item/stick",
+    "layer1": "morered:item/bundled_cable_spool"
+  }
 }

@@ -1,28 +1,22 @@
 {
-	"type": "minecraft:crafting_shaped",
-	"pattern": 
-	[
-		"#r#",
-		"rtr",
-		"#r#"
-	],
-	"key": 
-	{
-		"#": 
-		{
-			"tag": "forge:quarter_slabs/smooth_stone"
-		},
-		"r": 
-		{
-			"tag": "forge:dusts/redstone"
-		},
-		"t": 
-		{
-			"item": "minecraft:redstone_torch"
-		}
-	},
-	"result": 
-	{
-		"item": "morered:nor_gate"
-	}
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "#r#",
+    "rtr",
+    "#r#"
+  ],
+  "key": {
+    "#": {
+      "tag": "forge:quarter_slabs/smooth_stone"
+    },
+    "r": {
+      "tag": "forge:dusts/redstone"
+    },
+    "t": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "result": {
+    "item": "morered:nor_gate"
+  }
 }

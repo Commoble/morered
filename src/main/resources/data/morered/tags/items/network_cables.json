@@ -1,1 +1,6 @@
-{"values":["#morered:bundled_network_cables","#morered:colored_network_cables"]}
+{
+  "values": [
+    "#morered:bundled_network_cables",
+    "#morered:colored_network_cables"
+  ]
+}

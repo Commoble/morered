@@ -1,1 +1,6 @@
-{"parent":"morered:block/colored_network_cable_edge_template","textures":{"wire":"morered:block/black_network_cable"}}
+{
+  "parent": "morered:block/colored_network_cable_edge_template",
+  "textures": {
+    "wire": "morered:block/black_network_cable"
+  }
+}
