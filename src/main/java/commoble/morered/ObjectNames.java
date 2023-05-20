@@ -2,8 +2,8 @@ package commoble.morered;
 
 import java.util.Arrays;
 
-import net.minecraft.item.DyeColor;
-import net.minecraft.util.Util;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.Util;
 
 public class ObjectNames
 {
@@ -53,6 +53,12 @@ public class ObjectNames
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
 	public static final String REDWIRE_SPOOL = "redwire_spool";
 	public static final String BUNDLED_CABLE_SPOOL = "bundled_cable_spool";
+	
+	// tags
+	public static final String REDWIRE_POSTS = "redwire_posts";
+	public static final String BUNDLED_CABLE_POSTS = "bundled_cable_posts";
+	public static final String RED_ALLOY_WIRES = "red_alloy_wires";
+	public static final String COLORED_NETWORK_CABLES = "colored_network_cables";
 	
 	// capabilities
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";

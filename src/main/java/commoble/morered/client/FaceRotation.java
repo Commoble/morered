@@ -1,16 +1,16 @@
 package commoble.morered.client;
 
-import net.minecraft.client.renderer.model.IModelTransform;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.vector.Quaternion;
-import net.minecraft.util.math.vector.TransformationMatrix;
-import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.Util;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Transformation;
+import com.mojang.math.Vector3f;
 
 // expanded rotations similar to ModelRotation but with 24 values instead of 16
 // rotations represent an "attachment face" and a "connection side"
 // representing a thing attached to one of the six faces and pointing in one of the four directions orthagonal to that face
 // the "default" state is assumed to be a thing attached to DOWN and pointing NORTH
-public class FaceRotation implements IModelTransform
+public class FaceRotation implements ModelState
 {
 	public static final FaceRotation[] FACE_ROTATIONS = Util.make(() ->
 	{
@@ -53,18 +53,18 @@ public class FaceRotation implements IModelTransform
 		return FACE_ROTATIONS[side*4 + subSide];
 	}
 	
-	private final TransformationMatrix transformation;
+	private final Transformation transformation;
 	
 	FaceRotation(int x, int y, int z)
 	{
 		Quaternion quaternion = new Quaternion(new Vector3f(0.0F, 0.0F, 1.0F), (-z), true);
 		quaternion.mul(new Quaternion(new Vector3f(0.0F, 1.0F, 0.0F), (-y), true));
 		quaternion.mul(new Quaternion(new Vector3f(1.0F, 0.0F, 0.0F), (-x), true));
-		this.transformation = new TransformationMatrix((Vector3f)null, quaternion, (Vector3f)null, (Quaternion)null);
+		this.transformation = new Transformation((Vector3f)null, quaternion, (Vector3f)null, (Quaternion)null);
 	}
 
 	@Override
-	public TransformationMatrix getRotation()
+	public Transformation getRotation()
 	{
 		return this.transformation;
 	}

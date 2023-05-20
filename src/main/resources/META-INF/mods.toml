@@ -46,7 +46,7 @@ by poking them with a stick.
     # Does this dependency have to exist - if not, ordering below must be specified
     mandatory=true #mandatory
     # The version range of the dependency
-    versionRange="[36.0.34,)" #mandatory
+    versionRange="[43.2.4,)" #mandatory
     # An ordering relationship for the dependency - BEFORE or AFTER required if the relationship is not mandatory
     ordering="NONE"
     # Side this dependency is applied on - BOTH, CLIENT or SERVER
@@ -55,12 +55,18 @@ by poking them with a stick.
 [[dependencies.morered]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.16.5,1.17)"
+    versionRange="[1.19.2,1.19.3)"
     ordering="NONE"
     side="BOTH"
 [[dependencies.morered]]
-	modId="bagofyurting"
+	modId="jei"
 	mandatory=false
-	versionRange="[1.2.0.0,)"
-	ordering="AFTER"
+	versionRange="[11.6, 12)" #11=1.19.2, 12=1.19.3
+	ordering="NONE"
+	side="BOTH"
+[[dependencies.morered]]
+	modId="useitemonblockevent"
+	mandatory=true
+	versionRange="[1.0.0.1, 1.1)"
+	ordering="NONE"
 	side="BOTH"

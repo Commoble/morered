@@ -1,23 +1,21 @@
 package commoble.morered;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RedstoneWireBlock;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer.Builder;
-import net.minecraft.state.properties.AttachFace;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.AttachFace;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class HexidecrubrometerBlock extends Block
 {
@@ -48,9 +46,9 @@ public class HexidecrubrometerBlock extends Block
 	}
 
 	@Override
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
-		World world = context.getLevel();
+		Level world = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		Direction attachDirection = context.getNearestLookingDirection();
 		Direction horizontalDirectionAwayFromPlayer = context.getHorizontalDirection();
@@ -68,7 +66,8 @@ public class HexidecrubrometerBlock extends Block
 	// called on the client and server when this block is added to the world
 	// we want to make sure we update our power after this to react to changes in nearby blocks
 	@Override
-	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	@Deprecated
+	public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		if (oldState.getBlock() != this)
 		{
@@ -83,17 +82,18 @@ public class HexidecrubrometerBlock extends Block
 	}
 
 	// forge method, called when a neighbor calls updateComparatorOutputLevel
+	@SuppressWarnings("deprecation")
 	@Override
-	public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor)
+	public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor)
 	{
 		if (!world.isClientSide() && pos.relative(getReadingDirection(state)).equals(neighbor))
 		{
-	          state.neighborChanged((World)world, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
+	          state.neighborChanged((Level)world, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
 		}
 	}
 
 	@Override
-	public void neighborChanged(BlockState state, World world, BlockPos pos, Block fromBlock, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block fromBlock, BlockPos fromPos, boolean isMoving)
 	{
 		int newValue = getInputValue(world,pos,state);
 		int oldValue = state.getValue(POWER);
@@ -103,20 +103,20 @@ public class HexidecrubrometerBlock extends Block
 		}
 	}
 	
-	public static int getInputValue(World world, BlockPos pos, BlockState state)
+	public static int getInputValue(Level world, BlockPos pos, BlockState state)
 	{
 	      Direction direction = getReadingDirection(state);
 	      return getInputValue(world,pos,direction);
 	}
 	
-	public static int getInputValue(World world, BlockPos pos, Direction direction)
+	public static int getInputValue(Level world, BlockPos pos, Direction direction)
 	{
 		BlockPos neighborPos = pos.relative(direction);
 		BlockState neighborState = world.getBlockState(neighborPos);
 		int comparatorPower = neighborState.getAnalogOutputSignal(world, neighborPos);
 		int canonicalRedstonePower = world.getSignal(neighborPos, direction);
 		int redstonePower = canonicalRedstonePower > 0 ? canonicalRedstonePower
-			: neighborState.getBlock() instanceof RedstoneWireBlock ? neighborState.getValue(BlockStateProperties.POWER)
+			: neighborState.getBlock() instanceof RedStoneWireBlock ? neighborState.getValue(BlockStateProperties.POWER)
 			: 0;
 		return Math.max(redstonePower, comparatorPower);
 	      
@@ -146,7 +146,7 @@ public class HexidecrubrometerBlock extends Block
 	}
 
 	@Override
-	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side)
+	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
 	{
 		return side != null && side.getOpposite() == getReadingDirection(state);
 	}

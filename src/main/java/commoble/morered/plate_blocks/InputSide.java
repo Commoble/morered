@@ -1,13 +1,13 @@
 package commoble.morered.plate_blocks;
 
 import commoble.morered.util.BlockStateUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.RedstoneWireBlock;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public enum InputSide
 {
@@ -33,7 +33,7 @@ public enum InputSide
 	 * @param pos The position of the state in the world
 	 * @return Whether the block is receiving power
 	 */
-	public boolean isBlockReceivingPower(World world, BlockState state, BlockPos pos)
+	public boolean isBlockReceivingPower(Level world, BlockState state, BlockPos pos)
 	{
 		// return early if the state doesn't care about this side or we're checking an invalid state
 		if(!state.hasProperty(this.property) || !state.hasProperty(PlateBlockStateProperties.ATTACHMENT_DIRECTION) || !state.hasProperty(PlateBlockStateProperties.ROTATION))
@@ -57,7 +57,7 @@ public enum InputSide
 		else
 		{
 			BlockState inputState = world.getBlockState(inputPos);
-			return (inputState.getBlock() == Blocks.REDSTONE_WIRE && inputState.getValue(RedstoneWireBlock.POWER) > 0);
+			return (inputState.getBlock() == Blocks.REDSTONE_WIRE && inputState.getValue(RedStoneWireBlock.POWER) > 0);
 		}
 	}
 }

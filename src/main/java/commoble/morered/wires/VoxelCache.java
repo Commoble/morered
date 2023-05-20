@@ -8,47 +8,53 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.level.Level;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.SavedData;
 
-public class VoxelCache extends WorldSavedData
+public class VoxelCache extends SavedData
 {
 	public static final String ID = "morered:voxelcache";
 	private static VoxelCache clientCache = null;
 	
-	protected final World world;
+	protected final Level world;
 	public final LoadingCache<BlockPos, VoxelShape> shapesByPos;
 	
-	public VoxelCache(@Nonnull World world)
+	public VoxelCache(@Nonnull Level world)
 	{
-		super(ID);
 		this.world = world;
 		this.shapesByPos = CacheBuilder.newBuilder()
 			.expireAfterAccess(2, TimeUnit.MINUTES)
 			.build(new VoxelLoader());
 	}
 	
-	public static VoxelCache get(@Nonnull World world)
+	public static VoxelCache get(@Nonnull Level level)
 	{
-		if (world instanceof ServerWorld)
+		if (level instanceof ServerLevel serverLevel)
 		{
-			return ((ServerWorld)world).getDataStorage().computeIfAbsent(() -> new VoxelCache(world), ID);
+			// data is transient, don't need to load anything
+			return serverLevel.getDataStorage().computeIfAbsent(tag -> new VoxelCache(level), () -> new VoxelCache(level), ID);
 		}
 		else
 		{
-			if (clientCache == null || clientCache.world != world)
+			if (clientCache == null || clientCache.world != level)
 			{
-				clientCache = new VoxelCache(world);
+				clientCache = new VoxelCache(level);
 			}
 			return clientCache;
 		}
+	}
+
+	@Override
+	public CompoundTag save(CompoundTag tag)
+	{
+		return tag; //noop
 	}
 	
 	public static void clearClientCache()
@@ -60,18 +66,6 @@ public class VoxelCache extends WorldSavedData
 	{
 		return this.shapesByPos.getUnchecked(pos.immutable());
 	}
-
-	@Override
-	public void load(CompoundNBT nbt)
-	{
-		//noop
-	}
-
-	@Override
-	public CompoundNBT save(CompoundNBT compound)
-	{
-		return compound; //noop
-	}
 	
 	public class VoxelLoader extends CacheLoader<BlockPos, VoxelShape>
 	{
@@ -79,11 +73,11 @@ public class VoxelCache extends WorldSavedData
 		@Override
 		public VoxelShape load(BlockPos pos) throws Exception
 		{
-			World world = VoxelCache.this.world;
+			Level world = VoxelCache.this.world;
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();
 			if (!(block instanceof AbstractWireBlock))
-				return VoxelShapes.empty();
+				return Shapes.empty();
 			
 			AbstractWireBlock wireBlock = (AbstractWireBlock)block;
 			

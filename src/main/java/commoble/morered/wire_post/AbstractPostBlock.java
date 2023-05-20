@@ -5,22 +5,22 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractPostBlock extends Block
 {
@@ -33,10 +33,10 @@ public abstract class AbstractPostBlock extends Block
 			.setValue(DIRECTION_OF_ATTACHMENT, Direction.DOWN));
 	}
 	
-	protected abstract void notifyNeighbors(World world, BlockPos pos, BlockState state);
+	protected abstract void notifyNeighbors(Level world, BlockPos pos, BlockState state);
 
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
 		builder.add(DIRECTION_OF_ATTACHMENT);
@@ -44,15 +44,15 @@ public abstract class AbstractPostBlock extends Block
 
 	@Override
 	@Deprecated
-	public VoxelShape getCollisionShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
 		// we override this to ensure the correct context is used instead of the dummy context
-		return this.hasCollision ? state.getShape(worldIn, pos, context) : VoxelShapes.empty();
+		return this.hasCollision ? state.getShape(worldIn, pos, context) : Shapes.empty();
 	}
 
 	@Override
 	@Deprecated
-	public void onPlace(BlockState state, World world, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		this.updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onPlace(state, world, pos, oldState, isMoving);
@@ -61,28 +61,26 @@ public abstract class AbstractPostBlock extends Block
 
 	@Override
 	@Deprecated
-	public void onRemove(BlockState state, World world, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
-		if (state.getBlock() == newState.getBlock())
+		if (state.hasBlockEntity() && (!state.is(newState.getBlock()) || !newState.hasBlockEntity()))
 		{
-			// only thing super.onReplaced does is remove the tile entity
-			// if the block stays the same, we specifically do NOT remove the tile entity
-			// so don't do anything here
+			if (level.getBlockEntity(pos) instanceof WirePostBlockEntity be)
+			{
+				be.clearRemoteConnections();
+			}
+			this.updatePostSet(level, pos, Set<BlockPos>::remove);
+			level.removeBlockEntity(pos);
+			this.notifyNeighbors(level, pos, state);
 		}
-		else
-		{
-			this.updatePostSet(world, pos, Set<BlockPos>::remove);
-			super.onRemove(state, world, pos, newState, isMoving);
-		}
-		this.notifyNeighbors(world, pos, state);
 	}
 	
-	public void updatePostSet(World world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
+	public void updatePostSet(Level world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
-		Chunk chunk = world.getChunkAt(pos);
+		LevelChunk chunk = world.getChunkAt(pos);
 		if (chunk != null)
 		{
-			chunk.getCapability(PostsInChunkCapability.INSTANCE)
+			chunk.getCapability(PostsInChunk.CAPABILITY)
 				.ifPresent(posts -> {
 					Set<BlockPos> set = posts.getPositions();
 					consumer.accept(set, pos);
@@ -93,10 +91,10 @@ public abstract class AbstractPostBlock extends Block
 
 	@Override
 	@Nullable
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
 		BlockState defaultState = this.defaultBlockState();
-		World world = context.getLevel();
+		Level world = context.getLevel();
 		BlockPos pos = context.getClickedPos();
 		
 		for (Direction direction : context.getNearestLookingDirections())
@@ -104,7 +102,7 @@ public abstract class AbstractPostBlock extends Block
 			BlockState checkState = defaultState.setValue(DIRECTION_OF_ATTACHMENT, direction);
 			if (checkState != null && checkState.canSurvive(world, pos))
 			{
-				return world.isUnobstructed(checkState, pos, ISelectionContext.empty())
+				return world.isUnobstructed(checkState, pos, CollisionContext.empty())
 					? checkState
 					: null;
 			}

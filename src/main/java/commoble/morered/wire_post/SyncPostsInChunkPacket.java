@@ -8,20 +8,20 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import commoble.databuddy.codec.ExtraCodecs;
-import commoble.morered.MoreRed;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.NBTDynamicOps;
-import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraftforge.fml.network.NetworkEvent;
+import commoble.morered.client.ClientProxy;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraftforge.network.NetworkEvent;
 
 public class SyncPostsInChunkPacket
 {
+	public static final Codec<ChunkPos> CHUNK_POS_CODEC = Codec.LONG.xmap(ChunkPos::new, ChunkPos::toLong);
 	public static final Codec<SyncPostsInChunkPacket> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-			ExtraCodecs.COMPRESSED_CHUNK_POS.fieldOf("chunk").forGetter(SyncPostsInChunkPacket::getChunkPos),
-				PostsInChunkCapability.POST_SET_CODEC.fieldOf("tubes").forGetter(SyncPostsInChunkPacket::getPostsInChunk)
+				CHUNK_POS_CODEC.fieldOf("chunk").forGetter(SyncPostsInChunkPacket::getChunkPos),
+				PostsInChunk.DATA_CODEC.fieldOf("positions").forGetter(SyncPostsInChunkPacket::getPostsInChunk)
 			).apply(instance, SyncPostsInChunkPacket::new));
 	
 	public static final SyncPostsInChunkPacket BAD_PACKET = new SyncPostsInChunkPacket(new ChunkPos(ChunkPos.INVALID_CHUNK_POS), ImmutableSet.of());
@@ -35,20 +35,20 @@ public class SyncPostsInChunkPacket
 		this.inChunk = inChunk;
 	}
 	
-	public void write(PacketBuffer buffer)
+	public void write(FriendlyByteBuf buffer)
 	{
-		buffer.writeNbt((CompoundNBT)CODEC.encodeStart(NBTDynamicOps.INSTANCE, this).result().orElse(new CompoundNBT()));
+		buffer.writeNbt((CompoundTag)CODEC.encodeStart(NbtOps.INSTANCE, this).result().orElse(new CompoundTag()));
 	}
 	
-	public static SyncPostsInChunkPacket read(PacketBuffer buffer)
+	public static SyncPostsInChunkPacket read(FriendlyByteBuf buffer)
 	{
-		return CODEC.decode(NBTDynamicOps.INSTANCE, buffer.readNbt()).result().map(Pair::getFirst).orElse(BAD_PACKET);
+		return CODEC.decode(NbtOps.INSTANCE, buffer.readNbt()).result().map(Pair::getFirst).orElse(BAD_PACKET);
 	}
 	
 	public void handle(Supplier<NetworkEvent.Context> contextGetter)
 	{
 		NetworkEvent.Context context = contextGetter.get();
-		MoreRed.CLIENT_PROXY.ifPresent(proxy -> contextGetter.get().enqueueWork(() -> proxy.updatePostsInChunk(this.chunkPos, this.inChunk)));
+		context.enqueueWork(() -> ClientProxy.updatePostsInChunk(this.chunkPos, this.inChunk));
 		context.setPacketHandled(true);
 	} 
 }

@@ -1,23 +1,22 @@
-
 package commoble.morered.client;
 
-import commoble.morered.BlockRegistrar;
+import commoble.morered.MoreRed;
 import commoble.morered.plate_blocks.InputState;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.LogicFunction;
 import commoble.morered.plate_blocks.LogicFunctions;
 import commoble.morered.wire_post.AbstractPoweredWirePostBlock;
 import commoble.morered.wires.Edge;
-import commoble.morered.wires.WireTileEntity;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.IBlockDisplayReader;
+import commoble.morered.wires.WireBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.BlockAndTintGetter;
 
 public class ColorHandlers
 {
@@ -28,7 +27,7 @@ public class ColorHandlers
 	public static final int LIT_RED = LIT >> 16;
 	public static final int UNLIT_RED = UNLIT >> 16;
 	
-	public static int getLogicFunctionBlockTint(BlockState state, IBlockDisplayReader lightReader, BlockPos pos, int tintIndex)
+	public static int getLogicFunctionBlockTint(BlockState state, BlockAndTintGetter lightReader, BlockPos pos, int tintIndex)
 	{
 		return getLogicFunctionBlockStateTint(state, tintIndex);
 	}
@@ -70,14 +69,14 @@ public class ColorHandlers
 		return logicFunction.apply(a, b, c) ? LIT : UNLIT;
 	}
 	
-	public static int getLatchBlockTint(BlockState state, IBlockDisplayReader lightReader, BlockPos pos, int tintIndex)
+	public static int getLatchBlockTint(BlockState state, BlockAndTintGetter lightReader, BlockPos pos, int tintIndex)
 	{
 		return getLatchTint(state, tintIndex);
 	}
 	
 	public static int getLatchItemTint(ItemStack stack, int tintIndex)
 	{
-		return getLatchTint(BlockRegistrar.LATCH.get().defaultBlockState(), tintIndex);
+		return getLatchTint(MoreRed.instance().latchBlock.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getLatchTint(BlockState state, int tintIndex)
@@ -98,14 +97,14 @@ public class ColorHandlers
 		}
 	}
 	
-	public static int getRedwirePostBlockTint(BlockState state, IBlockDisplayReader lightReader, BlockPos pos, int tintIndex)
+	public static int getRedwirePostBlockTint(BlockState state, BlockAndTintGetter lightReader, BlockPos pos, int tintIndex)
 	{
 		return getRedwirePostTint(state, tintIndex);
 	}
 	
 	public static int getRedwirePostItemTint(ItemStack stack, int tintIndex)
 	{
-		return getRedwirePostTint(BlockRegistrar.REDWIRE_POST.get().defaultBlockState(), tintIndex);
+		return getRedwirePostTint(MoreRed.instance().redwirePostBlock.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getRedwirePostTint(BlockState state, int tintIndex)
@@ -114,7 +113,7 @@ public class ColorHandlers
 		{
 			int power = state.getValue(AbstractPoweredWirePostBlock.POWER);
 			double lerpFactor = power / 15D;
-			return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
+			return ((int)Mth.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 		}
 		else
 		{
@@ -122,22 +121,22 @@ public class ColorHandlers
 		}
 	}
 	
-	public static int getRedAlloyWireBlockTint(BlockState state, IBlockDisplayReader world, BlockPos pos, int tintIndex)
+	public static int getRedAlloyWireBlockTint(BlockState state, BlockAndTintGetter world, BlockPos pos, int tintIndex)
 	{
 		if (tintIndex < 0 || tintIndex > 18) // no tint specified / unused
 			return NO_TINT;
 		if (tintIndex == 0) // reserved for particle, particle tint is hardcoded to 0
 			return UNLIT;
-		TileEntity te = world.getBlockEntity(pos);
-		if (te instanceof WireTileEntity)
+		BlockEntity te = world.getBlockEntity(pos);
+		if (te instanceof WireBlockEntity)
 		{
-			WireTileEntity wire = (WireTileEntity)te;
+			WireBlockEntity wire = (WireBlockEntity)te;
 			if (tintIndex < 7) // range is [1,6], indicating a face tint
 			{
 				int side = tintIndex-1;
 				int power = wire.getPower(side);
 				double lerpFactor = power/32D;
-				return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
+				return ((int)Mth.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 			}
 			else // range is [7,18], indicating an edge tint
 			{
@@ -146,21 +145,21 @@ public class ColorHandlers
 				Edge edge = Edge.values()[edgeIndex];
 				Direction directionA = edge.sideA;
 				BlockPos neighborPosA = pos.relative(directionA);
-				TileEntity neighborTileA = world.getBlockEntity(neighborPosA);
-				if (neighborTileA instanceof WireTileEntity)
+				BlockEntity neighborTileA = world.getBlockEntity(neighborPosA);
+				if (neighborTileA instanceof WireBlockEntity)
 				{
-					WireTileEntity neighborWireA = (WireTileEntity)neighborTileA;
+					WireBlockEntity neighborWireA = (WireBlockEntity)neighborTileA;
 					Direction directionB = edge.sideB;
 					BlockPos neighborPosB = pos.relative(directionB);
-					TileEntity neighborTileB = world.getBlockEntity(neighborPosB);
-					if (neighborTileB instanceof WireTileEntity)
+					BlockEntity neighborTileB = world.getBlockEntity(neighborPosB);
+					if (neighborTileB instanceof WireBlockEntity)
 					{
-						WireTileEntity neighborWireB = (WireTileEntity)neighborTileB;
+						WireBlockEntity neighborWireB = (WireBlockEntity)neighborTileB;
 						double powerA = neighborWireA.getPower(directionB);
 						double powerB = neighborWireB.getPower(directionA);
 						double averagePower = (powerA + powerB)/2D;
 						double lerpFactor = averagePower/32D;
-						return ((int)MathHelper.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
+						return ((int)Mth.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 					}
 				}
 			}

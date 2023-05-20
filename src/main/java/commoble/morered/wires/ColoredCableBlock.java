@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import com.google.common.cache.LoadingCache;
 
-import commoble.morered.TileEntityRegistrar;
+import commoble.morered.MoreRed;
 import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
@@ -16,18 +16,16 @@ import commoble.morered.api.internal.DefaultWireProperties;
 import commoble.morered.api.internal.WireVoxelHelpers;
 import commoble.morered.util.BlockStateUtil;
 import commoble.morered.util.DirectionHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.DyeColor;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class ColoredCableBlock extends PoweredWireBlock
 {
@@ -44,14 +42,14 @@ public class ColoredCableBlock extends PoweredWireBlock
 		super(properties, SHAPES_BY_STATE_INDEX, RAYTRACE_BACKBOARDS, VOXEL_CACHE, false);
 		this.color = color;
 	}
-
+	
 	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return TileEntityRegistrar.COLORED_NETWORK_CABLE.get().create();
+		return MoreRed.instance().coloredNetworkCableBeType.get().create(pos, state);
 	}
 
-	public boolean canConnectToAdjacentWireOrCable(IBlockReader world, BlockPos thisPos,
+	public boolean canConnectToAdjacentWireOrCable(BlockGetter world, BlockPos thisPos,
 		BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		Block wireBlock = wireState.getBlock();
@@ -61,7 +59,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 	}
 
 	@Override
-	protected boolean canAdjacentBlockConnectToFace(IBlockReader world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
 	{
 		// do this check first so we don't check the same behaviour twice for colored cable blocks
 		return neighborBlock instanceof ColoredCableBlock
@@ -75,7 +73,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 	
 	// invoked when an adjacent TE is marked dirty or an adjacent block updates its comparator output
 	@Override
-	public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor)
+	public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor)
 	{
 		// when would we need to update power here?
 		// firstly, if the entire blockstate changed, we'll be updating the power elsewhere anyway
@@ -86,10 +84,10 @@ public class ColoredCableBlock extends PoweredWireBlock
 		// in which case we don't need to do anything 
 		// or B) the neighbor TE does have the capability, in which case the power MAY have changed, in which case we should check power
 		
-		if (!(world instanceof World))
+		if (!(world instanceof Level))
 			return;
 		
-		TileEntity neighborTE = world.getBlockEntity(pos);
+		BlockEntity neighborTE = world.getBlockEntity(pos);
 		if (neighborTE == null)
 			return;
 		
@@ -97,16 +95,16 @@ public class ColoredCableBlock extends PoweredWireBlock
 		if (directionFromNeighbor == null)
 			return;
 		
-		neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionFromNeighbor).ifPresent($ -> this.updatePowerAfterBlockUpdate((World)world, pos, state));
+		neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionFromNeighbor).ifPresent($ -> this.updatePowerAfterBlockUpdate((Level)world, pos, state));
 	}
 	
 	@Override
-	protected void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState)
+	protected void updatePowerAfterBlockUpdate(Level world, BlockPos wirePos, BlockState wireState)
 	{
-		TileEntity te = world.getBlockEntity(wirePos);
-		if (!(te instanceof WireTileEntity))
+		BlockEntity te = world.getBlockEntity(wirePos);
+		if (!(te instanceof WireBlockEntity))
 			return; // if there's no TE then we can't make any updates
-		WireTileEntity wire = (WireTileEntity)te;
+		WireBlockEntity wire = (WireBlockEntity)te;
 		
 		Map<Block,WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
 		Map<Block,ExpandedPowerSupplier> expandedPowerSuppliers = MoreRedAPI.getExpandedPowerRegistry();
@@ -118,7 +116,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 		ChanneledPowerSupplier noPower = DefaultWireProperties.NO_POWER_SUPPLIER;
 		Function<BlockPos, Function<Direction, ChanneledPowerSupplier>> neighborPowerFinder = neighborPos -> directionToNeighbor ->
 		{
-			TileEntity neighborTE = world.getBlockEntity(neighborPos);
+			BlockEntity neighborTE = world.getBlockEntity(neighborPos);
 			if (neighborTE == null)
 				return noPower;
 			
@@ -126,7 +124,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 		};
 		int channel = this.getDyeColor().ordinal();
 		
-		BlockPos.Mutable mutaPos = wirePos.mutable();
+		BlockPos.MutableBlockPos mutaPos = wirePos.mutable();
 		BlockState[] neighborStates = new BlockState[6];
 		
 		boolean anyPowerUpdated = false;
@@ -239,10 +237,10 @@ public class ColoredCableBlock extends PoweredWireBlock
 					int directionToWireSide = directionToWire.ordinal();
 					if (diagonalState.getBlock() == this && diagonalState.getValue(INTERIOR_FACES[directionToWireSide]))
 					{
-						TileEntity diagonalTe = world.getBlockEntity(diagonalPos);
-						if (diagonalTe instanceof WireTileEntity)
+						BlockEntity diagonalTe = world.getBlockEntity(diagonalPos);
+						if (diagonalTe instanceof WireBlockEntity)
 						{	// at the moment we can only diagonally connect to blocks of the same type, just get the TE's power directly
-							power = Math.max(power, ((WireTileEntity)diagonalTe).getPower(directionToWireSide)-1);
+							power = Math.max(power, ((WireBlockEntity)diagonalTe).getPower(directionToWireSide)-1);
 						}
 					}
 				}

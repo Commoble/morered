@@ -1,1 +1,11 @@
-{"loader":"morered:wire_parts","line":{"parent":"morered:block/green_network_cable_line"},"edge":{"parent":"morered:block/green_network_cable_edge"}}
+{
+  "edge": {
+    "parent": "morered:block/green_network_cable_edge",
+    "render_type": "minecraft:solid"
+  },
+  "line": {
+    "parent": "morered:block/green_network_cable_line",
+    "render_type": "minecraft:solid"
+  },
+  "loader": "morered:wire_parts"
+}

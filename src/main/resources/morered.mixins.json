@@ -1,16 +1,15 @@
 {
 	"required": true,
 	"package": "commoble.morered.mixin",
-	"compatibilityLevel": "JAVA_8",
+	"compatibilityLevel": "JAVA_17",
 	"refmap": "morered.refmap.json",
 	"mixins": 
 	[
-		"ChunkManagerMixin"
 	],
 	"client": 
 	[
-		"ClientBlockItemMixin",
-		"ClientPlayerControllerAccess"
+		"ClientElementsModelAccess",
+		"MultiPlayerGameModeAccess"
 	],
 	"injectors": 
 	{

@@ -2,16 +2,16 @@ package commoble.morered.gatecrafting_plinth;
 
 import javax.annotation.Nonnull;
 
-import commoble.morered.RecipeRegistrar;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipe;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.IRecipeType;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.ShapelessRecipe;
-import net.minecraft.util.NonNullList;
+import commoble.morered.MoreRed;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 /** Wrapper around vanilla shapeless recipes to change the recipe type **/
 public class GatecraftingRecipe extends ShapelessRecipe
@@ -22,18 +22,18 @@ public class GatecraftingRecipe extends ShapelessRecipe
 	}
 
 	@Override
-	public IRecipeType<?> getType()
+	public RecipeType<?> getType()
 	{
-		return RecipeRegistrar.GATECRAFTING_RECIPE_TYPE;
+		return MoreRed.instance().gatecraftingRecipeType.get();
 	}
 
 	@Override
-	public IRecipeSerializer<?> getSerializer()
+	public RecipeSerializer<?> getSerializer()
 	{
-		return RecipeRegistrar.GATECRAFTING_SERIALIZER.get();
+		return MoreRed.instance().gatecraftingSerializer.get();
 	}
 	
-	public static boolean doesPlayerHaveIngredients(PlayerInventory playerInventory, @Nonnull IRecipe<CraftingInventory> recipe)
+	public static boolean doesPlayerHaveIngredients(Inventory playerInventory, @Nonnull Recipe<CraftingContainer> recipe)
 	{
 		// assumes that the ingredient list doesn't have two of the same ingredients
 		// e.g. two stacks of redstone

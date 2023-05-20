@@ -1,20 +1,20 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "forge:wools/magenta"
+    },
+    "w": {
+      "tag": "morered:red_alloy_wires"
+    }
+  },
   "pattern": [
     "www",
     "w#w",
     "www"
   ],
-  "key": {
-    "w": {
-      "tag": "morered:red_alloy_wires"
-    },
-    "#": {
-      "tag": "forge:wools/magenta"
-    }
-  },
   "result": {
-    "item": "morered:magenta_network_cable",
-    "count": 8
+    "count": 8,
+    "item": "morered:magenta_network_cable"
   }
 }

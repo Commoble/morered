@@ -6,36 +6,39 @@ import java.nio.IntBuffer;
 
 import org.lwjgl.system.MemoryStack;
 
-import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.BlockModelRenderer;
-import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.block.ModelBlockRenderer;
+import net.minecraft.client.renderer.block.BlockRenderDispatcher;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.model.BakedQuad;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.math.vector.Vector3f;
-import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.math.vector.Vector4f;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraft.world.World;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import net.minecraft.core.BlockPos;
+import com.mojang.math.Matrix4f;
+import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.client.model.data.ModelData;
+
+import com.mojang.math.Vector3f;
+import net.minecraft.core.Vec3i;
+import com.mojang.math.Vector4f;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.Level;
 
 /**
  * Wrapper class around the vanilla block renderer so we don't have to copy five
  * functions verbatim
  **/
-public class BlockPreviewRenderer extends BlockModelRenderer
+public class BlockPreviewRenderer extends ModelBlockRenderer
 {
 	private static BlockPreviewRenderer INSTANCE;
 	
-	public static BlockPreviewRenderer getInstance(BlockModelRenderer baseRenderer)
+	public static BlockPreviewRenderer getInstance(ModelBlockRenderer baseRenderer)
 	{
 		if (INSTANCE == null || INSTANCE.blockColors != baseRenderer.blockColors)
 		{
@@ -44,13 +47,13 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 		
 		return INSTANCE;
 	}
-	public BlockPreviewRenderer(BlockModelRenderer baseRenderer)
+	public BlockPreviewRenderer(ModelBlockRenderer baseRenderer)
 	{
 		super(baseRenderer.blockColors);
 	}
 
 	// invoked from the DrawHighlightEvent.HighlightBlock event
-	public static void renderBlockPreview(BlockPos pos, BlockState state, World world, Vector3d currentRenderPos, MatrixStack matrix, IRenderTypeBuffer renderTypeBuffer)
+	public static void renderBlockPreview(BlockPos pos, BlockState state, Level level, Vec3 currentRenderPos, PoseStack matrix, MultiBufferSource renderTypeBuffer)
 	{
 		matrix.pushPose();
 	
@@ -62,26 +65,27 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 		double offsetZ = pos.getZ() - currentRenderPos.z();
 		matrix.translate(offsetX, offsetY, offsetZ);
 	
-		BlockRendererDispatcher blockDispatcher = Minecraft.getInstance().getBlockRenderer();
-		BlockModelRenderer renderer = getInstance(blockDispatcher.getModelRenderer());
-		renderer.renderModel(
-			world,
+		BlockRenderDispatcher blockDispatcher = Minecraft.getInstance().getBlockRenderer();
+		ModelBlockRenderer renderer = getInstance(blockDispatcher.getModelRenderer());
+		renderer.tesselateBlock(
+			level,
 			blockDispatcher.getBlockModel(state),
 			state,
 			pos,
 			matrix,
-			renderTypeBuffer.getBuffer(RenderType.translucent()),
+			renderTypeBuffer.getBuffer(Sheets.translucentCullBlockSheet()),
 			false,
-			world.random,
+			level.random,
 			state.getSeed(pos),
 			OverlayTexture.NO_OVERLAY,
-			net.minecraftforge.client.model.data.EmptyModelData.INSTANCE);
+			ModelData.EMPTY,
+			RenderType.translucent());
 	
 		matrix.popPose();
 	}
 
 	@Override
-	public void putQuadData(IBlockDisplayReader world, BlockState state, BlockPos pos, IVertexBuilder buffer, MatrixStack.Entry matrixEntry, BakedQuad quadIn,
+	public void putQuadData(BlockAndTintGetter level, BlockState state, BlockPos pos, VertexConsumer buffer, PoseStack.Pose matrixEntry, BakedQuad quadIn,
 		float tintA, float tintB, float tintC, float tintD, int brightness0, int brightness1, int brightness2, int brightness3, int combinedOverlayIn)
 	{
 		float r=1F;
@@ -89,19 +93,17 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 		float b=1F;
 		if (quadIn.isTinted())
 		{
-			int i = this.blockColors.getColor(state, world, pos, quadIn.getTintIndex());
+			int i = this.blockColors.getColor(state, level, pos, quadIn.getTintIndex());
 			r = (i >> 16 & 255) / 255.0F;
 			g = (i >> 8 & 255) / 255.0F;
 			b = (i & 255) / 255.0F;
 		}
-		// FORGE: Apply diffuse lighting at render-time instead of baking it in
 		if (quadIn.isShade()) // better name: shouldApplyDiffuseLighting
 		{
-			// TODO this should be handled by the forge lighting pipeline
-			float forgeLighting = net.minecraftforge.client.model.pipeline.LightUtil.diffuseLight(quadIn.getDirection());
-			r *= forgeLighting;
-			g *= forgeLighting;
-			b *= forgeLighting;
+			float shade = level.getShade(quadIn.getDirection(), true);
+			r *= shade;
+			g *= shade;
+			b *= shade;
 		}
 
 		// use our method below instead of adding the quad in the usual manner
@@ -110,11 +112,11 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 	}
 	
 	// as IVertexBuilder::addQuad except when we add the vertex, we add an opacity float instead of 1.0F
-	public static void addTransparentQuad(MatrixStack.Entry matrixEntry, BakedQuad quad, float[] colorMuls, float r, float g, float b, int[] vertexLights,
-		int combinedOverlayIn, boolean mulColor, IVertexBuilder buffer)
+	public static void addTransparentQuad(PoseStack.Pose matrixEntry, BakedQuad quad, float[] colorMuls, float r, float g, float b, int[] vertexLights,
+		int combinedOverlayIn, boolean mulColor, VertexConsumer buffer)
 	{
 		int[] vertexData = quad.getVertices();
-		Vector3i faceVector3i = quad.getDirection().getNormal();
+		Vec3i faceVector3i = quad.getDirection().getNormal();
 		Vector3f faceVector = new Vector3f(faceVector3i.getX(), faceVector3i.getY(), faceVector3i.getZ());
 		Matrix4f matrix = matrixEntry.pose();
 		faceVector.transform(matrixEntry.normal());
@@ -123,7 +125,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 
 		try (MemoryStack memorystack = MemoryStack.stackPush())
 		{
-			ByteBuffer bytebuffer = memorystack.malloc(DefaultVertexFormats.BLOCK.getVertexSize());
+			ByteBuffer bytebuffer = memorystack.malloc(DefaultVertexFormat.BLOCK.getVertexSize());
 			IntBuffer intbuffer = bytebuffer.asIntBuffer();
 
 			for (int vertexIndex = 0; vertexIndex < vertexDataEntries; ++vertexIndex)
@@ -149,7 +151,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 				}
 				
 				// this is the important part
-				float ALPHA = ClientConfig.INSTANCE.previewPlacementOpacity.get().floatValue();
+				float alpha = ClientConfig.INSTANCE.previewPlacementOpacity().get().floatValue();
 
 				int light = buffer.applyBakedLighting(vertexLights[vertexIndex], bytebuffer);
 				float texU = bytebuffer.getFloat(16);
@@ -157,7 +159,7 @@ public class BlockPreviewRenderer extends BlockModelRenderer
 				Vector4f posVector = new Vector4f(x, y, z, 1.0F);
 				posVector.transform(matrix);
 				buffer.applyBakedNormals(faceVector, bytebuffer, matrixEntry.normal());
-				buffer.vertex(posVector.x(), posVector.y(), posVector.z(), red, green, blue, ALPHA, texU, texV,
+				buffer.vertex(posVector.x(), posVector.y(), posVector.z(), red, green, blue, alpha, texU, texV,
 					combinedOverlayIn, light, faceVector.x(), faceVector.y(), faceVector.z());
 			}
 		}

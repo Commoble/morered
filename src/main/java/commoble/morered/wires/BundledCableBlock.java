@@ -7,7 +7,7 @@ import java.util.function.Function;
 
 import com.google.common.cache.LoadingCache;
 
-import commoble.morered.TileEntityRegistrar;
+import commoble.morered.MoreRed;
 import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
@@ -15,19 +15,18 @@ import commoble.morered.api.internal.DefaultWireProperties;
 import commoble.morered.api.internal.WireVoxelHelpers;
 import commoble.morered.util.BlockStateUtil;
 import commoble.morered.util.DirectionHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-import net.minecraft.block.AbstractBlock.Properties;
-
-public class BundledCableBlock extends AbstractWireBlock
+public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 {
 	public static final VoxelShape[] NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(3, 4);
 	public static final VoxelShape[] RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(4);
@@ -39,24 +38,16 @@ public class BundledCableBlock extends AbstractWireBlock
 	{
 		super(properties, SHAPES_BY_STATE_INDEX, RAYTRACE_BACKBOARDS, VOXEL_CACHE, false);
 	}
-
-
-	@Override
-	public boolean hasTileEntity(BlockState state)
-	{
-		return true;
-	}
-
-	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
-	{
-		return TileEntityRegistrar.BUNDLED_NETWORK_CABLE.get().create();
-	}
 	
+	@Override
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
+	{
+		return MoreRed.instance().bundledNetworkCableBeType.get().create(pos, state);
+	}	
 	
 	// invoked when an adjacent TE is marked dirty or an adjacent block updates its comparator output
 	@Override
-	public void onNeighborChange(BlockState state, IWorldReader world, BlockPos pos, BlockPos neighbor)
+	public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor)
 	{
 		// when would we need to update power here?
 		// firstly, if the entire blockstate changed, we'll be updating the power elsewhere anyway
@@ -67,10 +58,10 @@ public class BundledCableBlock extends AbstractWireBlock
 		// in which case we don't need to do anything 
 		// or B) the neighbor TE does have the capability, in which case the power MAY have changed, in which case we should check power
 		
-		if (!(world instanceof World))
+		if (!(world instanceof Level))
 			return;
 		
-		TileEntity neighborTE = world.getBlockEntity(pos);
+		BlockEntity neighborTE = world.getBlockEntity(pos);
 		if (neighborTE == null)
 			return;
 		
@@ -78,7 +69,7 @@ public class BundledCableBlock extends AbstractWireBlock
 		if (directionFromNeighbor == null)
 			return;
 		
-		neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionFromNeighbor).ifPresent($ -> this.updatePowerAfterBlockUpdate((World)world, pos, state));
+		neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionFromNeighbor).ifPresent($ -> this.updatePowerAfterBlockUpdate((Level)world, pos, state));
 
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		long edgeFlags = this.getEdgeFlags(world,pos);
@@ -100,7 +91,7 @@ public class BundledCableBlock extends AbstractWireBlock
 			}
 			if (!edgeUpdateDirs.isEmpty())
 			{
-				BlockPos.Mutable mutaPos = pos.mutable();
+				BlockPos.MutableBlockPos mutaPos = pos.mutable();
 				for (Direction dir : edgeUpdateDirs)
 				{
 					BlockPos otherNeighborPos = mutaPos.setWithOffset(pos, dir);
@@ -111,25 +102,25 @@ public class BundledCableBlock extends AbstractWireBlock
 	}
 
 	@Override
-	protected void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState)
+	protected void updatePowerAfterBlockUpdate(Level world, BlockPos wirePos, BlockState wireState)
 	{
-		TileEntity te = world.getBlockEntity(wirePos);
-		if (!(te instanceof BundledCableTileEntity))
+		BlockEntity te = world.getBlockEntity(wirePos);
+		if (!(te instanceof BundledCableBlockEntity))
 			return; // if there's no TE then we can't make any updates
-		BundledCableTileEntity wire = (BundledCableTileEntity)te;
+		BundledCableBlockEntity wire = (BundledCableBlockEntity)te;
 
 		// keep in mind that we don't need to set neighbor updates here
 		// as calling markDirty notifies neighbors of TE updates
 		Map<Block,WireConnector> connectors = MoreRedAPI.getCableConnectabilityRegistry();
 		WireConnector defaultConnector = MoreRedAPI.getDefaultCableConnector();
 		
-		BlockPos.Mutable mutaPos = wirePos.mutable();
+		BlockPos.MutableBlockPos mutaPos = wirePos.mutable();
 		BlockState[] neighborStates = new BlockState[6];
 		Map<Direction,ChanneledPowerSupplier> neighborPowerSuppliers = new EnumMap<>(Direction.class);
 		ChanneledPowerSupplier noPower = DefaultWireProperties.NO_POWER_SUPPLIER;
 		Function<BlockPos, Function<Direction, ChanneledPowerSupplier>> neighborPowerFinder = neighborPos -> directionToNeighbor ->
 		{
-			TileEntity neighborTE = world.getBlockEntity(neighborPos);
+			BlockEntity neighborTE = world.getBlockEntity(neighborPos);
 			if (neighborTE == null)
 				return noPower;
 			
@@ -226,10 +217,10 @@ public class BundledCableBlock extends AbstractWireBlock
 						int directionToWireSide = directionToWire.ordinal();
 						if (diagonalState.getBlock() == this && diagonalState.getValue(INTERIOR_FACES[directionToWireSide]))
 						{
-							TileEntity diagonalTe = world.getBlockEntity(diagonalPos);
-							if (diagonalTe instanceof BundledCableTileEntity)
+							BlockEntity diagonalTe = world.getBlockEntity(diagonalPos);
+							if (diagonalTe instanceof BundledCableBlockEntity)
 							{
-								power = Math.max(power, ((BundledCableTileEntity)diagonalTe).getPower(directionToWireSide, channel)-1);
+								power = Math.max(power, ((BundledCableBlockEntity)diagonalTe).getPower(directionToWireSide, channel)-1);
 							}
 						}
 					}
@@ -253,7 +244,7 @@ public class BundledCableBlock extends AbstractWireBlock
 	}
 	
 	@Override
-	protected void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
+	protected void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
 	{
 //		BlockPos.Mutable mutaPos = wirePos.toMutable();
 //		Block newBlock = newState.getBlock();
@@ -274,7 +265,7 @@ public class BundledCableBlock extends AbstractWireBlock
 	}
 
 	@Override
-	protected boolean canAdjacentBlockConnectToFace(IBlockReader world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
 	{
 		return MoreRedAPI.getCableConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultCableConnector())
 			.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);

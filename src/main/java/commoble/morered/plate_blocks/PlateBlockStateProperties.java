@@ -1,18 +1,18 @@
 package commoble.morered.plate_blocks;
 
 import commoble.morered.util.BlockStateUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraft.block.material.PushReaction;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.Material;
+import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.phys.Vec3;
 
 /**
  * The three input booleanproperties here are the inputs 90, 180, and 270 degrees clockwise from the output
@@ -56,7 +56,7 @@ public class PlateBlockStateProperties
 		return BlockStateUtil.getOutputDirection(attachmentDirection, rotationIndex);
 	}
 	
-	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockItemUseContext context)
+	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPlaceContext context)
 	{
 		// how do we want to orient the block when we place it?
 		// attachment face should be the face that was clicked
@@ -73,11 +73,11 @@ public class PlateBlockStateProperties
 		BlockPos placePos = context.getClickedPos();
 		Direction faceOfAdjacentBlock = context.getClickedFace();
 		Direction directionTowardAdjacentBlock = faceOfAdjacentBlock.getOpposite();
-		Vector3d relativeHitVec = context.getClickLocation().subtract(Vector3d.atLowerCornerOf(placePos));
+		Vec3 relativeHitVec = context.getClickLocation().subtract(Vec3.atLowerCornerOf(placePos));
 		return getStateForPlacedGatePlate(state, placePos, directionTowardAdjacentBlock, relativeHitVec); 
 	}
 	
-	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPos placePos, Direction directionTowardAdjacentBlock, Vector3d relativeHitVec)
+	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPos placePos, Direction directionTowardAdjacentBlock, Vec3 relativeHitVec)
 	{
 		Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, directionTowardAdjacentBlock);
 		int rotationIndex = BlockStateUtil.getRotationIndexForDirection(directionTowardAdjacentBlock, outputDirection);

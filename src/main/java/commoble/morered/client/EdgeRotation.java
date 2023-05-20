@@ -2,31 +2,31 @@ package commoble.morered.client;
 
 import commoble.morered.util.DirectionHelper;
 import commoble.morered.wires.Edge;
-import net.minecraft.client.renderer.model.ModelRotation;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.core.Direction;
+import com.mojang.math.Matrix4f;
 
 public class EdgeRotation
 {
 	/**
 	 * Rotating the down-west edge by EDGE_ROTATIONS[i] results in Edge.values()[i]
 	 */
-	public static final ModelRotation[] EDGE_ROTATIONS =
+	public static final BlockModelRotation[] EDGE_ROTATIONS =
 	{
-		ModelRotation.X0_Y90,
-		ModelRotation.X0_Y270,
-		ModelRotation.X0_Y0,
-		ModelRotation.X0_Y180,
+		BlockModelRotation.X0_Y90,
+		BlockModelRotation.X0_Y270,
+		BlockModelRotation.X0_Y0,
+		BlockModelRotation.X0_Y180,
 		
-		ModelRotation.X180_Y90,
-		ModelRotation.X180_Y270,
-		ModelRotation.X180_Y0,
-		ModelRotation.X180_Y180,
+		BlockModelRotation.X180_Y90,
+		BlockModelRotation.X180_Y270,
+		BlockModelRotation.X180_Y0,
+		BlockModelRotation.X180_Y180,
 		
-		ModelRotation.X90_Y90,
-		ModelRotation.X90_Y180,
-		ModelRotation.X90_Y0,
-		ModelRotation.X90_Y270
+		BlockModelRotation.X90_Y90,
+		BlockModelRotation.X90_Y180,
+		BlockModelRotation.X90_Y0,
+		BlockModelRotation.X90_Y270
 	};
 	
 	public static Edge getRotatedEdge(Edge oldEdge, Matrix4f rotation)

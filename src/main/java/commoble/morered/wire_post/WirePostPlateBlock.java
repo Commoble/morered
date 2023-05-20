@@ -4,25 +4,23 @@ import java.util.EnumSet;
 import java.util.function.Function;
 
 import commoble.morered.plate_blocks.PlateBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.world.IBlockReader;
-
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WirePostPlateBlock extends AbstractPoweredWirePostBlock
 {
 	protected static final VoxelShape[] PLATED_POST_SHAPES_DUNSWE = {
-		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[0], PlateBlock.SHAPES_BY_DIRECTION[0]), // down
-		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[1], PlateBlock.SHAPES_BY_DIRECTION[1]), // up
-		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[2], PlateBlock.SHAPES_BY_DIRECTION[2]), // north
-		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[3], PlateBlock.SHAPES_BY_DIRECTION[3]), // south
-		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[4], PlateBlock.SHAPES_BY_DIRECTION[4]), // west
-		VoxelShapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[5], PlateBlock.SHAPES_BY_DIRECTION[5]) // east
+		Shapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[0], PlateBlock.SHAPES_BY_DIRECTION[0]), // down
+		Shapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[1], PlateBlock.SHAPES_BY_DIRECTION[1]), // up
+		Shapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[2], PlateBlock.SHAPES_BY_DIRECTION[2]), // north
+		Shapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[3], PlateBlock.SHAPES_BY_DIRECTION[3]), // south
+		Shapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[4], PlateBlock.SHAPES_BY_DIRECTION[4]), // west
+		Shapes.or(AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[5], PlateBlock.SHAPES_BY_DIRECTION[5]) // east
 	};
 
 	public WirePostPlateBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
@@ -31,7 +29,7 @@ public class WirePostPlateBlock extends AbstractPoweredWirePostBlock
 	}
 	
 	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
 		// if we're raytracing a wire, ignore the post (the plate can still block the raytrace)
 		VoxelShape[] shapeTable = context instanceof WireRayTraceSelectionContext && ((WireRayTraceSelectionContext)context).shouldIgnoreBlock(pos)

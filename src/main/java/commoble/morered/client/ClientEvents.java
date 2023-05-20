@@ -1,89 +1,85 @@
 package commoble.morered.client;
 
+import java.util.function.Consumer;
+
 import javax.annotation.Nullable;
 
-import commoble.morered.BlockRegistrar;
-import commoble.morered.ContainerRegistrar;
-import commoble.morered.ItemRegistrar;
 import commoble.morered.MoreRed;
 import commoble.morered.ObjectNames;
-import commoble.morered.TileEntityRegistrar;
-import commoble.morered.mixin.ClientPlayerControllerAccess;
-import commoble.morered.plate_blocks.LogicGateType;
+import commoble.morered.mixin.MultiPlayerGameModeAccess;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.util.BlockStateUtil;
 import commoble.morered.wires.AbstractWireBlock;
 import commoble.morered.wires.VoxelCache;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.ScreenManager;
-import net.minecraft.client.multiplayer.PlayerController;
+import net.minecraft.client.gui.screens.MenuScreens;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.multiplayer.MultiPlayerGameMode;
+import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.RenderTypeLookup;
-import net.minecraft.client.renderer.color.BlockColors;
-import net.minecraft.client.renderer.color.ItemColors;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.GameType;
-import net.minecraft.world.World;
+import net.minecraft.client.renderer.block.BlockModelShaper;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.ModelResourceLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ColorHandlerEvent;
-import net.minecraftforge.client.event.DrawHighlightEvent;
-import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
-import net.minecraftforge.client.event.ModelRegistryEvent;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
+import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
+import net.minecraftforge.client.event.InputEvent;
+import net.minecraftforge.client.event.ModelEvent;
+import net.minecraftforge.client.event.RegisterColorHandlersEvent;
+import net.minecraftforge.client.event.RenderHighlightEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.client.registry.ClientRegistry;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.RegistryObject;
 
 public class ClientEvents
 {
 	public static void addClientListeners(ModLoadingContext modContext, FMLJavaModLoadingContext fmlContext, IEventBus modBus, IEventBus forgeBus)
 	{
-		ClientConfig.initClientConfig(modContext, fmlContext);
+		ClientConfig.initClientConfig();
 		
 		modBus.addListener(ClientEvents::onClientSetup);
 		modBus.addListener(ClientEvents::onRegisterModelLoaders);
 		modBus.addListener(ClientEvents::onRegisterBlockColors);
 		modBus.addListener(ClientEvents::onRegisterItemColors);
+		modBus.addListener(ClientEvents::onRegisterRenderers);
+		modBus.addListener(ClientEvents::onModelBakingCompleted);
 		
 		forgeBus.addListener(ClientEvents::onClientLogIn);
 		forgeBus.addListener(ClientEvents::onClientLogOut);
 		forgeBus.addListener(ClientEvents::onHighlightBlock);
-		forgeBus.addListener(ClientEvents::onClickInput);
+		forgeBus.addListener(ClientEvents::onInteract);
 	}
 	
+	@SuppressWarnings("removal")
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		// render layer setting is synchronized, safe to do during multithreading
-		LogicGateType.TYPES.values().forEach(ClientEvents::setLogicGateRenderLayer);
-		LogicGateType.BITWISE_TYPES.values()
-			.forEach(pair -> RenderTypeLookup.setRenderLayer(pair.blockGetter.get(), RenderType.cutout()));
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.LATCH.get(), RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_PLATE.get(), RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get(), RenderType.cutout());
-		RenderTypeLookup.setRenderLayer(BlockRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), RenderType.cutout());
-		
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.REDWIRE_POST.get(), WirePostRenderer::new);
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_POST.get(), BundledCablePostRenderer::new);
-		ClientRegistry.bindTileEntityRenderer(TileEntityRegistrar.BUNDLED_CABLE_RELAY_PLATE.get(), BundledCablePostRenderer::new);
+		MoreRed.instance().logicPlates.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
+		MoreRed.instance().bitwiseLogicPlates.values()
+			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.instance().latchBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.instance().redwirePostPlateBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.instance().redwirePostRelayPlateBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.instance().bundledCableRelayPlateBlock.get(), RenderType.cutout());
 		
 		event.enqueueWork(ClientEvents::afterClientSetup);
 	}
@@ -91,90 +87,114 @@ public class ClientEvents
 	static void afterClientSetup()
 	{
 		// not threadsafe, do this on main thread
-		ScreenManager.register(ContainerRegistrar.GATECRAFTING.get(), GatecraftingScreen::new);
+		MenuScreens.register(MoreRed.instance().gatecraftingMenuType.get(), GatecraftingScreen::new);
 	}
 	
-	public static void setLogicGateRenderLayer(LogicGateType type)
+	public static void onRegisterModelLoaders(ModelEvent.RegisterGeometryLoaders event)
 	{
-		RenderTypeLookup.setRenderLayer(type.blockGetter.get(), RenderType.cutout());
+		event.register(ObjectNames.WIRE_PARTS, WirePartModelLoader.INSTANCE);
+		event.register(ObjectNames.ROTATE_TINTS, TintRotatingModelLoader.INSTANCE);
 	}
 	
-	public static void onRegisterModelLoaders(ModelRegistryEvent event)
+	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
 	{
-		ModelLoaderRegistry.registerLoader(new ResourceLocation(MoreRed.MODID, ObjectNames.WIRE_PARTS), WirePartModelLoader.INSTANCE);
-		ModelLoaderRegistry.registerLoader(new ResourceLocation(MoreRed.MODID, ObjectNames.ROTATE_TINTS), TintRotatingModelLoader.INSTANCE);
+		MoreRed.instance().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockTint, rob.get()));
+		event.register(ColorHandlers::getLatchBlockTint, MoreRed.instance().latchBlock.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.instance().redwirePostBlock.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.instance().redwirePostPlateBlock.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.instance().redwirePostRelayPlateBlock.get());
+		event.register(ColorHandlers::getRedAlloyWireBlockTint, MoreRed.instance().redAlloyWireBlock.get());
 	}
 	
-	public static void onRegisterBlockColors(ColorHandlerEvent.Block event)
+	public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event)
 	{
-		BlockColors colors = event.getBlockColors();
-		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockTint, type.blockGetter.get()));
-		colors.register(ColorHandlers::getLatchBlockTint, BlockRegistrar.LATCH.get());
-		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST.get());
-		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST_PLATE.get());
-		colors.register(ColorHandlers::getRedwirePostBlockTint, BlockRegistrar.REDWIRE_POST_RELAY_PLATE.get());
-		colors.register(ColorHandlers::getRedAlloyWireBlockTint, BlockRegistrar.RED_ALLOY_WIRE.get());
+		MoreRed.instance().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockItemTint, rob.get().asItem()));
+		event.register(ColorHandlers::getLatchItemTint, MoreRed.instance().latchBlock.get().asItem());
+		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.instance().redwirePostBlock.get().asItem());
+		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.instance().redwirePostPlateBlock.get().asItem());
+		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.instance().redwirePostRelayPlateBlock.get().asItem());
+		event.register(ColorHandlers::getRedAlloyWireItemTint, MoreRed.instance().redAlloyWireBlock.get().asItem());
 	}
 	
-	public static void onRegisterItemColors(ColorHandlerEvent.Item event)
+	private static void onRegisterRenderers(RegisterRenderers event)
 	{
-		ItemColors colors = event.getItemColors();
-		LogicGateType.TYPES.values().forEach(type -> colors.register(ColorHandlers::getLogicFunctionBlockItemTint, type.itemGetter.get()));
-		colors.register(ColorHandlers::getLatchItemTint, ItemRegistrar.LATCH.get());
-		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST.get());
-		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_PLATE.get());
-		colors.register(ColorHandlers::getRedwirePostItemTint, ItemRegistrar.REDWIRE_POST_RELAY_PLATE.get());
-		colors.register(ColorHandlers::getRedAlloyWireItemTint, ItemRegistrar.RED_ALLOY_WIRE.get());
+		event.registerBlockEntityRenderer(MoreRed.instance().redwirePostBeType.get(), WirePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.instance().bundledCablePostBeType.get(), BundledCablePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.instance().bundledCableRelayPlateBeType.get(), BundledCablePostRenderer::new);
 	}
 	
-	public static void onClientLogIn(ClientPlayerNetworkEvent.LoggedInEvent event)
+	@Deprecated
+	private static void onModelBakingCompleted(ModelEvent.BakingCompleted event)
+	{
+		var models = event.getModels();
+		Consumer<RegistryObject<? extends Block>> modelCheeser = rob -> {
+			for (BlockState state : rob.get().getStateDefinition().getPossibleStates())
+			{
+				ModelResourceLocation mrl = BlockModelShaper.stateToModelLocation(state);
+				BakedModel model = models.get(mrl);
+				if (model != null)
+				{
+					models.put(mrl,  new WirePartModelLoader.MultipartWireModel(model));
+				}
+			}
+		};
+		
+		modelCheeser.accept(MoreRed.instance().redAlloyWireBlock);
+		modelCheeser.accept(MoreRed.instance().bundledNetworkCableBlock);
+		for (var rob : MoreRed.instance().networkCableBlocks)
+		{
+			modelCheeser.accept(rob);
+		}
+	}
+	
+	private static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)
 	{
 		// clean up static data on the client
-		MoreRed.CLIENT_PROXY = ClientProxy.makeClientProxy();
+		ClientProxy.clear();
 		VoxelCache.clearClientCache();
 	}
 	
-	public static void onClientLogOut(ClientPlayerNetworkEvent.LoggedOutEvent event)
+	private static void onClientLogOut(ClientPlayerNetworkEvent.LoggingOut event)
 	{
 		// clean up static data on the client
-		MoreRed.CLIENT_PROXY = ClientProxy.makeClientProxy();
+		ClientProxy.clear();
 		VoxelCache.clearClientCache();
 	}
 	
-	public static void onHighlightBlock(DrawHighlightEvent.HighlightBlock event)
+	private static void onHighlightBlock(RenderHighlightEvent.Block event)
 	{
-		if (ClientConfig.INSTANCE.showPlacementPreview.get())
+		if (ClientConfig.INSTANCE.showPlacementPreview().get())
 		{
 			@SuppressWarnings("resource")
-			ClientPlayerEntity player = Minecraft.getInstance().player;
+			LocalPlayer player = Minecraft.getInstance().player;
 			if (player != null && player.level != null)
 			{
-				Hand hand = player.getUsedItemHand();
-				Item item = player.getItemInHand(hand == null ? Hand.MAIN_HAND : hand).getItem();
-				if (item instanceof BlockItem)
+				InteractionHand hand = player.getUsedItemHand();
+				Item item = player.getItemInHand(hand == null ? InteractionHand.MAIN_HAND : hand).getItem();
+				if (item instanceof BlockItem blockItem)
 				{
-					Block block = ((BlockItem)item).getBlock();
+					Block block = blockItem.getBlock();
 					if (block instanceof PlateBlock)
 					{
-						World world = player.level;
-						BlockRayTraceResult rayTrace = event.getTarget();
+						Level world = player.level;
+						BlockHitResult rayTrace = event.getTarget();
 						Direction directionAwayFromTargetedBlock = rayTrace.getDirection();
 						BlockPos placePos = rayTrace.getBlockPos().relative(directionAwayFromTargetedBlock);
 						
 						BlockState existingState = world.getBlockState(placePos);
-						if (existingState.isAir(world, placePos) || existingState.getMaterial().isReplaceable())
+						if (existingState.isAir() || existingState.getMaterial().isReplaceable())
 						{
 							// only render the preview if we know it would make sense for the block to be placed where we expect it to be
-							Vector3d hitVec = rayTrace.getLocation();
+							Vec3 hitVec = rayTrace.getLocation();
 							
 							Direction attachmentDirection = directionAwayFromTargetedBlock.getOpposite();
-							Vector3d relativeHitVec = hitVec.subtract(Vector3d.atLowerCornerOf(placePos));
+							Vec3 relativeHitVec = hitVec.subtract(Vec3.atLowerCornerOf(placePos));
 							
 							Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentDirection);
 							BlockStateUtil.getRotationIndexForDirection(attachmentDirection, outputDirection);
 							BlockState state = PlateBlockStateProperties.getStateForPlacedGatePlate(block.defaultBlockState(), placePos, attachmentDirection, relativeHitVec);
 							
-							BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getInfo().getPosition(), event.getMatrix(), event.getBuffers());
+							BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getCamera().getPosition(), event.getPoseStack(), event.getMultiBufferSource());
 							
 						}
 					}
@@ -183,7 +203,7 @@ public class ClientEvents
 		}
 	}
 	
-	public static void onClickInput(ClickInputEvent event)
+	public static void onInteract(InputEvent.InteractionKeyMappingTriggered event)
 	{
 		// when the player clicks a wire block,
 		// we want to handle the block in a manner that causes the digging packet to be sent
@@ -192,12 +212,12 @@ public class ClientEvents
 		// but we can do this by sending our own digging packet and bypassing the vanilla behaviour
 		// (it helps that wire blocks are instant-break blocks)
 		Minecraft mc = Minecraft.getInstance();
-		RayTraceResult rayTraceResult = mc.hitResult;
-		ClientWorld world = mc.level;
-		ClientPlayerEntity player = mc.player;
-		if (rayTraceResult != null && rayTraceResult.getLocation() != null && world != null && player != null && event.isAttack() && rayTraceResult.getType() == RayTraceResult.Type.BLOCK)
+		HitResult rayTraceResult = mc.hitResult;
+		ClientLevel world = mc.level;
+		LocalPlayer player = mc.player;
+		if (rayTraceResult != null && rayTraceResult.getLocation() != null && world != null && event.isAttack() && player != null && rayTraceResult.getType() == HitResult.Type.BLOCK)
 		{
-			BlockRayTraceResult blockResult = (BlockRayTraceResult) rayTraceResult;
+			BlockHitResult blockResult = (BlockHitResult) rayTraceResult;
 			BlockPos pos = blockResult.getBlockPos();
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();
@@ -207,8 +227,8 @@ public class ClientEvents
 				event.setCanceled(true);
 				
 				AbstractWireBlock wireBlock = (AbstractWireBlock)block;
-				PlayerController controller = mc.gameMode;
-				ClientPlayerControllerAccess controllerAccess = (ClientPlayerControllerAccess)controller;
+				MultiPlayerGameMode controller = mc.gameMode;
+				MultiPlayerGameModeAccess controllerAccess = (MultiPlayerGameModeAccess)controller;
 				GameType gameType = controller.getPlayerMode();
 				// now run over all the permissions checking that would normally happen here
 				if (player.blockActionRestricted(world, pos, gameType))
@@ -221,7 +241,7 @@ public class ClientEvents
 				Direction hitNormal = faceToBreak.getOpposite();
 				if (gameType.isCreative())
 				{
-					controllerAccess.callSendBlockAction(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
+					Minecraft.getInstance().getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, hitNormal));
 					// TODO do stuff from onPlayerDestroyBlock here
 					if (!net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player, pos, hitNormal).isCanceled())
 					{
@@ -233,11 +253,11 @@ public class ClientEvents
 				{
 					if (controller.isDestroying())
 					{
-						controllerAccess.callSendBlockAction(CPlayerDiggingPacket.Action.ABORT_DESTROY_BLOCK, controllerAccess.getDestroyBlockPos(), blockResult.getDirection());
+						Minecraft.getInstance().getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.ABORT_DESTROY_BLOCK, controllerAccess.getDestroyBlockPos(), blockResult.getDirection()));
 					}
 					PlayerInteractEvent.LeftClickBlock leftClickBlockEvent = net.minecraftforge.common.ForgeHooks.onLeftClickBlock(player,pos,hitNormal);
 
-					controllerAccess.callSendBlockAction(CPlayerDiggingPacket.Action.START_DESTROY_BLOCK, pos, hitNormal);
+					Minecraft.getInstance().getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, hitNormal));
 					if (!leftClickBlockEvent.isCanceled() && leftClickBlockEvent.getUseItem() != Event.Result.DENY)
 					{
 						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
@@ -250,7 +270,7 @@ public class ClientEvents
 	// more parity with existing destroy-clicked-block code
 	// these checks are run after the digging packet is sent
 	// the existing code checks some things that are already checked above, so we'll skip those
-	private static void destroyClickedWireBlock(AbstractWireBlock block, BlockState state, ClientWorld world, BlockPos pos, ClientPlayerEntity player, ClientPlayerControllerAccess controllerAccess, Direction interiorSide)
+	private static void destroyClickedWireBlock(AbstractWireBlock block, BlockState state, ClientLevel world, BlockPos pos, LocalPlayer player, MultiPlayerGameModeAccess controllerAccess, Direction interiorSide)
 	{
 		ItemStack heldItemStack = player.getMainHandItem();
 		if (heldItemStack.onBlockStartBreak(pos, player))

@@ -1,37 +1,33 @@
 package commoble.morered.client;
 
-import commoble.databuddy.config.ConfigHelper;
-import commoble.databuddy.config.ConfigHelper.ConfigValueListener;
+import commoble.morered.util.ConfigHelper;
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
-public class ClientConfig
+public record ClientConfig(ConfigValue<Boolean> showPlacementPreview, ConfigValue<Double> previewPlacementOpacity)
 {
 	public static ClientConfig INSTANCE;
 	
-	// called during mod object construction on client side
-	public static void initClientConfig(ModLoadingContext modContext, FMLJavaModLoadingContext fmlContext)
+	// TODO move to ClientProxy
+	public static void initClientConfig()
 	{
-		INSTANCE = ConfigHelper.register(modContext, fmlContext, ModConfig.Type.CLIENT, ClientConfig::new);
+		INSTANCE = ConfigHelper.register(ModConfig.Type.CLIENT, ClientConfig::create);
 	}
 	
-	
-	public ConfigValueListener<Boolean> showPlacementPreview;
-	public ConfigValueListener<Double> previewPlacementOpacity;
-	
-	public ClientConfig(ForgeConfigSpec.Builder builder, ConfigHelper.Subscriber subscriber)
+	public static ClientConfig create(ForgeConfigSpec.Builder builder)
 	{
 		builder.push("Rendering");
-		this.showPlacementPreview = subscriber.subscribe(builder
+		ConfigValue<Boolean> showPlacementPreview = builder
 			.comment("Render preview of plate blocks before placing them")
 			.translation("morered.showPlacementPreview")
-			.define("showPlacementPreview", true));
-		this.previewPlacementOpacity = subscriber.subscribe(builder
+			.define("showPlacementPreview", true);
+		ConfigValue<Double> previewPlacementOpacity = builder
 			.comment("Opacity of the render preview. Higher value = less transparent, lower = more transparent")
 			.translation("morered.showPlacementPreview")
-			.defineInRange("previewPlacementOpacity", 0.4D, 0D, 1D));
+			.defineInRange("previewPlacementOpacity", 0.4D, 0D, 1D);
 		builder.pop();
+		
+		return new ClientConfig(showPlacementPreview, previewPlacementOpacity);
 	}
 }

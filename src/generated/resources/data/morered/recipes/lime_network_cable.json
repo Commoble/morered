@@ -1,20 +1,20 @@
 {
   "type": "minecraft:crafting_shaped",
+  "key": {
+    "#": {
+      "tag": "forge:wools/lime"
+    },
+    "w": {
+      "tag": "morered:red_alloy_wires"
+    }
+  },
   "pattern": [
     "www",
     "w#w",
     "www"
   ],
-  "key": {
-    "w": {
-      "tag": "morered:red_alloy_wires"
-    },
-    "#": {
-      "tag": "forge:wools/lime"
-    }
-  },
   "result": {
-    "item": "morered:lime_network_cable",
-    "count": 8
+    "count": 8,
+    "item": "morered:lime_network_cable"
   }
 }

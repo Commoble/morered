@@ -1,30 +1,27 @@
 package commoble.morered.gatecrafting_plinth;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.IContainerProvider;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.inventory.container.SimpleNamedContainerProvider;
-import net.minecraft.util.ActionResultType;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.network.NetworkHooks;
-
-import net.minecraft.block.AbstractBlock.Properties;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.SimpleMenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.MenuConstructor;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
 
 public class GatecraftingPlinthBlock extends Block
 {
-	public static final VoxelShape SHAPE = VoxelShapes.or(
+	public static final VoxelShape SHAPE = Shapes.or(
 		// plate
 		Block.box(0, 14, 0, 16, 16, 16),
 		// blaze rod
@@ -42,21 +39,21 @@ public class GatecraftingPlinthBlock extends Block
 	}
 
 	@Override
-	public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult rayTrace)
+	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTrace)
 	{
-		if (player instanceof ServerPlayerEntity)
+		if (player instanceof ServerPlayer serverPlayer)
 		{
-			IContainerProvider provider = GatecraftingContainer.getServerContainerProvider(pos);
-			ITextComponent name = new TranslationTextComponent(this.getDescriptionId());
-			INamedContainerProvider namedProvider = new SimpleNamedContainerProvider(provider, name);
-			NetworkHooks.openGui((ServerPlayerEntity)player, namedProvider);
+			MenuConstructor provider = GatecraftingMenu.getServerContainerProvider(pos);
+			Component name = Component.translatable(this.getDescriptionId());
+			MenuProvider namedProvider = new SimpleMenuProvider(provider, name);
+			NetworkHooks.openScreen(serverPlayer, namedProvider);
 		}
 
-		return ActionResultType.SUCCESS;
+		return InteractionResult.SUCCESS;
 	}
 	
 	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
 		return SHAPE;
 	}

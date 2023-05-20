@@ -1,8 +1,8 @@
 package commoble.morered.plate_blocks;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
 
 public enum InputState
 {
@@ -60,7 +60,7 @@ public enum InputState
 		);
 	}
 	
-	public static InputState getWorldPowerState(World world, BlockState state, BlockPos pos)
+	public static InputState getWorldPowerState(Level world, BlockState state, BlockPos pos)
 	{
 		return getState(
 			InputSide.A.isBlockReceivingPower(world, state, pos),
@@ -69,7 +69,7 @@ public enum InputState
 			);
 	}
 	
-	public static BlockState getUpdatedBlockState(World world, BlockState oldBlockState, BlockPos pos)
+	public static BlockState getUpdatedBlockState(Level world, BlockState oldBlockState, BlockPos pos)
 	{
 		InputState oldInputState = InputState.getInput(oldBlockState);
 		InputState newInputState = InputState.getWorldPowerState(world, oldBlockState, pos);

@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import commoble.morered.util.DirectionHelper;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
 
 public class DirectionUtilTests
 {

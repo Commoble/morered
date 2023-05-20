@@ -2,7 +2,7 @@ modLoader="javafml" #mandatory
 loaderVersion="[36,)" #mandatory
 license="MIT License"
 [[mods]] #mandatory
-modId="morered-datagen" #mandatory
+modId="morered_datagen" #mandatory
 version="${file.jarVersion}" #mandatory
 displayName="More Red Datagen" #mandatory
 credits='''

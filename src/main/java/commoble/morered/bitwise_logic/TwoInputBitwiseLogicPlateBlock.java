@@ -9,12 +9,12 @@ import commoble.morered.plate_blocks.LogicFunction;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.util.BlockStateUtil;
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 
 public class TwoInputBitwiseLogicPlateBlock extends BitwiseLogicPlateBlock
 {
@@ -27,20 +27,20 @@ public class TwoInputBitwiseLogicPlateBlock extends BitwiseLogicPlateBlock
 	}
 
 	@Override
-	protected void updatePower(World world, BlockPos thisPos, BlockState thisState)
+	protected void updatePower(Level world, BlockPos thisPos, BlockState thisState)
 	{
-		TileEntity te = world.getBlockEntity(thisPos);
-		if (te instanceof ChanneledPowerStorageTileEntity)
+		BlockEntity te = world.getBlockEntity(thisPos);
+		if (te instanceof ChanneledPowerStorageBlockEntity)
 		{
-			ChanneledPowerStorageTileEntity logicTE = (ChanneledPowerStorageTileEntity)te;
+			ChanneledPowerStorageBlockEntity logicTE = (ChanneledPowerStorageBlockEntity)te;
 			// get capability from output side
 			byte[] power = new byte[16]; // defaults to 0s
 			Direction attachmentDir = thisState.getValue(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
 			int rotationIndex = thisState.getValue(PlateBlockStateProperties.ROTATION);
 			Direction inputSideA = BlockStateUtil.getInputDirection(attachmentDir, rotationIndex, InputSide.A.rotationsFromOutput);
 			Direction inputSideC = BlockStateUtil.getInputDirection(attachmentDir, rotationIndex, InputSide.C.rotationsFromOutput);
-			TileEntity inputTileA = world.getBlockEntity(thisPos.relative(inputSideA));
-			TileEntity inputTileC = world.getBlockEntity(thisPos.relative(inputSideC));
+			BlockEntity inputTileA = world.getBlockEntity(thisPos.relative(inputSideA));
+			BlockEntity inputTileC = world.getBlockEntity(thisPos.relative(inputSideC));
 			ChanneledPowerSupplier inputA = inputTileA == null
 				? BitwiseLogicPlateBlock.NO_POWER_SUPPLIER
 				: inputTileA.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, inputSideA.getOpposite()).orElse(NO_POWER_SUPPLIER);
@@ -61,7 +61,7 @@ public class TwoInputBitwiseLogicPlateBlock extends BitwiseLogicPlateBlock
 
 	
 	@Override
-	public boolean canConnectToAdjacentCable(@Nonnull IBlockReader world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToWire)
+	public boolean canConnectToAdjacentCable(@Nonnull BlockGetter world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToWire)
 	{
 		Direction plateAttachmentDir = thisState.getValue(PlateBlock.ATTACHMENT_DIRECTION);
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(thisState);

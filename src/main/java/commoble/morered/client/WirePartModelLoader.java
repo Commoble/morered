@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
-import java.util.function.LongPredicate;
+
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonDeserializationContext;
@@ -16,49 +17,45 @@ import com.mojang.datafixers.util.Pair;
 
 import commoble.morered.client.WirePartModelLoader.WirePartGeometry;
 import commoble.morered.wires.AbstractWireBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.BlockModel;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.IModelTransform;
-import net.minecraft.client.renderer.model.IUnbakedModel;
-import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.model.ModelBakery;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Direction;
-import net.minecraft.util.JSONUtils;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockDisplayReader;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.data.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.IModelData;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.client.model.BakedModelWrapper;
+import net.minecraftforge.client.model.IDynamicBakedModel;
+import net.minecraftforge.client.model.data.ModelData;
 import net.minecraftforge.client.model.data.ModelProperty;
-import net.minecraftforge.client.model.geometry.IModelGeometry;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
 
-public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
+public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 {
 	public static final WirePartModelLoader INSTANCE = new WirePartModelLoader();
 
 	@Override
-	public void onResourceManagerReload(IResourceManager resourceManager)
+	public WirePartModelLoader.WirePartGeometry read(JsonObject modelJson, JsonDeserializationContext context)
 	{
-		// not needed at the moment, consider using if caches need to be cleared
-	}
-
-	@Override
-	public WirePartModelLoader.WirePartGeometry read(JsonDeserializationContext context, JsonObject modelContents)
-	{
-        BlockModel lineModel = context.deserialize(JSONUtils.getAsJsonObject(modelContents, "line"), BlockModel.class);
-        BlockModel edgeModel = context.deserialize(JSONUtils.getAsJsonObject(modelContents, "edge"), BlockModel.class);
+        BlockModel lineModel = context.deserialize(GsonHelper.getAsJsonObject(modelJson, "line"), BlockModel.class);
+        BlockModel edgeModel = context.deserialize(GsonHelper.getAsJsonObject(modelJson, "edge"), BlockModel.class);
         return new WirePartGeometry(lineModel, edgeModel);
 	}
 	
-	public static class WirePartGeometry implements IModelGeometry<WirePartGeometry>
+	public static class WirePartGeometry implements IUnbakedGeometry<WirePartGeometry>
 	{
 		private final BlockModel lineModel;
 		private final BlockModel edgeModel;
@@ -70,12 +67,12 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		}
 
 		@Override
-		public IBakedModel bake(IModelConfiguration owner, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter, IModelTransform modelTransform,
-			ItemOverrideList overrides, ResourceLocation modelLocation)
+		public BakedModel bake(IGeometryBakingContext context, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+			ItemOverrides overrides, ResourceLocation modelLocation)
 		{
-			IBakedModel[] lineModels = new IBakedModel[24];
-			IBakedModel[] edgeModels = new IBakedModel[12];
-			boolean isSideLit = owner.isSideLit();
+			BakedModel[] lineModels = new BakedModel[24];
+			BakedModel[] edgeModels = new BakedModel[12];
+			boolean useBlockLight = context.useBlockLight();
 			
 			// for each combination of attachment face + rotated connection side, bake a connection line model
 			for (int side = 0; side < 6; side++)
@@ -83,8 +80,8 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 				for (int subSide = 0; subSide < 4; subSide++)
 				{
 					int index = side*4 + subSide;
-					IModelTransform transform = FaceRotation.getFaceRotation(side, subSide);
-					lineModels[index] = this.lineModel.bake(bakery, this.lineModel, spriteGetter, transform, modelLocation, isSideLit);
+					ModelState transform = FaceRotation.getFaceRotation(side, subSide);
+					lineModels[index] = this.lineModel.bake(bakery, this.lineModel, spriteGetter, transform, modelLocation, useBlockLight);
 				}
 			}
 			
@@ -94,20 +91,20 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 				// let's define them in directional precedence
 				// down comes first, then up, then the sides
 				// the "default" edge with no rotation has to be on the middle sides to ignore the z-axis, we'll use bottom-west
-				IModelTransform transform = EdgeRotation.EDGE_ROTATIONS[edge];
-				edgeModels[edge] = this.edgeModel.bake(bakery, this.edgeModel, spriteGetter, transform, modelLocation, isSideLit);
+				ModelState transform = EdgeRotation.EDGE_ROTATIONS[edge];
+				edgeModels[edge] = this.edgeModel.bake(bakery, this.edgeModel, spriteGetter, transform, modelLocation, useBlockLight);
 			}
 			
-			return new WirePartModelLoader.WirePartModel(owner.useSmoothLighting(), owner.isShadedInGui(), owner.isSideLit(),
+			return new WirePartModelLoader.WirePartModel(context.useAmbientOcclusion(), context.isGui3d(), useBlockLight,
 				spriteGetter.apply(this.lineModel.getMaterial("particle")),
 				lineModels,
 				edgeModels);
 		}
 
 		@Override
-		public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors)
+		public Collection<Material> getMaterials(IGeometryBakingContext context, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors)
 		{
-	        Set<RenderMaterial> textures = new HashSet<>();
+	        Set<Material> textures = new HashSet<>();
 	        textures.addAll(this.lineModel.getMaterials(modelGetter, missingTextureErrors));
 	        textures.addAll(this.edgeModel.getMaterials(modelGetter, missingTextureErrors));
 	        return textures;
@@ -122,10 +119,10 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
         private final boolean isGui3d;
         private final boolean isSideLit;
         private final TextureAtlasSprite particle;
-        private final IBakedModel[] lineModels;
-        private final IBakedModel[] edgeModels;
+        private final BakedModel[] lineModels;
+        private final BakedModel[] edgeModels;
 		
-		public WirePartModel(boolean isAmbientOcclusion, boolean isGui3d, boolean isSideLit, TextureAtlasSprite particle, IBakedModel[] lineModels, IBakedModel[] edgeModels)
+		public WirePartModel(boolean isAmbientOcclusion, boolean isGui3d, boolean isSideLit, TextureAtlasSprite particle, BakedModel[] lineModels, BakedModel[] edgeModels)
 		{
 			this.isAmbientOcclusion = isAmbientOcclusion;
 			this.isGui3d = isGui3d;
@@ -166,17 +163,18 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		}
 
 		@Override
-		public ItemOverrideList getOverrides()
+		public ItemOverrides getOverrides()
 		{
-			return ItemOverrideList.EMPTY;
+			return ItemOverrides.EMPTY;
 		}
 
 		@Override
-		public List<BakedQuad> getQuads(BlockState state, Direction side, Random rand, IModelData extraData)
+		public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData, @Nullable RenderType renderType)
 		{
-			WireModelData wireData = extraData.getData(WireModelData.PROPERTY);
+			Long wireData = extraData.get(WireModelData.PROPERTY);
 			if (wireData == null)
 				return NO_QUADS;
+			long wireFlags = wireData;
 
 			List<BakedQuad> quads = new ArrayList<>();
 			int lineStart = 6;
@@ -185,39 +183,44 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 			int edges = 12;
 			for (int i=0; i<lines; i++)
 			{
-				if (wireData.test(i+lineStart))
-					quads.addAll(this.lineModels[i].getQuads(state, side, rand, extraData));
+				if (WireModelData.test(wireFlags, i+lineStart))
+					quads.addAll(this.lineModels[i].getQuads(state, side, rand, extraData, renderType));
 			}
 			for (int i=0; i < edges; i++)
 			{
-				if (wireData.test(i+edgeStart))
-					quads.addAll(this.edgeModels[i].getQuads(state, side, rand, extraData));
+				if (WireModelData.test(wireFlags, i+edgeStart))
+					quads.addAll(this.edgeModels[i].getQuads(state, side, rand, extraData, renderType));
 			}
 			
 			return quads;
 		}
 
 		@Override
-		public IModelData getModelData(IBlockDisplayReader world, BlockPos pos, BlockState state, IModelData tileData)
+		public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData modelData)
 		{
 			Block block = state.getBlock();
-			if (block instanceof AbstractWireBlock)
+			if (block instanceof AbstractWireBlock wireBlock)
 			{
-				return new WirePartModelLoader.WireModelData(((AbstractWireBlock)block).getExpandedShapeIndex(state, world, pos));
+				return ModelData.builder()
+					.with(WireModelData.PROPERTY,
+						wireBlock.getExpandedShapeIndex(state, level, pos))
+					.build();
 			}
 			else
 			{
-				return tileData;
+				return modelData;
 			}
 		}
 		
 		
 	}
 	
-	public static class WireModelData implements IModelData, LongPredicate
+	public static final class WireModelData
 	{
-		public static final ModelProperty<WireModelData> PROPERTY = new ModelProperty<>();
+		private WireModelData() {}; // static member holder
 		
+		public static final ModelProperty<Long> PROPERTY = new ModelProperty<>();
+
 		/**
 		 * The flags here are a bit pattern indicating a wire block's state and neighbor context
 		 * first 6 bits [0-5] -- which interior faces the wire block has true wires attached to from blockitems
@@ -227,41 +230,39 @@ public class WirePartModelLoader implements IModelLoader<WirePartGeometry>
 		 * next 12 bits [30-41] -- indicates which connecting edges that should be rendered
 		 * 	these use the 12 EdgeRotation indeces
 		 */
-		private final long flags;
-		
-		public WireModelData(long flags)
+		public static boolean test(long flags, int bitIndex)
 		{
-			this.flags = flags;
+			return ((1L << bitIndex) & flags) != 0;
 		}
-
-		@Override
-		public boolean test(long i)
-		{
-			return ((1L << i) & this.flags) != 0;
-		}
-
-		@Override
-		public boolean hasProperty(ModelProperty<?> prop)
-		{
-			return prop == PROPERTY;
-		}
-
-		@SuppressWarnings("unchecked")
-		@Override
-		public <T> T getData(ModelProperty<T> prop)
-		{
-			if (prop == PROPERTY)
-				return (T)this;
-			else
-				return null;
-		}
-
-		@Override
-		public <T> T setData(ModelProperty<T> prop, T data)
-		{
-			return data;
-		}
-
 	}
 	
+	/**
+	 * Temporary hack to make multipart blocks with dynamic models work.
+	 * TODO stop using this when forge fixes that
+	 */
+	@Deprecated
+	public static class MultipartWireModel extends BakedModelWrapper<BakedModel>
+	{
+		public MultipartWireModel(BakedModel originalModel)
+		{
+			super(originalModel);
+		}
+
+		@Override
+		public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData)
+		{
+			Block block = state.getBlock();
+			if (block instanceof AbstractWireBlock wireBlock)
+			{
+				return ModelData.builder()
+					.with(WireModelData.PROPERTY,
+						wireBlock.getExpandedShapeIndex(state, level, pos))
+					.build();
+			}
+			else
+			{
+				return modelData;
+			}
+		}
+	}
 }

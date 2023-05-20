@@ -8,14 +8,14 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.Lists;
 
-import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.world.phys.AABB;
 
 public class NestedBoundingBox
 {
 	private final @Nonnull List<NestedBoundingBox> subBoxes;	// immutable list of all sub-boxes nested in this box
-	private final @Nonnull AxisAlignedBB superBox;	// union of all AABBs belonging to sub-boxes
+	private final @Nonnull AABB superBox;	// union of all AABBs belonging to sub-boxes
 	
-	private static final AxisAlignedBB EMPTY_AABB = new AxisAlignedBB(
+	private static final AABB EMPTY_AABB = new AABB(
 		Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY,
 		Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY);
 	
@@ -29,7 +29,7 @@ public class NestedBoundingBox
 //		ArrayList<AxisAlignedBB> list = Arrays.stream(blockPosArray).map(AxisAlignedBB::new).collect(Collectors.toCollection(ArrayList::new));
 	}
 	
-	public NestedBoundingBox(@Nonnull AxisAlignedBB box)
+	public NestedBoundingBox(@Nonnull AABB box)
 	{
 		this.subBoxes = Collections.emptyList();
 		this.superBox = box;
@@ -40,13 +40,13 @@ public class NestedBoundingBox
 		return new NestedBoundingBox(this, other);
 	}
 	
-	public static NestedBoundingBox fromAABBs(AxisAlignedBB ...boxes)
+	public static NestedBoundingBox fromAABBs(AABB ...boxes)
 	{
 		return fromAABBs(0, boxes.length-1, boxes);
 	}
 	
 	// get a NestedBoundingBox from the aabbs in the list with indices in the range [fromIndex, toIndex] inclusive
-	private static NestedBoundingBox fromAABBs(int fromIndex, int toIndex, AxisAlignedBB ...boxes)
+	private static NestedBoundingBox fromAABBs(int fromIndex, int toIndex, AABB ...boxes)
 	{
 		int size = toIndex - fromIndex + 1;
 		if (size <= 0)
@@ -65,16 +65,16 @@ public class NestedBoundingBox
 		
 	}
 	
-	public boolean intersects(@Nonnull AxisAlignedBB target)
+	public boolean intersects(@Nonnull AABB target)
 	{
 		return new IntersectionPredicate(target).test(this);
 	}
 	
 	private static class IntersectionPredicate implements Predicate<NestedBoundingBox>
 	{
-		private final AxisAlignedBB target;
+		private final AABB target;
 		
-		public IntersectionPredicate(AxisAlignedBB target)
+		public IntersectionPredicate(AABB target)
 		{
 			this.target = target;
 		}

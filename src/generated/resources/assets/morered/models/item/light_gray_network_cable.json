@@ -1,1 +1,7 @@
-{"parent":"morered:item/colored_network_cable_template","textures":{"wire":"morered:block/light_gray_network_cable"}}
+{
+  "parent": "morered:item/colored_network_cable_template",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "wire": "morered:block/light_gray_network_cable"
+  }
+}

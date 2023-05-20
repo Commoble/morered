@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import commoble.morered.client.EdgeRotation;
 import commoble.morered.wires.Edge;
-import net.minecraft.client.renderer.model.ModelRotation;
+import net.minecraft.client.resources.model.BlockModelRotation;
 
 public class EdgeTests
 {
@@ -19,7 +19,7 @@ public class EdgeTests
 		Edge[] actual = new Edge[12];
 		for (int i=0; i<12; i++)
 		{
-			ModelRotation rotation = EdgeRotation.EDGE_ROTATIONS[i];
+			BlockModelRotation rotation = EdgeRotation.EDGE_ROTATIONS[i];
 			actual[i] = EdgeRotation.getRotatedEdge(baseEdge, rotation.getRotation().getMatrix());
 		}
 		

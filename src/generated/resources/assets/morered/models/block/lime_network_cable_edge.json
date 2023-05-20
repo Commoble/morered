@@ -1,1 +1,7 @@
-{"parent":"morered:block/colored_network_cable_edge_template","textures":{"wire":"morered:block/lime_network_cable"}}
+{
+  "parent": "morered:block/colored_network_cable_edge_template",
+  "render_type": "minecraft:solid",
+  "textures": {
+    "wire": "morered:block/lime_network_cable"
+  }
+}

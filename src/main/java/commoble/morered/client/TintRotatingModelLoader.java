@@ -7,26 +7,25 @@ import java.util.function.Function;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Matrix4f;
 
 import commoble.morered.client.TintRotatingModelLoader.TintRotatingModelGeometry;
+import commoble.morered.mixin.ClientElementsModelAccess;
 import commoble.morered.wires.Edge;
-import net.minecraft.client.renderer.model.BakedQuad;
-import net.minecraft.client.renderer.model.IBakedModel;
-import net.minecraft.client.renderer.model.IModelTransform;
-import net.minecraft.client.renderer.model.IUnbakedModel;
-import net.minecraft.client.renderer.model.ModelBakery;
-import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.resources.IResourceManager;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelState;
+import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.model.ElementsModel;
 import net.minecraftforge.client.model.IModelBuilder;
-import net.minecraftforge.client.model.IModelConfiguration;
-import net.minecraftforge.client.model.IModelLoader;
-import net.minecraftforge.client.model.ModelLoaderRegistry;
-import net.minecraftforge.client.model.ModelLoaderRegistry.VanillaProxy;
-import net.minecraftforge.client.model.geometry.ISimpleModelGeometry;
+import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
+import net.minecraftforge.client.model.geometry.IGeometryLoader;
+import net.minecraftforge.client.model.geometry.SimpleUnbakedGeometry;
 
 /**
  model loader that "rotates" a tintindex in a predefined way
@@ -48,45 +47,41 @@ import net.minecraftforge.client.model.geometry.ISimpleModelGeometry;
  we will then sneakily replace the quads when we bake them, updating the tintindexes
  based on the model transform to more appropriate values
  */
-public class TintRotatingModelLoader implements IModelLoader<TintRotatingModelGeometry>
+public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingModelGeometry>
 {
 	public static final TintRotatingModelLoader INSTANCE = new TintRotatingModelLoader();
-	
-	@Override
-	public void onResourceManagerReload(IResourceManager resourceManager)
-	{
-		// noop
-	}
 
 	@Override
-	public TintRotatingModelGeometry read(JsonDeserializationContext context, JsonObject modelContents)
+	public TintRotatingModelGeometry read(JsonObject modelContents, JsonDeserializationContext context)
 	{
-		VanillaProxy proxy = ModelLoaderRegistry.VanillaProxy.Loader.INSTANCE.read(context, modelContents);
+		// we use the vanilla model loader to parse everything
+		ElementsModel proxy = ElementsModel.Loader.INSTANCE.read(modelContents, context);
         return new TintRotatingModelGeometry(proxy);
 	}
 	
-	public static class TintRotatingModelGeometry implements ISimpleModelGeometry<TintRotatingModelGeometry>
+	public static class TintRotatingModelGeometry extends SimpleUnbakedGeometry<TintRotatingModelGeometry>
 	{
-		private final VanillaProxy proxy;
+		private final ElementsModel elementsModel;
 		
-		public TintRotatingModelGeometry(VanillaProxy proxy)
+		public TintRotatingModelGeometry(ElementsModel proxy)
 		{
-			this.proxy = proxy;
+			this.elementsModel = proxy;
 		}
 
 		@Override
-		public void addQuads(IModelConfiguration owner, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<RenderMaterial, TextureAtlasSprite> spriteGetter,
-			IModelTransform modelTransform, ResourceLocation modelLocation)
+		public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter,
+			ModelState modelTransform, ResourceLocation modelLocation)
 		{
 			IModelBuilder<?> builderWrapper = new TintRotatingModelBuilder(modelBuilder, modelTransform);
-			this.proxy.addQuads(owner, builderWrapper, bakery, spriteGetter, modelTransform, modelLocation);
+			// it's a protected method in a forge class so we have to either use accessors or reflection to get at it
+			((ClientElementsModelAccess)(Object)(this.elementsModel)).callAddQuads(context, builderWrapper, bakery, spriteGetter, modelTransform, modelLocation);
 		}
 
 		@Override
-		public Collection<RenderMaterial> getTextures(IModelConfiguration owner, Function<ResourceLocation, IUnbakedModel> modelGetter,
+		public Collection<Material> getMaterials(IGeometryBakingContext owner, Function<ResourceLocation, UnbakedModel> modelGetter,
 			Set<Pair<String, String>> missingTextureErrors)
 		{
-			return this.proxy.getTextures(owner, modelGetter, missingTextureErrors);
+			return this.elementsModel.getMaterials(owner, modelGetter, missingTextureErrors);
 		}
 	}
 	
@@ -95,30 +90,30 @@ public class TintRotatingModelLoader implements IModelLoader<TintRotatingModelGe
 		private final IModelBuilder<?> delegate;
 		private final Matrix4f rotation;
 		
-		public TintRotatingModelBuilder(IModelBuilder<?> delegate, IModelTransform modelTransform)
+		public TintRotatingModelBuilder(IModelBuilder<?> delegate, ModelState modelTransform)
 		{
 			this.delegate = delegate;
 			this.rotation = modelTransform.getRotation().getMatrix();
 		}
 
 		@Override
-		public TintRotatingModelBuilder addFaceQuad(Direction facing, BakedQuad quad)
+		public TintRotatingModelBuilder addCulledFace(Direction facing, BakedQuad quad)
 		{
 			BakedQuad tintRotatedQuad = this.getTintRotatedQuad(quad);
-			this.delegate.addFaceQuad(facing,tintRotatedQuad);
+			this.delegate.addCulledFace(facing,tintRotatedQuad);
 			return this;
 		}
 
 		@Override
-		public TintRotatingModelBuilder addGeneralQuad(BakedQuad quad)
+		public TintRotatingModelBuilder addUnculledFace(BakedQuad quad)
 		{
 			BakedQuad tintRotatedQuad = this.getTintRotatedQuad(quad);
-			this.delegate.addGeneralQuad(tintRotatedQuad);
+			this.delegate.addUnculledFace(tintRotatedQuad);
 			return this;
 		}
 
 		@Override
-		public IBakedModel build()
+		public BakedModel build()
 		{
 			return this.delegate.build();
 		}

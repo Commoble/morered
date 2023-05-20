@@ -1,23 +1,23 @@
 package commoble.morered.plate_blocks;
 
 import java.util.EnumSet;
-import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.state.properties.BlockStateProperties;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class LatchBlock extends RedstonePlateBlock
 {
@@ -41,7 +41,7 @@ public class LatchBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
 		builder.add(INPUT_A, INPUT_C, POWERED);
@@ -51,7 +51,7 @@ public class LatchBlock extends RedstonePlateBlock
 
 	@Nullable
 	@Override
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
 		BlockState state = super.getStateForPlacement(context);
 		if (state.getValue(INPUT_C))
@@ -63,7 +63,7 @@ public class LatchBlock extends RedstonePlateBlock
 
 	@Deprecated
 	@Override
-	public int getSignal(BlockState state, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
+	public int getSignal(BlockState state, BlockGetter blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
 	{
 		// if both inputs are active, both outputs are off
 		if (state.getValue(INPUT_A) && state.getValue(INPUT_C))
@@ -80,16 +80,16 @@ public class LatchBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	public void tick(BlockState oldBlockState, ServerWorld world, BlockPos pos, Random rand)
+	public void tick(BlockState oldBlockState, ServerLevel level, BlockPos pos, RandomSource rand)
 	{
-		BlockState stateWithNewInput = InputState.getUpdatedBlockState(world, oldBlockState, pos);
-		InputState newInputState = InputState.getWorldPowerState(world, stateWithNewInput, pos);
+		BlockState stateWithNewInput = InputState.getUpdatedBlockState(level, oldBlockState, pos);
+		InputState newInputState = InputState.getWorldPowerState(level, stateWithNewInput, pos);
 		boolean wasPowered = oldBlockState.getValue(POWERED);
 		boolean isPowered = ((wasPowered && !newInputState.c) || (!wasPowered && newInputState.a));
 		BlockState newBlockState = stateWithNewInput.setValue(POWERED, isPowered);
 		if (newBlockState != oldBlockState)
 		{
-			world.setBlock(pos, newBlockState, 2);
+			level.setBlock(pos, newBlockState, 2);
 		}
 	}
 	
@@ -100,7 +100,7 @@ public class LatchBlock extends RedstonePlateBlock
 	}
 	
 	@Override
-	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, Direction side)
+	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
 	{
 		// latch blocks have two outputs
 		// the superclass checks side == outputDirection.getOpposite() (because the given side is the side of the neighbor block)
@@ -110,7 +110,7 @@ public class LatchBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
+	public void notifyNeighbors(Level world, BlockPos pos, BlockState state)
 	{
 		Direction primaryDirection = PlateBlockStateProperties.getOutputDirection(state);
 		Direction oppositeDirection = primaryDirection.getOpposite();

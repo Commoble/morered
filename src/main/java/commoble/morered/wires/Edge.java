@@ -1,10 +1,10 @@
 package commoble.morered.wires;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.core.Direction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.BlockGetter;
 
 /**
  * A cube has 12 edges.
@@ -56,7 +56,7 @@ public enum Edge
 	 * @param centerWireBlock The wire block we want to render an edge for (connecting two neighbor wires)
 	 * @return true if this edge should be rendered for this block
 	 */
-	public boolean shouldEdgeRender(IBlockReader world, BlockPos pos, AbstractWireBlock centerWireBlock)
+	public boolean shouldEdgeRender(BlockGetter world, BlockPos pos, AbstractWireBlock centerWireBlock)
 	{
 		// suppose we're checking the edge for down-north
 		// we want to render this edge if the block below us is a wire block attached to north,

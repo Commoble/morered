@@ -1,18 +1,17 @@
 package commoble.morered.plate_blocks;
 
-import java.util.Random;
-
-import net.minecraft.block.AbstractBlock;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.DirectionProperty;
-import net.minecraft.state.IntegerProperty;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 {
@@ -24,7 +23,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	@FunctionalInterface
 	public static interface LogicFunctionPlateBlockFactory
 	{	
-		public LogicFunctionPlateBlock makeBlock(LogicFunction function, AbstractBlock.Properties properties);
+		public LogicFunctionPlateBlock makeBlock(LogicFunction function, BlockBehaviour.Properties properties);
 	}
 	
 	public static final LogicFunctionPlateBlockFactory THREE_INPUTS = getBlockFactory(InputSide.A, InputSide.B, InputSide.C);
@@ -77,7 +76,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	public abstract InputSide[] getInputSides();
 
 	@Override
-	protected void createBlockStateDefinition(StateContainer.Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
 		for (InputSide side : this.getInputSides())
@@ -88,7 +87,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	
 	@Deprecated
 	@Override
-	public int getSignal(BlockState blockState, IBlockReader blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
+	public int getSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
 	{
 		if (InputState.getInput(blockState).applyLogic(this.function)
 			&& PlateBlockStateProperties.getOutputDirection(blockState) == sideOfAdjacentBlock.getOpposite())
@@ -102,7 +101,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	public void tick(BlockState oldBlockState, ServerWorld world, BlockPos pos, Random rand)
+	public void tick(BlockState oldBlockState, ServerLevel world, BlockPos pos, RandomSource rand)
 	{
 		BlockState newBlockState = InputState.getUpdatedBlockState(world, oldBlockState, pos);
 		if (newBlockState != oldBlockState)
@@ -115,7 +114,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 
 	
 	@Override
-	public void notifyNeighbors(World world, BlockPos pos, BlockState state)
+	public void notifyNeighbors(Level world, BlockPos pos, BlockState state)
 	{
 		Direction outputDirection = PlateBlockStateProperties.getOutputDirection(state);
 		BlockPos outputPos = pos.relative(outputDirection);

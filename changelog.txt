@@ -1,3 +1,9 @@
+1.19.2-3.0.0.0
+ * Ported to 1.19.2!
+ * Bundled cable texture slightly less ugly (still ugly)
+ * Temporarily removed Bag of Yurting compatibility with wires and cables; their data format will be refactored to be more structure-friendly in a later version
+ 
+
 1.16.5-2.1.1.0
  * Added Bitwise Diodes, Bitwise NOT Gates, Bitwise AND Gates, Bitwise OR Gates, Bitwise XOR Gates, and Bitwise XNOR Gates
  * Fixed a bug where bundled cables would load incorrectly, causing them to have incorrect internal data after being loaded until their internal state updated

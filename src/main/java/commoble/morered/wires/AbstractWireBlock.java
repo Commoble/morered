@@ -2,6 +2,7 @@ package commoble.morered.wires;
 
 import java.util.EnumSet;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -9,46 +10,43 @@ import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 
+import commoble.morered.client.ClientProxy;
 import commoble.morered.util.DirectionHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SixWayBlock;
-import net.minecraft.client.particle.ParticleManager;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.BlockItemUseContext;
-import net.minecraft.item.ItemStack;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.StateContainer.Builder;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Mirror;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.IWorld;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.common.util.Constants.BlockFlags;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.PipeBlock;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
 
 public abstract class AbstractWireBlock extends Block
 {
 	
-	public static final BooleanProperty DOWN = SixWayBlock.DOWN;
-	public static final BooleanProperty UP = SixWayBlock.UP;
-	public static final BooleanProperty NORTH = SixWayBlock.NORTH;
-	public static final BooleanProperty SOUTH = SixWayBlock.SOUTH;
-	public static final BooleanProperty WEST = SixWayBlock.WEST;
-	public static final BooleanProperty EAST = SixWayBlock.EAST;
+	public static final BooleanProperty DOWN = PipeBlock.DOWN;
+	public static final BooleanProperty UP = PipeBlock.UP;
+	public static final BooleanProperty NORTH = PipeBlock.NORTH;
+	public static final BooleanProperty SOUTH = PipeBlock.SOUTH;
+	public static final BooleanProperty WEST = PipeBlock.WEST;
+	public static final BooleanProperty EAST = PipeBlock.EAST;
 	public static final BooleanProperty[] INTERIOR_FACES = {DOWN,UP,NORTH,SOUTH,WEST,EAST};
 	
 	/**
@@ -63,13 +61,13 @@ public abstract class AbstractWireBlock extends Block
 		
 		for (int i=0; i<64; i++)
 		{
-			VoxelShape nextShape = VoxelShapes.empty();
+			VoxelShape nextShape = Shapes.empty();
 			boolean[] addedSides = new boolean[6]; // sides for which we've already added node shapes to
 			for (int side=0; side<6; side++)
 			{
 				if ((i & (1 << side)) != 0)
 				{
-					nextShape = VoxelShapes.or(nextShape, nodeShapes[side]);
+					nextShape = Shapes.or(nextShape, nodeShapes[side]);
 					
 					int sideAxis = side/2; // 0,1,2 = y,z,x
 					for (int secondarySide = 0; secondarySide < side; secondarySide++)
@@ -77,8 +75,8 @@ public abstract class AbstractWireBlock extends Block
 						if (addedSides[secondarySide] && sideAxis != secondarySide/2) // the two sides are orthagonal to each other (not parallel)
 						{
 							// add line shapes for the elbows
-							nextShape = VoxelShapes.or(nextShape, getLineShape(lineShapes, side, DirectionHelper.getCompressedSecondSide(side,secondarySide)));
-							nextShape = VoxelShapes.or(nextShape, getLineShape(lineShapes, secondarySide, DirectionHelper.getCompressedSecondSide(secondarySide,side)));
+							nextShape = Shapes.or(nextShape, getLineShape(lineShapes, side, DirectionHelper.getCompressedSecondSide(side,secondarySide)));
+							nextShape = Shapes.or(nextShape, getLineShape(lineShapes, secondarySide, DirectionHelper.getCompressedSecondSide(secondarySide,side)));
 						}
 					}
 					
@@ -129,7 +127,7 @@ public abstract class AbstractWireBlock extends Block
 			{
 				if ((expandedShapeIndex & flag) != 0)
 				{
-					shape = VoxelShapes.or(shape, AbstractWireBlock.getLineShape(lineShapes, side, subSide));
+					shape = Shapes.or(shape, AbstractWireBlock.getLineShape(lineShapes, side, subSide));
 				}
 				flag = flag << 1;
 			}
@@ -153,7 +151,7 @@ public abstract class AbstractWireBlock extends Block
 			});
 	}
 
-	public static boolean canWireConnectToAdjacentWireOrCable(IBlockReader world, BlockPos thisPos,
+	public static boolean canWireConnectToAdjacentWireOrCable(BlockGetter world, BlockPos thisPos,
 		BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
 	{
 		// this wire can connect to an adjacent wire's subwire if
@@ -212,9 +210,9 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	
-	protected abstract boolean canAdjacentBlockConnectToFace(IBlockReader world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState);
-	protected abstract void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState);
-	protected abstract void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
+	protected abstract boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState);
+	protected abstract void updatePowerAfterBlockUpdate(Level world, BlockPos wirePos, BlockState wireState);
+	protected abstract void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
 
 	@Override
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
@@ -224,37 +222,37 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	@Override
-	public VoxelShape getShape(BlockState state, IBlockReader worldIn, BlockPos pos, ISelectionContext context)
+	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
-		return worldIn instanceof World
-			? VoxelCache.get((World)worldIn).getWireShape(pos)
+		return worldIn instanceof Level
+			? VoxelCache.get((Level)worldIn).getWireShape(pos)
 			: this.shapesByStateIndex[getShapeIndex(state)];
 	}
 
 	// overriding this so we don't delegate to getShape for the render shape (to reduce lookups of the extended shape)
 	@Override
-	public VoxelShape getOcclusionShape(BlockState state, IBlockReader worldIn, BlockPos pos)
+	public VoxelShape getOcclusionShape(BlockState state, BlockGetter worldIn, BlockPos pos)
 	{
 		return this.shapesByStateIndex[getShapeIndex(state)];
 	}
 
 	@Override
-	public boolean canBeReplaced(BlockState state, BlockItemUseContext useContext)
+	public boolean canBeReplaced(BlockState state, BlockPlaceContext useContext)
 	{
 		return this.isEmptyWireBlock(state);
 	}
 
 	@Override
-	public BlockState updateShape(BlockState thisState, Direction directionToNeighbor, BlockState neighborState, IWorld world, BlockPos thisPos, BlockPos neighborPos)
+	public BlockState updateShape(BlockState thisState, Direction directionToNeighbor, BlockState neighborState, LevelAccessor world, BlockPos thisPos, BlockPos neighborPos)
 	{
 		BooleanProperty sideProperty = INTERIOR_FACES[directionToNeighbor.ordinal()];
 		if (thisState.getValue(sideProperty)) // if wire is attached on the relevant face, check if it should be disattached
 		{
 			Direction neighborSide = directionToNeighbor.getOpposite();
 			boolean isNeighborSideSolid = neighborState.isFaceSturdy(world, neighborPos, neighborSide);
-			if (!isNeighborSideSolid && world instanceof ServerWorld)
+			if (!isNeighborSideSolid && world instanceof ServerLevel)
 			{
-				Block.dropResources(this.defaultBlockState().setValue(sideProperty, true), (ServerWorld)world, thisPos);
+				Block.dropResources(this.defaultBlockState().setValue(sideProperty, true), (ServerLevel)world, thisPos);
 			}
 			return thisState.setValue(sideProperty, isNeighborSideSolid);
 		}
@@ -265,7 +263,7 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	@Override
-	public boolean canSurvive(BlockState state, IWorldReader world, BlockPos pos)
+	public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos)
 	{
 		Direction[] dirs = Direction.values();
 		for (int side=0; side<6; side++)
@@ -292,9 +290,9 @@ public abstract class AbstractWireBlock extends Block
 	 */
 	@Override
 	@Nullable
-	public BlockState getStateForPlacement(BlockItemUseContext context)
+	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
-		World world = context.getLevel();
+		Level world = context.getLevel();
 		Direction sideOfNeighbor = context.getClickedFace();
 		Direction directionToNeighbor = sideOfNeighbor.getOpposite();
 		// with standard BlockItemUseContext rules,
@@ -308,36 +306,18 @@ public abstract class AbstractWireBlock extends Block
 			: null;
 	}
 
-	
-	/**
-	 * Spawn a digging particle effect in the world, this is a wrapper around
-	 * EffectRenderer.addBlockHitEffects to allow the block more control over the
-	 * particles. Useful when you have entirely different texture sheets for
-	 * different sides/locations in the world.
-	 *
-	 * @param state
-	 *            The current state
-	 * @param worldObj
-	 *            The current world
-	 * @param target
-	 *            The target the player is looking at {x/y/z/side/sub}
-	 * @param manager
-	 *            A reference to the current particle manager.
-	 * @return True to prevent vanilla digging particles form spawning.
-	 */
 	@Override
-	@OnlyIn(Dist.CLIENT)
-	public boolean addHitEffects(BlockState state, World worldObj, RayTraceResult target, ParticleManager manager)
+	public void initializeClient(Consumer<IClientBlockExtensions> consumer)
 	{
-		return this.getWireCount(state) == 0; // if we have no wires here, we have no shape, so return true to disable particles
-		// (otherwise the particle manager crashes because it performs an unsupported operation on the empty shape)
+		ClientProxy.initializeAbstractWireBlockClient(this, consumer);
 	}
 	
 	// called when a different block instance is replaced with this one
 	// only called on server
 	// called after previous block and TE are removed, but before this block's TE is added
 	@Override
-	public void onPlace(BlockState state, World worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	@Deprecated
+	public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		this.updateShapeCache(worldIn, pos);
 		super.onPlace(state, worldIn, pos, oldState, isMoving);
@@ -346,7 +326,7 @@ public abstract class AbstractWireBlock extends Block
 	// called when a player places this block or adds a wire to a wire block
 	// also called on the client of the placing player
 	@Override
-	public void setPlacedBy(World worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
+	public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
 		if (!worldIn.isClientSide)
 		{
@@ -369,7 +349,8 @@ public abstract class AbstractWireBlock extends Block
 	// only called on servers
 	// oldState is a state of this block, newState may or may not be
 	@Override
-	public void onRemove(BlockState oldState, World worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	@Deprecated
+	public void onRemove(BlockState oldState, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		boolean doPowerUpdate = true;
@@ -402,7 +383,8 @@ public abstract class AbstractWireBlock extends Block
 
 	// called when a neighboring blockstate changes, not called on the client
 	@Override
-	public void neighborChanged(BlockState state, World worldIn, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+	@Deprecated
+	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
 	{
 		BlockPos offset = fromPos.subtract(pos);
 		Direction directionToNeighbor = Direction.fromNormal(offset.getX(), offset.getY(), offset.getZ());
@@ -444,7 +426,7 @@ public abstract class AbstractWireBlock extends Block
 			}
 			if (!edgeUpdateDirs.isEmpty() && !net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
 			{
-				BlockPos.Mutable mutaPos = pos.mutable();
+				BlockPos.MutableBlockPos mutaPos = pos.mutable();
 				for (Direction dir : edgeUpdateDirs)
 				{
 					BlockPos neighborPos = mutaPos.setWithOffset(pos, dir);
@@ -500,7 +482,7 @@ public abstract class AbstractWireBlock extends Block
 		return state == this.defaultBlockState();
 	}
 	
-	protected long getEdgeFlags(IBlockReader world, BlockPos pos)
+	protected long getEdgeFlags(BlockGetter world, BlockPos pos)
 	{
 		long result = 0;
 		for (int edge=0; edge<12; edge++)
@@ -520,13 +502,13 @@ public abstract class AbstractWireBlock extends Block
 	 * @param pos The position for worldpos context
 	 * @return A set of edge flags where the 30 least-significant bits are 0 and the next 12 bits contain edge flags in edge-ordinal order
 	 */
-	protected long getEdgeFlagsForNodeLineEdgeFormat(IBlockReader world, BlockPos pos)
+	protected long getEdgeFlagsForNodeLineEdgeFormat(BlockGetter world, BlockPos pos)
 	{
 		return this.getEdgeFlags(world,pos) << 30;
 	}
 	
 	@Nullable
-	public Direction getInteriorFaceToBreak(BlockState state, BlockPos pos, PlayerEntity player, BlockRayTraceResult raytrace, float partialTicks)
+	public Direction getInteriorFaceToBreak(BlockState state, BlockPos pos, Player player, BlockHitResult raytrace, float partialTicks)
 	{
 		// raytrace against the face voxels, get the one the player is actually pointing at
 		// this is invoked when the player has been holding left-click sufficiently long enough for the block to break
@@ -536,9 +518,9 @@ public abstract class AbstractWireBlock extends Block
 		// then compare the hit vector to the six face cuboids
 		// and see if any of them contain the hit vector
 		// we'll need the player to not be null though
-		Vector3d lookOffset = player.getViewVector(partialTicks); // unit normal vector in look direction
-		Vector3d hitVec = raytrace.getLocation();
-		Vector3d relativeHitVec = hitVec
+		Vec3 lookOffset = player.getViewVector(partialTicks); // unit normal vector in look direction
+		Vec3 hitVec = raytrace.getLocation();
+		Vec3 relativeHitVec = hitVec
 			.add(lookOffset.multiply(0.001D, 0.001D, 0.001D))
 			.subtract(pos.getX(), pos.getY(), pos.getZ()); // we're also wanting this to be relative to the voxel
 		for (int side=0; side<6; side++)
@@ -548,7 +530,7 @@ public abstract class AbstractWireBlock extends Block
 				// figure out which part of the shape we clicked
 				VoxelShape faceShape = this.raytraceBackboards[side];
 				
-				for (AxisAlignedBB aabb : faceShape.toAabbs())
+				for (AABB aabb : faceShape.toAabbs())
 				{
 					if (aabb.contains(relativeHitVec))
 					{
@@ -562,7 +544,7 @@ public abstract class AbstractWireBlock extends Block
 		return null;
 	}
 	
-	protected void updateShapeCache(World world, BlockPos pos)
+	protected void updateShapeCache(Level world, BlockPos pos)
 	{
 		LoadingCache<BlockPos, VoxelShape> cache = VoxelCache.get(world).shapesByPos;
 		cache.invalidate(pos);
@@ -570,13 +552,13 @@ public abstract class AbstractWireBlock extends Block
 		{
 			cache.invalidate(pos.relative(Direction.from3DDataValue(i)));
 		}
-		if (world instanceof ServerWorld)
+		if (world instanceof ServerLevel)
 		{
-			WireUpdateBuffer.get((ServerWorld)world).enqueue(pos);
+			WireUpdateBuffer.get((ServerLevel)world).enqueue(pos);
 		}
 	}
 
-	protected void addEmptyWireToAir(BlockState thisState, World world, BlockPos neighborAirPos, Direction directionToNeighbor)
+	protected void addEmptyWireToAir(BlockState thisState, Level world, BlockPos neighborAirPos, Direction directionToNeighbor)
 	{
 		Direction directionFromNeighbor = directionToNeighbor.getOpposite();
 		for (Direction dir : Direction.values())
@@ -589,7 +571,7 @@ public abstract class AbstractWireBlock extends Block
 					BlockPos diagonalNeighbor = neighborAirPos.relative(dir);
 					BooleanProperty neighborAttachmentFace = INTERIOR_FACES[directionFromNeighbor.ordinal()];
 					BlockState diagonalState = world.getBlockState(diagonalNeighbor);
-					if (diagonalState.getBlock() == this.getBlock() && diagonalState.getValue(neighborAttachmentFace))
+					if (diagonalState.getBlock() == this && diagonalState.getValue(neighborAttachmentFace))
 					{
 						world.setBlockAndUpdate(neighborAirPos, this.defaultBlockState());
 						break; // we don't need to set the wire block more than once
@@ -599,7 +581,7 @@ public abstract class AbstractWireBlock extends Block
 		}
 	}
 	
-	public void destroyClickedSegment(BlockState state, World world, BlockPos pos, PlayerEntity player, Direction interiorFace, boolean dropItems)
+	public void destroyClickedSegment(BlockState state, Level world, BlockPos pos, Player player, Direction interiorFace, boolean dropItems)
 	{
 		int side = interiorFace.ordinal();
 		BooleanProperty sideProperty = INTERIOR_FACES[side];
@@ -627,7 +609,7 @@ public abstract class AbstractWireBlock extends Block
 				removedBlock.playerWillDestroy(world, pos, removedState, player);
 			}
 			// default and rerender flags are used when block is broken on client
-			if (world.setBlock(pos, newState, BlockFlags.DEFAULT_AND_RERENDER))
+			if (world.setBlock(pos, newState, Block.UPDATE_ALL_IMMEDIATE))
 			{
 				removedBlock.destroy(world, pos, removedState);
 			}
@@ -648,7 +630,7 @@ public abstract class AbstractWireBlock extends Block
 	 * @param pos position of the blockstate
 	 * @return An index usable by the voxel cache
 	 */
-	public long getExpandedShapeIndex(BlockState state, IBlockReader world, BlockPos pos)
+	public long getExpandedShapeIndex(BlockState state, BlockGetter world, BlockPos pos)
 	{
 		// for each of the six interior faces a wire block can have a wire attached to,
 		// that face can be connected to any of the four orthagonally adjacent blocks
@@ -686,7 +668,7 @@ public abstract class AbstractWireBlock extends Block
 		return result;
 	}
 	
-	public VoxelShape getCachedExpandedShapeVoxel(BlockState wireState, World world, BlockPos pos)
+	public VoxelShape getCachedExpandedShapeVoxel(BlockState wireState, Level world, BlockPos pos)
 	{
 		long index = this.getExpandedShapeIndex(wireState, world, pos);
 		

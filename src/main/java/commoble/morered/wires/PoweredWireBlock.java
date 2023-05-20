@@ -7,40 +7,34 @@ import javax.annotation.Nullable;
 
 import com.google.common.cache.LoadingCache;
 
-import commoble.morered.TileEntityRegistrar;
+import commoble.morered.MoreRed;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
 import commoble.morered.util.BlockStateUtil;
 import commoble.morered.util.DirectionHelper;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.world.IBlockReader;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class PoweredWireBlock extends AbstractWireBlock
+public abstract class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 {
 	
 	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower)
 	{
 		super(properties, shapesByStateIndex, raytraceBackboards, voxelCache, useIndirectPower);
 	}
-
-
+	
 	@Override
-	public boolean hasTileEntity(BlockState state)
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return true;
-	}
-
-	@Override
-	public TileEntity createTileEntity(BlockState state, IBlockReader world)
-	{
-		return TileEntityRegistrar.WIRE.get().create();
+		return MoreRed.instance().wireBeType.get().create(pos, state);
 	}
 	
 	@Override
@@ -59,20 +53,20 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 
 	// get "immediate power"
 	@Override
-	public int getSignal(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
+	public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
 	{
 		return this.getPower(state,world,pos,directionFromNeighbor,false);
 	}
 
 	// get the power that can be conducted through solid blocks
 	@Override
-	public int getDirectSignal(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor)
+	public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
 	{
 		return this.useIndirectPower ? this.getPower(state,world,pos,directionFromNeighbor,false) : 0;
 	}
 
 	@Override
-	public boolean canConnectRedstone(BlockState state, IBlockReader world, BlockPos pos, @Nullable Direction directionFromNeighbor)
+	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction directionFromNeighbor)
 	{
 		// connectability is fundamentally sided
 		// if no side is supplied, we can't connect
@@ -105,15 +99,15 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		return false;
 	}
 	
-	protected int getPower(BlockState state, IBlockReader world, BlockPos pos, Direction directionFromNeighbor, boolean expand)
+	protected int getPower(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor, boolean expand)
 	{
 //		return 0;
 		// power is stored in the TE (because storing it in 16 states per side is too many state combinations)
 		// if we don't have a TE, we have no power
-		TileEntity te = world.getBlockEntity(pos);
-		if (!(te instanceof WireTileEntity))
+		BlockEntity te = world.getBlockEntity(pos);
+		if (!(te instanceof WireBlockEntity))
 			return 0;
-		WireTileEntity wire = (WireTileEntity)te;
+		WireBlockEntity wire = (WireBlockEntity)te;
 		
 		Direction directionToNeighbor = directionFromNeighbor.getOpposite();
 		int side = directionToNeighbor.ordinal();
@@ -142,13 +136,13 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		return expand ? output : output/2;
 	}
 	
-	public int getExpandedPower(World world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState,
+	public int getExpandedPower(Level world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState,
 		Direction wireFace, Direction directionFromWire)
 	{
-		TileEntity te = world.getBlockEntity(thisPos);
-		if (!(te instanceof WireTileEntity))
+		BlockEntity te = world.getBlockEntity(thisPos);
+		if (!(te instanceof WireBlockEntity))
 			return 0; // if there's no TE then we can't make power
-		WireTileEntity wire = (WireTileEntity)te;
+		WireBlockEntity wire = (WireBlockEntity)te;
 		return thisState.getValue(INTERIOR_FACES[wireFace.ordinal()])
 			? wire.getPower(wireFace)
 			: 0;
@@ -156,12 +150,12 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 
 
 	@Override
-	protected void updatePowerAfterBlockUpdate(World world, BlockPos wirePos, BlockState wireState)
+	protected void updatePowerAfterBlockUpdate(Level world, BlockPos wirePos, BlockState wireState)
 	{
-		TileEntity te = world.getBlockEntity(wirePos);
-		if (!(te instanceof WireTileEntity))
+		BlockEntity te = world.getBlockEntity(wirePos);
+		if (!(te instanceof WireBlockEntity))
 			return; // if there's no TE then we can't make any updates
-		WireTileEntity wire = (WireTileEntity)te;
+		WireBlockEntity wire = (WireBlockEntity)te;
 		
 //		EnumSet<Direction> updatedDirections = EnumSet.noneOf(Direction.class);
 		Map<Block,WireConnector> connectors = MoreRedAPI.getWireConnectabilityRegistry();
@@ -169,7 +163,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 		WireConnector defaultConnector = MoreRedAPI.getDefaultWireConnector();
 		ExpandedPowerSupplier defaultPowerSupplier = MoreRedAPI.getDefaultExpandedPowerSupplier();
 		
-		BlockPos.Mutable mutaPos = wirePos.mutable();
+		BlockPos.MutableBlockPos mutaPos = wirePos.mutable();
 		BlockState[] neighborStates = new BlockState[6];
 		
 		boolean anyPowerUpdated = false;
@@ -269,10 +263,10 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 					int directionToWireSide = directionToWire.ordinal();
 					if (diagonalState.getBlock() == this && diagonalState.getValue(INTERIOR_FACES[directionToWireSide]))
 					{
-						TileEntity diagonalTe = world.getBlockEntity(diagonalPos);
-						if (diagonalTe instanceof WireTileEntity)
+						BlockEntity diagonalTe = world.getBlockEntity(diagonalPos);
+						if (diagonalTe instanceof WireBlockEntity)
 						{
-							power = Math.max(power, ((WireTileEntity)diagonalTe).getPower(directionToWireSide)-1);
+							power = Math.max(power, ((WireBlockEntity)diagonalTe).getPower(directionToWireSide)-1);
 						}
 					}
 				}
@@ -302,7 +296,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock
 	}
 	
 	@Override
-	protected void notifyNeighbors(World world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
+	protected void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
 	{
 		Block newBlock = newState.getBlock();
 		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())

@@ -6,28 +6,23 @@ import java.util.Map;
 import java.util.Set;
 
 import commoble.morered.MoreRed;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldSavedData;
-import net.minecraftforge.fml.network.PacketDistributor;
-import net.minecraftforge.fml.network.PacketDistributor.PacketTarget;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor.PacketTarget;
 
-public class WireUpdateBuffer extends WorldSavedData
+public class WireUpdateBuffer extends SavedData
 {
 	public static final String ID = "morered:wireupdatebuffer";
 	
 	private Map<ChunkPos, Set<BlockPos>> buffer = new HashMap<>();
 	
-	public WireUpdateBuffer()
+	public static WireUpdateBuffer get(ServerLevel world)
 	{
-		super(ID);
-	}
-
-	public static WireUpdateBuffer get(ServerWorld world)
-	{
-		return world.getDataStorage().computeIfAbsent(WireUpdateBuffer::new, ID);
+		return world.getDataStorage().computeIfAbsent(tag -> new WireUpdateBuffer(), WireUpdateBuffer::new, ID);
 	}
 	
 	public void enqueue(BlockPos pos)
@@ -36,7 +31,7 @@ public class WireUpdateBuffer extends WorldSavedData
 		this.buffer.computeIfAbsent(chunkPos, $-> new HashSet<BlockPos>()).add(pos.immutable());
 	}
 	
-	public void sendPackets(ServerWorld world)
+	public void sendPackets(ServerLevel world)
 	{
 		if (this.buffer.size() > 0)
 		{
@@ -56,13 +51,7 @@ public class WireUpdateBuffer extends WorldSavedData
 	}
 
 	@Override
-	public void load(CompoundNBT nbt)
-	{
-		//noop
-	}
-
-	@Override
-	public CompoundNBT save(CompoundNBT compound)
+	public CompoundTag save(CompoundTag compound)
 	{
 		return compound; //noop
 	}

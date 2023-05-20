@@ -1,29 +1,45 @@
 package commoble.morered.wire_post;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
+import com.mojang.serialization.Codec;
 
 import commoble.morered.MoreRed;
 import commoble.morered.ServerConfig;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.Direction;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.fml.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor;
 
-public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSerializable<CompoundNBT>
-{	
-	private final LazyOptional<IPostsInChunk> holder = LazyOptional.of(() -> this);
+public class PostsInChunk implements ICapabilityProvider, INBTSerializable<CompoundTag>
+{
+	public static final Capability<PostsInChunk> CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+	private static final Logger LOGGER = LogManager.getLogger();
+	
+	public static final String POSITIONS = "positions";
+	public static final Codec<Set<BlockPos>> DATA_CODEC = BlockPos.CODEC.listOf().xmap(HashSet::new, List::copyOf);
+	
+	private final LazyOptional<PostsInChunk> holder = LazyOptional.of(() -> this);
 	
 	private Set<BlockPos> positions = new HashSet<>();
-	private final Chunk chunk; public Chunk getChunk() {return this.chunk;}
+	private final LevelChunk chunk; public LevelChunk getChunk() {return this.chunk;}
 	
-	public PostsInChunk(Chunk chunk)
+	public PostsInChunk(LevelChunk chunk)
 	{
 		this.chunk = chunk;
 	}
@@ -31,9 +47,9 @@ public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSer
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
 	{
-		if (cap == PostsInChunkCapability.INSTANCE)
+		if (cap == CAPABILITY)
 		{
-			return PostsInChunkCapability.INSTANCE.orEmpty(cap, this.holder);
+			return CAPABILITY.orEmpty(cap, this.holder);
 		}
 		else
 		{
@@ -41,13 +57,11 @@ public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSer
 		}
 	}
 
-	@Override
 	public Set<BlockPos> getPositions()
 	{
 		return this.positions;
 	}
 
-	@Override
 	public void setPositions(Set<BlockPos> set)
 	{
 		this.positions = set;
@@ -55,20 +69,30 @@ public class PostsInChunk implements IPostsInChunk, ICapabilityProvider, INBTSer
 	}
 
 	@Override
-	public CompoundNBT serializeNBT()
+	public CompoundTag serializeNBT()
 	{
-		return (CompoundNBT)PostsInChunkCapability.INSTANCE.getStorage().writeNBT(PostsInChunkCapability.INSTANCE, this, null);
+		CompoundTag compound = new CompoundTag();
+		DATA_CODEC.encodeStart(NbtOps.INSTANCE, this.positions)
+			.resultOrPartial(e -> LOGGER.error("Error encoding PostsInChunk for chunk {}, {}: {}", this.chunk.getPos().x, this.chunk.getPos().z, e))
+			.ifPresent(tag -> compound.put(POSITIONS, tag));
+		return compound;
 	}
 
 	@Override
-	public void deserializeNBT(CompoundNBT nbt)
+	public void deserializeNBT(CompoundTag nbt)
 	{
-		PostsInChunkCapability.INSTANCE.getStorage().readNBT(PostsInChunkCapability.INSTANCE, this, null, nbt);
+		Tag tag = nbt.get(POSITIONS);
+		if (tag != null)
+		{
+			DATA_CODEC.parse(NbtOps.INSTANCE, tag)
+				.resultOrPartial(e -> LOGGER.error("Error dencoding PostsInChunk for chunk {}, {}: {}", this.chunk.getPos().x, this.chunk.getPos().z, e))
+				.ifPresent(set -> this.positions = set);
+		}
 	}
 	
 	public static Set<ChunkPos> getRelevantChunkPositionsNearPos(BlockPos pos)
 	{
-		double range = ServerConfig.INSTANCE.max_wire_post_connection_range.get();
+		double range = ServerConfig.INSTANCE.maxWirePostConnectionRange().get();
 		ChunkPos chunkPos = new ChunkPos(pos);
 		int chunkRange = (int) Math.ceil(range/16D);
 		Set<ChunkPos> set = new HashSet<>();
