@@ -468,6 +468,10 @@ public class MoreRed
 			BlockPlaceContext placeContext = new BlockPlaceContext(useContext);
 			BlockPos placePos = placeContext.getClickedPos(); // getClickedPos is a misnomer, this is the position the block is placed at
 			BlockState placementState = blockItem.getPlacementState(placeContext);
+			if (placementState == null)
+			{
+				return; // placement state is null when the block couldn't be placed there anyway
+			}
 			Set<ChunkPos> chunkPositions = PostsInChunk.getRelevantChunkPositionsNearPos(placePos);
 			
 			for (ChunkPos chunkPos : chunkPositions)
