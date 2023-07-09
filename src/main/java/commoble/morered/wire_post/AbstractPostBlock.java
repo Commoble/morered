@@ -133,7 +133,9 @@ public abstract class AbstractPostBlock extends Block
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
-		BlockState newState = state.rotate(mirrorIn.getRotation(state.getValue(DIRECTION_OF_ATTACHMENT)));
+		Direction oldFacing = state.getValue(DIRECTION_OF_ATTACHMENT);
+		Direction newFacing = mirrorIn.getRotation(oldFacing).rotate(oldFacing);
+		BlockState newState = state.setValue(DIRECTION_OF_ATTACHMENT, newFacing);
 		newState = EightGroup.mirror(newState, mirrorIn);
 		return newState;
 	}

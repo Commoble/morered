@@ -1,5 +1,6 @@
 package commoble.morered.wire_post;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,9 +9,10 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableSet;
-import com.google.common.collect.Lists;
+import com.mojang.math.OctahedralGroup;
 
 import commoble.morered.MoreRed;
+import commoble.morered.util.EightGroup;
 import commoble.morered.util.NBTListCodec;
 import commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;
@@ -33,6 +35,7 @@ public class WirePostBlockEntity extends BlockEntity
 	public static final String CONNECTIONS = "connections";
 	public static final AABB EMPTY_AABB = new AABB(0,0,0,0,0,0);
 
+	// we keep this as absolute positions in-memory but write them to relative/normalized positions on save
 	private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
 	
 	private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
@@ -201,9 +204,14 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		if (compound.contains(CONNECTIONS))
 		{
-			List<BlockPos> positions = BLOCKPOS_LISTER.read(compound);
+			List<BlockPos> normalizedPositions = BLOCKPOS_LISTER.read(compound);
+			List<BlockPos> absolutePositions = new ArrayList<>();
+			for (BlockPos normalPos : normalizedPositions)
+			{
+				absolutePositions.add(this.denormalizePos(normalPos));
+			}
 			Map<BlockPos, NestedBoundingBox> newMap = new HashMap<>();
-			positions.forEach(otherPos -> newMap.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos)));
+			absolutePositions.forEach(otherPos -> newMap.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos)));
 			this.remoteConnections = newMap;
 		}
 		this.renderAABB = getAABBContainingAllBlockPos(this.worldPosition, this.remoteConnections.keySet());
@@ -213,7 +221,36 @@ public class WirePostBlockEntity extends BlockEntity
 	public void saveAdditional(CompoundTag compound)
 	{
 		super.saveAdditional(compound);
-		BLOCKPOS_LISTER.write(Lists.newArrayList(this.remoteConnections.keySet()), compound);
+		List<BlockPos> normalizedPositions = new ArrayList<>();
+		for (BlockPos absolutePos : this.remoteConnections.keySet())
+		{
+			normalizedPositions.add(this.normalizePos(absolutePos));
+		}
+		BLOCKPOS_LISTER.write(normalizedPositions, compound);
+	}
+	
+	/**
+	 * {@return Relative position normalized by this block's rotation/mirror transform.}
+	 * @param absolutePos BlockPos representing an absolute position in the level.
+	 */
+	public BlockPos normalizePos(BlockPos absolutePos)
+	{
+		BlockPos relativePos = absolutePos.subtract(this.getBlockPos());
+		OctahedralGroup normalizer = this.getBlockState().getValue(WirePostBlock.TRANSFORM).inverse();
+		BlockPos normalizedPos = EightGroup.transform(relativePos, normalizer);
+		return normalizedPos;
+	}
+	
+	/**
+	 * {@return Absolute position in the level.}
+	 * @param normalPos BlockPos relative to this block's position and transform.
+	 */
+	public BlockPos denormalizePos(BlockPos normalPos)
+	{
+		OctahedralGroup denormalizer = this.getBlockState().getValue(WirePostBlock.TRANSFORM);
+		BlockPos relativePos = EightGroup.transform(normalPos, denormalizer);
+		BlockPos absolutePos = relativePos.offset(this.getBlockPos());
+		return absolutePos;
 	}
 
 	@Override
