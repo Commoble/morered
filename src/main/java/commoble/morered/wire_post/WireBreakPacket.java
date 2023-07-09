@@ -2,7 +2,7 @@ package commoble.morered.wire_post;
 
 import java.util.function.Supplier;
 
-import commoble.morered.client.ClientPacketHandlers;
+import commoble.morered.client.ClientProxy;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.phys.Vec3;
@@ -56,7 +56,7 @@ public class WireBreakPacket
 	public void handle(Supplier<NetworkEvent.Context> contextGetter)
 	{
 		NetworkEvent.Context context = contextGetter.get();
-		context.enqueueWork(() -> ClientPacketHandlers.onWireBreakPacket(context, this));
+		context.enqueueWork(() -> ClientProxy.onWireBreakPacket(context, this));
 		context.setPacketHandled(true);
 	}
 }

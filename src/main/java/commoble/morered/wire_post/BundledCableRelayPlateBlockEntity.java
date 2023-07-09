@@ -25,7 +25,7 @@ public class BundledCableRelayPlateBlockEntity extends BundledCablePostBlockEnti
 	
 	public BundledCableRelayPlateBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.instance().bundledCableRelayPlateBeType.get(), pos, state);
+		this(MoreRed.get().bundledCableRelayPlateBeType.get(), pos, state);
 	}
 
 	@Override

@@ -387,7 +387,7 @@ public abstract class AbstractWireBlock extends Block
 	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
 	{
 		BlockPos offset = fromPos.subtract(pos);
-		Direction directionToNeighbor = Direction.fromNormal(offset.getX(), offset.getY(), offset.getZ());
+		Direction directionToNeighbor = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
 		long edgeFlags = this.getEdgeFlags(worldIn,pos);
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		if (this.isEmptyWireBlock(state))

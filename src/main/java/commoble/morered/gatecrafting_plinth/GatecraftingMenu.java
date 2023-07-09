@@ -46,9 +46,9 @@ public class GatecraftingMenu extends AbstractContainerMenu
 
 	protected GatecraftingMenu(int id, Inventory playerInventory, BlockPos pos)
 	{
-		super(MoreRed.instance().gatecraftingMenuType.get(), id);
+		super(MoreRed.get().gatecraftingMenuType.get(), id);
 		this.player = playerInventory.player;
-		this.positionInWorld = ContainerLevelAccess.create(this.player.level, pos);
+		this.positionInWorld = ContainerLevelAccess.create(this.player.level(), pos);
 		
 		// crafting output slot // apparently it's helpful to do this first
 //		this.addSlot(new GatecraftingResultSlot(this, playerInventory.player, this.craftingInventory, this.craftResult, OUTPUT_SLOT_ID, inputOffsetX + 94, inputOffsetY + slotHeight));
@@ -76,7 +76,7 @@ public class GatecraftingMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player playerIn)
 	{
-		return stillValid(this.positionInWorld, playerIn, MoreRed.instance().gatecraftingPlinthBlock.get());
+		return stillValid(this.positionInWorld, playerIn, MoreRed.get().gatecraftingPlinthBlock.get());
 	}
 
 		/**
@@ -156,7 +156,7 @@ public class GatecraftingMenu extends AbstractContainerMenu
 	
 	public void onPlayerChoseRecipe(ResourceLocation recipeID)
 	{
-		this.attemptRecipeAssembly(MoreRed.getGatecraftingRecipe(this.player.level.getRecipeManager(), recipeID));
+		this.attemptRecipeAssembly(MoreRed.getGatecraftingRecipe(this.player.level().getRecipeManager(), recipeID));
 	}
 	
 	/**
@@ -172,6 +172,6 @@ public class GatecraftingMenu extends AbstractContainerMenu
 	public void updateRecipeAndResult(Optional<Recipe<CraftingContainer>> recipeHolder)
 	{
 		this.currentRecipe = recipeHolder;
-		this.craftResult.setItem(0, recipeHolder.map(recipe -> recipe.getResultItem().copy()).orElse(ItemStack.EMPTY));
+		this.craftResult.setItem(0, recipeHolder.map(recipe -> recipe.getResultItem(this.player.level().registryAccess()).copy()).orElse(ItemStack.EMPTY));
 	}
 }

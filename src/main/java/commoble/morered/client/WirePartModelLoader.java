@@ -1,10 +1,7 @@
 package commoble.morered.client;
 
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +10,6 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
 
 import commoble.morered.client.WirePartModelLoader.WirePartGeometry;
 import commoble.morered.wires.AbstractWireBlock;
@@ -24,7 +20,7 @@ import net.minecraft.client.renderer.block.model.ItemOverrides;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.BlockPos;
@@ -67,7 +63,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		}
 
 		@Override
-		public BakedModel bake(IGeometryBakingContext context, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
+		public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
 			ItemOverrides overrides, ResourceLocation modelLocation)
 		{
 			BakedModel[] lineModels = new BakedModel[24];
@@ -102,12 +98,10 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		}
 
 		@Override
-		public Collection<Material> getMaterials(IGeometryBakingContext context, Function<ResourceLocation, UnbakedModel> modelGetter, Set<Pair<String, String>> missingTextureErrors)
+		public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext context)
 		{
-	        Set<Material> textures = new HashSet<>();
-	        textures.addAll(this.lineModel.getMaterials(modelGetter, missingTextureErrors));
-	        textures.addAll(this.edgeModel.getMaterials(modelGetter, missingTextureErrors));
-	        return textures;
+			this.lineModel.resolveParents(modelGetter);
+			this.edgeModel.resolveParents(modelGetter);
 		}
 	}
 	

@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import commoble.morered.MoreRed;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
@@ -18,19 +19,19 @@ public class GatecraftingRecipe extends ShapelessRecipe
 {
 	public GatecraftingRecipe(ShapelessRecipe baseRecipe)
 	{
-		super(baseRecipe.getId(), baseRecipe.getGroup(), baseRecipe.getResultItem(), baseRecipe.getIngredients());
+		super(baseRecipe.getId(), baseRecipe.getGroup(), baseRecipe.category(), baseRecipe.getResultItem(RegistryAccess.EMPTY), baseRecipe.getIngredients());
 	}
 
 	@Override
 	public RecipeType<?> getType()
 	{
-		return MoreRed.instance().gatecraftingRecipeType.get();
+		return MoreRed.get().gatecraftingRecipeType.get();
 	}
 
 	@Override
 	public RecipeSerializer<?> getSerializer()
 	{
-		return MoreRed.instance().gatecraftingSerializer.get();
+		return MoreRed.get().gatecraftingSerializer.get();
 	}
 	
 	public static boolean doesPlayerHaveIngredients(Inventory playerInventory, @Nonnull Recipe<CraftingContainer> recipe)

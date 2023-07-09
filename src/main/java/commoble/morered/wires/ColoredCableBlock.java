@@ -46,7 +46,7 @@ public class ColoredCableBlock extends PoweredWireBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().coloredNetworkCableBeType.get().create(pos, state);
+		return MoreRed.get().coloredNetworkCableBeType.get().create(pos, state);
 	}
 
 	public boolean canConnectToAdjacentWireOrCable(BlockGetter world, BlockPos thisPos,

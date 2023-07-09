@@ -3,6 +3,7 @@ package commoble.morered.datagen;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.IntStream;
 
 import com.google.common.collect.ImmutableList;
@@ -17,20 +18,23 @@ import commoble.morered.wires.AbstractWireBlock;
 import commoble.morered.wires.ColoredCableBlock;
 import commoble.morered.wires.WireCountLootFunction;
 import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.core.Registry;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.DataGenerator.Target;
+import net.minecraft.data.PackOutput;
+import net.minecraft.data.PackOutput.Target;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.storage.loot.LootDataType;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.minecraft.world.level.storage.loot.LootTables;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
@@ -49,7 +53,7 @@ import net.minecraftforge.registries.RegistryObject;
 public class MoreRedDataGen
 {
 	public static final List<TagKey<Item>> WOOL_TAGS = IntStream.range(0, 16)
-		.<TagKey<Item>>mapToObj(i -> TagKey.<Item>create(Registry.ITEM_REGISTRY, new ResourceLocation("forge", "wools/" + DyeColor.values()[i].getSerializedName())))
+		.<TagKey<Item>>mapToObj(i -> TagKey.<Item>create(Registries.ITEM, new ResourceLocation("forge", "wools/" + DyeColor.values()[i].getSerializedName())))
 		.toList();
 	
 	
@@ -58,16 +62,16 @@ public class MoreRedDataGen
 	{		
 		DataGenerator generator = event.getGenerator();
 		ExistingFileHelper efh = event.getExistingFileHelper();
+		CompletableFuture<HolderLookup.Provider> holders = event.getLookupProvider();
+		PackOutput output = generator.getPackOutput();
 		Map<ResourceLocation, BlockStateFile> blockStates = new HashMap<>();
 		Map<ResourceLocation, SimpleModel> models = new HashMap<>();
 		Map<ResourceLocation, WirePartModelDefinition> wirePartModels = new HashMap<>();
-		Provider<LootTable> lootTables = Provider.create(event, Target.DATA_PACK, "loot_tables", LootTables::serialize);
+		Provider<LootTable> lootTables = Provider.create(event, Target.DATA_PACK, "loot_tables", LootDataType.TABLE.parser()::toJsonTree);
 		Provider<FinishedRecipe> recipes = Provider.create(event, Target.DATA_PACK, "recipes", FinishedRecipe::serializeRecipe);
-		@SuppressWarnings("deprecation")
-		TagProvider<Block> blockTags = TagProvider.create(event, Registry.BLOCK);
-		@SuppressWarnings("deprecation")
-		TagProvider<Item> itemTags = TagProvider.create(event, Registry.ITEM);
-		LanguageProvider lang = new LanguageProvider(generator, MoreRed.MODID, "en_us")
+		TagProvider<Block> blockTags = TagProvider.create(event, Registries.BLOCK, holders);
+		TagProvider<Item> itemTags = TagProvider.create(event, Registries.ITEM, holders);
+		LanguageProvider lang = new LanguageProvider(output, MoreRed.MODID, "en_us")
 		{
 			@Override
 			protected void addTranslations()
@@ -81,9 +85,9 @@ public class MoreRedDataGen
 			buildColorData(dataGenContext, i);
 		}
 
-		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(generator, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "blockstates", BlockStateFile.CODEC, blockStates));
-		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(generator, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", SimpleModel.CODEC, models));
-		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(generator, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", WirePartModelDefinition.CODEC, wirePartModels));
+		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "blockstates", BlockStateFile.CODEC, blockStates));
+		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", SimpleModel.CODEC, models));
+		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", WirePartModelDefinition.CODEC, wirePartModels));
 		generator.addProvider(event.includeServer(), lootTables);
 		generator.addProvider(event.includeServer(), recipes);
 		generator.addProvider(event.includeServer(), blockTags);
@@ -94,7 +98,7 @@ public class MoreRedDataGen
 	
 	static void buildColorData(DataGenContext context, int i)
 	{
-		final RegistryObject<ColoredCableBlock> blockHolder = MoreRed.instance().networkCableBlocks[i];
+		final RegistryObject<ColoredCableBlock> blockHolder = MoreRed.get().networkCableBlocks[i];
 		final ResourceLocation blockId = blockHolder.getId();
 		final String modid = blockId.getNamespace();
 		final String blockPath = blockId.getPath();
@@ -221,7 +225,7 @@ public class MoreRedDataGen
 		
 		// generate recipe
 		context.recipes().put(blockId,
-			RecipeHelpers.shaped(blockId, item, 8,
+			RecipeHelpers.shaped(blockId, item, 8, CraftingBookCategory.REDSTONE,
 				List.of("www", "w#w", "www"),
 				Map.<Character,Ingredient>of(
 					'w', Ingredient.of(MoreRed.Tags.Items.RED_ALLOY_WIRES),

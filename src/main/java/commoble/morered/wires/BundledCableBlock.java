@@ -42,7 +42,7 @@ public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().bundledNetworkCableBeType.get().create(pos, state);
+		return MoreRed.get().bundledNetworkCableBeType.get().create(pos, state);
 	}	
 	
 	// invoked when an adjacent TE is marked dirty or an adjacent block updates its comparator output

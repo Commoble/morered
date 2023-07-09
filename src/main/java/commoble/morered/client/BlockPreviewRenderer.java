@@ -4,6 +4,9 @@ import java.nio.Buffer;
 import java.nio.ByteBuffer;
 import java.nio.IntBuffer;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 import org.lwjgl.system.MemoryStack;
 
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -20,13 +23,10 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import net.minecraft.core.BlockPos;
-import com.mojang.math.Matrix4f;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.client.model.data.ModelData;
 
-import com.mojang.math.Vector3f;
 import net.minecraft.core.Vec3i;
-import com.mojang.math.Vector4f;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 
@@ -119,7 +119,7 @@ public class BlockPreviewRenderer extends ModelBlockRenderer
 		Vec3i faceVector3i = quad.getDirection().getNormal();
 		Vector3f faceVector = new Vector3f(faceVector3i.getX(), faceVector3i.getY(), faceVector3i.getZ());
 		Matrix4f matrix = matrixEntry.pose();
-		faceVector.transform(matrixEntry.normal());
+		faceVector.mul(matrixEntry.normal());
 		
 		int vertexDataEntries = vertexData.length / 8;
 
@@ -157,7 +157,7 @@ public class BlockPreviewRenderer extends ModelBlockRenderer
 				float texU = bytebuffer.getFloat(16);
 				float texV = bytebuffer.getFloat(20);
 				Vector4f posVector = new Vector4f(x, y, z, 1.0F);
-				posVector.transform(matrix);
+				posVector.mul(matrix);
 				buffer.applyBakedNormals(faceVector, bytebuffer, matrixEntry.normal());
 				buffer.vertex(posVector.x(), posVector.y(), posVector.z(), red, green, blue, alpha, texU, texV,
 					combinedOverlayIn, light, faceVector.x(), faceVector.y(), faceVector.z());

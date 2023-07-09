@@ -45,7 +45,7 @@ public class BundledCableRelayPlateBlock extends AbstractChanneledCablePostBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().bundledCableRelayPlateBeType.get().create(pos, state);
+		return MoreRed.get().bundledCableRelayPlateBeType.get().create(pos, state);
 	}
 	
 	@Override

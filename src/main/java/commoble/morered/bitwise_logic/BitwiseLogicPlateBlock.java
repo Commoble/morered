@@ -50,7 +50,7 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().bitwiseLogicGateBeType.get().create(pos, state);
+		return MoreRed.get().bitwiseLogicGateBeType.get().create(pos, state);
 	}
 
 	@Override

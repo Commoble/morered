@@ -155,7 +155,7 @@ public class SlackInterpolator
 			return result;
 		}, (rayTraceContext) -> {
 			Vec3 difference = rayTraceContext.getFrom().subtract(rayTraceContext.getTo());
-			return BlockHitResult.miss(rayTraceContext.getTo(), Direction.getNearest(difference.x, difference.y, difference.z), new BlockPos(rayTraceContext.getTo()));
+			return BlockHitResult.miss(rayTraceContext.getTo(), Direction.getNearest(difference.x, difference.y, difference.z),BlockPos.containing(rayTraceContext.getTo()));
 		});
 	}
 

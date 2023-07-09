@@ -33,7 +33,7 @@ public class BundledCablePostBlockEntity extends WirePostBlockEntity
 	
 	public BundledCablePostBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.instance().bundledCablePostBeType.get(), pos, state);
+		this(MoreRed.get().bundledCablePostBeType.get(), pos, state);
 	}
 	
 	public int getPower(int channel)

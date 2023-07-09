@@ -44,6 +44,7 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.data.DataGenerator;
+import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.util.ExtraCodecs;
@@ -73,7 +74,8 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 	public static void addDataProvider(GatherDataEvent event, String modid, DynamicOps<JsonElement> dynamicOps, Map<ResourceLocation, BlockStateFile> entries)
 	{
 		DataGenerator dataGenerator = event.getGenerator();
-		dataGenerator.addProvider(event.includeClient(), new JsonCodecProvider<BlockStateFile>(dataGenerator, event.getExistingFileHelper(), modid, dynamicOps, PackType.CLIENT_RESOURCES, "blockstates", CODEC, entries));
+		PackOutput packOutput = dataGenerator.getPackOutput();
+		dataGenerator.addProvider(event.includeClient(), new JsonCodecProvider<BlockStateFile>(packOutput, event.getExistingFileHelper(), modid, dynamicOps, PackType.CLIENT_RESOURCES, "blockstates", CODEC, entries));
 	}
 	
 	/**
@@ -181,12 +183,12 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 	{
 		/** codec **/
 		public static final Codec<PropertyValue<?>> CODEC = Codec.STRING.comapFlatMap(
-			s -> DataResult.error("PropertyValue not deserializable"),
+			s -> DataResult.error(() -> "PropertyValue not deserializable"),
 			PropertyValue::toString);
 		
 		/** list codec **/
 		public static final Codec<List<PropertyValue<?>>> LIST_CODEC = Codec.STRING.comapFlatMap(
-			s -> DataResult.error("PropertyValue List not deserializable"),
+			s -> DataResult.error(() -> "PropertyValue List not deserializable"),
 			values -> String.join(",", values.stream().map(PropertyValue::toString).toArray(String[]::new)));
 		
 		/**

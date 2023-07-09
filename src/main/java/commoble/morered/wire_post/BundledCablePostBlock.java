@@ -30,7 +30,7 @@ public class BundledCablePostBlock extends AbstractChanneledCablePostBlock imple
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().bundledCablePostBeType.get().create(pos, state);
+		return MoreRed.get().bundledCablePostBeType.get().create(pos, state);
 	}
 
 }

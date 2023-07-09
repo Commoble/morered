@@ -10,17 +10,19 @@ import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
 
 public class RecipeHelpers
 {
-	public static FinishedRecipe shapeless(ResourceLocation recipeId, Item result, int count, List<Ingredient> ingredients)
+	public static FinishedRecipe shapeless(ResourceLocation recipeId, Item result, int count, CraftingBookCategory category, List<Ingredient> ingredients)
 	{
 		return new ShapelessRecipeBuilder.Result(
 			recipeId,
 			result,
 			count,
 			"", // recipe book group (not used)
+			category,
 			ingredients,
 			null, // advancement
 			null
@@ -34,17 +36,19 @@ public class RecipeHelpers
 		};
 	}
 	
-	public static FinishedRecipe shaped(ResourceLocation recipeId, Item result, int count, List<String> pattern, Map<Character,Ingredient> key)
+	public static FinishedRecipe shaped(ResourceLocation recipeId, Item result, int count, CraftingBookCategory category, List<String> pattern, Map<Character,Ingredient> key)
 	{
 		return new ShapedRecipeBuilder.Result(
 			recipeId,
 			result,
 			count,
 			"", // recipe book group (not used)
+			category,
 			pattern,
 			key,
 			null, // advancement
-			null)
+			null,
+			true)
 		{
 			@Override
 			public JsonObject serializeAdvancement()

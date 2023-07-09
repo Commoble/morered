@@ -34,7 +34,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Enti
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().wireBeType.get().create(pos, state);
+		return MoreRed.get().wireBeType.get().create(pos, state);
 	}
 	
 	@Override

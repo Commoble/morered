@@ -52,7 +52,7 @@ public class WirePostBlockEntity extends BlockEntity
 	
 	public WirePostBlockEntity(BlockPos pos, BlockState state)
 	{
-		super(MoreRed.instance().redwirePostBeType.get(), pos, state);
+		super(MoreRed.get().redwirePostBeType.get(), pos, state);
 	}
 
 	public static Optional<WirePostBlockEntity> getPost(LevelAccessor world, BlockPos pos)

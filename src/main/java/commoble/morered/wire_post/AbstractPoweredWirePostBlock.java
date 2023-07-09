@@ -5,10 +5,7 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-import com.google.common.collect.ImmutableSet;
-
 import commoble.morered.MoreRed;
-import commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -54,7 +51,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.instance().redwirePostBeType.get().create(pos, state);
+		return MoreRed.get().redwirePostBeType.get().create(pos, state);
 	}
 
 	@Override

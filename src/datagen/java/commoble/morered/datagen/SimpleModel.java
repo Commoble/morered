@@ -80,7 +80,7 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 	public static void addDataProvider(GatherDataEvent event, String modid, DynamicOps<JsonElement> dynamicOps, Map<ResourceLocation,SimpleModel> entries)
 	{
 		DataGenerator dataGenerator = event.getGenerator();
-		dataGenerator.addProvider(event.includeClient(), new JsonCodecProvider<SimpleModel>(dataGenerator, event.getExistingFileHelper(), modid, dynamicOps, PackType.CLIENT_RESOURCES, "models", CODEC, entries));
+		dataGenerator.addProvider(event.includeClient(), new JsonCodecProvider<SimpleModel>(dataGenerator.getPackOutput(), event.getExistingFileHelper(), modid, dynamicOps, PackType.CLIENT_RESOURCES, "models", CODEC, entries));
 	}
 
 	/**

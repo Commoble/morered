@@ -2,9 +2,10 @@ package commoble.morered.client;
 
 import java.util.Set;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 
 import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.WirePostBlockEntity;
@@ -187,7 +188,8 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 			int lines = points - 1;
 			float cableWidth = 0.1F;
 			Matrix4f lastMatrix = matrices.last().pose();
-			float offsetScale = Mth.fastInvSqrt(dx * dx + dz * dz) * cableWidth / 2.0F;
+			@SuppressWarnings("deprecation")
+			float offsetScale = 0.5F * cableWidth * (float)Mth.fastInvSqrt(dx * dx + dz * dz);
 			float xOffset = dz * offsetScale;
 			float zOffset = dx * offsetScale;
 			int startBlockLight = level.getBrightness(LightLayer.BLOCK, startPos);
@@ -216,7 +218,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 				{
 					// render the quads with a different orientation if the cable is completely vertical
 					// (otherwise they have 0 width and are invisible)
-					float width = cableWidth * 0.5F;
+					float width = (float) (cableWidth * 0.5F);
 					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, cableWidth, segmentIndex, false, width, width, minU, maxU, minV, maxV);
 					addVertexPair(vertexBuilder, lastMatrix, packedLight, x1, y1, z1, cableWidth, cableWidth, secondSegmentIndex, true, width, width, minU, maxU, minV, maxV);
 					addVertexPair(vertexBuilder, lastMatrix, packedLight, x0, y0, z0, cableWidth, 0F, segmentIndex, false, -width, width, minU, maxU, minV, maxV);

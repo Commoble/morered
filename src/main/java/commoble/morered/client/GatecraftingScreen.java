@@ -1,12 +1,16 @@
 package commoble.morered.client;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 
 import commoble.morered.MoreRed;
@@ -14,14 +18,13 @@ import commoble.morered.gatecrafting_plinth.GatecraftingMenu;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
-import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.core.NonNullList;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -30,6 +33,7 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.gui.widget.ExtendedButton;
 import net.minecraftforge.client.gui.widget.ScrollPanel;
@@ -64,60 +68,51 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		ClientLevel world = this.minecraft.level;
-		List<Recipe<CraftingContainer>> recipes = world != null ? MoreRed.getAllGatecraftingRecipes(world.getRecipeManager()) : ImmutableList.of();
+		List<Recipe<CraftingContainer>> recipes = world != null ? getAllGatecraftingRecipes(world.getRecipeManager(), world.registryAccess()) : ImmutableList.of();
 		this.scrollPanel = new GatecraftingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
 		this.addWidget(this.scrollPanel);
 	}
 
 	@Override
-	public void render(PoseStack matrix, int mouseX, int mouseY, float partialTicks)
+	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
 	{
-		this.renderBackground(matrix);
-		super.render(matrix, mouseX, mouseY, partialTicks);
+		this.renderBackground(graphics);
+		super.render(graphics, mouseX, mouseY, partialTicks);
 		if (this.scrollPanel != null)
 		{
-			this.scrollPanel.render(matrix, mouseX, mouseY, 0);
+			this.scrollPanel.render(graphics, mouseX, mouseY, 0);
 		}
-		this.renderTooltip(matrix, mouseX, mouseY);
-	}
-
-	protected void renderLabels(PoseStack poseStack, int mouseX, int mouseY)
-	{
-		this.font.draw(poseStack, this.title, (float) this.titleLabelX, (float) this.titleLabelY, 4210752);
-		this.font.draw(poseStack, this.playerInventoryTitle, (float) this.inventoryLabelX, (float) this.inventoryLabelY, 4210752);
+		this.renderTooltip(graphics, mouseX, mouseY);
 	}
 	
-	public void renderItemStack(ItemStack stack, int x, int y)
+	public void renderItemStack(GuiGraphics graphics, ItemStack stack, int x, int y)
 	{
-        this.itemRenderer.renderAndDecorateItem(stack, x, y);
-        this.itemRenderer.renderGuiItemDecorations(this.font, stack, x, y);
+        graphics.renderFakeItem(stack, x, y);
+        graphics.renderItemDecorations(this.font, stack, x, y);
 	}
 
 	@Override
-	protected void renderTooltip(PoseStack matrix, int mouseX, int mouseY)
+	protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY)
 	{
 		if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
 		{
-			this.renderTooltip(matrix, this.hoveredSlot.getItem(), mouseX, mouseY);
+			graphics.renderTooltip(this.font, this.hoveredSlot.getItem(), mouseX, mouseY);
 		}
 		else if (this.scrollPanel != null && !this.scrollPanel.tooltipItem.isEmpty())
 		{
-			this.renderTooltip(matrix, this.scrollPanel.tooltipItem, mouseX, mouseY);
+			graphics.renderTooltip(this.font, this.scrollPanel.tooltipItem, mouseX, mouseY);
 		}
 
 	}
 
 	@Override
-	protected void renderBg(PoseStack matrix, float partialTicks, int mouseX, int mouseY)
+	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
 	{
 		// use the trading window as the main background
-		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		RenderSystem.setShaderTexture(0, TRADING_SCREEN);
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		
-		GuiComponent.blit(matrix, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
+		graphics.blit(TRADING_SCREEN, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
 		
 		// stretch the arrow over the crafting slot background
 		int arrowU = 186;
@@ -128,7 +123,7 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 		int arrowScreenX = xStart + arrowU - tiles*arrowWidth;
 		int arrowScreenY = yStart + arrowV;
 		int blitWidth = arrowWidth*tiles;
-		GuiComponent.blit(matrix, arrowScreenX, arrowScreenY, blitWidth, arrowHeight, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		graphics.blit(TRADING_SCREEN, arrowScreenX, arrowScreenY, blitWidth, arrowHeight, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 	}
 
 	@Override
@@ -175,12 +170,14 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 	     * Draws this button to the screen.
 	     */
 	    @Override
-	    public void renderButton(PoseStack matrix, int mouseX, int mouseY, float partial)
+	    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partial)
 	    {
 	    	this.tooltipItem = ItemStack.EMPTY;
 	        if (this.visible)
 	        {
-	            super.renderButton(matrix, mouseX, mouseY, partial);
+	        	int thisX = this.getX();
+	        	int thisY = this.getY();
+	            super.renderWidget(graphics, mouseX, mouseY, partial);
 	            NonNullList<Ingredient> ingredients = this.recipe.getIngredients();
 	            int ingredientCount = ingredients.size();
 	            // render ingredients
@@ -192,11 +189,11 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 	            	int itemColumn = ingredientIndex % 3;
 	            	int itemOffsetX = 2 + itemColumn*18;
 	            	int itemOffsetY = 2 + itemRow*18;
-	            	int itemX = this.x + itemOffsetX;
-	            	int itemY = this.y + itemOffsetY;
+	            	int itemX = thisX + itemOffsetX;
+	            	int itemY = thisY + itemOffsetY;
 	            	int itemEndX = itemX + 18;
 	            	int itemEndY = itemY + 18;
-	            	this.screen.renderItemStack(stack, itemX, itemY);
+	            	this.screen.renderItemStack(graphics, stack, itemX, itemY);
 	            	if (mouseX >= itemX && mouseX < itemEndX && mouseY >= itemY && mouseY < itemEndY)
 	            	{
 	            		this.tooltipItem = stack;
@@ -206,24 +203,24 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 	            {
 		            // render helpy crafty arrow // arrow is 10x9 on the villager trading gui texture
 	            	int extraIngredientRows = (ingredientCount-1)/3; //0 if 3 ingredients, 1 if 4-6 ingredients, 2 if 7-9 ingredients, etc
-		            int arrowX = this.x + 2 + (18*3) + 4;
-		            int arrowY = this.y + 2 + 4 + 9*extraIngredientRows;
+		            int arrowX = thisX + 2 + (18*3) + 4;
+		            int arrowY = thisY + 2 + 4 + 9*extraIngredientRows;
 		            int arrowWidth = 10;
 		            int arrowHeight = 9;
 		            int arrowU = 15;
 		            int arrowV = 171;
 		    		RenderSystem.setShaderTexture(0, TRADING_SCREEN);
-		            Screen.blit(matrix, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		            graphics.blit(TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
-		            ItemStack outputStack = this.recipe.getResultItem();
+		            ItemStack outputStack = this.recipe.getResultItem(this.screen.minecraft.level.registryAccess());
 		            if (!outputStack.isEmpty())
 		            {
-			            int itemX = this.x + 2 + (18*4);
-			            int itemY = this.y + 2 + 9*extraIngredientRows;
+			            int itemX = thisX + 2 + (18*4);
+			            int itemY = thisY + 2 + 9*extraIngredientRows;
 		            	int itemEndX = itemX + 18;
 		            	int itemEndY = itemY + 18;
-		            	this.screen.renderItemStack(outputStack, itemX, itemY);
+		            	this.screen.renderItemStack(graphics, outputStack, itemX, itemY);
 		            	if (mouseX >= itemX && mouseX < itemEndX && mouseY >= itemY && mouseY < itemEndY)
 		            	{
 		            		this.tooltipItem = outputStack;
@@ -251,13 +248,24 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 
 		public void scrollButton(int currentScrollAmount)
 		{
-			this.y = this.baseY - currentScrollAmount;
+			this.setY(this.baseY - currentScrollAmount);
 		}
 		
 		public void onClickButton()
 		{
 			
 		}
+	}
+
+	public static List<Recipe<CraftingContainer>> getAllGatecraftingRecipes(RecipeManager manager, RegistryAccess registries)
+	{
+//		return manager.recipes.getOrDefault(RecipeRegistrar.GATECRAFTING_RECIPE_TYPE, Collections.emptyMap()).entrySet().stream()
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(MoreRed.get().gatecraftingRecipeType.get(), Collections.emptyMap());
+			return map.entrySet().stream()
+			.map(Entry::getValue)
+			.sorted(Comparator.comparing(recipe -> recipe.getResultItem(registries).getDescriptionId()))
+			.collect(Collectors.toList());
 	}
 
 	public static class GatecraftingScrollPanel extends ScrollPanel implements GuiEventListener
@@ -275,7 +283,7 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 			Level world = client.level;
 			if (world != null)
 			{
-				for (Recipe<CraftingContainer> recipe : MoreRed.getAllGatecraftingRecipes(world.getRecipeManager()))
+				for (Recipe<CraftingContainer> recipe : getAllGatecraftingRecipes(world.getRecipeManager(), world.registryAccess()))
 				{
 					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
 					this.buttons.add(recipeButton);
@@ -298,13 +306,13 @@ public class GatecraftingScreen extends AbstractContainerScreen<GatecraftingMenu
 		}
 
 		@Override
-		protected void drawPanel(PoseStack matrix, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY)
+		protected void drawPanel(GuiGraphics graphics, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY)
 		{
 	    	this.tooltipItem = ItemStack.EMPTY;
 			for (RecipeButton button : this.buttons)
 			{
 				button.scrollButton((int) this.scrollDistance);
-				button.render(matrix, mouseX, mouseY, 0);
+				button.render(graphics, mouseX, mouseY, 0);
 				if (!button.tooltipItem.isEmpty())
 				{
 					this.tooltipItem = button.tooltipItem;

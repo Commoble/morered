@@ -17,7 +17,7 @@ public class WireBlockEntity extends BlockEntity
 	
 	public WireBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.instance().wireBeType.get(), pos, state);
+		this(MoreRed.get().wireBeType.get(), pos, state);
 	}
 	
 	public WireBlockEntity(BlockEntityType<? extends WireBlockEntity> type, BlockPos pos, BlockState state)

@@ -112,15 +112,12 @@ configurations {
 repositories {
 	mavenCentral()
 	maven {url = "https://maven.blamejared.com/"}
-	maven {url = "https://dvs1.progwml6.com/files/maven/"}
-	maven {url = "https://modmaven.dev"}
-	maven {url = "https://cursemaven.com"}
 	maven {url = "https://cubicinterpolation.net/maven/"}
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
-    
+
     // jei
 	// compile against the JEI API but do not include it at runtime
 	compileOnly(fg.deobf("mezz.jei:${jei_branch}-common-api:${jei_version}"))
@@ -130,10 +127,13 @@ dependencies {
 
 	// junit dependencies
 	testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
-	
-	implementation fg.deobf("commoble.useitemonblockevent:${useitemonblockevent_branch}:${useitemonblockevent_version}")
-	jarJar(group: "commoble.useitemonblockevent", name: "${useitemonblockevent_branch}", version: "[${useitemonblockevent_version}, ${useitemonblockevent_version_next})")
-	
+
+	implementation fg.deobf("commoble.jumbofurnace:jumbofurnace-${jumbofurnace_mc_version}:${jumbofurnace_version}")
+	jarJar(group: "commoble.jumbofurnace", name: "jumbofurnace-${jumbofurnace_mc_version}", version: "[${jumbofurnace_version}, ${jumbofurnace_version_next})")
+
+	implementation fg.deobf("commoble.useitemonblockevent:useitemonblockevent-${useitemonblockevent_mc_version}:${useitemonblockevent_version}")
+	jarJar(group: "commoble.useitemonblockevent", name: "useitemonblockevent-${useitemonblockevent_mc_version}", version: "[${useitemonblockevent_version}, ${useitemonblockevent_version_next})")
+
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
     
     

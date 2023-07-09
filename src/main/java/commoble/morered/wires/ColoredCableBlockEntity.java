@@ -32,7 +32,7 @@ public class ColoredCableBlockEntity extends WireBlockEntity
 	
 	public ColoredCableBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.instance().coloredNetworkCableBeType.get(), pos, state);
+		this(MoreRed.get().coloredNetworkCableBeType.get(), pos, state);
 	}
 	
 	public ColoredCableBlockEntity(BlockEntityType<ColoredCableBlockEntity> type, BlockPos pos, BlockState state)

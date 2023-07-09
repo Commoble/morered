@@ -5,7 +5,7 @@ import java.util.stream.Stream;
 
 import com.google.gson.JsonObject;
 
-import net.minecraft.core.Registry;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -42,7 +42,7 @@ public class TagStackIngredient
 		{
 			ResourceLocation tagID = new ResourceLocation(GsonHelper.getAsString(json, "tag")); // throws JsonSyntaxException if no tag field
 			int count = GsonHelper.getAsInt(json, "count", 1);
-			TagCountValue value = new TagCountValue(TagKey.create(Registry.ITEM_REGISTRY, tagID), count);
+			TagCountValue value = new TagCountValue(TagKey.create(Registries.ITEM, tagID), count);
 			return Ingredient.fromValues(Stream.of(value));
 		}
 

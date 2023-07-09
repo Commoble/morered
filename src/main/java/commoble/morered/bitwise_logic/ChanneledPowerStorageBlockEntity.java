@@ -24,7 +24,7 @@ public class ChanneledPowerStorageBlockEntity extends BlockEntity implements Cha
 
 	public static ChanneledPowerStorageBlockEntity create(BlockPos pos, BlockState state)
 	{
-		return new ChanneledPowerStorageBlockEntity(MoreRed.instance().bitwiseLogicGateBeType.get(), pos, state);
+		return new ChanneledPowerStorageBlockEntity(MoreRed.get().bitwiseLogicGateBeType.get(), pos, state);
 	}
 	
 	public ChanneledPowerStorageBlockEntity(BlockEntityType<? extends ChanneledPowerStorageBlockEntity> type, BlockPos pos, BlockState state)
@@ -34,7 +34,7 @@ public class ChanneledPowerStorageBlockEntity extends BlockEntity implements Cha
 	
 	public ChanneledPowerStorageBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.instance().bitwiseLogicGateBeType.get(), pos, state);
+		this(MoreRed.get().bitwiseLogicGateBeType.get(), pos, state);
 	}
 	
 	@SuppressWarnings("unchecked")

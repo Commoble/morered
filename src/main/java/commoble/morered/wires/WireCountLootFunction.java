@@ -40,7 +40,7 @@ public class WireCountLootFunction implements LootItemFunction, Serializer<WireC
 	@Override
 	public LootItemFunctionType getType()
 	{
-		return MoreRed.instance().wireCountLootFunction.get();
+		return MoreRed.get().wireCountLootFunction.get();
 	}
 	
 	@Override

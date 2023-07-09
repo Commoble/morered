@@ -1,10 +1,11 @@
 package commoble.morered.client;
 
+import org.joml.Matrix4f;
+
 import commoble.morered.util.DirectionHelper;
 import commoble.morered.wires.Edge;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
-import com.mojang.math.Matrix4f;
 
 public class EdgeRotation
 {

@@ -2,18 +2,14 @@ package commoble.morered;
 
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,7 +28,7 @@ import commoble.morered.bitwise_logic.BitwiseLogicPlateBlock;
 import commoble.morered.bitwise_logic.ChanneledPowerStorageBlockEntity;
 import commoble.morered.bitwise_logic.SingleInputBitwiseLogicPlateBlock;
 import commoble.morered.bitwise_logic.TwoInputBitwiseLogicPlateBlock;
-import commoble.morered.client.ClientEvents;
+import commoble.morered.client.ClientProxy;
 import commoble.morered.gatecrafting_plinth.GatecraftingMenu;
 import commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
 import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
@@ -43,7 +39,6 @@ import commoble.morered.plate_blocks.LogicFunctionPlateBlock;
 import commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 import commoble.morered.plate_blocks.LogicFunctions;
 import commoble.morered.plate_blocks.PlateBlock;
-import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import commoble.morered.wire_post.BundledCablePostBlock;
 import commoble.morered.wire_post.BundledCablePostBlockEntity;
 import commoble.morered.wire_post.BundledCableRelayPlateBlock;
@@ -75,6 +70,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -87,6 +84,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.flag.FeatureFlags;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
@@ -109,9 +107,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
+import net.minecraft.world.level.material.MapColor;
+import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -145,7 +144,7 @@ public class MoreRed
 	public static final String MODID = "morered";
 	public static final Logger LOGGER = LogManager.getLogger();
 	private static MoreRed instance;
-	public static MoreRed instance() { return instance; }
+	public static MoreRed get() { return instance; }
 	
 	// the network channel we'll use for sending packets associated with this mod
 	public static final String CHANNEL_PROTOCOL_VERSION = "2";
@@ -179,6 +178,8 @@ public class MoreRed
 	public final RegistryObject<WireSpoolItem> redwireSpoolItem;
 	public final RegistryObject<Item> bundledCableSpoolItem;
 	public final RegistryObject<Item> redAlloyIngotItem;
+	
+	public final RegistryObject<CreativeModeTab> tab;
 
 	public final RegistryObject<BlockEntityType<WirePostBlockEntity>> redwirePostBeType;
 	public final RegistryObject<BlockEntityType<WireBlockEntity>> wireBeType;
@@ -194,16 +195,6 @@ public class MoreRed
 	
 	public final RegistryObject<LootItemFunctionType> wireCountLootFunction;
 	
-	public final CreativeModeTab creativeTab = new CreativeModeTab(MoreRed.MODID)
-	{
-		@SuppressWarnings("deprecation")
-		@Override
-		public ItemStack makeIcon()
-		{
-			return new ItemStack(Registry.ITEM.get(new ResourceLocation(MoreRed.MODID, ObjectNames.NOR_GATE)));
-		}
-	};
-	
 	@SuppressWarnings("unchecked")
 	public MoreRed()
 	{
@@ -214,43 +205,44 @@ public class MoreRed
 		IEventBus modBus = fmlContext.getModEventBus();
 		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
 
-		DeferredRegister<Block> blocks = createDeferredRegister(modBus, Registry.BLOCK_REGISTRY);
-		DeferredRegister<Item> items = createDeferredRegister(modBus, Registry.ITEM_REGISTRY);
-		DeferredRegister<BlockEntityType<?>> blockEntityTypes = createDeferredRegister(modBus, Registry.BLOCK_ENTITY_TYPE_REGISTRY);
-		DeferredRegister<MenuType<?>> menuTypes = createDeferredRegister(modBus, Registry.MENU_REGISTRY);
-		DeferredRegister<RecipeSerializer<?>> recipeSerializers = createDeferredRegister(modBus, Registry.RECIPE_SERIALIZER_REGISTRY);
-		DeferredRegister<RecipeType<?>> recipeTypes = createDeferredRegister(modBus, Registry.RECIPE_TYPE_REGISTRY);
-		DeferredRegister<LootItemFunctionType> lootFunctions = createDeferredRegister(modBus, Registry.LOOT_FUNCTION_REGISTRY);
+		DeferredRegister<Block> blocks = createDeferredRegister(modBus, Registries.BLOCK);
+		DeferredRegister<Item> items = createDeferredRegister(modBus, Registries.ITEM);
+		DeferredRegister<CreativeModeTab> tabs = createDeferredRegister(modBus, Registries.CREATIVE_MODE_TAB);
+		DeferredRegister<BlockEntityType<?>> blockEntityTypes = createDeferredRegister(modBus, Registries.BLOCK_ENTITY_TYPE);
+		DeferredRegister<MenuType<?>> menuTypes = createDeferredRegister(modBus, Registries.MENU);
+		DeferredRegister<RecipeSerializer<?>> recipeSerializers = createDeferredRegister(modBus, Registries.RECIPE_SERIALIZER);
+		DeferredRegister<RecipeType<?>> recipeTypes = createDeferredRegister(modBus, Registries.RECIPE_TYPE);
+		DeferredRegister<LootItemFunctionType> lootFunctions = createDeferredRegister(modBus, Registries.LOOT_FUNCTION_TYPE);
 		
 		gatecraftingPlinthBlock = registerBlockItem(blocks, items, ObjectNames.GATECRAFTING_PLINTH,
-			() -> new GatecraftingPlinthBlock(BlockBehaviour.Properties.of(Material.STONE).strength(3.5F).noOcclusion()));
+			() -> new GatecraftingPlinthBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion()));
 		stonePlateBlock = registerBlockItem(blocks, items, ObjectNames.STONE_PLATE,
-			() -> new PlateBlock(BlockBehaviour.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD)));
+			() -> new PlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD)));
 		latchBlock = registerBlockItem(blocks, items, ObjectNames.LATCH,
-			() -> new LatchBlock(BlockBehaviour.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL).strength(0).sound(SoundType.WOOD)));
+			() -> new LatchBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD)));
 		redwirePostBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST,
-			() -> new WirePostBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F), WirePostBlock::getRedstoneConnectionDirections));
+			() -> new WirePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostBlock::getRedstoneConnectionDirections));
 		redwirePostPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_PLATE,
-			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
+			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
 		redwirePostRelayPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_RELAY_PLATE,
-			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
+			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
 		hexidecrubrometerBlock = registerBlockItem(blocks, items, ObjectNames.HEXIDECRUBROMETER,
-			() -> new HexidecrubrometerBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_RED).strength(2F, 5F)));
+			() -> new HexidecrubrometerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		bundledCablePostBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_CABLE_POST,
-			() -> new BundledCablePostBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLUE).strength(2F, 5F)));
+			() -> new BundledCablePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		bundledCableRelayPlateBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
-			() -> new BundledCableRelayPlateBlock(BlockBehaviour.Properties.of(Material.STONE, MaterialColor.COLOR_BLUE).strength(2F, 5F)));
+			() -> new BundledCableRelayPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		
 		redAlloyWireBlock = registerBlockItem(blocks, items, ObjectNames.RED_ALLOY_WIRE, 
-			() -> new RedAlloyWireBlock(BlockBehaviour.Properties.of(Material.DECORATION, MaterialColor.COLOR_RED).noCollission().instabreak()),
-			block -> new WireBlockItem(block, new Item.Properties().tab(creativeTab)));
+			() -> new RedAlloyWireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
+			block -> new WireBlockItem(block, new Item.Properties()));
 		networkCableBlocks = Util.make((RegistryObject<ColoredCableBlock>[])new RegistryObject[16], array ->
 			Arrays.setAll(array, i -> registerBlockItem(blocks, items, ObjectNames.NETWORK_CABLES[i],
-				() -> new ColoredCableBlock(BlockBehaviour.Properties.of(Material.DECORATION, DyeColor.values()[i].getMaterialColor()).noCollission().instabreak(), DyeColor.values()[i]),
-				block -> new WireBlockItem(block, new Item.Properties().tab(creativeTab)))));
+				() -> new ColoredCableBlock(BlockBehaviour.Properties.of().mapColor(DyeColor.values()[i]).pushReaction(PushReaction.DESTROY).noCollission().instabreak(), DyeColor.values()[i]),
+				block -> new WireBlockItem(block, new Item.Properties()))));
 		bundledNetworkCableBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_NETWORK_CABLE,
-			() -> new BundledCableBlock(BlockBehaviour.Properties.of(Material.DECORATION, MaterialColor.COLOR_BLUE).noCollission().instabreak()),
-			block -> new WireBlockItem(block, new Item.Properties().tab(creativeTab)));
+			() -> new BundledCableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
+			block -> new WireBlockItem(block, new Item.Properties()));
 		
 		registerLogicGateType(blocks, items, ObjectNames.DIODE, LogicFunctions.INPUT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
 		registerLogicGateType(blocks, items, ObjectNames.NOT_GATE, LogicFunctions.NOT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
@@ -275,10 +267,18 @@ public class MoreRed
 		registerBitwiseLogicGateType(blocks, items, ObjectNames.BITWISE_XOR_GATE, LogicFunctions.XOR_AC, twoInputs);
 		registerBitwiseLogicGateType(blocks, items, ObjectNames.BITWISE_XNOR_GATE, LogicFunctions.XNOR_AC, twoInputs);
 
-		redwireSpoolItem = items.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().tab(creativeTab).durability(64), MoreRed.Tags.Blocks.REDWIRE_POSTS));
-		bundledCableSpoolItem = items.register(ObjectNames.BUNDLED_CABLE_SPOOL, () -> new WireSpoolItem(new Item.Properties().tab(creativeTab).durability(64), MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
-		redAlloyIngotItem = items.register(ObjectNames.RED_ALLOY_INGOT, () -> new Item(new Item.Properties().tab(creativeTab)));
+		redwireSpoolItem = items.register(ObjectNames.REDWIRE_SPOOL, () -> new WireSpoolItem(new Item.Properties().durability(64), MoreRed.Tags.Blocks.REDWIRE_POSTS));
+		bundledCableSpoolItem = items.register(ObjectNames.BUNDLED_CABLE_SPOOL, () -> new WireSpoolItem(new Item.Properties().durability(64), MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
+		redAlloyIngotItem = items.register(ObjectNames.RED_ALLOY_INGOT, () -> new Item(new Item.Properties()));
 
+		ResourceLocation tabIconId = new ResourceLocation(MODID, ObjectNames.NOR_GATE);
+		this.tab = tabs.register(MoreRed.MODID, () -> CreativeModeTab.builder()
+			.icon(() -> new ItemStack(this.logicPlates.get(tabIconId).get()))
+			.title(Component.translatable("itemGroup.morered"))
+			.displayItems((params, output) -> output.acceptAll(items.getEntries().stream().map(rob -> new ItemStack(rob.get())).toList()))
+			.build()
+			);
+		
 		redwirePostBeType = blockEntityTypes.register(ObjectNames.REDWIRE_POST,
 			() -> BlockEntityType.Builder.of(WirePostBlockEntity::new,
 				redwirePostBlock.get(),
@@ -318,7 +318,7 @@ public class MoreRed
 			.build(null));
 
 		gatecraftingMenuType = menuTypes.register(ObjectNames.GATECRAFTING_PLINTH,
-			() -> new MenuType<>(GatecraftingMenu::getClientContainer));
+			() -> new MenuType<>(GatecraftingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
 		gatecraftingSerializer = recipeSerializers.register(ObjectNames.GATECRAFTING_RECIPE,
 			() -> new GatecraftingRecipeSerializer());
 		gatecraftingRecipeType = recipeTypes.register(ObjectNames.GATECRAFTING_RECIPE, () -> RecipeType.simple(new ResourceLocation(MODID, ObjectNames.GATECRAFTING_RECIPE)));
@@ -342,7 +342,7 @@ public class MoreRed
 		// add layer of separation to client stuff so we don't break servers
 		if (FMLEnvironment.dist == Dist.CLIENT)
 		{
-			ClientEvents.addClientListeners(modContext, fmlContext, modBus, forgeBus);
+			ClientProxy.addClientListeners(modContext, fmlContext, modBus, forgeBus);
 		}
 	}
 	
@@ -350,7 +350,7 @@ public class MoreRed
 	{
 		public static class Blocks
 		{
-			private static TagKey<Block> tag(String name) { return TagKey.create(Registry.BLOCK_REGISTRY, new ResourceLocation(MODID, name)); }
+			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, name)); }
 			
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
@@ -358,7 +358,7 @@ public class MoreRed
 		
 		public static class Items
 		{
-			private static TagKey<Item> tag(String name) { return TagKey.create(Registry.ITEM_REGISTRY, new ResourceLocation(MODID, name)); }
+			private static TagKey<Item> tag(String name) { return TagKey.create(Registries.ITEM, new ResourceLocation(MODID, name)); }
 			
 			public static final TagKey<Item> RED_ALLOY_WIRES = tag(ObjectNames.RED_ALLOY_WIRES);
 			public static final TagKey<Item> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
@@ -544,14 +544,19 @@ public class MoreRed
 			return;
 		if (!level.mayInteract(player, pos))
 			return;
-		
-		double dx = player.getX() - (pos.getX() + 0.5D);
-		double dy = player.getY() - (pos.getY() + 0.5D) + 1.5D;
-		double dz = player.getZ() - (pos.getZ() + 0.5D);
-		double distSquared = dx * dx + dy * dy + dz * dz;
-		double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.REACH_DISTANCE.get()).getValue() + 1;
-		if (distSquared > reachDistance*reachDistance)
+
+		// this was the old reach check, keep it around for a version or two so we can compare old behavior if we get buggy
+//		double dx = player.getX() - (pos.getX() + 0.5D);
+//		double dy = player.getY() - (pos.getY() + 0.5D) + 1.5D;
+//		double dz = player.getZ() - (pos.getZ() + 0.5D);
+//		double distSquared = dx * dx + dy * dy + dz * dz;
+//		double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.BLOCK_REACH.get()).getValue() + 1;
+//		if (distSquared > reachDistance*reachDistance)
+//			return;
+		if (!player.canReach(pos, 1.5D))
+		{
 			return;
+		}
 		
 		// we have a specific enough situation to take over the event from this point forward
 		event.setCanceled(true);
@@ -633,24 +638,13 @@ public class MoreRed
 		String name,
 		Supplier<? extends BLOCK> blockFactory)
 	{
-		return registerBlockItem(blocks, items, name, blockFactory, block -> new BlockItem(block, new Item.Properties().tab(MoreRed.instance().creativeTab)));
-	}
-
-	public static List<Recipe<CraftingContainer>> getAllGatecraftingRecipes(RecipeManager manager)
-	{
-//		return manager.recipes.getOrDefault(RecipeRegistrar.GATECRAFTING_RECIPE_TYPE, Collections.emptyMap()).entrySet().stream()
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(instance().gatecraftingRecipeType.get(), Collections.emptyMap());
-			return map.entrySet().stream()
-			.map(Entry::getValue)
-			.sorted(Comparator.comparing(recipe -> recipe.getResultItem().getDescriptionId()))
-			.collect(Collectors.toList());
+		return registerBlockItem(blocks, items, name, blockFactory, block -> new BlockItem(block, new Item.Properties()));
 	}
 
 	public static Optional<Recipe<CraftingContainer>> getGatecraftingRecipe(RecipeManager manager, ResourceLocation id)
 	{
 		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(instance().gatecraftingRecipeType.get(), Collections.emptyMap());
+		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(get().gatecraftingRecipeType.get(), Collections.emptyMap());
 		return Optional.ofNullable(map.get(id));
 	}
 	
@@ -659,7 +653,7 @@ public class MoreRed
 		LogicFunctionPlateBlockFactory factory)
 	{
 		Supplier<LogicFunctionPlateBlock> blockFactory = () -> factory.makeBlock(function,
-			BlockBehaviour.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL).strength(0F).sound(SoundType.WOOD));
+			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD));
 		RegistryObject<LogicFunctionPlateBlock> blockGetter = registerBlockItem(blocks, items, name, blockFactory);
 		logicPlates.put(blockGetter.getId(), blockGetter);
 		return blockGetter;
@@ -670,7 +664,7 @@ public class MoreRed
 		BiFunction<BlockBehaviour.Properties, LogicFunction, B> blockFactory)
 	{
 		Supplier<B> actualBlockFactory = () -> blockFactory.apply(
-			BlockBehaviour.Properties.of(PlateBlockStateProperties.PLATE_MATERIAL, MaterialColor.QUARTZ).strength(0F).sound(SoundType.WOOD), function);
+			BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD), function);
 		RegistryObject<B> rob = registerBlockItem(blocks, items, name, actualBlockFactory);
 		bitwiseLogicPlates.put(rob.getId(), rob);
 		return rob;

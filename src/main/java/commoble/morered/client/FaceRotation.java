@@ -2,9 +2,11 @@ package commoble.morered.client;
 
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.Util;
-import com.mojang.math.Quaternion;
+
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.mojang.math.Transformation;
-import com.mojang.math.Vector3f;
 
 // expanded rotations similar to ModelRotation but with 24 values instead of 16
 // rotations represent an "attachment face" and a "connection side"
@@ -57,10 +59,16 @@ public class FaceRotation implements ModelState
 	
 	FaceRotation(int x, int y, int z)
 	{
-		Quaternion quaternion = new Quaternion(new Vector3f(0.0F, 0.0F, 1.0F), (-z), true);
-		quaternion.mul(new Quaternion(new Vector3f(0.0F, 1.0F, 0.0F), (-y), true));
-		quaternion.mul(new Quaternion(new Vector3f(1.0F, 0.0F, 0.0F), (-x), true));
-		this.transformation = new Transformation((Vector3f)null, quaternion, (Vector3f)null, (Quaternion)null);
+//		Quaternionf quaternion = new Quaternionf(new Vector3f(0.0F, 0.0F, 1.0F), (-z), true);
+//		quaternion.mul(new Quaternionf(new Vector3f(0.0F, 1.0F, 0.0F), (-y), true));
+//		quaternion.mul(new Quaternionf(new Vector3f(1.0F, 0.0F, 0.0F), (-x), true));
+//		this.transformation = new Transformation((Vector3f)null, quaternion, (Vector3f)null, (Quaternionf)null);
+		float d2r = (float) (Math.PI / 180F);
+		Quaternionf q = new Quaternionf();
+		q.setAngleAxis(-z*d2r, 0F, 0F, 1F);
+		q.mul(new Quaternionf().setAngleAxis(-y*d2r, 0F, 1F, 0F));
+		q.mul(new Quaternionf().setAngleAxis(-x*d2r, 1F, 0F, 0F));
+		this.transformation = new Transformation((Vector3f)null, q, (Vector3f)null, (Quaternionf)null);
 	}
 
 	@Override

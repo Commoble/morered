@@ -51,7 +51,7 @@ public class BundledCableBlockEntity extends BlockEntity
 
 	public BundledCableBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.instance().bundledNetworkCableBeType.get(), pos, state);
+		this(MoreRed.get().bundledNetworkCableBeType.get(), pos, state);
 	}
 	
 	@Override

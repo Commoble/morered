@@ -7,7 +7,7 @@ import java.util.function.Consumer;
 
 import com.mojang.serialization.Codec;
 
-import commoble.morered.client.ClientPacketHandlers;
+import commoble.morered.client.ClientProxy;
 import net.minecraft.core.BlockPos;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkEvent.Context;
@@ -29,7 +29,7 @@ public class WireUpdatePacket implements Consumer<NetworkEvent.Context>
 	@Override
 	public void accept(Context context)
 	{
-		context.enqueueWork(() -> ClientPacketHandlers.onWireUpdatePacket(this));
+		context.enqueueWork(() -> ClientProxy.onWireUpdatePacket(this));
 	}
 
 }

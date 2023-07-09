@@ -1,13 +1,11 @@
 package commoble.morered.client;
 
-import java.util.Collection;
-import java.util.Set;
 import java.util.function.Function;
+
+import org.joml.Matrix4f;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Matrix4f;
 
 import commoble.morered.client.TintRotatingModelLoader.TintRotatingModelGeometry;
 import commoble.morered.mixin.ClientElementsModelAccess;
@@ -16,7 +14,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.ModelBakery;
+import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
@@ -69,7 +67,7 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
 		}
 
 		@Override
-		public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBakery bakery, Function<Material, TextureAtlasSprite> spriteGetter,
+		public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter,
 			ModelState modelTransform, ResourceLocation modelLocation)
 		{
 			IModelBuilder<?> builderWrapper = new TintRotatingModelBuilder(modelBuilder, modelTransform);
@@ -78,10 +76,9 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
 		}
 
 		@Override
-		public Collection<Material> getMaterials(IGeometryBakingContext owner, Function<ResourceLocation, UnbakedModel> modelGetter,
-			Set<Pair<String, String>> missingTextureErrors)
+		public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext owner)
 		{
-			return this.elementsModel.getMaterials(owner, modelGetter, missingTextureErrors);
+			this.elementsModel.resolveParents(modelGetter, owner);
 		}
 	}
 	

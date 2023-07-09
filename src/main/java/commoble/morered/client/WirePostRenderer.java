@@ -2,9 +2,10 @@ package commoble.morered.client;
 
 import java.util.Set;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 
 import commoble.morered.wire_post.AbstractPoweredWirePostBlock;
 import commoble.morered.wire_post.SlackInterpolator;

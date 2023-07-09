@@ -1,17 +1,14 @@
 package commoble.morered.plate_blocks;
 
 import commoble.morered.util.BlockStateUtil;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.material.Material;
-import net.minecraft.world.level.material.MaterialColor;
-import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.core.Direction;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
 
 /**
@@ -39,9 +36,6 @@ public class PlateBlockStateProperties
 	public static final BooleanProperty INPUT_B = BooleanProperty.create("input_b");
 	/** The third input clockwise from the output **/
 	public static final BooleanProperty INPUT_C = BooleanProperty.create("input_c");
-	
-	public static final Material PLATE_MATERIAL = new Material(MaterialColor.STONE, false, true, true, true, false, false, PushReaction.NORMAL);
-
 	
 	public static Direction getOutputDirection(BlockState state)
 	{

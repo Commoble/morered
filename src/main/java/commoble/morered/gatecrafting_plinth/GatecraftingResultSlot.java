@@ -75,7 +75,7 @@ public class GatecraftingResultSlot extends Slot
 	public void verifyRecipeAfterCrafting(Inventory playerInventory, Optional<Recipe<CraftingContainer>> recipeHolder)
 	{
 		Optional<Recipe<CraftingContainer>> remainingRecipe = recipeHolder.filter(recipe -> GatecraftingRecipe.doesPlayerHaveIngredients(playerInventory, recipe));
-		this.set(remainingRecipe.map(recipe -> recipe.getResultItem().copy()).orElse(ItemStack.EMPTY));
+		this.set(remainingRecipe.map(recipe -> recipe.getResultItem(playerInventory.player.level().registryAccess()).copy()).orElse(ItemStack.EMPTY));
 		this.container.currentRecipe = remainingRecipe;
 	}
 }
