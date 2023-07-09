@@ -1,5 +1,5 @@
 1.20.1-4.0.0.0
- * Updated to 1.20.1 (requires forge build 47.1.0+)
+ * Updated to 1.20.1 (requires forge build 47.1.0+). Old worlds using More Red are not compatible with this update.
  * Jumbo Furnace is now bundled with More Red via forge jar-in-jar
  * The "morered:red_alloy_ingot_with_jumbo_furnace" recipe has been renamed to "morered:red_alloy_ingot_from_jumbo_smelting"
  * The "morered:red_alloy_ingot_without_jumbo_furnace" recipe has been removed

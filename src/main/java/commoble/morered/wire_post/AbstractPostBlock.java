@@ -5,6 +5,9 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
+import com.mojang.math.OctahedralGroup;
+
+import commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -17,6 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -24,13 +28,18 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractPostBlock extends Block
 {
+	// this gives the block 48 states (6*8)
+	// we could optimize it to 24 (3*8) by having the facing be up/down/sideways and using the transform to handle sideways facing,
+	// but that makes the logic a lot grittier and we'd have to refactor the blockstate files
 	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
+	public static final EnumProperty<OctahedralGroup> TRANSFORM = EightGroup.TRANSFORM;
 
 	public AbstractPostBlock(Properties properties)
 	{
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any()
-			.setValue(DIRECTION_OF_ATTACHMENT, Direction.DOWN));
+			.setValue(DIRECTION_OF_ATTACHMENT, Direction.DOWN)
+			.setValue(TRANSFORM, OctahedralGroup.IDENTITY));
 	}
 	
 	protected abstract void notifyNeighbors(Level world, BlockPos pos, BlockState state);
@@ -39,7 +48,7 @@ public abstract class AbstractPostBlock extends Block
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
-		builder.add(DIRECTION_OF_ATTACHMENT);
+		builder.add(DIRECTION_OF_ATTACHMENT, TRANSFORM);
 	}
 
 	@Override
@@ -115,14 +124,18 @@ public abstract class AbstractPostBlock extends Block
 	@Override
 	public BlockState rotate(BlockState state, Rotation rot)
 	{
-		return state.setValue(DIRECTION_OF_ATTACHMENT, rot.rotate(state.getValue(DIRECTION_OF_ATTACHMENT)));
+		BlockState newState = state.setValue(DIRECTION_OF_ATTACHMENT, rot.rotate(state.getValue(DIRECTION_OF_ATTACHMENT)));
+		newState = EightGroup.rotate(newState, rot);
+		return newState;
 	}
 
 	@Deprecated
 	@Override
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
-		return state.rotate(mirrorIn.getRotation(state.getValue(DIRECTION_OF_ATTACHMENT)));
+		BlockState newState = state.rotate(mirrorIn.getRotation(state.getValue(DIRECTION_OF_ATTACHMENT)));
+		newState = EightGroup.mirror(newState, mirrorIn);
+		return newState;
 	}
 
 }
