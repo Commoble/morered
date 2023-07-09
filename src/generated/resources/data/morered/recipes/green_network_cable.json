@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "key": {
     "#": {
       "tag": "forge:wools/green"
@@ -16,5 +17,6 @@
   "result": {
     "count": 8,
     "item": "morered:green_network_cable"
-  }
+  },
+  "show_notification": true
 }

@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "key": {
     "#": {
       "tag": "forge:wools/magenta"
@@ -16,5 +17,6 @@
   "result": {
     "count": 8,
     "item": "morered:magenta_network_cable"
-  }
+  },
+  "show_notification": true
 }

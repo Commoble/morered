@@ -26,5 +26,3 @@ maven
 # Files from Forge MDK
 forge*changelog.txt
 /Users/
-
-src/generated/resources/.cache/

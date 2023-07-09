@@ -15,12 +15,5 @@
 	{
 		"item": "morered:red_alloy_ingot"
 	},
-	"experience": 0.15,
-	"conditions": 
-	[
-		{
-			"type": "forge:mod_loaded",
-			"modid": "jumbofurnace"
-		}
-	]
+	"experience": 0.15
 }

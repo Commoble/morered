@@ -1,5 +1,9 @@
-1.19.2-3.0.0.2
- * Reenable JEI support. Oops!
+1.20.1-4.0.0.0
+ * Updated to 1.20.1 (requires forge build 47.1.0+)
+ * Jumbo Furnace is now bundled with More Red via forge jar-in-jar
+ * The "morered:red_alloy_ingot_with_jumbo_furnace" recipe has been renamed to "morered:red_alloy_ingot_from_jumbo_smelting"
+ * The "morered:red_alloy_ingot_without_jumbo_furnace" recipe has been removed
+ 
 
 1.19.2-3.0.0.1
  * Fix crash when placing unplaceable blocks near blockless wires. Fixes issue #31

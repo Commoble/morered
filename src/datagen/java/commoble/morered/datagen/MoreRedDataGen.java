@@ -87,7 +87,14 @@ public class MoreRedDataGen
 
 		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "blockstates", BlockStateFile.CODEC, blockStates));
 		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", SimpleModel.CODEC, models));
-		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", WirePartModelDefinition.CODEC, wirePartModels));
+		generator.addProvider(event.includeClient(), new JsonCodecProvider<>(output, efh, MoreRed.MODID, JsonOps.INSTANCE, PackType.CLIENT_RESOURCES, "models", WirePartModelDefinition.CODEC, wirePartModels)
+		{
+			@Override
+			public String getName()
+			{
+				return "morered wire models"; // stupid datagenerator doesn't allow duplicate names
+			}
+		});
 		generator.addProvider(event.includeServer(), lootTables);
 		generator.addProvider(event.includeServer(), recipes);
 		generator.addProvider(event.includeServer(), blockTags);

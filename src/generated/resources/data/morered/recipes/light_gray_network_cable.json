@@ -1,5 +1,6 @@
 {
   "type": "minecraft:crafting_shaped",
+  "category": "redstone",
   "key": {
     "#": {
       "tag": "forge:wools/light_gray"
@@ -16,5 +17,6 @@
   "result": {
     "count": 8,
     "item": "morered:light_gray_network_cable"
-  }
+  },
+  "show_notification": true
 }
