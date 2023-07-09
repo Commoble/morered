@@ -45,18 +45,16 @@ public class WireSpoolItem extends Item
 	@Override
 	public InteractionResult useOn(UseOnContext context)
 	{
-		Level world = context.getLevel();
+		Level level = context.getLevel();
 		BlockPos pos = context.getClickedPos();
-		return world.getBlockState(pos).is(this.postBlockTag)
-			? WirePostBlockEntity.getPost(world, pos)
-				.map(post -> this.onUseOnPost(world, pos, post, context.getItemInHand(), context.getPlayer()))
-				.orElseGet(() -> super.useOn(context))
+		return level.getBlockState(pos).is(this.postBlockTag) && level.getBlockEntity(pos) instanceof WirePostBlockEntity post
+			? this.onUseOnPost(level, pos, post, context.getItemInHand(), context.getPlayer())
 			: super.useOn(context);
 	}
 	
-	private InteractionResult onUseOnPost(Level world, BlockPos pos, @Nonnull WirePostBlockEntity post, ItemStack stack, Player player)
+	private InteractionResult onUseOnPost(Level level, BlockPos pos, @Nonnull WirePostBlockEntity post, ItemStack stack, Player player)
 	{
-		if (!world.isClientSide)
+		if (!level.isClientSide)
 		{
 			CompoundTag nbt = stack.getTagElement(LAST_POST_POS);
 			
@@ -75,7 +73,7 @@ public class WireSpoolItem extends Item
 				// if post was already connected to the other position, remove connections
 				else if (post.hasRemoteConnection(lastPos))
 				{
-					WirePostBlockEntity.removeConnection(world, pos, lastPos);
+					WirePostBlockEntity.removeConnection(level, pos, lastPos);
 					stack.removeTagKey(LAST_POST_POS);
 				}
 				else // we clicked a different post that doesn't have an existing connection to the original post
@@ -84,16 +82,16 @@ public class WireSpoolItem extends Item
 					boolean lastPosIsHigher = pos.getY() < lastPos.getY();
 					BlockPos upperPos = lastPosIsHigher ? lastPos : pos;
 					BlockPos lowerPos = lastPosIsHigher ? pos : lastPos; 
-					Vec3 hit = SlackInterpolator.getWireRaytraceHit(lowerPos, upperPos, world);
+					Vec3 hit = SlackInterpolator.getWireRaytraceHit(lowerPos, upperPos, level);
 					
 					// if post wasn't connected but they can't be connected due to a block in the way, interrupt the connection
 					if (hit != null)
 					{
 						stack.removeTagKey(LAST_POST_POS);
-						if (player instanceof ServerPlayer && world instanceof ServerLevel)
+						if (player instanceof ServerPlayer && level instanceof ServerLevel)
 						{
 							MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(() -> (ServerPlayer)player), new WireBreakPacket(WirePostBlockEntity.getConnectionVector(lowerPos), WirePostBlockEntity.getConnectionVector(upperPos)));
-							((ServerLevel)world).sendParticles((ServerPlayer)player, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+							((ServerLevel)level).sendParticles((ServerPlayer)player, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 							
 							((ServerPlayer)player).playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 						}
@@ -102,8 +100,10 @@ public class WireSpoolItem extends Item
 					else if (pos.closerThan(lastPos, ServerConfig.INSTANCE.maxWirePostConnectionRange().get()))
 					{
 						stack.removeTagKey(LAST_POST_POS);
-						WirePostBlockEntity.getPost(world, lastPos)
-							.ifPresent(lastPost -> WirePostBlockEntity.addConnection(world, post, lastPost));
+						if (level.getBlockEntity(lastPos) instanceof WirePostBlockEntity lastPost)
+						{
+							WirePostBlockEntity.addConnection(level, post, lastPost);
+						}
 						stack.hurtAndBreak(1, player, thePlayer -> thePlayer.broadcastBreakEvent(EquipmentSlot.MAINHAND));
 							
 					}
@@ -114,9 +114,9 @@ public class WireSpoolItem extends Item
 					}
 				}
 			}
-			world.playSound(null, pos, SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS,
-				0.2F + world.random.nextFloat()*0.1F,
-				0.7F + world.random.nextFloat()*0.1F);
+			level.playSound(null, pos, SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS,
+				0.2F + level.random.nextFloat()*0.1F,
+				0.7F + level.random.nextFloat()*0.1F);
 		}
 		
 		return InteractionResult.SUCCESS;

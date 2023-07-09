@@ -3,7 +3,6 @@ package commoble.morered.wire_post;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
@@ -14,18 +13,17 @@ import com.google.common.collect.Lists;
 import commoble.morered.MoreRed;
 import commoble.morered.util.NBTListCodec;
 import commoble.morered.util.NestedBoundingBox;
-import commoble.morered.util.WorldHelper;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.Vec3;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.PacketDistributor;
@@ -53,11 +51,6 @@ public class WirePostBlockEntity extends BlockEntity
 	public WirePostBlockEntity(BlockPos pos, BlockState state)
 	{
 		super(MoreRed.get().redwirePostBeType.get(), pos, state);
-	}
-
-	public static Optional<WirePostBlockEntity> getPost(LevelAccessor world, BlockPos pos)
-	{
-		return WorldHelper.getTileEntityAt(WirePostBlockEntity.class, world, pos);
 	}
 
 	// connects two post TEs
@@ -103,10 +96,12 @@ public class WirePostBlockEntity extends BlockEntity
 
 	// returns true if post TEs exist at the given locations and both have a
 	// connection to the other
-	public static boolean arePostsConnected(LevelAccessor world, BlockPos posA, BlockPos posB)
+	public static boolean arePostsConnected(LevelAccessor level, BlockPos posA, BlockPos posB)
 	{
-		return getPost(world, posA).flatMap(postA -> getPost(world, posB).map(postB -> postA.hasRemoteConnection(posB) && postB.hasRemoteConnection(posA)))
-			.orElse(false);
+		return level.getBlockEntity(posA) instanceof WirePostBlockEntity postA
+			&& level.getBlockEntity(posB) instanceof WirePostBlockEntity postB
+			&& postA.hasRemoteConnection(posB)
+			&& postB.hasRemoteConnection(posA);
 	}
 
 	public void clearRemoteConnections()

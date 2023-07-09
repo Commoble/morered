@@ -1,6 +1,5 @@
 package commoble.morered.wire_post;
 
-import commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -27,12 +26,15 @@ public abstract class AbstractChanneledCablePostBlock extends AbstractPostBlock
 	}
 
 	@Override
-	protected void notifyNeighbors(Level world, BlockPos pos, BlockState state)
+	protected void notifyNeighbors(Level level, BlockPos pos, BlockState state)
 	{
-		// markdirty is sufficient for notifying neighbors of internal TE updates
+		// markdirty is sufficient for notifying neighbors of internal BE updates
 		// standard block updates are sufficient for notifying neighbors of blockstate addition/removal
-		// but we do want to notify connected TEs
-		WorldHelper.getTileEntityAt(WirePostBlockEntity.class, world, pos).ifPresent(te -> te.notifyConnections());
+		// but we do want to notify connected BEs
+		if (level.getBlockEntity(pos) instanceof WirePostBlockEntity be)
+		{
+			be.notifyConnections();
+		}
 	}
 	
 	@Override
