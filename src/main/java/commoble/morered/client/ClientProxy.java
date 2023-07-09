@@ -186,8 +186,9 @@ public class ClientProxy
 	}
 
 	@Deprecated
-	static void onModelBakingCompleted(ModelEvent.BakingCompleted event)
+	static void onModelBakingCompleted(ModelEvent.ModifyBakingResult event)
 	{
+		// replace multipart models with modeldata-sensitive ones
 		var models = event.getModels();
 		@SuppressWarnings("deprecation")
 		Consumer<RegistryObject<? extends Block>> modelCheeser = rob -> {
