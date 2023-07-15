@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.mojang.math.OctahedralGroup;
+
 import commoble.morered.MoreRed;
 import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
@@ -145,13 +147,16 @@ public class BundledCableBlockEntity extends BlockEntity
 		CompoundTag powerData = new CompoundTag();
 		boolean wrotePower = false;
 		// writes all positive power values
-		for (byte side=0; side<6; side++)
+		for (byte sideIndex=0; sideIndex<6; sideIndex++)
 		{
+			OctahedralGroup normalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM).inverse();
+			Direction denormalSide = Direction.from3DDataValue(sideIndex);
+			Direction normalizedSide = normalizer.rotate(denormalSide);
 			ByteArrayList bytes = new ByteArrayList();
 			short channelFlags = 0;
 			for (byte channel = 0; channel < 16; channel++)
 			{
-				int powerValue = this.getPower(side, channel);
+				int powerValue = this.getPower(sideIndex, channel);
 				if (powerValue > 0)
 				{
 					bytes.add((byte)powerValue);
@@ -163,7 +168,7 @@ public class BundledCableBlockEntity extends BlockEntity
 				CompoundTag sidedPower = new CompoundTag();
 				sidedPower.putShort(CHANNEL_FLAGS, channelFlags);
 				sidedPower.putByteArray(POWER_BYTES, bytes.toByteArray());
-				powerData.put(Direction.from3DDataValue(side).getName(), sidedPower);
+				powerData.put(normalizedSide.getName(), sidedPower);
 				wrotePower = true;
 			}
 		}
@@ -181,12 +186,17 @@ public class BundledCableBlockEntity extends BlockEntity
 		if (powerData == null)
 			return;
 		
-		for (int side=0; side<6; side++)
+		for (int sideIndex=0; sideIndex<6; sideIndex++)
 		{
-			CompoundTag sidedPower = powerData.getCompound(Direction.from3DDataValue(side).getName());
+
+			OctahedralGroup denormalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM);
+			Direction normalSide = Direction.from3DDataValue(sideIndex);
+			Direction denormalizedSide = denormalizer.rotate(normalSide);
+			int denormalizedSideIndex = denormalizedSide.ordinal();
+			
+			CompoundTag sidedPower = powerData.getCompound(normalSide.getName());
 			if (sidedPower == null)
 				continue;
-			
 
 			int channels = sidedPower.getShort(CHANNEL_FLAGS);
 			byte[] powerValues = sidedPower.getByteArray(POWER_BYTES);
@@ -203,7 +213,7 @@ public class BundledCableBlockEntity extends BlockEntity
 				int channelFlag = (1 << channel);
 				if ((channels & channelFlag) != 0)
 				{
-					this.power[side][channel] = powerValues[powerByteIndex++];
+					this.power[denormalizedSideIndex][channel] = powerValues[powerByteIndex++];
 				}
 			}
 		}

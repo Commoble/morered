@@ -9,9 +9,11 @@ import javax.annotation.Nullable;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.mojang.math.OctahedralGroup;
 
 import commoble.morered.client.ClientProxy;
 import commoble.morered.util.DirectionHelper;
+import commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -30,6 +32,7 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -48,6 +51,7 @@ public abstract class AbstractWireBlock extends Block
 	public static final BooleanProperty WEST = PipeBlock.WEST;
 	public static final BooleanProperty EAST = PipeBlock.EAST;
 	public static final BooleanProperty[] INTERIOR_FACES = {DOWN,UP,NORTH,SOUTH,WEST,EAST};
+	public static final EnumProperty<OctahedralGroup> TRANSFORM = EightGroup.TRANSFORM;
 	
 	/**
 	 * 
@@ -202,6 +206,7 @@ public abstract class AbstractWireBlock extends Block
 			.setValue(SOUTH, false)
 			.setValue(WEST, false)
 			.setValue(EAST, false)
+			.setValue(TRANSFORM, OctahedralGroup.IDENTITY)
 			);
 		this.shapesByStateIndex = shapesByStateIndex;
 		this.raytraceBackboards = raytraceBackboards;
@@ -218,7 +223,7 @@ public abstract class AbstractWireBlock extends Block
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
-		builder.add(DOWN,UP,NORTH,SOUTH,WEST,EAST);
+		builder.add(DOWN,UP,NORTH,SOUTH,WEST,EAST,TRANSFORM);
 	}
 
 	@Override
@@ -448,6 +453,7 @@ public abstract class AbstractWireBlock extends Block
 			Direction newDir = rot.rotate(dir);
 			result = result.setValue(INTERIOR_FACES[newDir.ordinal()], state.getValue(INTERIOR_FACES[dir.ordinal()]));
 		}
+		result = EightGroup.rotate(result, rot);
 		return result;
 	}
 
@@ -461,6 +467,7 @@ public abstract class AbstractWireBlock extends Block
 			Direction newDir = mirrorIn.mirror(dir);
 			result = result.setValue(INTERIOR_FACES[newDir.ordinal()], state.getValue(INTERIOR_FACES[dir.ordinal()]));
 		}
+		result = EightGroup.mirror(result, mirrorIn);
 		return result;
 	}
 

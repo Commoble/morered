@@ -1,5 +1,7 @@
 package commoble.morered.wires;
 
+import com.mojang.math.OctahedralGroup;
+
 import commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -82,16 +84,36 @@ public class WireBlockEntity extends BlockEntity
 	public void saveAdditional(CompoundTag compound)
 	{
 		super.saveAdditional(compound);
-		compound.putIntArray(POWER, this.power.clone());
+		// normalize power array based on structure transform
+		int[] normalizedPower = new int[6];
+		OctahedralGroup normalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM).inverse();
+		for (int i=0; i<6; i++)
+		{
+			int sidedPower = this.power[i];
+			int normalizedIndex = normalizer.rotate(Direction.from3DDataValue(i)).ordinal();
+			normalizedPower[normalizedIndex] = sidedPower;
+		}
+		compound.putIntArray(POWER, normalizedPower);
 	}
 	
 	@Override
 	public void load(CompoundTag compound)
 	{
 		super.load(compound);
-		int[] newPower = compound.getIntArray(POWER); // returns 0-length array if field not present
-		if (newPower.length == 6)
-			this.power = newPower.clone();
+		int[] normalizedPower = compound.getIntArray(POWER); // returns 0-length array if field not present
+		if (normalizedPower.length == 6)
+		{
+			// denormalize power array based on structure transform
+			int[] denormalizedPower = new int[6];
+			OctahedralGroup denormalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM);
+			for (int i=0; i<6; i++)
+			{
+				int sidedPower = normalizedPower[i];
+				int denormalizedIndex = denormalizer.rotate(Direction.from3DDataValue(i)).ordinal();
+				denormalizedPower[denormalizedIndex] = sidedPower;
+			}
+			this.power = denormalizedPower;
+		}
 	}
 
 	// called on server to get the data to send to clients when chunk is loaded for client
