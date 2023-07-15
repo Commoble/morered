@@ -123,7 +123,7 @@ public class ClientProxy
 		modBus.addListener(ClientProxy::onRegisterBlockColors);
 		modBus.addListener(ClientProxy::onRegisterItemColors);
 		modBus.addListener(ClientProxy::onRegisterRenderers);
-		modBus.addListener(ClientProxy::onModelBakingCompleted);
+		modBus.addListener(ClientProxy::onModifyBakedModels);
 		
 		forgeBus.addListener(ClientProxy::onClientLogIn);
 		forgeBus.addListener(ClientProxy::onClientLogOut);
@@ -186,7 +186,7 @@ public class ClientProxy
 	}
 
 	@Deprecated
-	static void onModelBakingCompleted(ModelEvent.ModifyBakingResult event)
+	static void onModifyBakedModels(ModelEvent.ModifyBakingResult event)
 	{
 		// replace multipart models with modeldata-sensitive ones
 		var models = event.getModels();
