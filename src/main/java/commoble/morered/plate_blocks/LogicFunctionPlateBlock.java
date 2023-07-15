@@ -1,5 +1,8 @@
 package commoble.morered.plate_blocks;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -109,21 +112,10 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 			world.setBlock(pos, newBlockState, 2);
 		}
 	}
-
-
-
 	
 	@Override
-	public void notifyNeighbors(Level world, BlockPos pos, BlockState state)
+	public EnumSet<Direction> getOutputSides(Level level, BlockPos pos, BlockState state)
 	{
-		Direction outputDirection = PlateBlockStateProperties.getOutputDirection(state);
-		BlockPos outputPos = pos.relative(outputDirection);
-		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), java.util.EnumSet.of(outputDirection), false).isCanceled())
-		{
-			world.neighborChanged(outputPos, this, pos);
-			world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite());
-		}
+		return EnumSet.of(PlateBlockStateProperties.getOutputDirection(state));
 	}
-
-	
 }

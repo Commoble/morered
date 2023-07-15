@@ -1,5 +1,8 @@
 package commoble.morered.plate_blocks;
 
+import java.util.EnumSet;
+import java.util.Set;
+
 import javax.annotation.Nullable;
 
 import commoble.morered.util.BlockStateUtil;
@@ -29,8 +32,15 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		super(properties);
 	}
 	
+	/**
+	 * {@return InputSide array, where A = 90 degrees clockwise from the primary output side, B = 180, C = 270.}
+	 */
 	public abstract InputSide[] getInputSides();
-	public abstract void notifyNeighbors(Level world, BlockPos pos, BlockState state);
+	
+	/**
+	 * {@return Set of Directions that redstone power is output to, according to the blockstate. Used for notifying neighbors.}
+	 */
+	public abstract EnumSet<Direction> getOutputSides(Level level, BlockPos pos, BlockState state);
 	
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place
@@ -168,6 +178,22 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			}
 		}
 		return false;
+	}
+	
+	public void notifyNeighbors(Level level, BlockPos pos, BlockState state)
+	{
+		EnumSet<Direction> outputDirections = this.getOutputSides(level, pos, state);
+		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(level, pos, level.getBlockState(pos), outputDirections, false).isCanceled())
+		{
+			for (Direction outputDirection : outputDirections)
+			{
+				BlockPos outputPos = pos.relative(outputDirection);
+				{
+					level.neighborChanged(outputPos, this, pos);
+				}
+				level.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite());
+			}
+		}
 	}
 
 }

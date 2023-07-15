@@ -100,6 +100,14 @@ public class LatchBlock extends RedstonePlateBlock
 	}
 	
 	@Override
+	public EnumSet<Direction> getOutputSides(Level level, BlockPos pos, BlockState state)
+	{
+		Direction primaryDirection = PlateBlockStateProperties.getOutputDirection(state);
+		Direction oppositeDirection = primaryDirection.getOpposite();
+		return EnumSet.of(primaryDirection, oppositeDirection);
+	}
+
+	@Override
 	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
 	{
 		// latch blocks have two outputs
@@ -107,25 +115,5 @@ public class LatchBlock extends RedstonePlateBlock
 		// so we also check outputDirection here to see if it's the neighbor on the other side
 		return super.canConnectRedstone(state, world, pos, side)
 			|| (side != null && side == PlateBlockStateProperties.getOutputDirection(state));
-	}
-
-	@Override
-	public void notifyNeighbors(Level world, BlockPos pos, BlockState state)
-	{
-		Direction primaryDirection = PlateBlockStateProperties.getOutputDirection(state);
-		Direction oppositeDirection = primaryDirection.getOpposite();
-		EnumSet<Direction> outputDirections = EnumSet.of(primaryDirection, oppositeDirection);
-		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), outputDirections, false).isCanceled())
-		{
-			for (Direction outputDirection : outputDirections)
-			{
-				BlockPos outputPos = pos.relative(outputDirection);
-				
-				{
-					world.neighborChanged(outputPos, this, pos);
-				}
-				world.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite());
-			}
-		}
 	}
 }
