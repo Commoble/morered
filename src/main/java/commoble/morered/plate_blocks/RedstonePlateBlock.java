@@ -1,7 +1,6 @@
 package commoble.morered.plate_blocks;
 
 import java.util.EnumSet;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
@@ -69,6 +68,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		}
 		return state;
 	}
+	
 	@Override
 	@Deprecated
 	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)

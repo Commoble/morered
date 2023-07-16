@@ -47,7 +47,6 @@ public class LatchBlock extends RedstonePlateBlock
 		builder.add(INPUT_A, INPUT_C, POWERED);
 		
 	}
-	
 
 	@Nullable
 	@Override
