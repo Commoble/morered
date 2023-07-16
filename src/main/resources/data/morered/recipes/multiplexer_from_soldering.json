@@ -6,13 +6,14 @@
 			"tag": "forge:quarter_slabs/smooth_stone"
 		},
 		{
-			"type": "morered:tag_stack",
-			"tag": "forge:dusts/redstone",
-			"count": 2
+			"tag": "forge:dusts/redstone"
+		},
+		{
+			"tag": "forge:ingots/iron"
 		}
 	],
 	"result": 
 	{
-		"item": "morered:nor_gate"
+		"item": "morered:multiplexer"
 	}
 }

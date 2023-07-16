@@ -1,0 +1,25 @@
+{
+	"type": "morered:soldering",
+	"ingredients": 
+	[
+		{
+			"type": "morered:tag_stack",
+			"tag": "forge:quarter_slabs/smooth_stone",
+			"count": 8
+		},
+		{
+			"type": "morered:tag_stack",
+			"tag": "forge:dusts/redstone",
+			"count": 9
+		},
+		{
+			"type": "morered:tag_stack",
+			"tag": "forge:gems/quartz",
+			"count": 4
+		}
+	],
+	"result": 
+	{
+		"item": "morered:hexidecrubrometer"
+	}
+}

@@ -1,0 +1,22 @@
+{
+	"type": "morered:soldering",
+	"ingredients": 
+	[
+		{
+			"tag": "forge:quarter_slabs/smooth_stone"
+		},
+		{
+			"tag": "forge:ingots/iron"
+		},
+		{
+			"tag": "forge:ingots/redstone_alloy"
+		},
+		{
+			"tag": "forge:dusts/redstone"
+		}
+	],
+	"result": 
+	{
+		"item": "morered:redwire_post_relay_plate"
+	}
+}

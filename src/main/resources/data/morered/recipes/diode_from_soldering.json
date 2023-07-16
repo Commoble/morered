@@ -8,11 +8,11 @@
 		{
 			"type": "morered:tag_stack",
 			"tag": "forge:dusts/redstone",
-			"count": 2
+			"count": 3
 		}
 	],
 	"result": 
 	{
-		"item": "morered:nor_gate"
+		"item": "morered:diode"
 	}
 }

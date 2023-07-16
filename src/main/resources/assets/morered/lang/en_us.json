@@ -1,6 +1,6 @@
 {
 	"itemGroup.morered": "More Red",
-	"gui.morered.category.gatecrafting": "Gatecrafting",
+	"gui.morered.category.soldering": "Soldering",
 	"block.morered.diode": "Diode",
 	"block.morered.not_gate": "NOT Gate",
 	"block.morered.nor_gate": "NOR Gate",
@@ -15,7 +15,7 @@
 	"block.morered.latch": "Latch",
 	"block.morered.pulse_gate": "Pulse Gate",
 	"block.morered.stone_plate": "Stone Plate",
-	"block.morered.gatecrafting_plinth": "Gatecrafting Plinth",
+	"block.morered.soldering_table": "Soldering Table",
 	"block.morered.redwire_post": "Redwire Post",
 	"block.morered.redwire_post_plate": "Redwire Post Plate",
 	"block.morered.redwire_post_relay_plate": "Redwire Post Relay Plate",

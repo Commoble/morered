@@ -6,6 +6,7 @@
 * Wire blocks and wire posts are now compatible with structure pieces; they can be rotated and mirrored, and their connected positions will generally respect this when saved and loaded by structure blocks in different orientations.
 
 ## Data Changes
+* The gatecrafting_plinth block has been renamed to soldering_table. The gatecrafting recipe type has been renamed to soldering. Gatecrafting recipe files have been renamed accordingly.
 * Jumbo Furnace is now bundled with More Red via forge jar-in-jar
 * The "morered:red_alloy_ingot_with_jumbo_furnace" recipe has been renamed to "morered:red_alloy_ingot_from_jumbo_smelting"
 * The "morered:red_alloy_ingot_without_jumbo_furnace" recipe has been removed

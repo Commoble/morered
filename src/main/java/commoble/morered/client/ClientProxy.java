@@ -150,7 +150,7 @@ public class ClientProxy
 	static void afterClientSetup()
 	{
 		// not threadsafe, do this on main thread
-		MenuScreens.register(MoreRed.get().gatecraftingMenuType.get(), GatecraftingScreen::new);
+		MenuScreens.register(MoreRed.get().solderingMenuType.get(), SolderingScreen::new);
 	}
 
 	public static void onRegisterModelLoaders(ModelEvent.RegisterGeometryLoaders event)

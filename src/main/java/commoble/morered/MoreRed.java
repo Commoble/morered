@@ -1,11 +1,9 @@
 package commoble.morered;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
@@ -29,10 +27,6 @@ import commoble.morered.bitwise_logic.ChanneledPowerStorageBlockEntity;
 import commoble.morered.bitwise_logic.SingleInputBitwiseLogicPlateBlock;
 import commoble.morered.bitwise_logic.TwoInputBitwiseLogicPlateBlock;
 import commoble.morered.client.ClientProxy;
-import commoble.morered.gatecrafting_plinth.GatecraftingMenu;
-import commoble.morered.gatecrafting_plinth.GatecraftingPlinthBlock;
-import commoble.morered.gatecrafting_plinth.GatecraftingRecipeButtonPacket;
-import commoble.morered.gatecrafting_plinth.GatecraftingRecipeSerializer;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.LogicFunction;
 import commoble.morered.plate_blocks.LogicFunctionPlateBlock;
@@ -40,6 +34,10 @@ import commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateB
 import commoble.morered.plate_blocks.LogicFunctions;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PulseGateBlock;
+import commoble.morered.soldering.SolderingMenu;
+import commoble.morered.soldering.SolderingRecipeButtonPacket;
+import commoble.morered.soldering.SolderingRecipeSerializer;
+import commoble.morered.soldering.SolderingTableBlock;
 import commoble.morered.wire_post.BundledCablePostBlock;
 import commoble.morered.wire_post.BundledCablePostBlockEntity;
 import commoble.morered.wire_post.BundledCableRelayPlateBlock;
@@ -96,7 +94,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ChunkPos;
@@ -163,7 +160,7 @@ public class MoreRed
 	public final Map<ResourceLocation, RegistryObject<? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
 	public final Map<ResourceLocation, RegistryObject<? extends BitwiseLogicPlateBlock>> bitwiseLogicPlates = new HashMap<>();
 	
-	public final RegistryObject<GatecraftingPlinthBlock> gatecraftingPlinthBlock;
+	public final RegistryObject<SolderingTableBlock> solderingTableBlock;
 	public final RegistryObject<PlateBlock> stonePlateBlock;
 	public final RegistryObject<LatchBlock> latchBlock;
 	public final RegistryObject<PulseGateBlock> pulseGateBlock;
@@ -191,9 +188,9 @@ public class MoreRed
 	public final RegistryObject<BlockEntityType<BundledCableRelayPlateBlockEntity>> bundledCableRelayPlateBeType;
 	public final RegistryObject<BlockEntityType<ChanneledPowerStorageBlockEntity>> bitwiseLogicGateBeType;
 
-	public final RegistryObject<MenuType<GatecraftingMenu>> gatecraftingMenuType;
-	public final RegistryObject<GatecraftingRecipeSerializer> gatecraftingSerializer;
-	public final RegistryObject<RecipeType<Recipe<CraftingContainer>>> gatecraftingRecipeType;
+	public final RegistryObject<MenuType<SolderingMenu>> solderingMenuType;
+	public final RegistryObject<SolderingRecipeSerializer> solderingSerializer;
+	public final RegistryObject<RecipeType<Recipe<CraftingContainer>>> solderingRecipeType;
 	
 	public final RegistryObject<LootItemFunctionType> wireCountLootFunction;
 	
@@ -216,8 +213,8 @@ public class MoreRed
 		DeferredRegister<RecipeType<?>> recipeTypes = createDeferredRegister(modBus, Registries.RECIPE_TYPE);
 		DeferredRegister<LootItemFunctionType> lootFunctions = createDeferredRegister(modBus, Registries.LOOT_FUNCTION_TYPE);
 		
-		gatecraftingPlinthBlock = registerBlockItem(blocks, items, ObjectNames.GATECRAFTING_PLINTH,
-			() -> new GatecraftingPlinthBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion()));
+		solderingTableBlock = registerBlockItem(blocks, items, ObjectNames.SOLDERING_TABLE,
+			() -> new SolderingTableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion()));
 		stonePlateBlock = registerBlockItem(blocks, items, ObjectNames.STONE_PLATE,
 			() -> new PlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD)));
 		latchBlock = registerBlockItem(blocks, items, ObjectNames.LATCH,
@@ -321,11 +318,11 @@ public class MoreRed
 				}))
 			.build(null));
 
-		gatecraftingMenuType = menuTypes.register(ObjectNames.GATECRAFTING_PLINTH,
-			() -> new MenuType<>(GatecraftingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
-		gatecraftingSerializer = recipeSerializers.register(ObjectNames.GATECRAFTING_RECIPE,
-			() -> new GatecraftingRecipeSerializer());
-		gatecraftingRecipeType = recipeTypes.register(ObjectNames.GATECRAFTING_RECIPE, () -> RecipeType.simple(new ResourceLocation(MODID, ObjectNames.GATECRAFTING_RECIPE)));
+		solderingMenuType = menuTypes.register(ObjectNames.SOLDERING_TABLE,
+			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
+		solderingSerializer = recipeSerializers.register(ObjectNames.SOLDERING_RECIPE,
+			() -> new SolderingRecipeSerializer());
+		solderingRecipeType = recipeTypes.register(ObjectNames.SOLDERING_RECIPE, () -> RecipeType.simple(new ResourceLocation(MODID, ObjectNames.SOLDERING_RECIPE)));
 		
 		wireCountLootFunction = lootFunctions.register(ObjectNames.WIRE_COUNT, () -> new LootItemFunctionType(WireCountLootFunction.INSTANCE));
 		
@@ -423,10 +420,10 @@ public class MoreRed
 		// register packets
 		int packetID = 0;
 		MoreRed.CHANNEL.registerMessage(packetID++,
-			GatecraftingRecipeButtonPacket.class,
-			GatecraftingRecipeButtonPacket::write,
-			GatecraftingRecipeButtonPacket::read,
-			GatecraftingRecipeButtonPacket::handle);
+			SolderingRecipeButtonPacket.class,
+			SolderingRecipeButtonPacket::write,
+			SolderingRecipeButtonPacket::read,
+			SolderingRecipeButtonPacket::handle);
 		MoreRed.CHANNEL.registerMessage(packetID++,
 			WireBreakPacket.class,
 			WireBreakPacket::write,
@@ -643,13 +640,6 @@ public class MoreRed
 		Supplier<? extends BLOCK> blockFactory)
 	{
 		return registerBlockItem(blocks, items, name, blockFactory, block -> new BlockItem(block, new Item.Properties()));
-	}
-
-	public static Optional<Recipe<CraftingContainer>> getGatecraftingRecipe(RecipeManager manager, ResourceLocation id)
-	{
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(get().gatecraftingRecipeType.get(), Collections.emptyMap());
-		return Optional.ofNullable(map.get(id));
 	}
 	
 	public RegistryObject<LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,

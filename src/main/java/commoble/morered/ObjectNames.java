@@ -25,7 +25,7 @@ public class ObjectNames
 	
 	public static final String STONE_PLATE = "stone_plate";
 	
-	public static final String GATECRAFTING_PLINTH = "gatecrafting_plinth";
+	public static final String SOLDERING_TABLE = "soldering_table";
 	
 	public static final String REDWIRE_POST = "redwire_post";
 	public static final String REDWIRE_POST_PLATE = "redwire_post_plate";
@@ -65,7 +65,7 @@ public class ObjectNames
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";
 	
 	// recipe types
-	public static final String GATECRAFTING_RECIPE = "gatecrafting";
+	public static final String SOLDERING_RECIPE = "soldering";
 	
 	// loot functions
 	public static final String WIRE_COUNT = "set_wire_count";
