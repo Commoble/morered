@@ -2,14 +2,15 @@
 * Updated to 1.20.1 (requires forge build 47.1.0+). Old worlds using More Red are generally not compatible with this update.
 
 ## New Features
-* Wire posts are now compatible with structure pieces; they can be rotated and mirrored, and their connected positions will generally respect this when saved and loaded by structure blocks in different orientations.
+* Added the Pulse Gate, a block that generates a 2-tick pulse after receiving an input signal and does not produce a signal again until you turn it off and on again.
+* Wire blocks and wire posts are now compatible with structure pieces; they can be rotated and mirrored, and their connected positions will generally respect this when saved and loaded by structure blocks in different orientations.
 
 ## Data Changes
 * Jumbo Furnace is now bundled with More Red via forge jar-in-jar
 * The "morered:red_alloy_ingot_with_jumbo_furnace" recipe has been renamed to "morered:red_alloy_ingot_from_jumbo_smelting"
 * The "morered:red_alloy_ingot_without_jumbo_furnace" recipe has been removed
-* Added a "transform" blockstate property to wire posts. This has eight values: `identity`, `rot_180_face_xz`, `rot_90_y_neg`, `rot_90_y_pos`, `invert_x`, `invert_z`, `swap_xz`, and `swap_neg_xz`. Blocks placed by players will normally have the 'identity' state, this state is only changed when the block is rotated/mirrored (e.g. by structure blocks).
-* Wire posts' remote connection positions are now stored as relative positions. If the block has an altered transform state, the saved positions will be normalized to the 'identity' transform (and un-normalized when loaded).
+* Added a "transform" blockstate property to wire blocks and wire posts. This has eight values: `identity`, `rot_180_face_xz`, `rot_90_y_neg`, `rot_90_y_pos`, `invert_x`, `invert_z`, `swap_xz`, and `swap_neg_xz`. Blocks placed by players will normally have the 'identity' state, this state is only changed when the block is rotated/mirrored (e.g. by structure blocks).
+* Wire posts' remote connection positions are now stored as relative positions. If the block has an altered transform state, the saved positions will be normalized to the 'identity' transform (and un-normalized when loaded). Wire blocks' per-side power storage is similar transformed.
 
 ## Other Changes
 
