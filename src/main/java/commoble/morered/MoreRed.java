@@ -39,6 +39,7 @@ import commoble.morered.plate_blocks.LogicFunctionPlateBlock;
 import commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 import commoble.morered.plate_blocks.LogicFunctions;
 import commoble.morered.plate_blocks.PlateBlock;
+import commoble.morered.plate_blocks.PulseGateBlock;
 import commoble.morered.wire_post.BundledCablePostBlock;
 import commoble.morered.wire_post.BundledCablePostBlockEntity;
 import commoble.morered.wire_post.BundledCableRelayPlateBlock;
@@ -165,6 +166,7 @@ public class MoreRed
 	public final RegistryObject<GatecraftingPlinthBlock> gatecraftingPlinthBlock;
 	public final RegistryObject<PlateBlock> stonePlateBlock;
 	public final RegistryObject<LatchBlock> latchBlock;
+	public final RegistryObject<PulseGateBlock> pulseGateBlock;
 	public final RegistryObject<WirePostBlock> redwirePostBlock;
 	public final RegistryObject<WirePostPlateBlock> redwirePostPlateBlock;
 	public final RegistryObject<WirePostPlateBlock> redwirePostRelayPlateBlock;
@@ -220,6 +222,8 @@ public class MoreRed
 			() -> new PlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD)));
 		latchBlock = registerBlockItem(blocks, items, ObjectNames.LATCH,
 			() -> new LatchBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD)));
+		pulseGateBlock = registerBlockItem(blocks, items, ObjectNames.PULSE_GATE,
+			() -> new PulseGateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD)));
 		redwirePostBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST,
 			() -> new WirePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostBlock::getRedstoneConnectionDirections));
 		redwirePostPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_PLATE,

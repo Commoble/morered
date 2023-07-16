@@ -21,6 +21,7 @@ public class ObjectNames
 	public static final String NAND_2_GATE = "nand_2_gate";
 
 	public static final String LATCH = "latch";
+	public static final String PULSE_GATE = "pulse_gate";
 	
 	public static final String STONE_PLATE = "stone_plate";
 	

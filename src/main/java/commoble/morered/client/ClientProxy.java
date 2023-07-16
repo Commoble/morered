@@ -139,6 +139,7 @@ public class ClientProxy
 		MoreRed.get().bitwiseLogicPlates.values()
 			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().latchBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwirePostPlateBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwirePostRelayPlateBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().bundledCableRelayPlateBlock.get(), RenderType.cutout());
@@ -162,6 +163,7 @@ public class ClientProxy
 	{
 		MoreRed.get().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockTint, rob.get()));
 		event.register(ColorHandlers::getLatchBlockTint, MoreRed.get().latchBlock.get());
+		event.register(ColorHandlers::getPulseGateBlockTint, MoreRed.get().pulseGateBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostPlateBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostRelayPlateBlock.get());
@@ -172,6 +174,7 @@ public class ClientProxy
 	{
 		MoreRed.get().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockItemTint, rob.get().asItem()));
 		event.register(ColorHandlers::getLatchItemTint, MoreRed.get().latchBlock.get().asItem());
+		event.register(ColorHandlers::getPulseGateItemTint, MoreRed.get().pulseGateBlock.get().asItem());
 		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostBlock.get().asItem());
 		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostPlateBlock.get().asItem());
 		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostRelayPlateBlock.get().asItem());

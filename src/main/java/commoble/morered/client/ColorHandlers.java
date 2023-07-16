@@ -5,6 +5,7 @@ import commoble.morered.plate_blocks.InputState;
 import commoble.morered.plate_blocks.LatchBlock;
 import commoble.morered.plate_blocks.LogicFunction;
 import commoble.morered.plate_blocks.LogicFunctions;
+import commoble.morered.plate_blocks.PulseGateBlock;
 import commoble.morered.wire_post.AbstractPoweredWirePostBlock;
 import commoble.morered.wires.Edge;
 import commoble.morered.wires.WireBlockEntity;
@@ -88,6 +89,30 @@ public class ColorHandlers
 		else if (tintIndex == LogicFunctions.UNSET_LATCH)
 		{
 			return !state.getValue(LatchBlock.POWERED) && !state.getValue(LatchBlock.INPUT_A) ? LIT : UNLIT;
+		}
+		else
+		{
+			InputState input = InputState.getInput(state);
+			
+			return getLogicFunctionTint(tintIndex, input.a, input.b, input.c);
+		}
+	}
+	
+	public static int getPulseGateBlockTint(BlockState state, BlockAndTintGetter lightReader, BlockPos pos, int tintIndex)
+	{
+		return getPulseGateTint(state, tintIndex);
+	}
+	
+	public static int getPulseGateItemTint(ItemStack stack, int tintIndex)
+	{
+		return getPulseGateTint(MoreRed.get().pulseGateBlock.get().defaultBlockState(), tintIndex);
+	}
+	
+	public static int getPulseGateTint(BlockState state, int tintIndex)
+	{
+		if (tintIndex == LogicFunctions.SET_LATCH)
+		{
+			return state.getValue(PulseGateBlock.POWERED) ? LIT : UNLIT;
 		}
 		else
 		{
