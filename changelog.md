@@ -16,6 +16,9 @@
 ## Other Changes
 
 
+1.19.2-3.0.0.2
+ * Reenable JEI support. Oops!
+
 1.19.2-3.0.0.1
  * Fix crash when placing unplaceable blocks near blockless wires. Fixes issue #31
 
