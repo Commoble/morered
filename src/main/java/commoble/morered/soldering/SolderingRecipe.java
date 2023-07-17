@@ -1,15 +1,24 @@
 package commoble.morered.soldering;
 
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.stream.Collectors;
+
 import javax.annotation.Nonnull;
 
 import commoble.morered.MoreRed;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
@@ -59,5 +68,13 @@ public class SolderingRecipe extends ShapelessRecipe
 		return true;
 	}
 
-
+	public static List<Recipe<CraftingContainer>> getAllSolderingRecipes(RecipeManager manager, RegistryAccess registries)
+	{
+		@SuppressWarnings({ "unchecked", "rawtypes" })
+		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(MoreRed.get().solderingRecipeType.get(), Collections.emptyMap());
+			return map.entrySet().stream()
+			.map(Entry::getValue)
+			.sorted(Comparator.comparing(recipe -> recipe.getResultItem(registries).getDescriptionId()))
+			.collect(Collectors.toList());
+	}
 }

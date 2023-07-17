@@ -2,7 +2,7 @@ package commoble.morered.client.jei;
 
 import commoble.morered.MoreRed;
 import commoble.morered.ObjectNames;
-import commoble.morered.gatecrafting_plinth.GatecraftingRecipe;
+import commoble.morered.soldering.SolderingRecipe;
 import mezz.jei.api.constants.ModIds;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -12,6 +12,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
+import mezz.jei.library.util.RecipeUtil;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -22,7 +23,7 @@ import net.minecraft.world.item.crafting.Recipe;
 
 public class GatecraftingCategory implements IRecipeCategory<Recipe<CraftingContainer>>
 {
-	public static final RecipeType<Recipe<CraftingContainer>> TYPE = RecipeType.create(MoreRed.MODID, ObjectNames.GATECRAFTING_RECIPE, GatecraftingRecipe.class);
+	public static final RecipeType<Recipe<CraftingContainer>> TYPE = RecipeType.create(MoreRed.MODID, ObjectNames.SOLDERING_RECIPE, SolderingRecipe.class);
 	public static final ResourceLocation JEI_RECIPE_TEXTURE = new ResourceLocation(ModIds.JEI_ID, "textures/gui/gui_vanilla.png");
 	public static final String TITLE = "gui.morered.category.gatecrafting";
 	
@@ -31,7 +32,7 @@ public class GatecraftingCategory implements IRecipeCategory<Recipe<CraftingCont
 	
 	public GatecraftingCategory(IGuiHelper guiHelper)
 	{
-		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.instance().gatecraftingPlinthBlock.get()));
+		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.get().solderingTableBlock.get()));
 		this.background = guiHelper.createDrawable(JEI_RECIPE_TEXTURE, 0, 60, 116, 54);
 	}
 	
@@ -70,7 +71,7 @@ public class GatecraftingCategory implements IRecipeCategory<Recipe<CraftingCont
 		
 		// output slot
 		recipeLayout.addSlot(RecipeIngredientRole.OUTPUT, 94, 18)
-			.addItemStack(recipe.getResultItem());
+			.addItemStack(RecipeUtil.getResultItem(recipe));
 		
 		// input slots
 		NonNullList<Ingredient> ingredients = recipe.getIngredients();

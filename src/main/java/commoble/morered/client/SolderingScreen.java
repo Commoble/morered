@@ -1,13 +1,8 @@
 package commoble.morered.client;
 
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -15,6 +10,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 
 import commoble.morered.MoreRed;
 import commoble.morered.soldering.SolderingMenu;
+import commoble.morered.soldering.SolderingRecipe;
 import commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -24,7 +20,6 @@ import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -33,7 +28,6 @@ import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.client.gui.widget.ExtendedButton;
 import net.minecraftforge.client.gui.widget.ScrollPanel;
@@ -66,7 +60,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		ClientLevel world = this.minecraft.level;
-		List<Recipe<CraftingContainer>> recipes = world != null ? getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()) : ImmutableList.of();
+		List<Recipe<CraftingContainer>> recipes = world != null ? SolderingRecipe.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()) : ImmutableList.of();
 		this.scrollPanel = new SolderingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
 		this.addWidget(this.scrollPanel);
 	}
@@ -255,16 +249,6 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		}
 	}
 
-	public static List<Recipe<CraftingContainer>> getAllSolderingRecipes(RecipeManager manager, RegistryAccess registries)
-	{
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(MoreRed.get().solderingRecipeType.get(), Collections.emptyMap());
-			return map.entrySet().stream()
-			.map(Entry::getValue)
-			.sorted(Comparator.comparing(recipe -> recipe.getResultItem(registries).getDescriptionId()))
-			.collect(Collectors.toList());
-	}
-
 	public static class SolderingScrollPanel extends ScrollPanel implements GuiEventListener
 	{
 		private List<RecipeButton> buttons = new ArrayList<>();
@@ -280,7 +264,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 			Level world = client.level;
 			if (world != null)
 			{
-				for (Recipe<CraftingContainer> recipe : getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()))
+				for (Recipe<CraftingContainer> recipe : SolderingRecipe.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()))
 				{
 					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
 					this.buttons.add(recipeButton);

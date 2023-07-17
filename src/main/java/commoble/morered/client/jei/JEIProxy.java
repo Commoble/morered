@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import commoble.morered.MoreRed;
+import commoble.morered.soldering.SolderingRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.registration.IRecipeCatalystRegistration;
@@ -67,7 +68,7 @@ public class JEIProxy implements IModPlugin
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration)
 	{
-		registration.addRecipeCatalyst(new ItemStack(MoreRed.instance().gatecraftingPlinthBlock.get()), GatecraftingCategory.TYPE);
+		registration.addRecipeCatalyst(new ItemStack(MoreRed.get().solderingTableBlock.get()), GatecraftingCategory.TYPE);
 	}
 
 	public static List<Recipe<CraftingContainer>> getGatecraftingRecipes()
@@ -78,7 +79,7 @@ public class JEIProxy implements IModPlugin
 		if (clientLevel != null)
 		{
 			RecipeManager manager = clientLevel.getRecipeManager();
-			return MoreRed.getAllGatecraftingRecipes(manager);
+			return SolderingRecipe.getAllSolderingRecipes(manager, clientLevel.registryAccess());
 		}
 		else
 		{
