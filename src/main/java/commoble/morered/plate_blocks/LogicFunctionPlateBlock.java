@@ -1,7 +1,6 @@
 package commoble.morered.plate_blocks;
 
 import java.util.EnumSet;
-import java.util.Set;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
