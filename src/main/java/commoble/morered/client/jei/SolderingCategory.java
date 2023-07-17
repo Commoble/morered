@@ -24,7 +24,7 @@ import net.minecraft.world.item.crafting.Recipe;
 public class SolderingCategory implements IRecipeCategory<Recipe<CraftingContainer>>
 {
 	public static final RecipeType<Recipe<CraftingContainer>> TYPE = RecipeType.create(MoreRed.MODID, ObjectNames.SOLDERING_RECIPE, SolderingRecipe.class);
-	public static final ResourceLocation JEI_RECIPE_TEXTURE = new ResourceLocation(ModIds.JEI_ID, "textures/gui/gui_vanilla.png");
+	public static final ResourceLocation JEI_RECIPE_TEXTURE = new ResourceLocation(ModIds.JEI_ID, "textures/jei/gui/gui_vanilla.png");
 	public static final String TITLE = "gui.morered.category.soldering";
 	
 	private final IDrawable background;
@@ -33,7 +33,7 @@ public class SolderingCategory implements IRecipeCategory<Recipe<CraftingContain
 	public SolderingCategory(IGuiHelper guiHelper)
 	{
 		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.get().solderingTableBlock.get()));
-		this.background = guiHelper.createDrawable(mezz.jei.common.Constants.RECIPE_GUI_VANILLA, 0, 60, 116, 54);
+		this.background = guiHelper.createDrawable(JEI_RECIPE_TEXTURE, 0, 60, 116, 54);
 	}
 	
 	
