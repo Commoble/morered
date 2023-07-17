@@ -7,13 +7,13 @@
 
 ## Data Changes
 * The gatecrafting_plinth block has been renamed to soldering_table. The gatecrafting recipe type has been renamed to soldering. Gatecrafting recipe files have been renamed accordingly.
-* Jumbo Furnace is now bundled with More Red via forge jar-in-jar
 * The "morered:red_alloy_ingot_with_jumbo_furnace" recipe has been renamed to "morered:red_alloy_ingot_from_jumbo_smelting"
 * The "morered:red_alloy_ingot_without_jumbo_furnace" recipe has been removed
 * Added a "transform" blockstate property to wire blocks and wire posts. This has eight values: `identity`, `rot_180_face_xz`, `rot_90_y_neg`, `rot_90_y_pos`, `invert_x`, `invert_z`, `swap_xz`, and `swap_neg_xz`. Blocks placed by players will normally have the 'identity' state, this state is only changed when the block is rotated/mirrored (e.g. by structure blocks).
 * Wire posts' remote connection positions are now stored as relative positions. If the block has an altered transform state, the saved positions will be normalized to the 'identity' transform (and un-normalized when loaded). Wire blocks' per-side power storage is similar transformed.
 
 ## Other Changes
+* Jumbo Furnace is now bundled with More Red via forge jar-in-jar
 
 
 1.19.2-3.0.0.2
