@@ -12,7 +12,7 @@ import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
-import mezz.jei.library.util.RecipeUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -63,6 +63,7 @@ public class SolderingCategory implements IRecipeCategory<Recipe<CraftingContain
 		return this.icon;
 	}
 
+	@SuppressWarnings("resource")
 	@Override
 	public void setRecipe(IRecipeLayoutBuilder recipeLayout, Recipe<CraftingContainer> recipe, IFocusGroup focuses)
 	{
@@ -71,7 +72,7 @@ public class SolderingCategory implements IRecipeCategory<Recipe<CraftingContain
 		
 		// output slot
 		recipeLayout.addSlot(RecipeIngredientRole.OUTPUT, 94, 18)
-			.addItemStack(RecipeUtil.getResultItem(recipe));
+			.addItemStack(recipe.getResultItem(Minecraft.getInstance().level.registryAccess()));
 		
 		// input slots
 		NonNullList<Ingredient> ingredients = recipe.getIngredients();
