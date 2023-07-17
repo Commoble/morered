@@ -21,19 +21,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 
-public class GatecraftingCategory implements IRecipeCategory<Recipe<CraftingContainer>>
+public class SolderingCategory implements IRecipeCategory<Recipe<CraftingContainer>>
 {
 	public static final RecipeType<Recipe<CraftingContainer>> TYPE = RecipeType.create(MoreRed.MODID, ObjectNames.SOLDERING_RECIPE, SolderingRecipe.class);
 	public static final ResourceLocation JEI_RECIPE_TEXTURE = new ResourceLocation(ModIds.JEI_ID, "textures/gui/gui_vanilla.png");
-	public static final String TITLE = "gui.morered.category.gatecrafting";
+	public static final String TITLE = "gui.morered.category.soldering";
 	
 	private final IDrawable background;
 	private final IDrawable icon;
 	
-	public GatecraftingCategory(IGuiHelper guiHelper)
+	public SolderingCategory(IGuiHelper guiHelper)
 	{
 		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.get().solderingTableBlock.get()));
-		this.background = guiHelper.createDrawable(JEI_RECIPE_TEXTURE, 0, 60, 116, 54);
+		this.background = guiHelper.createDrawable(mezz.jei.common.Constants.RECIPE_GUI_VANILLA, 0, 60, 116, 54);
 	}
 	
 	
@@ -66,7 +66,7 @@ public class GatecraftingCategory implements IRecipeCategory<Recipe<CraftingCont
 	@Override
 	public void setRecipe(IRecipeLayoutBuilder recipeLayout, Recipe<CraftingContainer> recipe, IFocusGroup focuses)
 	{
-//		// TODO add JEI support for gatecrafting recipes with more than 9 ingredients
+//		// TODO add JEI support for recipes with more than 9 ingredients
 		recipeLayout.setShapeless();
 		
 		// output slot

@@ -27,7 +27,7 @@ public class JEIProxy implements IModPlugin
 	public static final ResourceLocation ID = new ResourceLocation(MoreRed.MODID, MoreRed.MODID);
 	
 	@Nullable
-	private GatecraftingCategory gatecraftingCategory;
+	private SolderingCategory solderingCategory;
 
 	@Override
 	public ResourceLocation getPluginUid()
@@ -42,8 +42,8 @@ public class JEIProxy implements IModPlugin
 	@Override
 	public void registerCategories(IRecipeCategoryRegistration registration)
 	{
-		this.gatecraftingCategory = new GatecraftingCategory(registration.getJeiHelpers().getGuiHelper());
-		registration.addRecipeCategories(this.gatecraftingCategory);
+		this.solderingCategory = new SolderingCategory(registration.getJeiHelpers().getGuiHelper());
+		registration.addRecipeCategories(this.solderingCategory);
 	}
 
 	/**
@@ -52,12 +52,12 @@ public class JEIProxy implements IModPlugin
 	@Override
 	public void registerRecipes(IRecipeRegistration registration)
 	{
-		if (this.gatecraftingCategory == null)
+		if (this.solderingCategory == null)
 		{
-			throw new NullPointerException("More Red's Gatecrafting JEI category failed to register! Notify the More Red author for assistance https://github.com/Commoble/morered/issues");
+			throw new NullPointerException("More Red's Soldering JEI category failed to register! Notify the More Red author for assistance https://github.com/Commoble/morered/issues");
 		}
 		
-		registration.addRecipes(GatecraftingCategory.TYPE, getGatecraftingRecipes());
+		registration.addRecipes(SolderingCategory.TYPE, getSolderingRecipes());
 	}
 
 	/**
@@ -68,10 +68,10 @@ public class JEIProxy implements IModPlugin
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration)
 	{
-		registration.addRecipeCatalyst(new ItemStack(MoreRed.get().solderingTableBlock.get()), GatecraftingCategory.TYPE);
+		registration.addRecipeCatalyst(new ItemStack(MoreRed.get().solderingTableBlock.get()), SolderingCategory.TYPE);
 	}
 
-	public static List<Recipe<CraftingContainer>> getGatecraftingRecipes()
+	public static List<Recipe<CraftingContainer>> getSolderingRecipes()
 	{
 		@SuppressWarnings("resource")
 		ClientLevel clientLevel = Minecraft.getInstance().level;
