@@ -1,3 +1,6 @@
+# 1.20.1-4.0.0.1
+* Updated embedded Jumbo Furnace jar to 4.0.0.3 (fixes jumbo furnace voiding items when full)
+
 # 1.20.1-4.0.0.0
 * Updated to 1.20.1 (requires forge build 47.1.0+). Old worlds using More Red are generally not compatible with this update.
 
