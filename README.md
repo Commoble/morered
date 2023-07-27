@@ -2,8 +2,8 @@ More Red is a minecraft mod that uses the forge modloader.
 
 Built jars are available here
 
-https://www.curseforge.com/minecraft/mc-mods/more-red
-
+* https://www.curseforge.com/minecraft/mc-mods/more-red
+* https://modrinth.com/mod/more-red
 
 ## Using the API
 
