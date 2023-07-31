@@ -1,3 +1,6 @@
+# 1.20.1-4.0.0.2
+* Updated embedded Jumbo Furnace jar to 4.0.0.4 (fixes jumbo smelting creating the wrong number of items)
+
 # 1.20.1-4.0.0.1
 * Updated embedded Jumbo Furnace jar to 4.0.0.3 (fixes jumbo furnace voiding items when full)
 
