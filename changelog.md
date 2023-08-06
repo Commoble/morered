@@ -1,3 +1,6 @@
+# 1.20.1-4.0.0.3
+* Updated embedded Jumbo Furnace jar to 4.0.0.5 (fixes unknown recipe category log warning)
+
 # 1.20.1-4.0.0.2
 * Updated embedded Jumbo Furnace jar to 4.0.0.4 (fixes jumbo smelting creating the wrong number of items)
 
