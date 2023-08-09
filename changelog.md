@@ -1,3 +1,6 @@
+# 1.20.1-4.0.0.4
+* Fixed redwire posts not emitting strong signals through solid blocks
+
 # 1.20.1-4.0.0.3
 * Updated embedded Jumbo Furnace jar to 4.0.0.5 (fixes unknown recipe category log warning)
 

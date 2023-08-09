@@ -148,6 +148,14 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 			return 0;
 		}
 	}
+
+	// get the power that can be conducted through solid blocks
+	@Deprecated
+	@Override
+	public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
+	{
+		return this.getSignal(state,world,pos,directionFromNeighbor);
+	}
 	
 	public EnumSet<Direction> getConnectableDirections(BlockState state)
 	{
