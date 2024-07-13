@@ -2,14 +2,17 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": [
-      {
-        "tag": "minecraft:wool"
-      },
-      {
-        "tag": "c:dyes/gray"
-      }
-    ],
+    "#": {
+      "type": "neoforge:intersection",
+      "children": [
+        {
+          "tag": "minecraft:wool"
+        },
+        {
+          "tag": "c:dyes/gray"
+        }
+      ]
+    },
     "w": {
       "tag": "morered:red_alloy_wires"
     }

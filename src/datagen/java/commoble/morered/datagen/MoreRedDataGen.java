@@ -58,9 +58,8 @@ import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.crafting.CompoundIngredient;
+import net.neoforged.neoforge.common.crafting.IntersectionIngredient;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -331,13 +330,15 @@ public class MoreRedDataGen
 					List.of("www", "w#w", "www"),
 					Map.<Character,Ingredient>of(
 						'w', Ingredient.of(MoreRed.Tags.Items.RED_ALLOY_WIRES),
-						'#', CompoundIngredient.of(
+						'#', IntersectionIngredient.of(
 							Ingredient.of(ItemTags.WOOL),
 							Ingredient.of(DyeColor.values()[i].getTag())))));
 			
 			// tags
 			itemTags
 				.getOrCreateRawBuilder(MoreRed.Tags.Items.COLORED_NETWORK_CABLES)
+				.addElement(blockId);
+			itemTags.getOrCreateRawBuilder(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + DyeColor.values()[i].getName())))
 				.addElement(blockId);
 		}
 
