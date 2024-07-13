@@ -1,5 +1,6 @@
 package commoble.morered.datagen;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -81,7 +82,7 @@ public class MoreRedDataGen
 	static final TagKey<Item> SMOOTH_STONE_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "slabs/smooth_stone"));
 	static final TagKey<Item> SMOOTH_STONE_QUARTER_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "quarter_slabs/smooth_stone"));
 	static final TagKey<Item> REDSTONE_ALLOY_INGOTS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ingots/redstone_alloy"));
-		
+
 	@SuppressWarnings("deprecation")
 	@SubscribeEvent
 	static void onGatherData(GatherDataEvent event)
@@ -332,7 +333,7 @@ public class MoreRedDataGen
 						'w', Ingredient.of(MoreRed.Tags.Items.RED_ALLOY_WIRES),
 						'#', IntersectionIngredient.of(
 							Ingredient.of(ItemTags.WOOL),
-							Ingredient.of(DyeColor.values()[i].getTag())))));
+							Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + DyeColor.values()[i].getName())))))));
 			
 			// tags
 			itemTags
