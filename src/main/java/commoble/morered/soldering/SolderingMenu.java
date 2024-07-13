@@ -168,7 +168,6 @@ public class SolderingMenu extends AbstractContainerMenu
 	
 	/**
 	 * Attempts to assemble the given recipe and updates crafting result if successful
-	 * @param recipeHolder recipe holder
 	 */
 	public void attemptRecipeAssembly(@Nullable SolderingRecipe recipe)
 	{
