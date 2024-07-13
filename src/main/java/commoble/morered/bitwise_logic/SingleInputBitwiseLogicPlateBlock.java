@@ -34,15 +34,12 @@ public class SingleInputBitwiseLogicPlateBlock extends BitwiseLogicPlateBlock
 			Direction outputDir = PlateBlockStateProperties.getOutputDirection(thisState);
 			Direction inputDir = outputDir.getOpposite();
 			BlockPos inputPos = thisPos.relative(inputDir);
-			BlockEntity inputTE = level.getBlockEntity(inputPos);
 			byte[] power = new byte[16]; // defaults to 0s
-			ChanneledPowerSupplier inputSupplier = inputTE == null
-				? BitwiseLogicPlateBlock.NO_POWER_SUPPLIER
-				: inputTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, inputDir.getOpposite()).orElse(NO_POWER_SUPPLIER);
+			ChanneledPowerSupplier inputSupplier = level.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, inputPos, inputDir.getOpposite());
 			Direction attachmentDir = thisState.getValue(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
 			for (int i=0; i<16; i++)
 			{
-				byte inputPower = (byte)inputSupplier.getPowerOnChannel(level, thisPos, thisState, attachmentDir, i);
+				byte inputPower = inputSupplier == null ? 0 : (byte)inputSupplier.getPowerOnChannel(level, thisPos, thisState, attachmentDir, i);
 				boolean inputBit = inputPower > 0;
 				boolean outputBit = this.operator.apply(false, inputBit, false);
 				power[i] = (byte) (outputBit ? 31 : 0);

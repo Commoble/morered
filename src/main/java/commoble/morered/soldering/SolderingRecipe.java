@@ -1,35 +1,37 @@
 package commoble.morered.soldering;
 
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.stream.Collectors;
 
-import javax.annotation.Nonnull;
+import org.jetbrains.annotations.NotNull;
+
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import commoble.morered.MoreRed;
-import net.minecraft.core.NonNullList;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
-/** Wrapper around vanilla shapeless recipes to change the recipe type **/
-public class SolderingRecipe extends ShapelessRecipe
+public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredients) implements Recipe<CraftingInput>
 {
-	public SolderingRecipe(ShapelessRecipe baseRecipe)
-	{
-		super(baseRecipe.getId(), baseRecipe.getGroup(), baseRecipe.category(), baseRecipe.getResultItem(RegistryAccess.EMPTY), baseRecipe.getIngredients());
-	}
+	public static final MapCodec<SolderingRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+			ItemStack.CODEC.fieldOf("result").forGetter(SolderingRecipe::result),
+			SizedIngredient.FLAT_CODEC.listOf().fieldOf("ingredients").forGetter(SolderingRecipe::ingredients)
+		).apply(builder, SolderingRecipe::new));
+	
+	public static final StreamCodec<RegistryFriendlyByteBuf, SolderingRecipe> STREAM_CODEC = StreamCodec.composite(
+		ItemStack.STREAM_CODEC, SolderingRecipe::result,
+		SizedIngredient.STREAM_CODEC.apply(ByteBufCodecs.list()), SolderingRecipe::ingredients,
+		SolderingRecipe::new);
 
 	@Override
 	public RecipeType<?> getType()
@@ -43,14 +45,14 @@ public class SolderingRecipe extends ShapelessRecipe
 		return MoreRed.get().solderingSerializer.get();
 	}
 	
-	public static boolean doesPlayerHaveIngredients(Inventory playerInventory, @Nonnull Recipe<CraftingContainer> recipe)
+	public static boolean doesPlayerHaveIngredients(Inventory playerInventory, @NotNull SolderingRecipe recipe)
 	{
 		// assumes that the ingredient list doesn't have two of the same ingredients
 		// e.g. two stacks of redstone
-		NonNullList<Ingredient> ingredients = recipe.getIngredients();
-		for (Ingredient ingredient : ingredients)
+		List<SizedIngredient> ingredients = recipe.ingredients();
+		for (SizedIngredient ingredient : ingredients)
 		{
-			int remainingItems = ingredient.getItems()[0].getCount();
+			int remainingItems = ingredient.count();
 			int playerSlots = playerInventory.getContainerSize();
 			for (int playerSlot = 0; playerSlot < playerSlots && remainingItems > 0; playerSlot++)
 			{
@@ -68,13 +70,40 @@ public class SolderingRecipe extends ShapelessRecipe
 		return true;
 	}
 
-	public static List<Recipe<CraftingContainer>> getAllSolderingRecipes(RecipeManager manager, RegistryAccess registries)
+	@Override
+	public boolean matches(CraftingInput input, Level level)
 	{
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(MoreRed.get().solderingRecipeType.get(), Collections.emptyMap());
-			return map.entrySet().stream()
-			.map(Entry::getValue)
-			.sorted(Comparator.comparing(recipe -> recipe.getResultItem(registries).getDescriptionId()))
-			.collect(Collectors.toList());
+		// TODO we handle recipe matching manually but we could theoretically move it here
+		return false;
+	}
+
+	@Override
+	public ItemStack assemble(CraftingInput input, Provider registries)
+	{
+		return this.result.copy();
+	}
+
+	@Override
+	public boolean canCraftInDimensions(int x, int y)
+	{
+		return x*y <= ingredients.size();
+	}
+
+	@Override
+	public ItemStack getResultItem(Provider provider)
+	{
+		return this.result;
+	}
+
+	@Override
+	public boolean isSpecial()
+	{
+		return true; // keeps vanilla recipe book from logspamming
+	}
+
+	@Override
+	public boolean showNotification()
+	{
+		return false;
 	}
 }

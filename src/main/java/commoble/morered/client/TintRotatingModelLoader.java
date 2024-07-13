@@ -19,11 +19,11 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.model.ElementsModel;
-import net.minecraftforge.client.model.IModelBuilder;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.geometry.SimpleUnbakedGeometry;
+import net.neoforged.neoforge.client.model.ElementsModel;
+import net.neoforged.neoforge.client.model.IModelBuilder;
+import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.client.model.geometry.SimpleUnbakedGeometry;
 
 /**
  model loader that "rotates" a tintindex in a predefined way
@@ -68,11 +68,11 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
 
 		@Override
 		public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter,
-			ModelState modelTransform, ResourceLocation modelLocation)
+			ModelState modelTransform)
 		{
 			IModelBuilder<?> builderWrapper = new TintRotatingModelBuilder(modelBuilder, modelTransform);
 			// it's a protected method in a forge class so we have to either use accessors or reflection to get at it
-			((ClientElementsModelAccess)(Object)(this.elementsModel)).callAddQuads(context, builderWrapper, bakery, spriteGetter, modelTransform, modelLocation);
+			((ClientElementsModelAccess)(Object)(this.elementsModel)).callAddQuads(context, builderWrapper, bakery, spriteGetter, modelTransform);
 		}
 
 		@Override

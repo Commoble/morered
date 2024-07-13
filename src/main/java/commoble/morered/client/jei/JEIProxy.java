@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 import com.google.common.collect.ImmutableList;
 
 import commoble.morered.MoreRed;
+import commoble.morered.client.ClientProxy;
 import commoble.morered.soldering.SolderingRecipe;
 import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
@@ -16,15 +17,14 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 @JeiPlugin
 public class JEIProxy implements IModPlugin
 {
-	public static final ResourceLocation ID = new ResourceLocation(MoreRed.MODID, MoreRed.MODID);
+	public static final ResourceLocation ID = MoreRed.getModRL(MoreRed.MODID);
 	
 	@Nullable
 	private SolderingCategory solderingCategory;
@@ -57,7 +57,7 @@ public class JEIProxy implements IModPlugin
 			throw new NullPointerException("More Red's Soldering JEI category failed to register! Notify the More Red author for assistance https://github.com/Commoble/morered/issues");
 		}
 		
-		registration.addRecipes(SolderingCategory.TYPE, getSolderingRecipes());
+		registration.addRecipes(SolderingCategory.TYPE, getSolderingRecipes().stream().map(RecipeHolder::value).toList());
 	}
 
 	/**
@@ -71,7 +71,7 @@ public class JEIProxy implements IModPlugin
 		registration.addRecipeCatalyst(new ItemStack(MoreRed.get().solderingTableBlock.get()), SolderingCategory.TYPE);
 	}
 
-	public static List<Recipe<CraftingContainer>> getSolderingRecipes()
+	public static List<RecipeHolder<SolderingRecipe>> getSolderingRecipes()
 	{
 		@SuppressWarnings("resource")
 		ClientLevel clientLevel = Minecraft.getInstance().level;
@@ -79,7 +79,7 @@ public class JEIProxy implements IModPlugin
 		if (clientLevel != null)
 		{
 			RecipeManager manager = clientLevel.getRecipeManager();
-			return SolderingRecipe.getAllSolderingRecipes(manager, clientLevel.registryAccess());
+			return ClientProxy.getAllSolderingRecipes(manager, clientLevel.registryAccess());
 		}
 		else
 		{

@@ -1,16 +1,15 @@
 package commoble.morered.soldering;
 
-import java.util.Optional;
+import java.util.List;
 
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.CraftingContainer;
+import org.jetbrains.annotations.Nullable;
+
 import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.core.NonNullList;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 public class SolderingResultSlot extends Slot
 {
@@ -37,7 +36,10 @@ public class SolderingResultSlot extends Slot
 	{
 		super.onTake(player, stack);
 		// ingredients have already been verified by canTakeStack, we can decrement them now
-		this.container.currentRecipe.ifPresent(recipe -> this.removeIngredients(player.getInventory(), recipe));
+		if (this.container.currentRecipe != null)
+		{
+			this.removeIngredients(player.getInventory(), this.container.currentRecipe);
+		}
 		// set the stack and the container's current recipe accordingly
 		this.verifyRecipeAfterCrafting(player.getInventory(), this.container.currentRecipe);
 	}
@@ -48,16 +50,15 @@ public class SolderingResultSlot extends Slot
 	@Override
 	public boolean mayPickup(Player player)
 	{
-		return this.container.currentRecipe.map(recipe -> SolderingRecipe.doesPlayerHaveIngredients(player.getInventory(), recipe))
-			.orElse(false);
+		return this.container.currentRecipe != null;
 	}
 	
-	public void removeIngredients(Inventory playerInventory, Recipe<CraftingContainer> recipe)
+	public void removeIngredients(Inventory playerInventory, SolderingRecipe recipe)
 	{
-		NonNullList<Ingredient> ingredients = recipe.getIngredients();
-		for(Ingredient ingredient : ingredients)
+		List<SizedIngredient> ingredients = recipe.ingredients();
+		for(SizedIngredient ingredient : ingredients)
 		{
-			int remainingItemsToRemove = ingredient.getItems()[0].getCount();
+			int remainingItemsToRemove = ingredient.count();
 			int playerSlots = playerInventory.getContainerSize();
 			for (int playerSlot=0; playerSlot<playerSlots && remainingItemsToRemove > 0; playerSlot++)
 			{
@@ -72,10 +73,17 @@ public class SolderingResultSlot extends Slot
 		}
 	}
 	
-	public void verifyRecipeAfterCrafting(Inventory playerInventory, Optional<Recipe<CraftingContainer>> recipeHolder)
+	public void verifyRecipeAfterCrafting(Inventory playerInventory, @Nullable SolderingRecipe recipe)
 	{
-		Optional<Recipe<CraftingContainer>> remainingRecipe = recipeHolder.filter(recipe -> SolderingRecipe.doesPlayerHaveIngredients(playerInventory, recipe));
-		this.set(remainingRecipe.map(recipe -> recipe.getResultItem(playerInventory.player.level().registryAccess()).copy()).orElse(ItemStack.EMPTY));
-		this.container.currentRecipe = remainingRecipe;
+		if (recipe != null && SolderingRecipe.doesPlayerHaveIngredients(playerInventory, recipe))
+		{
+			this.set(recipe.getResultItem(playerInventory.player.level().registryAccess()).copy());
+			this.container.currentRecipe = recipe;
+		}
+		else
+		{
+			this.set(ItemStack.EMPTY);
+			this.container.currentRecipe = null;
+		}
 	}
 }

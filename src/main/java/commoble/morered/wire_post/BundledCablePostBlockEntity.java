@@ -7,6 +7,7 @@ import java.util.Set;
 
 import commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -92,9 +93,9 @@ public class BundledCablePostBlockEntity extends WirePostBlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound);
+		super.saveAdditional(compound, registries);
 		compound.putByteArray(POWER, this.power.clone());
 	}
 	

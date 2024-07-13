@@ -1,0 +1,21 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 1,
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    {
+      "count": 1,
+      "tag": "c:ingots/redstone_alloy"
+    },
+    {
+      "count": 1,
+      "tag": "c:ingots/iron"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:redwire_post_plate"
+  }
+}

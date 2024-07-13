@@ -1,0 +1,10 @@
+{
+  "type": "minecraft:stonecutting",
+  "ingredient": {
+    "tag": "c:smooth_stone"
+  },
+  "result": {
+    "count": 8,
+    "id": "morered:stone_plate"
+  }
+}

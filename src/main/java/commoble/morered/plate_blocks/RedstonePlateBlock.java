@@ -8,7 +8,7 @@ import commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -19,7 +19,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.ticks.TickPriority;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class RedstonePlateBlock extends PlateBlock
 {
@@ -69,11 +70,9 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		return state;
 	}
 	
-	@Override
-	@Deprecated
-	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+	public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		boolean isPlayerHoldingStick = player.getItemInHand(hand).is(Tags.Items.RODS_WOODEN);
+		boolean isPlayerHoldingStick = stack.is(Tags.Items.RODS_WOODEN);
 		
 		// rotate the block when the player pokes it with a stick
 		if (isPlayerHoldingStick && !level.isClientSide)
@@ -87,7 +86,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			level.setBlockAndUpdate(pos, newState);
 		}
 		
-		return isPlayerHoldingStick ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		return isPlayerHoldingStick ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 	@Deprecated
@@ -183,7 +182,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	public void notifyNeighbors(Level level, BlockPos pos, BlockState state)
 	{
 		EnumSet<Direction> outputDirections = this.getOutputSides(level, pos, state);
-		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(level, pos, level.getBlockState(pos), outputDirections, false).isCanceled())
+		if (!EventHooks.onNeighborNotify(level, pos, level.getBlockState(pos), outputDirections, false).isCanceled())
 		{
 			for (Direction outputDirection : outputDirections)
 			{

@@ -29,17 +29,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.gson.JsonElement;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.data.DataGenerator;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraftforge.client.NamedRenderTypeManager;
-import net.minecraftforge.common.data.JsonCodecProvider;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.client.NamedRenderTypeManager;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
  * Represents a parented model file. The codec can be used for datagen via {@link #addDataProvider(GatherDataEvent, String, DynamicOps, Map)}.
@@ -58,31 +54,6 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 			ResourceLocation.CODEC.optionalFieldOf("render_type").forGetter(SimpleModel::renderType)
 		).apply(builder, SimpleModel::new));
 	
-	/**
-	 * @param parent ResourceLocation of the parent model
-	 * @param textures Map of String texture identifiers (specific to this model or its parent) to ResourceLocation ids of textures
-	 * 
-	 * @deprecated Use the main constructor or {@link SimpleModel#create(ResourceLocation)}
-	 */
-	@Deprecated(forRemoval=true, since="3.0.0.1")
-	public SimpleModel(ResourceLocation parent, Map<String,ResourceLocation> textures)
-	{
-		this(parent, textures, Optional.empty());
-	}
-	
-	/**
-	 * Creates a DataProvider and adds the provided GatherDataEvent's datagenerator, generating in the assets/namespace/models/ folder
-	 * @param event GatherDataEvent containing datagen context
-	 * @param modid String modid for logging purposes
-	 * @param dynamicOps DynamicOps to serialize the data to json with, e.g. JsonOps.INSTANCE
-	 * @param entries Map of ResourceLocation ids to SimpleModels to serialize
-	 */
-	public static void addDataProvider(GatherDataEvent event, String modid, DynamicOps<JsonElement> dynamicOps, Map<ResourceLocation,SimpleModel> entries)
-	{
-		DataGenerator dataGenerator = event.getGenerator();
-		dataGenerator.addProvider(event.includeClient(), new JsonCodecProvider<SimpleModel>(dataGenerator.getPackOutput(), event.getExistingFileHelper(), modid, dynamicOps, PackType.CLIENT_RESOURCES, "models", CODEC, entries));
-	}
-
 	/**
 	 * Creates a SimpleModel with specified parent and no explicit render type.
 	 * The model will inherit a render type from its parent if it has one,
@@ -134,14 +105,14 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 	public static class RenderTypes
 	{
 		/** Vanilla solid render type, no transparency **/
-		public static final ResourceLocation SOLID = new ResourceLocation("solid");
+		public static final ResourceLocation SOLID = ResourceLocation.withDefaultNamespace("solid");
 		/** Vanilla cutout render type, all-or-nothing transparency **/
-		public static final ResourceLocation CUTOUT = new ResourceLocation("cutout");
+		public static final ResourceLocation CUTOUT = ResourceLocation.withDefaultNamespace("cutout");
 		/** Vanilla cutout_mipped render type, all-or-nothing transparency and mipmapping **/ 
-		public static final ResourceLocation CUTOUT_MIPPED = new ResourceLocation("cutout_mipped");
+		public static final ResourceLocation CUTOUT_MIPPED = ResourceLocation.withDefaultNamespace("cutout_mipped");
 		/** Vanilla translucent render type, allows partial transparency **/
-		public static final ResourceLocation TRANSLUCENT = new ResourceLocation("translucent");
+		public static final ResourceLocation TRANSLUCENT = ResourceLocation.withDefaultNamespace("translucent");
 		/** Vanilla tripwire render type, similar to translucent but uses the tripwire shader **/
-		public static final ResourceLocation TRIPWIRE = new ResourceLocation("tripwire");
+		public static final ResourceLocation TRIPWIRE = ResourceLocation.withDefaultNamespace("tripwire");
 	}
 }

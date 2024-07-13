@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    "F": {
+      "tag": "c:ingots/iron"
+    },
+    "b": {
+      "tag": "morered:bundled_network_cables"
+    }
+  },
+  "pattern": [
+    " b ",
+    "bFb",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:bundled_cable_relay_plate"
+  }
+}

@@ -15,9 +15,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
-import net.minecraftforge.common.data.ExistingFileHelper;
-import net.minecraftforge.data.event.GatherDataEvent;
-import net.minecraftforge.fml.ModLoadingContext;
+import net.neoforged.fml.ModLoadingContext;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
  * Better TagsProvider that allows other things to add tags to it
@@ -51,4 +51,5 @@ public class TagProvider<T> extends TagsProvider<T>
 	{
 		this.builders.putAll(this.subclassBuilders);
 	}
+
 }

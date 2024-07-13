@@ -5,24 +5,25 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.PacketDistributor.PacketTarget;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class WireUpdateBuffer extends SavedData
 {
 	public static final String ID = "morered:wireupdatebuffer";
 	
+	public static final SavedData.Factory<WireUpdateBuffer> FACTORY = new SavedData.Factory<>(WireUpdateBuffer::new, (tag,registries) -> new WireUpdateBuffer());
+	
 	private Map<ChunkPos, Set<BlockPos>> buffer = new HashMap<>();
 	
 	public static WireUpdateBuffer get(ServerLevel world)
 	{
-		return world.getDataStorage().computeIfAbsent(tag -> new WireUpdateBuffer(), WireUpdateBuffer::new, ID);
+		return world.getDataStorage().computeIfAbsent(FACTORY, ID);
 	}
 	
 	public void enqueue(BlockPos pos)
@@ -40,9 +41,7 @@ public class WireUpdateBuffer extends SavedData
 				// ignore and discard unloaded chunks
 				if (world.hasChunk(chunkPos.x, chunkPos.z))
 				{
-					PacketTarget target = PacketDistributor.TRACKING_CHUNK.with(() -> world.getChunk(chunkPos.x, chunkPos.z));
-					WireUpdatePacket packet = new WireUpdatePacket(positions);
-					MoreRed.CHANNEL.send(target,packet);
+					PacketDistributor.sendToPlayersTrackingChunk(world, chunkPos, new WireUpdatePacket(positions));
 				}
 			});
 			
@@ -51,7 +50,7 @@ public class WireUpdateBuffer extends SavedData
 	}
 
 	@Override
-	public CompoundTag save(CompoundTag compound)
+	public CompoundTag save(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		return compound; //noop
 	}

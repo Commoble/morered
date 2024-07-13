@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "item": "minecraft:red_nether_bricks"
+    },
+    "b": {
+      "tag": "c:rods/blaze"
+    },
+    "s": {
+      "tag": "c:quarter_slabs/smooth_stone"
+    }
+  },
+  "pattern": [
+    "sss",
+    "#b#",
+    "#b#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:soldering_table"
+  }
+}

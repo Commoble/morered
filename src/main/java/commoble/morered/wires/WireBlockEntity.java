@@ -5,6 +5,7 @@ import com.mojang.math.OctahedralGroup;
 import commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -81,9 +82,9 @@ public class WireBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound);
+		super.saveAdditional(compound, registries);
 		// normalize power array based on structure transform
 		int[] normalizedPower = new int[6];
 		OctahedralGroup normalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM).inverse();
@@ -97,9 +98,9 @@ public class WireBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void load(CompoundTag compound)
+	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.load(compound);
+		super.loadAdditional(compound, registries);
 		int[] normalizedPower = compound.getIntArray(POWER); // returns 0-length array if field not present
 		if (normalizedPower.length == 6)
 		{
@@ -119,10 +120,10 @@ public class WireBlockEntity extends BlockEntity
 	// called on server to get the data to send to clients when chunk is loaded for client
 	// defaults to this.writeInternal()
 	@Override
-	public CompoundTag getUpdateTag()
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag compound = super.getUpdateTag(); // empty tag
-		this.saveAdditional(compound);
+		CompoundTag compound = super.getUpdateTag(registries); // empty tag
+		this.saveAdditional(compound, registries);
 		return compound;
 	}
 
@@ -136,9 +137,9 @@ public class WireBlockEntity extends BlockEntity
 
 	// called on client to read the packet sent by getUpdatePacket
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt)
+	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
 	{
-		super.onDataPacket(net, pkt);	// calls load()
+		super.onDataPacket(net, pkt, registries);	// calls load()
 		BlockState state = this.getBlockState();
 		this.level.sendBlockUpdated(this.worldPosition, state, state, 8);
 	}

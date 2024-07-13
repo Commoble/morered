@@ -1,7 +1,0 @@
-{
-    "parent": "item/handheld",
-    "textures":
-    {
-        "layer0": "morered:item/red_alloy_ingot"
-    }
-}

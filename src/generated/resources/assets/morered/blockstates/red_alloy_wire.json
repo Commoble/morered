@@ -1,0 +1,190 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_parts"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_node"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_node",
+        "x": 180
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_node",
+        "x": 90
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_node",
+        "x": 90,
+        "y": 90
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_node",
+        "x": 90,
+        "y": 180
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_node",
+        "x": 90,
+        "y": 270
+      },
+      "when": {
+        "east": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow"
+      },
+      "when": {
+        "down": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "y": 90
+      },
+      "when": {
+        "down": "true",
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "y": 180
+      },
+      "when": {
+        "down": "true",
+        "east": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "y": 270
+      },
+      "when": {
+        "down": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 90
+      },
+      "when": {
+        "south": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 90,
+        "y": 90
+      },
+      "when": {
+        "north": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 90,
+        "y": 180
+      },
+      "when": {
+        "east": "true",
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 90,
+        "y": 270
+      },
+      "when": {
+        "east": "true",
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 180
+      },
+      "when": {
+        "up": "true",
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 180,
+        "y": 90
+      },
+      "when": {
+        "north": "true",
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 180,
+        "y": 180
+      },
+      "when": {
+        "east": "true",
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "morered:block/red_alloy_wire_elbow",
+        "x": 180,
+        "y": 270
+      },
+      "when": {
+        "south": "true",
+        "up": "true"
+      }
+    }
+  ]
+}

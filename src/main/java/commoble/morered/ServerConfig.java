@@ -1,11 +1,9 @@
 package commoble.morered;
 
 import commoble.morered.util.ConfigHelper;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 public record ServerConfig(ConfigValue<Double> maxWirePostConnectionRange)
 {
@@ -13,12 +11,12 @@ public record ServerConfig(ConfigValue<Double> maxWirePostConnectionRange)
 	public static ServerConfig INSTANCE;
 	
 	// called during mod object construction
-	public static void initServerConfig(ModLoadingContext modContext, FMLJavaModLoadingContext fmlContext)
+	public static void initServerConfig()
 	{
-		INSTANCE = ConfigHelper.register(ModConfig.Type.SERVER, ServerConfig::create);
+		INSTANCE = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
 	}
 	
-	public static ServerConfig create(ForgeConfigSpec.Builder builder)
+	public static ServerConfig create(ModConfigSpec.Builder builder)
 	{
 		builder.push("General Settings");
 		ConfigValue<Double> maxWirePostConnectionRange = builder

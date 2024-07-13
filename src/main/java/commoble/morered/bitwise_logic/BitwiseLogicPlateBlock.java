@@ -10,7 +10,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -25,7 +25,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
-import net.minecraftforge.common.Tags;
+import net.neoforged.neoforge.common.Tags;
 
 public abstract class BitwiseLogicPlateBlock extends PlateBlock implements EntityBlock
 {
@@ -77,6 +77,15 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 		level.scheduleTick(pos, this, TICK_DELAY);
 	}
 	
+	// called when setBlock puts this block in the world or changes its state
+	// direction-state-dependent capabilities need to be invalidated here
+	@Override
+	protected void onPlace(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	{
+		super.onPlace(newState, level, pos, newState, isMoving);
+		level.invalidateCapabilities(pos);
+	}
+	
 	// forge hook, signals that a neighboring block's TE data or comparator data updated
 	@Override
 	public void onNeighborChange(BlockState thisState, LevelReader levelReader, BlockPos thisPos, BlockPos neighborPos)
@@ -88,35 +97,17 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 		}
 		
 	}
-
-	@Override
-	@Deprecated
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
-	{
-		// if this is just a blockstate change, make sure we tell the TE to invalidate and reset its capability
-		if (state.getBlock() == newState.getBlock())
-		{
-			BlockEntity be = level.getBlockEntity(pos);
-			if (be instanceof ChanneledPowerStorageBlockEntity powerBe)
-			{
-				powerBe.resetCapabilities();
-			}
-		}
-		super.onRemove(state, level, pos, newState, isMoving);
-	}
 	
 	@Override
-	@Deprecated
 	public void tick(BlockState oldBlockState, ServerLevel level, BlockPos pos, RandomSource rand)
 	{
 		this.updatePower(level,pos,oldBlockState);
 	}
 	
 	@Override
-	@Deprecated
-	public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+	public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		boolean isPlayerHoldingStick = player.getItemInHand(hand).is(Tags.Items.RODS_WOODEN);
+		boolean isPlayerHoldingStick = stack.is(Tags.Items.RODS_WOODEN);
 		
 		// rotate the block when the player pokes it with a stick
 		if (isPlayerHoldingStick && !level.isClientSide)
@@ -126,7 +117,7 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 			level.setBlockAndUpdate(pos, newState);
 		}
 		
-		return isPlayerHoldingStick ? InteractionResult.SUCCESS : InteractionResult.PASS;
+		return isPlayerHoldingStick ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 }

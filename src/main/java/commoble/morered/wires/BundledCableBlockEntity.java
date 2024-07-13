@@ -9,20 +9,18 @@ import com.mojang.math.OctahedralGroup;
 
 import commoble.morered.MoreRed;
 import commoble.morered.api.ChanneledPowerSupplier;
-import commoble.morered.api.MoreRedAPI;
 import commoble.morered.util.DirectionHelper;
 import it.unimi.dsi.fastutil.bytes.ByteArrayList;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class BundledCableBlockEntity extends BlockEntity
 {
@@ -37,12 +35,12 @@ public class BundledCableBlockEntity extends BlockEntity
 	 */
 	protected byte[][] power = new byte[6][16];
 	
-	protected Map<Direction, LazyOptional<ChanneledPowerSupplier>> sidedPowerSuppliers = Util.make(new EnumMap<>(Direction.class), map ->
+	protected Map<Direction, ChanneledPowerSupplier> sidedPowerSuppliers = Util.make(new EnumMap<>(Direction.class), map ->
 	{
 		for (int i=0; i<6; i++)
 		{
 			Direction dir = Direction.from3DDataValue(i);
-			map.put(dir, LazyOptional.of(() -> new SidedPowerSupplier(dir)));
+			map.put(dir,  new SidedPowerSupplier(dir));
 		}
 	});
 	
@@ -54,13 +52,6 @@ public class BundledCableBlockEntity extends BlockEntity
 	public BundledCableBlockEntity(BlockPos pos, BlockState state)
 	{
 		this(MoreRed.get().bundledNetworkCableBeType.get(), pos, state);
-	}
-	
-	@Override
-	public void invalidateCaps()
-	{
-		super.invalidateCaps();
-		this.sidedPowerSuppliers.forEach((dir, holder) -> holder.invalidate());
 	}
 
 	public int getPower(int side, int channel)
@@ -105,29 +96,25 @@ public class BundledCableBlockEntity extends BlockEntity
 		this.power= newPower;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
+	public ChanneledPowerSupplier getChanneledPower(Direction side)
 	{
-		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY && side != null)
-			return (LazyOptional<T>) this.sidedPowerSuppliers.get(side);
-		return super.getCapability(cap, side);
+		return side == null ? null : this.sidedPowerSuppliers.get(side);
 	}
 
 	// called when TE is serialized to hard drive or whatever
 	// defaults to this.writeInternal()
 	@Override
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound);
+		super.saveAdditional(compound, registries);
 		this.writeServerData(compound);
 	}
 	
 	// reads the data written by write, called when TE is loaded from hard drive
 	@Override
-	public void load(CompoundTag compound)
+	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.load(compound);
+		super.loadAdditional(compound, registries);
 		this.readServerData(compound);
 	}
 	

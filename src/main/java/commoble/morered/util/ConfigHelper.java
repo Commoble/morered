@@ -7,9 +7,9 @@ import javax.annotation.Nullable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.ModList;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
 
 /**
  * Helper for creating configs and defining complex objects in configs 
@@ -21,6 +21,7 @@ public class ConfigHelper
 	/**
 	 * Register a config using a default config filename for your mod.
 	 * @param <T> The class of your config implementation
+	 * @param modid String of your modid
 	 * @param configType Forge config type:
 	 * <ul>
 	 * <li>SERVER configs are defined by the server and synced to clients; individual configs are generated per-save. Filename will be modid-server.toml
@@ -31,15 +32,17 @@ public class ConfigHelper
 	 * @return An instance of your config class
 	 */
 	public static <T> T register(
+		final String modid,
 		final ModConfig.Type configType,
-		final Function<ForgeConfigSpec.Builder, T> configFactory)
+		final Function<ModConfigSpec.Builder, T> configFactory)
 	{
-		return register(configType, configFactory, null);
+		return register(modid, configType, configFactory, null);
 	}
 	
 	/**
 	 * Register a config using a custom filename.
 	 * @param <T> Your config class
+	 * @param modid String of your modid
 	 * @param configType Forge config type:
 	 * <ul>
 	 * <li>SERVER configs are defined by the server and synced to clients; individual configs are generated per-save.
@@ -51,22 +54,23 @@ public class ConfigHelper
 	 * @return An instance of your config class
 	 */
 	public static <T> T register(
+		final String modid,
 		final ModConfig.Type configType,
-		final Function<ForgeConfigSpec.Builder, T> configFactory,
+		final Function<ModConfigSpec.Builder, T> configFactory,
 		final @Nullable String configName)
 	{
-		final ModLoadingContext modContext = ModLoadingContext.get();
-		final org.apache.commons.lang3.tuple.Pair<T, ForgeConfigSpec> entry = new ForgeConfigSpec.Builder()
-			.configure(thisBuilder -> configFactory.apply(thisBuilder));
+		final var mod = ModList.get().getModContainerById(modid).get();
+		final org.apache.commons.lang3.tuple.Pair<T, ModConfigSpec> entry = new ModConfigSpec.Builder()
+			.configure(configFactory);
 		final T config = entry.getLeft();
-		final ForgeConfigSpec spec = entry.getRight();
+		final ModConfigSpec spec = entry.getRight();
 		if (configName == null)
 		{
-			modContext.registerConfig(configType,spec);
+			mod.registerConfig(configType,spec);
 		}
 		else
 		{
-			modContext.registerConfig(configType, spec, configName + ".toml");
+			mod.registerConfig(configType, spec, configName + ".toml");
 		}
 		
 		return config;

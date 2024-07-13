@@ -1,3 +1,7 @@
+# 1.21-5.0.0.0
+* Updated to minecraft 1.21 / neoforge 21.0.40-beta. This update is not compatible with old worlds; loading old worlds may cause data loss.
+* Jumbo Furnace is no longer bundled with this mod, it is now optional again. If jumbo furnace is not installed, Red Alloy Ingots will be craftable at a crafting table.
+
 # 1.20.1-4.0.0.4
 * Fixed redwire posts not emitting strong signals through solid blocks
 

@@ -37,7 +37,7 @@ public class ObjectNames
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";
 	public static final String COLORED_NETWORK_CABLE = "colored_network_cable";
-	public static final String[] NETWORK_CABLES = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_network_cable"));
+	public static final String[] NETWORK_CABLES_BY_COLOR = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_network_cable"));
 	public static final String BUNDLED_NETWORK_CABLE = "bundled_network_cable";
 	
 	public static final String HEXIDECRUBROMETER = "hexidecrubrometer";
@@ -56,13 +56,20 @@ public class ObjectNames
 	public static final String BUNDLED_CABLE_SPOOL = "bundled_cable_spool";
 	
 	// tags
-	public static final String REDWIRE_POSTS = "redwire_posts";
 	public static final String BUNDLED_CABLE_POSTS = "bundled_cable_posts";
-	public static final String RED_ALLOY_WIRES = "red_alloy_wires";
+	public static final String BUNDLED_NETWORK_CABLES = "bundled_network_cables";
 	public static final String COLORED_NETWORK_CABLES = "colored_network_cables";
+	public static final String NETWORK_CABLES = "network_cables";
+	public static final String RED_ALLOY_WIRES = "red_alloy_wires";
+	public static final String RED_ALLOYABLE_INGOTS = "red_alloyable_ingots";
+	public static final String REDWIRE_POSTS = "redwire_posts";
 	
 	// capabilities
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";
+	public static final String VOXEL_CACHE = "voxel_cache";
+	
+	// data components
+	public static final String SPOOLED_POST = "spooled_post";
 	
 	// recipe types
 	public static final String SOLDERING_RECIPE = "soldering";

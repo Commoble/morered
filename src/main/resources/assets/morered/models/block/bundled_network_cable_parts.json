@@ -1,5 +1,0 @@
-{
-	"loader": "morered:wire_parts",
-	"line": {"parent": "morered:block/bundled_network_cable_line"},
-	"edge": {"parent": "morered:block/bundled_network_cable_edge"}
-}

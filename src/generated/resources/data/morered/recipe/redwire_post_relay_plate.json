@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    "F": {
+      "tag": "c:ingots/iron"
+    },
+    "R": {
+      "tag": "c:ingots/redstone_alloy"
+    },
+    "r": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    " F ",
+    "rRr",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:redwire_post_relay_plate"
+  }
+}

@@ -1,9 +1,10 @@
 package commoble.morered.client;
 
+import commoble.morered.MoreRed;
 import commoble.morered.util.ConfigHelper;
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
-import net.minecraftforge.fml.config.ModConfig;
+import net.neoforged.fml.config.ModConfig;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 public record ClientConfig(ConfigValue<Boolean> showPlacementPreview, ConfigValue<Double> previewPlacementOpacity)
 {
@@ -12,10 +13,10 @@ public record ClientConfig(ConfigValue<Boolean> showPlacementPreview, ConfigValu
 	// TODO move to ClientProxy
 	public static void initClientConfig()
 	{
-		INSTANCE = ConfigHelper.register(ModConfig.Type.CLIENT, ClientConfig::create);
+		INSTANCE = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.CLIENT, ClientConfig::create);
 	}
 	
-	public static ClientConfig create(ForgeConfigSpec.Builder builder)
+	public static ClientConfig create(ModConfigSpec.Builder builder)
 	{
 		builder.push("Rendering");
 		ConfigValue<Boolean> showPlacementPreview = builder

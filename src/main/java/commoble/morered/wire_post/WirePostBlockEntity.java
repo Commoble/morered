@@ -10,15 +10,18 @@ import javax.annotation.Nonnull;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.math.OctahedralGroup;
+import com.mojang.serialization.Codec;
 
 import commoble.morered.MoreRed;
 import commoble.morered.util.EightGroup;
-import commoble.morered.util.NBTListCodec;
 import commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -26,9 +29,7 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class WirePostBlockEntity extends BlockEntity
 {
@@ -39,12 +40,8 @@ public class WirePostBlockEntity extends BlockEntity
 	private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
 	
 	private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
-
-	public static final NBTListCodec<BlockPos, CompoundTag> BLOCKPOS_LISTER = new NBTListCodec<>(
-		CONNECTIONS,
-		NBTListCodec.ListTagType.COMPOUND,
-		NbtUtils::writeBlockPos,
-		NbtUtils::readBlockPos);
+	
+	public static final Codec<List<BlockPos>> BLOCKPOS_LISTER = BlockPos.CODEC.listOf();
 	
 	public WirePostBlockEntity(BlockEntityType<? extends WirePostBlockEntity> type, BlockPos pos, BlockState state)
 	{
@@ -147,14 +144,15 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		this.remoteConnections.remove(otherPos);
 		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
-		if (!this.level.isClientSide)
+		if (this.level instanceof ServerLevel serverLevel)
 		{
 			// only send one break packet when breaking two connections
 			int thisY = this.worldPosition.getY();
 			int otherY = otherPos.getY();
-			if (thisY < otherY || (thisY == otherY && this.worldPosition.hashCode() < otherPos.hashCode())) 
-				MoreRed.CHANNEL.send(PacketDistributor.TRACKING_CHUNK.with(() -> this.level.getChunkAt(this.worldPosition)),
-					new WireBreakPacket(getConnectionVector(this.worldPosition), getConnectionVector(otherPos)));
+			if (thisY < otherY || (thisY == otherY && this.worldPosition.hashCode() < otherPos.hashCode()))
+			{
+				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(this.worldPosition), new WireBreakPacket(Vec3.atCenterOf(worldPosition), Vec3.atCenterOf(otherPos)));
+			}
 		}
 		this.onCommonDataUpdated();
 	}
@@ -166,14 +164,7 @@ public class WirePostBlockEntity extends BlockEntity
 //			world.notifyNeighborsOfStateExcept(neighborPos, this, dir);
 			
 	}
-	
-	public static Vec3 getConnectionVector(BlockPos pos)
-	{
-		return new Vec3(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D);
-	}
 
-	@Override
-	@OnlyIn(Dist.CLIENT)
 	public AABB getRenderBoundingBox()
 	{
 		return this.renderAABB;
@@ -194,9 +185,9 @@ public class WirePostBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void load(CompoundTag compound)
+	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.load(compound);
+		super.loadAdditional(compound, registries);
 		this.readCommonData(compound);
 	}
 	
@@ -204,7 +195,7 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		if (compound.contains(CONNECTIONS))
 		{
-			List<BlockPos> normalizedPositions = BLOCKPOS_LISTER.read(compound);
+			List<BlockPos> normalizedPositions = BLOCKPOS_LISTER.parse(NbtOps.INSTANCE, compound.get(CONNECTIONS)).result().orElse(List.of());
 			List<BlockPos> absolutePositions = new ArrayList<>();
 			for (BlockPos normalPos : normalizedPositions)
 			{
@@ -218,15 +209,17 @@ public class WirePostBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound);
+		super.saveAdditional(compound, registries);
 		List<BlockPos> normalizedPositions = new ArrayList<>();
 		for (BlockPos absolutePos : this.remoteConnections.keySet())
 		{
 			normalizedPositions.add(this.normalizePos(absolutePos));
 		}
-		BLOCKPOS_LISTER.write(normalizedPositions, compound);
+		BLOCKPOS_LISTER.encodeStart(NbtOps.INSTANCE, normalizedPositions)
+			.result()
+			.ifPresent(tag -> compound.put(CONNECTIONS, tag));
 	}
 	
 	/**
@@ -255,10 +248,10 @@ public class WirePostBlockEntity extends BlockEntity
 
 	@Override
 	// called on server when client loads chunk with TE in it
-	public CompoundTag getUpdateTag()
+	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag compound = super.getUpdateTag();
-		this.saveAdditional(compound);
+		CompoundTag compound = super.getUpdateTag(registries);
+		this.saveAdditional(compound, registries);
 		return compound;
 	}
 
@@ -272,8 +265,8 @@ public class WirePostBlockEntity extends BlockEntity
 	
 	public NestedBoundingBox getNestedBoundingBoxForConnectedPos(BlockPos otherPos)
 	{
-		Vec3 thisVec = getConnectionVector(this.worldPosition);
-		Vec3 otherVec = getConnectionVector(otherPos);
+		Vec3 thisVec = Vec3.atCenterOf(this.worldPosition);
+		Vec3 otherVec = Vec3.atCenterOf(otherPos);
 		boolean otherHigher = otherVec.y > thisVec.y;
 		Vec3 higherVec = otherHigher ? otherVec : thisVec;
 		Vec3 lowerVec = otherHigher ? thisVec : otherVec;

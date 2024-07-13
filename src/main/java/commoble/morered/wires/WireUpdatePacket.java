@@ -1,35 +1,33 @@
 package commoble.morered.wires;
 
-import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
-import java.util.function.Consumer;
 
-import com.mojang.serialization.Codec;
-
+import commoble.morered.MoreRed;
 import commoble.morered.client.ClientProxy;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.core.BlockPos;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraftforge.network.NetworkEvent.Context;
+import net.minecraft.network.codec.ByteBufCodecs;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class WireUpdatePacket implements Consumer<NetworkEvent.Context>
+public record WireUpdatePacket(Set<BlockPos> positions) implements CustomPacketPayload
 {
-	public static final Codec<WireUpdatePacket> CODEC = BlockPos.CODEC.listOf()
-		.<Set<BlockPos>>xmap(HashSet::new, ArrayList::new)
-		.xmap(WireUpdatePacket::new, WireUpdatePacket::getPositions)
-		.fieldOf("positions").codec();
+	public static final CustomPacketPayload.Type<WireUpdatePacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL("wire_update"));
+	public static final StreamCodec<ByteBuf, WireUpdatePacket> STREAM_CODEC = BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list())
+		.map(Set::copyOf, List::copyOf)
+		.map(WireUpdatePacket::new, WireUpdatePacket::positions);
 	
-	private final Set<BlockPos> positions; public Set<BlockPos> getPositions() { return this.positions; }
-	
-	public WireUpdatePacket(Set<BlockPos> positions)
+	public void handle(IPayloadContext context)
 	{
-		this.positions = positions;
+		context.enqueueWork(() -> ClientProxy.onWireUpdatePacket(this));
 	}
 
 	@Override
-	public void accept(Context context)
+	public Type<? extends CustomPacketPayload> type()
 	{
-		context.enqueueWork(() -> ClientProxy.onWireUpdatePacket(this));
+		return TYPE;
 	}
 
 }

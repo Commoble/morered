@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import commoble.morered.MoreRed;
 import commoble.morered.api.ChanneledPowerSupplier;
-import commoble.morered.api.MoreRedAPI;
 import commoble.morered.util.DirectionHelper;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -16,17 +15,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class ColoredCableBlockEntity extends WireBlockEntity
 {
-	protected Map<Direction, LazyOptional<ChanneledPowerSupplier>> sidedPowerSuppliers = Util.make(new EnumMap<>(Direction.class), map ->
+	protected Map<Direction, ChanneledPowerSupplier> sidedPowerSuppliers = Util.make(new EnumMap<>(Direction.class), map ->
 	{
 		for (int i=0; i<6; i++)
 		{
 			Direction dir = Direction.from3DDataValue(i);
-			map.put(dir, LazyOptional.of(() -> new SidedPowerSupplier(dir)));
+			map.put(dir, new SidedPowerSupplier(dir));
 		}
 	});
 	
@@ -40,20 +37,10 @@ public class ColoredCableBlockEntity extends WireBlockEntity
 		super(type, pos, state);
 	}
 
-	@Override
-	public void invalidateCaps()
+	public ChanneledPowerSupplier getChanneledPower(Direction side)
 	{
-		super.invalidateCaps();
-		this.sidedPowerSuppliers.forEach((dir, holder) -> holder.invalidate());
-	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
-	{
-		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY && side != null)
-			return (LazyOptional<T>) this.sidedPowerSuppliers.get(side);
-		return super.getCapability(cap, side);
+		return side == null ? null : this.sidedPowerSuppliers.get(side);
 	}
 	
 	protected class SidedPowerSupplier implements ChanneledPowerSupplier

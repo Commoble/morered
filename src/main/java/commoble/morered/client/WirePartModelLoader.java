@@ -31,13 +31,13 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.IDynamicBakedModel;
-import net.minecraftforge.client.model.data.ModelData;
-import net.minecraftforge.client.model.data.ModelProperty;
-import net.minecraftforge.client.model.geometry.IGeometryBakingContext;
-import net.minecraftforge.client.model.geometry.IGeometryLoader;
-import net.minecraftforge.client.model.geometry.IUnbakedGeometry;
+import net.neoforged.neoforge.client.model.BakedModelWrapper;
+import net.neoforged.neoforge.client.model.IDynamicBakedModel;
+import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.client.model.data.ModelProperty;
+import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
+import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
+import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 
 public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 {
@@ -64,7 +64,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 
 		@Override
 		public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-			ItemOverrides overrides, ResourceLocation modelLocation)
+			ItemOverrides overrides)
 		{
 			BakedModel[] lineModels = new BakedModel[24];
 			BakedModel[] edgeModels = new BakedModel[12];
@@ -77,7 +77,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 				{
 					int index = side*4 + subSide;
 					ModelState transform = FaceRotation.getFaceRotation(side, subSide);
-					lineModels[index] = this.lineModel.bake(bakery, this.lineModel, spriteGetter, transform, modelLocation, useBlockLight);
+					lineModels[index] = this.lineModel.bake(bakery, this.lineModel, spriteGetter, transform, useBlockLight);
 				}
 			}
 			
@@ -88,7 +88,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 				// down comes first, then up, then the sides
 				// the "default" edge with no rotation has to be on the middle sides to ignore the z-axis, we'll use bottom-west
 				ModelState transform = EdgeRotation.EDGE_ROTATIONS[edge];
-				edgeModels[edge] = this.edgeModel.bake(bakery, this.edgeModel, spriteGetter, transform, modelLocation, useBlockLight);
+				edgeModels[edge] = this.edgeModel.bake(bakery, this.edgeModel, spriteGetter, transform, useBlockLight);
 			}
 			
 			return new WirePartModelLoader.WirePartModel(context.useAmbientOcclusion(), context.isGui3d(), useBlockLight,

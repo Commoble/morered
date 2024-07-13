@@ -1,0 +1,36 @@
+{
+	"type": "minecraft:crafting_shapeless",
+	"ingredients": 
+	[
+		{
+			"tag": "morered:red_alloyable_ingots"
+		},
+		{
+			"tag": "c:dusts/redstone"
+		},
+		{
+			"tag": "c:dusts/redstone"
+		},
+		{
+			"tag": "c:dusts/redstone"
+		},
+		{
+			"tag": "c:dusts/redstone"
+		}
+	],
+	"result": 
+	{
+		"id": "morered:red_alloy_ingot"
+	},
+	"neoforge:conditions": 
+	[
+		{
+			"type": "neoforge:not",
+			"value": 
+			{
+				"type": "neoforge:mod_loaded",
+				"modid": "jumbofurnace"
+			}
+		}
+	]
+}

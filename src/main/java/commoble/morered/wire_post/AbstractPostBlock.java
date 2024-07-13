@@ -7,11 +7,14 @@ import javax.annotation.Nullable;
 
 import com.mojang.math.OctahedralGroup;
 
+import commoble.morered.MoreRed;
 import commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -25,6 +28,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public abstract class AbstractPostBlock extends Block
 {
@@ -89,12 +93,14 @@ public abstract class AbstractPostBlock extends Block
 		LevelChunk chunk = world.getChunkAt(pos);
 		if (chunk != null)
 		{
-			chunk.getCapability(PostsInChunk.CAPABILITY)
-				.ifPresent(posts -> {
-					Set<BlockPos> set = posts.getPositions();
-					consumer.accept(set, pos);
-					posts.setPositions(set);
-				});
+			Set<BlockPos> set = chunk.getData(MoreRed.get().postsInChunkAttachment.get());
+			consumer.accept(set, pos);
+			if (world instanceof ServerLevel serverLevel)
+			{
+				chunk.setUnsaved(true);
+				ChunkPos chunkPos = chunk.getPos();
+				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, chunkPos, new SyncPostsInChunkPacket(chunkPos, set));
+			}
 		}
 	}
 

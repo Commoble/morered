@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock implements EntityBlock
 {
@@ -224,7 +225,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	public void notifyNeighbors(Level world, BlockPos pos, BlockState state)
 	{
 		EnumSet<Direction> neighborDirections = this.getConnectableDirections(state);
-		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, pos, world.getBlockState(pos), neighborDirections, false).isCanceled())
+		if (!EventHooks.onNeighborNotify(world, pos, world.getBlockState(pos), neighborDirections, false).isCanceled())
 		{
 			for (Direction dir : neighborDirections)
 			{

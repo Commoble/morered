@@ -2,25 +2,22 @@ package commoble.morered.bitwise_logic;
 
 import commoble.morered.MoreRed;
 import commoble.morered.api.ChanneledPowerSupplier;
-import commoble.morered.api.MoreRedAPI;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 
-public class ChanneledPowerStorageBlockEntity extends BlockEntity implements ChanneledPowerSupplier
+public class ChanneledPowerStorageBlockEntity extends BlockEntity
 {
 	public static final String POWER = "power";
 	
 	protected byte[] power = new byte[16];
-	protected LazyOptional<ChanneledPowerSupplier> powerHolder = LazyOptional.of(() -> this);
 
 	public static ChanneledPowerStorageBlockEntity create(BlockPos pos, BlockState state)
 	{
@@ -37,32 +34,13 @@ public class ChanneledPowerStorageBlockEntity extends BlockEntity implements Cha
 		this(MoreRed.get().bitwiseLogicGateBeType.get(), pos, state);
 	}
 	
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
+	public ChanneledPowerSupplier getChanneledPower(Direction side)
 	{
-		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY)
-			return side == PlateBlockStateProperties.getOutputDirection(this.getBlockState()) ? (LazyOptional<T>) this.powerHolder : LazyOptional.empty();
-		return super.getCapability(cap, side);
-	}
-	
-	@Override
-	public void invalidateCaps()
-	{
-		super.invalidateCaps();
-		this.powerHolder.invalidate();
-	}
-	
-	// invalidate and replace capabilities with fresh ones
-	// needed if we change the blockstate to one with a different output side
-	public void resetCapabilities()
-	{
-		LazyOptional<ChanneledPowerSupplier> oldPowerHolder = this.powerHolder;
-		this.powerHolder = LazyOptional.of(() -> this);
-		oldPowerHolder.invalidate();
+		return side == PlateBlockStateProperties.getOutputDirection(this.getBlockState())
+			? this::getPowerOnChannel
+			: null;
 	}
 
-	@Override
 	public int getPowerOnChannel(Level level, BlockPos wirePos, BlockState wireState, Direction wireFace, int channel)
 	{
 		BlockState thisState = this.getBlockState();
@@ -125,16 +103,16 @@ public class ChanneledPowerStorageBlockEntity extends BlockEntity implements Cha
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.saveAdditional(compound);
+		super.saveAdditional(compound, registries);
 		compound.putByteArray(POWER, this.power.clone());
 	}
 	
 	@Override
-	public void load(CompoundTag compound)
+	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
-		super.load(compound);
+		super.loadAdditional(compound, registries);
 		byte[] newPower = compound.getByteArray(POWER);
 		if (newPower.length == 16)
 			this.power = newPower.clone();

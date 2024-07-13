@@ -2,13 +2,11 @@ package commoble.morered.client;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
 
-import commoble.morered.MoreRed;
 import commoble.morered.soldering.SolderingMenu;
 import commoble.morered.soldering.SolderingRecipe;
 import commoble.morered.soldering.SolderingRecipeButtonPacket;
@@ -19,23 +17,22 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.core.NonNullList;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.client.gui.widget.ExtendedButton;
-import net.minecraftforge.client.gui.widget.ScrollPanel;
+import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
+import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
+import net.neoforged.neoforge.common.crafting.SizedIngredient;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 {
-	public static final ResourceLocation TRADING_SCREEN = new ResourceLocation("minecraft:textures/gui/container/villager2.png");
-	public static final ResourceLocation CRAFTING_SCREEN = new ResourceLocation("minecraft:textures/gui/container/crafting_table.png");
+	public static final ResourceLocation TRADING_SCREEN = ResourceLocation.withDefaultNamespace("textures/gui/container/villager.png");
+	public static final ResourceLocation CRAFTING_SCREEN = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 	
 	public static final int SCROLLPANEL_X = 4;
 	public static final int SCROLLPANEL_Y = 17;
@@ -60,7 +57,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		ClientLevel world = this.minecraft.level;
-		List<Recipe<CraftingContainer>> recipes = world != null ? SolderingRecipe.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()) : ImmutableList.of();
+		List<RecipeHolder<SolderingRecipe>> recipes = world != null ? ClientProxy.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()) : ImmutableList.of();
 		this.scrollPanel = new SolderingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
 		this.addWidget(this.scrollPanel);
 	}
@@ -68,7 +65,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
 	{
-		this.renderBackground(graphics);
+		this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 		super.render(graphics, mouseX, mouseY, partialTicks);
 		if (this.scrollPanel != null)
 		{
@@ -129,26 +126,26 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	{
 		private final int baseY;
 		private final SolderingScreen screen;
-		private final Recipe<CraftingContainer> recipe;
+		private final RecipeHolder<SolderingRecipe> recipe;
 		public ItemStack tooltipItem = ItemStack.EMPTY;
 
-		public RecipeButton(SolderingScreen screen, Recipe<CraftingContainer> recipe, int x, int y, int width)
+		public RecipeButton(SolderingScreen screen, RecipeHolder<SolderingRecipe> recipe, int x, int y, int width)
 		{
-			super(x, y, width, getHeightForRecipe(recipe), Component.literal(""), button -> onButtonClicked(screen.menu, recipe));
+			super(x, y, width, getHeightForRecipe(recipe.value()), Component.literal(""), button -> onButtonClicked(screen.menu, recipe));
 			this.baseY = y;
 			this.screen = screen;
 			this.recipe = recipe;
 		}
 		
-		public static void onButtonClicked(SolderingMenu container, Recipe<CraftingContainer> recipe)
+		public static void onButtonClicked(SolderingMenu container, RecipeHolder<SolderingRecipe> recipe)
 		{
-			MoreRed.CHANNEL.sendToServer(new SolderingRecipeButtonPacket(recipe.getId()));
-			container.attemptRecipeAssembly(Optional.of(recipe));
+			PacketDistributor.sendToServer(new SolderingRecipeButtonPacket(recipe.id()));
+			container.attemptRecipeAssembly(recipe.value());
 		}
 		
-		public static int getHeightForRecipe(Recipe<?> recipe)
+		public static int getHeightForRecipe(SolderingRecipe recipe)
 		{
-			int rows = 1 + (recipe.getIngredients().size()-1) / 3;
+			int rows = 1 + (recipe.ingredients().size()-1) / 3;
 			return (rows*18)+5; // 2 padding on top, 3 on bottom
 		}
 
@@ -170,7 +167,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	        	int thisX = this.getX();
 	        	int thisY = this.getY();
 	            super.renderWidget(graphics, mouseX, mouseY, partial);
-	            NonNullList<Ingredient> ingredients = this.recipe.getIngredients();
+	            List<SizedIngredient> ingredients = this.recipe.value().ingredients();
 	            int ingredientCount = ingredients.size();
 	            // render ingredients
 	            for (int ingredientIndex=0; ingredientIndex<ingredientCount; ingredientIndex++)
@@ -205,7 +202,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		            graphics.blit(TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
-		            ItemStack outputStack = this.recipe.getResultItem(this.screen.minecraft.level.registryAccess());
+		            ItemStack outputStack = this.recipe.value().getResultItem(this.screen.minecraft.level.registryAccess());
 		            if (!outputStack.isEmpty())
 		            {
 			            int itemX = thisX + 2 + (18*4);
@@ -255,7 +252,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		public ItemStack tooltipItem = ItemStack.EMPTY;
 		public final int totalButtonHeight;
 		
-		public SolderingScrollPanel(Minecraft client, SolderingScreen screen, List<Recipe<CraftingContainer>> recipes, int left, int top, int width, int height)
+		public SolderingScrollPanel(Minecraft client, SolderingScreen screen, List<RecipeHolder<SolderingRecipe>> recipes, int left, int top, int width, int height)
 		{
 			super(client, width, height, top, left);
 			int buttonWidth = 90;
@@ -264,7 +261,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 			Level world = client.level;
 			if (world != null)
 			{
-				for (Recipe<CraftingContainer> recipe : SolderingRecipe.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()))
+				for (RecipeHolder<SolderingRecipe> recipe : ClientProxy.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()))
 				{
 					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
 					this.buttons.add(recipeButton);

@@ -3,58 +3,33 @@ package commoble.morered.datagen;
 import java.util.List;
 import java.util.Map;
 
-import com.google.gson.JsonObject;
-
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.data.recipes.ShapedRecipeBuilder;
-import net.minecraft.data.recipes.ShapelessRecipeBuilder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipePattern;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 public class RecipeHelpers
 {
-	public static FinishedRecipe shapeless(ResourceLocation recipeId, Item result, int count, CraftingBookCategory category, List<Ingredient> ingredients)
+	public static ShapelessRecipe shapeless(Item result, int count, CraftingBookCategory category, List<Ingredient> ingredients)
 	{
-		return new ShapelessRecipeBuilder.Result(
-			recipeId,
-			result,
-			count,
+		return new ShapelessRecipe(
 			"", // recipe book group (not used)
 			category,
-			ingredients,
-			null, // advancement
-			null
-		)
-		{
-			@Override
-			public JsonObject serializeAdvancement()
-			{
-				return null;
-			}
-		};
+			new ItemStack(result, count),
+			NonNullList.copyOf(ingredients));
 	}
 	
-	public static FinishedRecipe shaped(ResourceLocation recipeId, Item result, int count, CraftingBookCategory category, List<String> pattern, Map<Character,Ingredient> key)
+	public static ShapedRecipe shaped(Item result, int count, CraftingBookCategory category, List<String> pattern, Map<Character,Ingredient> key)
 	{
-		return new ShapedRecipeBuilder.Result(
-			recipeId,
-			result,
-			count,
-			"", // recipe book group (not used)
+		return new ShapedRecipe(
+			"", // recipe book group (not used),
 			category,
-			pattern,
-			key,
-			null, // advancement
-			null,
-			true)
-		{
-			@Override
-			public JsonObject serializeAdvancement()
-			{
-				return null;
-			}
-		};
+			ShapedRecipePattern.of(key, pattern),
+			new ItemStack(result, count),
+			true);
 	}
 }

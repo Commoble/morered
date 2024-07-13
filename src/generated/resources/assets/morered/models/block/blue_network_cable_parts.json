@@ -1,11 +1,9 @@
 {
   "edge": {
-    "parent": "morered:block/blue_network_cable_edge",
-    "render_type": "minecraft:solid"
+    "parent": "morered:block/blue_network_cable_edge"
   },
   "line": {
-    "parent": "morered:block/blue_network_cable_line",
-    "render_type": "minecraft:solid"
+    "parent": "morered:block/blue_network_cable_line"
   },
   "loader": "morered:wire_parts"
 }

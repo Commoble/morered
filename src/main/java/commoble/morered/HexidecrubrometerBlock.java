@@ -2,6 +2,7 @@ package commoble.morered;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -82,13 +83,12 @@ public class HexidecrubrometerBlock extends Block
 	}
 
 	// forge method, called when a neighbor calls updateComparatorOutputLevel
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onNeighborChange(BlockState state, LevelReader world, BlockPos pos, BlockPos neighbor)
 	{
-		if (!world.isClientSide() && pos.relative(getReadingDirection(state)).equals(neighbor))
+		if (world instanceof ServerLevel serverLevel && pos.relative(getReadingDirection(state)).equals(neighbor))
 		{
-	          state.neighborChanged((Level)world, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
+	          state.handleNeighborChanged(serverLevel, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
 		}
 	}
 

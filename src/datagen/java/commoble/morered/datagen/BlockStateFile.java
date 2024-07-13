@@ -34,24 +34,17 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.google.common.collect.Lists;
-import com.google.gson.JsonElement;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
-import net.minecraft.util.ExtraCodecs;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
-import net.minecraftforge.common.data.JsonCodecProvider;
-import net.minecraftforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.common.data.JsonCodecProvider;
 
 /**
  * Alternative datageneration for blockstate jsons. Usable with {@link JsonCodecProvider}.
@@ -63,21 +56,7 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 			Variants.CODEC.optionalFieldOf("variants").forGetter(BlockStateFile::variants),
 			Multipart.CODEC.optionalFieldOf("multipart").forGetter(BlockStateFile::multipart)
 		).apply(builder, BlockStateFile::new));
-	
-	/**
-	 * Creates a DataProvider and adds it to the provided GatherDataEvent's datagenerator, generating in the assets/namespace/blockstates/ folder
-	 * @param event GatherDataEvent with datagen context
-	 * @param modid String modid for logging purposes
-	 * @param dynamicOps DynamicOps to serialize data to json with, e.g. JsonOps.INSTANCE
-	 * @param entries Map of ResourceLocation ids to BlockStateDefinitions to serialize
-	 */
-	public static void addDataProvider(GatherDataEvent event, String modid, DynamicOps<JsonElement> dynamicOps, Map<ResourceLocation, BlockStateFile> entries)
-	{
-		DataGenerator dataGenerator = event.getGenerator();
-		PackOutput packOutput = dataGenerator.getPackOutput();
-		dataGenerator.addProvider(event.includeClient(), new JsonCodecProvider<BlockStateFile>(packOutput, event.getExistingFileHelper(), modid, dynamicOps, PackType.CLIENT_RESOURCES, "blockstates", CODEC, entries));
-	}
-	
+
 	/**
 	 * Specifies a blockstate file with a variants definition. See {@link Variants#builder}.
 	 * @param variants Variants mapping sets of blockstates to individual models.
@@ -118,7 +97,7 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 		/** codec **/
 		public static final Codec<Variants> CODEC = Codec.unboundedMap(
 				PropertyValue.LIST_CODEC,
-				new ExtraCodecs.EitherCodec<>(Model.CODEC, Model.CODEC.listOf()).xmap(
+				Codec.either(Model.CODEC, Model.CODEC.listOf()).xmap(
 					either -> either.map(List::of, Function.identity()),
 					list -> list.size() == 1 ? Either.left(list.get(0)) : Either.right(list)))
 			.xmap(Variants::new, Variants::variants);
@@ -381,7 +360,7 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 	{
 		/** codec **/
 		public static final Codec<OrCase> CODEC =
-			Codec.either(ExtraCodecs.lazyInitializedCodec(() -> OrCase.CODEC), Case.CODEC)
+			Codec.either(Codec.lazyInitialized(() -> OrCase.CODEC), Case.CODEC)
 				.listOf().fieldOf("OR").codec()
 				.xmap(OrCase::new, OrCase::cases);
 		

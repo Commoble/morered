@@ -1,0 +1,25 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 2,
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    {
+      "count": 1,
+      "tag": "c:gems/quartz"
+    },
+    {
+      "count": 1,
+      "tag": "c:dusts/redstone"
+    },
+    {
+      "count": 1,
+      "tag": "morered:bundled_network_cables"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:bitwise_and_gate"
+  }
+}

@@ -7,6 +7,7 @@ import org.joml.Matrix4f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import commoble.morered.MoreRed;
 import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.WirePostBlockEntity;
 import commoble.morered.wire_post.WireSpoolItem;
@@ -22,9 +23,6 @@ import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
@@ -32,6 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
 public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlockEntity>
@@ -39,7 +38,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 	public static final RenderType CABLE_RENDER_TYPE = ExtraRenderTypes.CABLE_RENDER_TYPE;
 
 	@SuppressWarnings("deprecation")
-	public static final Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,new ResourceLocation("morered:block/bundled_network_cable")); 
+	public static final Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,MoreRed.getModRL("block/bundled_network_cable")); 
 
 	public static final float[] REDS = {0.71F, 0.31F, 0.19F};
 	public static final float[] GREENS = {0.19F, 0.48F, 0.29F};
@@ -65,7 +64,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 		float quadStartV = (6F/16F) * texHeight + totalMinV;
 		float quadEndV = (12F/16F) * texHeight + totalMinV;
 		BlockPos postPos = post.getBlockPos();
-		Vec3 postVector = WirePostBlockEntity.getConnectionVector(postPos);
+		Vec3 postVector = Vec3.atCenterOf(postPos);
 		Set<BlockPos> connections = post.getRemoteConnections();
 		Level world = post.getLevel();
 		VertexConsumer vertexBuilder = buffer.getBuffer(ExtraRenderTypes.CABLE_RENDER_TYPE);
@@ -76,7 +75,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 			// ensure that for each pair of connections, only one cable is rendered (from the lower post if possible)
 			if (startY < endY || (startY == endY && postPos.hashCode() < connectionPos.hashCode()))
 			{
-				this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, postVector, WirePostBlockEntity.getConnectionVector(connectionPos), postPos, connectionPos, quadStartU, quadEndU, quadStartV, quadEndV);
+				this.renderConnection(post, world, partialTicks, matrices, vertexBuilder, postVector, Vec3.atCenterOf(connectionPos), postPos, connectionPos, quadStartU, quadEndU, quadStartV, quadEndV);
 			}
 		}
 
@@ -87,11 +86,10 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.getItem() instanceof WireSpoolItem)
 			{
-				CompoundTag nbt = stack.getTagElement(WireSpoolItem.LAST_POST_POS);
-				if (nbt != null)
+				BlockPos positionOfCurrentPostOfPlayer = stack.get(MoreRed.get().spooledPostComponent.get());
+				if (positionOfCurrentPostOfPlayer != null)
 				{
 					EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
-					BlockPos positionOfCurrentPostOfPlayer = NbtUtils.readBlockPos(nbt);
 
 					if (positionOfCurrentPostOfPlayer.equals(postPos))
 					{
@@ -243,6 +241,12 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 		return true;
 	}
 
+	@Override
+	public AABB getRenderBoundingBox(WirePostBlockEntity blockEntity)
+	{
+		return blockEntity.getRenderBoundingBox();
+	}
+
 	public static void addVertexPair(VertexConsumer vertexBuilder, Matrix4f lastMatrix, int packedLight, float x, float y, float z, float cableWidth,
 		float cableWidthOrZero, int segmentIndex, boolean secondVertexPairForQuad, float xOffset, float zOffset,
 		float minU, float maxU, float minV, float maxV)
@@ -250,30 +254,26 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 		
 		if (!secondVertexPairForQuad)
 		{
-			vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(minU, minV)
-				.uv2(packedLight)
-				.endVertex();
-			vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(minU, maxV)
-				.uv2(packedLight)
-				.endVertex();
+			vertexBuilder.addVertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
+				.setColor(1F, 1F, 1F, 1F)
+				.setUv(minU, minV)
+				.setLight(packedLight);
+			vertexBuilder.addVertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
+				.setColor(1F, 1F, 1F, 1F)
+				.setUv(minU, maxV)
+				.setLight(packedLight);
 		}
 		else
 		{
 
-			vertexBuilder.vertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(maxU, maxV)
-				.uv2(packedLight)
-				.endVertex();
-			vertexBuilder.vertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
-				.color(1F, 1F, 1F, 1F)
-				.uv(maxU, minV)
-				.uv2(packedLight)
-				.endVertex();
+			vertexBuilder.addVertex(lastMatrix, x - xOffset, y + cableWidthOrZero, z + zOffset)
+				.setColor(1F, 1F, 1F, 1F)
+				.setUv(maxU, maxV)
+				.setLight(packedLight);
+			vertexBuilder.addVertex(lastMatrix, x + xOffset, y + cableWidth - cableWidthOrZero, z - zOffset)
+				.setColor(1F, 1F, 1F, 1F)
+				.setUv(maxU, minV)
+				.setLight(packedLight);
 		}
 
 	}

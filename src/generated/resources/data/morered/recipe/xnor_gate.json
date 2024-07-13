@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    "t": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "pattern": [
+    "#t#",
+    "ttt",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:xnor_gate"
+  }
+}

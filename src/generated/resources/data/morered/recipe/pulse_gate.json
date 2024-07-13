@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    "i": {
+      "item": "minecraft:redstone_torch"
+    },
+    "r": {
+      "tag": "c:dusts/redstone"
+    }
+  },
+  "pattern": [
+    "rir",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:pulse_gate"
+  }
+}

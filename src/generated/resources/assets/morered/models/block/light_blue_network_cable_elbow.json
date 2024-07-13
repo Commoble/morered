@@ -1,6 +1,5 @@
 {
   "parent": "morered:block/colored_network_cable_elbow_template",
-  "render_type": "minecraft:solid",
   "textures": {
     "wire": "morered:block/light_blue_network_cable"
   }

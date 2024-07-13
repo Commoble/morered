@@ -2,12 +2,14 @@ package commoble.morered.api;
 
 import java.util.Map;
 
+import org.jetbrains.annotations.NotNull;
+
+import commoble.morered.MoreRed;
 import commoble.morered.api.internal.APIRegistries;
 import commoble.morered.api.internal.DefaultWireProperties;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
+import net.neoforged.neoforge.capabilities.BlockCapability;
 
 /**
  * This class contains some methods that can be used by other mods
@@ -28,7 +30,10 @@ public final class MoreRedAPI
 	/**
 	 * Capability instance for the Channeled Power Handler capability.
 	 */
-	public static final Capability<ChanneledPowerSupplier> CHANNELED_POWER_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
+	public static final BlockCapability<ChanneledPowerSupplier, @NotNull Direction> CHANNELED_POWER_CAPABILITY = BlockCapability.create(
+		MoreRed.getModRL("channeled_power"),
+		ChanneledPowerSupplier.class,
+		Direction.class);
 	
 	/**
 	 * Retrieves the registry for wire connectabilities to red alloy wires and colored network cables.

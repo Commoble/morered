@@ -58,19 +58,19 @@ public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 		// in which case we don't need to do anything 
 		// or B) the neighbor TE does have the capability, in which case the power MAY have changed, in which case we should check power
 		
-		if (!(world instanceof Level))
-			return;
-		
-		BlockEntity neighborTE = world.getBlockEntity(pos);
-		if (neighborTE == null)
+		if (!(world instanceof Level level))
 			return;
 		
 		Direction directionFromNeighbor = DirectionHelper.getDirectionToNeighborPos(neighbor, pos);
 		if (directionFromNeighbor == null)
 			return;
 		
-		neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionFromNeighbor).ifPresent($ -> this.updatePowerAfterBlockUpdate((Level)world, pos, state));
-
+		ChanneledPowerSupplier neighborPowerSupplier = level.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, neighbor, directionFromNeighbor);
+		if (neighborPowerSupplier != null)
+		{
+			this.updatePowerAfterBlockUpdate(level, pos, state);
+		}
+		
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		long edgeFlags = this.getEdgeFlags(world,pos);
 		if (edgeFlags != 0)
@@ -120,11 +120,8 @@ public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 		ChanneledPowerSupplier noPower = DefaultWireProperties.NO_POWER_SUPPLIER;
 		Function<BlockPos, Function<Direction, ChanneledPowerSupplier>> neighborPowerFinder = neighborPos -> directionToNeighbor ->
 		{
-			BlockEntity neighborTE = world.getBlockEntity(neighborPos);
-			if (neighborTE == null)
-				return noPower;
-			
-			return neighborTE.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, directionToNeighbor.getOpposite()).orElse(noPower);
+			ChanneledPowerSupplier neighborSupplier = world.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, neighborPos, directionToNeighbor.getOpposite());
+			return neighborSupplier == null ? noPower : neighborSupplier;
 		};
 		
 		for (int channel=0; channel<16; channel++)

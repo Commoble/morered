@@ -1,0 +1,15 @@
+modLoader="javafml" #mandatory
+loaderVersion="[1,)" #mandatory
+license="MIT License"
+[[mods]] #mandatory
+modId="morered_datagen" #mandatory
+version="${file.jarVersion}" #mandatory
+displayName="More Red Datagen" #mandatory
+credits='''
+I hear the Minecraft Mod Development discord channel is the cat's bananas.
+'''
+authors="Commoble"
+# The description text for the mod (multi line!) (#mandatory)
+description='''
+Datagen sources for More Red; not built into production jars.
+'''

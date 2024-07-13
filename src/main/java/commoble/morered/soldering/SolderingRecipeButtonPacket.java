@@ -1,49 +1,41 @@
 package commoble.morered.soldering;
 
-import java.util.function.Supplier;
-
+import commoble.morered.MoreRed;
+import io.netty.buffer.ByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraftforge.network.NetworkEvent;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 /** Packet sent from client to server when client clicks a recipe button in the soldering screen **/
-public class SolderingRecipeButtonPacket
+public record SolderingRecipeButtonPacket(ResourceLocation recipeId) implements CustomPacketPayload
 {
-	public final ResourceLocation recipeID;
+	public static final CustomPacketPayload.Type<SolderingRecipeButtonPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL("soldering_recipe_button"));
+	public static final StreamCodec<ByteBuf, SolderingRecipeButtonPacket> STREAM_CODEC = ResourceLocation.STREAM_CODEC
+		.map(SolderingRecipeButtonPacket::new, SolderingRecipeButtonPacket::recipeId);
 	
-	public SolderingRecipeButtonPacket(ResourceLocation recipeID)
+	public void handle(IPayloadContext context)
 	{
-		this.recipeID = recipeID;
+		context.enqueueWork(() -> this.handleThreadsafe(context));
 	}
 	
-	public void write(FriendlyByteBuf packet)
+	public void handleThreadsafe(IPayloadContext context)
 	{
-		packet.writeResourceLocation(this.recipeID);
-	}
-	
-	public static SolderingRecipeButtonPacket read(FriendlyByteBuf packet)
-	{
-		return new SolderingRecipeButtonPacket(packet.readResourceLocation());
-	}
-	
-	public void handle(Supplier<NetworkEvent.Context> contextGetter)
-	{
-		contextGetter.get().enqueueWork(() -> this.handleThreadsafe(contextGetter.get()));
-		contextGetter.get().setPacketHandled(true);
-	}
-	
-	public void handleThreadsafe(NetworkEvent.Context context)
-	{
-		ServerPlayer player = context.getSender();
-		if (player != null)
+		if (context.player() instanceof ServerPlayer player)
 		{
 			AbstractContainerMenu container = player.containerMenu;
-			if (container instanceof SolderingMenu)
+			if (container instanceof SolderingMenu menu)
 			{
-				((SolderingMenu)container).onPlayerChoseRecipe(this.recipeID);
+				menu.onPlayerChoseRecipe(this.recipeId);
 			}
 		}
+	}
+
+	@Override
+	public Type<? extends CustomPacketPayload> type()
+	{
+		return TYPE;
 	}
 }

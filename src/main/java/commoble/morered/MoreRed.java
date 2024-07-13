@@ -3,6 +3,7 @@ package commoble.morered;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
@@ -13,10 +14,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
 
-import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.MoreRedAPI;
 import commoble.morered.api.WireConnector;
@@ -35,15 +34,14 @@ import commoble.morered.plate_blocks.LogicFunctions;
 import commoble.morered.plate_blocks.PlateBlock;
 import commoble.morered.plate_blocks.PulseGateBlock;
 import commoble.morered.soldering.SolderingMenu;
+import commoble.morered.soldering.SolderingRecipe;
 import commoble.morered.soldering.SolderingRecipeButtonPacket;
-import commoble.morered.soldering.SolderingRecipeSerializer;
 import commoble.morered.soldering.SolderingTableBlock;
 import commoble.morered.wire_post.BundledCablePostBlock;
 import commoble.morered.wire_post.BundledCablePostBlockEntity;
 import commoble.morered.wire_post.BundledCableRelayPlateBlock;
 import commoble.morered.wire_post.BundledCableRelayPlateBlockEntity;
 import commoble.morered.wire_post.FakeStateLevel;
-import commoble.morered.wire_post.PostsInChunk;
 import commoble.morered.wire_post.SlackInterpolator;
 import commoble.morered.wire_post.SyncPostsInChunkPacket;
 import commoble.morered.wire_post.WireBreakPacket;
@@ -62,15 +60,15 @@ import commoble.morered.wires.WireBlockItem;
 import commoble.morered.wires.WireCountLootFunction;
 import commoble.morered.wires.WireUpdateBuffer;
 import commoble.morered.wires.WireUpdatePacket;
-import commoble.useitemonblockevent.api.UseItemOnBlockEvent;
-import commoble.useitemonblockevent.api.UseItemOnBlockEvent.UsePhase;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
+import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -80,11 +78,10 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.CreativeModeTab;
@@ -93,7 +90,6 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.context.UseOnContext;
-import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ChunkPos;
@@ -111,30 +107,29 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.common.crafting.CraftingHelper;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.TickEvent.LevelTickEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
-import net.minecraftforge.event.level.ChunkWatchEvent;
-import net.minecraftforge.eventbus.api.Event;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.fml.loading.FMLEnvironment;
-import net.minecraftforge.network.NetworkRegistry;
-import net.minecraftforge.network.PacketDistributor;
-import net.minecraftforge.network.simple.SimpleChannel;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.bus.api.EventPriority;
+import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
+import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent.UsePhase;
+import net.neoforged.neoforge.event.level.ChunkWatchEvent;
+import net.neoforged.neoforge.event.tick.LevelTickEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
+import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 @Mod(MoreRed.MODID)
 public class MoreRed
@@ -144,65 +139,59 @@ public class MoreRed
 	private static MoreRed instance;
 	public static MoreRed get() { return instance; }
 	
-	// the network channel we'll use for sending packets associated with this mod
-	public static final String CHANNEL_PROTOCOL_VERSION = "2";
-	public static final SimpleChannel CHANNEL = NetworkRegistry.newSimpleChannel(
-		new ResourceLocation(MoreRed.MODID, "main"),
-		() -> CHANNEL_PROTOCOL_VERSION,
-		CHANNEL_PROTOCOL_VERSION::equals,
-		CHANNEL_PROTOCOL_VERSION::equals);
-	
 	public static ResourceLocation getModRL(String name)
 	{
-		return new ResourceLocation(MODID, name);
+		return ResourceLocation.fromNamespaceAndPath(MODID, name);
 	}
 
-	public final Map<ResourceLocation, RegistryObject<? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
-	public final Map<ResourceLocation, RegistryObject<? extends BitwiseLogicPlateBlock>> bitwiseLogicPlates = new HashMap<>();
+	public final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
+	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseLogicPlateBlock>> bitwiseLogicPlates = new HashMap<>();
 	
-	public final RegistryObject<SolderingTableBlock> solderingTableBlock;
-	public final RegistryObject<PlateBlock> stonePlateBlock;
-	public final RegistryObject<LatchBlock> latchBlock;
-	public final RegistryObject<PulseGateBlock> pulseGateBlock;
-	public final RegistryObject<WirePostBlock> redwirePostBlock;
-	public final RegistryObject<WirePostPlateBlock> redwirePostPlateBlock;
-	public final RegistryObject<WirePostPlateBlock> redwirePostRelayPlateBlock;
-	public final RegistryObject<HexidecrubrometerBlock> hexidecrubrometerBlock;
-	public final RegistryObject<RedAlloyWireBlock> redAlloyWireBlock;
-	public final RegistryObject<ColoredCableBlock>[] networkCableBlocks;
-	public final RegistryObject<BundledCableBlock> bundledNetworkCableBlock;
-	public final RegistryObject<BundledCablePostBlock> bundledCablePostBlock;
-	public final RegistryObject<BundledCableRelayPlateBlock> bundledCableRelayPlateBlock;
+	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
+	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
+	public final DeferredHolder<Block, LatchBlock> latchBlock;
+	public final DeferredHolder<Block, PulseGateBlock> pulseGateBlock;
+	public final DeferredHolder<Block, WirePostBlock> redwirePostBlock;
+	public final DeferredHolder<Block, WirePostPlateBlock> redwirePostPlateBlock;
+	public final DeferredHolder<Block, WirePostPlateBlock> redwirePostRelayPlateBlock;
+	public final DeferredHolder<Block, HexidecrubrometerBlock> hexidecrubrometerBlock;
+	public final DeferredHolder<Block, RedAlloyWireBlock> redAlloyWireBlock;
+	public final DeferredHolder<Block, ColoredCableBlock>[] networkCableBlocks;
+	public final DeferredHolder<Block, BundledCableBlock> bundledNetworkCableBlock;
+	public final DeferredHolder<Block, BundledCablePostBlock> bundledCablePostBlock;
+	public final DeferredHolder<Block, BundledCableRelayPlateBlock> bundledCableRelayPlateBlock;
 
-	public final RegistryObject<WireSpoolItem> redwireSpoolItem;
-	public final RegistryObject<Item> bundledCableSpoolItem;
-	public final RegistryObject<Item> redAlloyIngotItem;
+	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
+	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
+	public final DeferredHolder<Item, Item> redAlloyIngotItem;
 	
-	public final RegistryObject<CreativeModeTab> tab;
+	public final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
 
-	public final RegistryObject<BlockEntityType<WirePostBlockEntity>> redwirePostBeType;
-	public final RegistryObject<BlockEntityType<WireBlockEntity>> wireBeType;
-	public final RegistryObject<BlockEntityType<ColoredCableBlockEntity>> coloredNetworkCableBeType;
-	public final RegistryObject<BlockEntityType<BundledCableBlockEntity>> bundledNetworkCableBeType;
-	public final RegistryObject<BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
-	public final RegistryObject<BlockEntityType<BundledCableRelayPlateBlockEntity>> bundledCableRelayPlateBeType;
-	public final RegistryObject<BlockEntityType<ChanneledPowerStorageBlockEntity>> bitwiseLogicGateBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> redwirePostBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ColoredCableBlockEntity>> coloredNetworkCableBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCableBlockEntity>> bundledNetworkCableBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCableRelayPlateBlockEntity>> bundledCableRelayPlateBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChanneledPowerStorageBlockEntity>> bitwiseLogicGateBeType;
 
-	public final RegistryObject<MenuType<SolderingMenu>> solderingMenuType;
-	public final RegistryObject<SolderingRecipeSerializer> solderingSerializer;
-	public final RegistryObject<RecipeType<Recipe<CraftingContainer>>> solderingRecipeType;
+	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
+	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
+	public final DeferredHolder<RecipeType<?>, RecipeType<SolderingRecipe>> solderingRecipeType;
 	
-	public final RegistryObject<LootItemFunctionType> wireCountLootFunction;
+	public final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> wireCountLootFunction;
+	
+	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> postsInChunkAttachment;
+	public final DeferredHolder<AttachmentType<?>, AttachmentType<Map<BlockPos, VoxelShape>>> voxelCacheAttachment;
+	
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> spooledPostComponent;
 	
 	@SuppressWarnings("unchecked")
-	public MoreRed()
+	public MoreRed(IEventBus modBus)
 	{
 		instance = this;
 		
-		ModLoadingContext modContext = ModLoadingContext.get();
-		FMLJavaModLoadingContext fmlContext = FMLJavaModLoadingContext.get();
-		IEventBus modBus = fmlContext.getModEventBus();
-		IEventBus forgeBus = MinecraftForge.EVENT_BUS;
+		IEventBus forgeBus = NeoForge.EVENT_BUS;
 
 		DeferredRegister<Block> blocks = createDeferredRegister(modBus, Registries.BLOCK);
 		DeferredRegister<Item> items = createDeferredRegister(modBus, Registries.ITEM);
@@ -211,7 +200,9 @@ public class MoreRed
 		DeferredRegister<MenuType<?>> menuTypes = createDeferredRegister(modBus, Registries.MENU);
 		DeferredRegister<RecipeSerializer<?>> recipeSerializers = createDeferredRegister(modBus, Registries.RECIPE_SERIALIZER);
 		DeferredRegister<RecipeType<?>> recipeTypes = createDeferredRegister(modBus, Registries.RECIPE_TYPE);
-		DeferredRegister<LootItemFunctionType> lootFunctions = createDeferredRegister(modBus, Registries.LOOT_FUNCTION_TYPE);
+		DeferredRegister<LootItemFunctionType<?>> lootFunctions = createDeferredRegister(modBus, Registries.LOOT_FUNCTION_TYPE);
+		DeferredRegister<AttachmentType<?>> attachmentTypes = createDeferredRegister(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
+		DeferredRegister<DataComponentType<?>> dataComponentTypes = createDeferredRegister(modBus, Registries.DATA_COMPONENT_TYPE);
 		
 		solderingTableBlock = registerBlockItem(blocks, items, ObjectNames.SOLDERING_TABLE,
 			() -> new SolderingTableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion()));
@@ -237,8 +228,8 @@ public class MoreRed
 		redAlloyWireBlock = registerBlockItem(blocks, items, ObjectNames.RED_ALLOY_WIRE, 
 			() -> new RedAlloyWireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
 			block -> new WireBlockItem(block, new Item.Properties()));
-		networkCableBlocks = Util.make((RegistryObject<ColoredCableBlock>[])new RegistryObject[16], array ->
-			Arrays.setAll(array, i -> registerBlockItem(blocks, items, ObjectNames.NETWORK_CABLES[i],
+		networkCableBlocks = Util.make((DeferredHolder<Block, ColoredCableBlock>[])new DeferredHolder[16], array ->
+			Arrays.setAll(array, i -> registerBlockItem(blocks, items, ObjectNames.NETWORK_CABLES_BY_COLOR[i],
 				() -> new ColoredCableBlock(BlockBehaviour.Properties.of().mapColor(DyeColor.values()[i]).pushReaction(PushReaction.DESTROY).noCollission().instabreak(), DyeColor.values()[i]),
 				block -> new WireBlockItem(block, new Item.Properties()))));
 		bundledNetworkCableBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_NETWORK_CABLE,
@@ -272,7 +263,7 @@ public class MoreRed
 		bundledCableSpoolItem = items.register(ObjectNames.BUNDLED_CABLE_SPOOL, () -> new WireSpoolItem(new Item.Properties().durability(64), MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
 		redAlloyIngotItem = items.register(ObjectNames.RED_ALLOY_INGOT, () -> new Item(new Item.Properties()));
 
-		ResourceLocation tabIconId = new ResourceLocation(MODID, ObjectNames.NOR_GATE);
+		ResourceLocation tabIconId = getModRL(ObjectNames.NOR_GATE);
 		this.tab = tabs.register(MoreRed.MODID, () -> CreativeModeTab.builder()
 			.icon(() -> new ItemStack(this.logicPlates.get(tabIconId).get()))
 			.title(Component.translatable("itemGroup.morered"))
@@ -293,7 +284,7 @@ public class MoreRed
 		coloredNetworkCableBeType = blockEntityTypes.register(ObjectNames.COLORED_NETWORK_CABLE,
 			() -> BlockEntityType.Builder.of(ColoredCableBlockEntity::new,
 				Arrays.stream(networkCableBlocks)
-					.map(RegistryObject::get)
+					.map(DeferredHolder::get)
 					.toArray(ColoredCableBlock[]::new))
 			.build(null));
 		bundledNetworkCableBeType = blockEntityTypes.register(ObjectNames.BUNDLED_NETWORK_CABLE,
@@ -321,29 +312,39 @@ public class MoreRed
 		solderingMenuType = menuTypes.register(ObjectNames.SOLDERING_TABLE,
 			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
 		solderingSerializer = recipeSerializers.register(ObjectNames.SOLDERING_RECIPE,
-			() -> new SolderingRecipeSerializer());
-		solderingRecipeType = recipeTypes.register(ObjectNames.SOLDERING_RECIPE, () -> RecipeType.simple(new ResourceLocation(MODID, ObjectNames.SOLDERING_RECIPE)));
+			() -> new SimpleRecipeSerializer<>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
+		solderingRecipeType = recipeTypes.register(ObjectNames.SOLDERING_RECIPE, () -> RecipeType.simple(getModRL(ObjectNames.SOLDERING_RECIPE)));
 		
-		wireCountLootFunction = lootFunctions.register(ObjectNames.WIRE_COUNT, () -> new LootItemFunctionType(WireCountLootFunction.INSTANCE));
+		wireCountLootFunction = lootFunctions.register(ObjectNames.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
 		
-		ServerConfig.initServerConfig(modContext, fmlContext);
+		postsInChunkAttachment = attachmentTypes.register(ObjectNames.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
+			.serialize(BlockPos.CODEC.listOf().xmap(HashSet::new, List::copyOf))
+			.build());
+		
+		voxelCacheAttachment = attachmentTypes.register(ObjectNames.VOXEL_CACHE, () -> AttachmentType.<Map<BlockPos,VoxelShape>>builder(() -> new HashMap<>())
+			.build());
+		
+		spooledPostComponent = dataComponentTypes.register(ObjectNames.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
+			.networkSynchronized(BlockPos.STREAM_CODEC)
+			.build());
+		
+		ServerConfig.initServerConfig();
 		
 		modBus.addListener(EventPriority.HIGH, this::onHighPriorityCommonSetup);
-		modBus.addListener(this::onCommonSetup);
 		modBus.addListener(this::onLoadComplete);
 		modBus.addListener(this::onRegisterCapabilities);
+		modBus.addListener(this::onRegisterPackets);
 		
-		forgeBus.addGenericListener(LevelChunk.class, this::onAttachChunkCapabilities);
 		forgeBus.addListener(EventPriority.LOW, this::onUseItemOnBlock);
 		forgeBus.addListener(EventPriority.LOW, this::onLeftClickBlock);
-		forgeBus.addListener(this::onLevelTick);
+		forgeBus.addListener(this::onLevelTickEnd);
 		forgeBus.addListener(this::onUseItemOnBlock);
 		forgeBus.addListener(this::onChunkWatch);
 		
 		// add layer of separation to client stuff so we don't break servers
 		if (FMLEnvironment.dist == Dist.CLIENT)
 		{
-			ClientProxy.addClientListeners(modContext, fmlContext, modBus, forgeBus);
+			ClientProxy.addClientListeners(modBus, forgeBus);
 		}
 	}
 	
@@ -351,7 +352,7 @@ public class MoreRed
 	{
 		public static class Blocks
 		{
-			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, new ResourceLocation(MODID, name)); }
+			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, getModRL(name)); }
 			
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
@@ -359,22 +360,13 @@ public class MoreRed
 		
 		public static class Items
 		{
-			private static TagKey<Item> tag(String name) { return TagKey.create(Registries.ITEM, new ResourceLocation(MODID, name)); }
+			private static TagKey<Item> tag(String name) { return TagKey.create(Registries.ITEM, getModRL(name)); }
 			
-			public static final TagKey<Item> RED_ALLOY_WIRES = tag(ObjectNames.RED_ALLOY_WIRES);
+			public static final TagKey<Item> BUNDLED_NETWORK_CABLES = tag(ObjectNames.BUNDLED_NETWORK_CABLES);
 			public static final TagKey<Item> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
-		}
-	}
-	
-	public void addModListeners(IEventBus modBus)
-	{
-	}
-	
-	public static void subscribedDeferredRegisters(IEventBus modBus, DeferredRegister<?>... registers)
-	{
-		for(DeferredRegister<?> register : registers)
-		{
-			register.register(modBus);
+			public static final TagKey<Item> NETWORK_CABLES = tag(ObjectNames.NETWORK_CABLES);
+			public static final TagKey<Item> RED_ALLOY_WIRES = tag(ObjectNames.RED_ALLOY_WIRES);
+			public static final TagKey<Item> RED_ALLOYABLE_INGOTS = tag(ObjectNames.RED_ALLOYABLE_INGOTS);
 		}
 	}
 	
@@ -411,38 +403,19 @@ public class MoreRed
 	
 	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
-		event.register(PostsInChunk.class);
-		event.register(ChanneledPowerSupplier.class);
+		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.coloredNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
+		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
+		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledCableRelayPlateBeType.get(), (be,side) -> be.getChanneledPower(side));
+		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bitwiseLogicGateBeType.get(), (be,side) -> be.getChanneledPower(side));
 	}
 	
-	private void onCommonSetup(FMLCommonSetupEvent event)
+	private void onRegisterPackets(RegisterPayloadHandlersEvent event)
 	{
-		// register packets
-		int packetID = 0;
-		MoreRed.CHANNEL.registerMessage(packetID++,
-			SolderingRecipeButtonPacket.class,
-			SolderingRecipeButtonPacket::write,
-			SolderingRecipeButtonPacket::read,
-			SolderingRecipeButtonPacket::handle);
-		MoreRed.CHANNEL.registerMessage(packetID++,
-			WireBreakPacket.class,
-			WireBreakPacket::write,
-			WireBreakPacket::read,
-			WireBreakPacket::handle);
-		MoreRed.CHANNEL.registerMessage(packetID++,
-			SyncPostsInChunkPacket.class,
-			SyncPostsInChunkPacket::write,
-			SyncPostsInChunkPacket::read,
-			SyncPostsInChunkPacket::handle);
-		PacketTypeFactory.register(packetID++, MoreRed.CHANNEL, WireUpdatePacket.CODEC, new WireUpdatePacket(ImmutableSet.of()));
-		
-		// run thread-sensitive stuff on main thread
-		event.enqueueWork(this::afterCommonSetup);
-	}
-	
-	private void afterCommonSetup()
-	{
-		CraftingHelper.register(new ResourceLocation("morered:tag_stack"), TagStackIngredient.SERIALIZER);
+		PayloadRegistrar r = event.registrar("6.0.0");
+		r.playToServer(SolderingRecipeButtonPacket.TYPE, SolderingRecipeButtonPacket.STREAM_CODEC, SolderingRecipeButtonPacket::handle);
+		r.playToClient(WireBreakPacket.TYPE, WireBreakPacket.STREAM_CODEC, WireBreakPacket::handle);
+		r.playToClient(SyncPostsInChunkPacket.TYPE, SyncPostsInChunkPacket.STREAM_CODEC, SyncPostsInChunkPacket::handle);
+		r.playToClient(WireUpdatePacket.TYPE, WireUpdatePacket.STREAM_CODEC, WireUpdatePacket::handle);
 	}
 
 	private void onLoadComplete(FMLLoadCompleteEvent event)
@@ -451,19 +424,12 @@ public class MoreRed
 		APIRegistries.freezeRegistries();
 	}
 	
-	private void onAttachChunkCapabilities(AttachCapabilitiesEvent<LevelChunk> event)
-	{
-		PostsInChunk cap = new PostsInChunk(event.getObject());
-		event.addCapability(getModRL(ObjectNames.POSTS_IN_CHUNK), cap);
-		event.addListener(cap::onCapabilityInvalidated);
-	}
-	
 	@SuppressWarnings("deprecation")
 	private void onUseItemOnBlock(UseItemOnBlockEvent event)
 	{
 		UseOnContext useContext = event.getUseOnContext();
 		ItemStack stack = useContext.getItemInHand();
-		if (event.getUsePhase() == UsePhase.POST_BLOCK && stack.getItem() instanceof BlockItem blockItem)
+		if (event.getUsePhase() == UsePhase.ITEM_AFTER_BLOCK && stack.getItem() instanceof BlockItem blockItem)
 		{
 			Level level = useContext.getLevel();
 			BlockPlaceContext placeContext = new BlockPlaceContext(useContext);
@@ -473,17 +439,29 @@ public class MoreRed
 			{
 				return; // placement state is null when the block couldn't be placed there anyway
 			}
-			Set<ChunkPos> chunkPositions = PostsInChunk.getRelevantChunkPositionsNearPos(placePos);
+			
+			// get relevant chunk positions near pos
+			double range = ServerConfig.INSTANCE.maxWirePostConnectionRange().get();
+			ChunkPos nearbyChunkPos = new ChunkPos(placePos);
+			int chunkRange = (int) Math.ceil(range/16D);
+			Set<ChunkPos> chunkPositions = new HashSet<>();
+			for (int xOff = -chunkRange; xOff <= chunkRange; xOff++)
+			{
+				for (int zOff = -chunkRange; zOff <= chunkRange; zOff++)
+				{
+					chunkPositions.add(new ChunkPos(nearbyChunkPos.x + xOff, nearbyChunkPos.z + zOff));
+				}
+			}
 			
 			for (ChunkPos chunkPos : chunkPositions)
 			{
 				if (level.hasChunkAt(chunkPos.getWorldPosition()))
 				{
 					LevelChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
-					chunk.getCapability(PostsInChunk.CAPABILITY).ifPresent(posts ->
-					{
+					Set<BlockPos> posts = chunk.getData(this.postsInChunkAttachment.get());
+					if (posts != null) {
 						Set<BlockPos> checkedPostPositions = new HashSet<BlockPos>();
-						for (BlockPos postPos : posts.getPositions())
+						for (BlockPos postPos : posts)
 						{
 							BlockEntity be = level.getBlockEntity(postPos);
 							if (be instanceof WirePostBlockEntity wire)
@@ -506,7 +484,7 @@ public class MoreRed
 									{
 										player.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 									}
-									event.cancelWithResult(InteractionResult.SUCCESS);
+									event.cancelWithResult(ItemInteractionResult.SUCCESS);
 									return;
 								}
 								else
@@ -515,7 +493,7 @@ public class MoreRed
 								}
 							}
 						}
-					});
+					}
 				}
 			}
 		}
@@ -523,6 +501,9 @@ public class MoreRed
 	
 	private void onLeftClickBlock(LeftClickBlock event)
 	{
+		if (event.getAction() != LeftClickBlock.Action.START)
+			return;
+		
 		Level level = event.getLevel();
 		if (!(level instanceof ServerLevel serverLevel))
 			return;
@@ -536,68 +517,39 @@ public class MoreRed
 		Block block = state.getBlock();
 		if (!(block instanceof AbstractWireBlock wireBlock))
 			return;
-
-		boolean blockActionRestricted = player.blockActionRestricted(level, pos, serverPlayer.gameMode.getGameModeForPlayer());
-		boolean isCreative = player.isCreative();
-		if (!isCreative && (event.getUseItem() == Event.Result.DENY || blockActionRestricted))
-			return;
-		if (pos.getY() > serverLevel.getMaxBuildHeight() || pos.getY() < serverLevel.getMinBuildHeight())
-			return;
-		if (!level.mayInteract(player, pos))
-			return;
-
-		// this was the old reach check, keep it around for a version or two so we can compare old behavior if we get buggy
-//		double dx = player.getX() - (pos.getX() + 0.5D);
-//		double dy = player.getY() - (pos.getY() + 0.5D) + 1.5D;
-//		double dz = player.getZ() - (pos.getZ() + 0.5D);
-//		double distSquared = dx * dx + dy * dy + dz * dz;
-//		double reachDistance = player.getAttribute(net.minecraftforge.common.ForgeMod.BLOCK_REACH.get()).getValue() + 1;
-//		if (distSquared > reachDistance*reachDistance)
-//			return;
-		if (!player.canReach(pos, 1.5D))
+		
+		// override event from here
+		event.setCanceled(true);
+		
+		// we still have to redo a few of the existing checks
+		if (!serverPlayer.canInteractWithBlock(pos, 1.0)
+			|| (pos.getY() >= serverLevel.getMaxBuildHeight() || pos.getY() < serverLevel.getMinBuildHeight())
+			|| !serverLevel.mayInteract(serverPlayer, pos) // checks spawn protection and world border
+			|| CommonHooks.fireBlockBreak(serverLevel, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer, pos, state).isCanceled()
+			|| serverPlayer.blockActionRestricted(serverLevel, pos, serverPlayer.gameMode.getGameModeForPlayer()))
 		{
+			serverPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, state));
 			return;
 		}
-		
-		// we have a specific enough situation to take over the event from this point forward
-		event.setCanceled(true);
-		// if we cancel the event, a digging response packet will be sent
-		// using whatever state exists in the world *after* the event
-		// so we can set our own blockstate here and it should be sent to the client correctly
-		
-		// we also really don't want to be sending any packets ourselves
-		// each digging packet the client sent has to have a response packet for the same pos and action or we get log spam
-		// the event handler will send a matching digging response for us if we cancel it
-		// (it's a deny response, but it also immediately send a block update afterward, so that's fine)
 		Direction hitNormal = event.getFace();
 		Direction destroySide = hitNormal.getOpposite();
-		if (!isCreative && (event.getUseBlock() != net.minecraftforge.eventbus.api.Event.Result.DENY))
+		if (serverPlayer.isCreative())
 		{
-			state.attack(level, pos, player);
+			wireBlock.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, false);
+			return;
 		}
-
-		int exp = ForgeHooks.onBlockBreakEvent(level, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer, pos);
-		if (exp == -1)
+		if (!state.canHarvestBlock(serverLevel, pos, serverPlayer))
+		{
+			serverPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, state));
 			return;
-		
-		if (player.getMainHandItem().onBlockStartBreak(pos, player))
-            return;
-		
-		// checking blockActionRestricted again looks weird, but it's for parity with normal logic
-		// if the player is in creative, they're allowed to fire the block break event and onBlockStartBreak first
-		// then this gets checked again even if they are in creative
-		if (blockActionRestricted)
-			return;
-		
-		// don't drop items if creative
-		boolean dropItems = !isCreative;
-		wireBlock.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, dropItems);
+		}
+		wireBlock.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, true);
 	}
 	
-	private void onLevelTick(LevelTickEvent event)
+	private void onLevelTickEnd(LevelTickEvent.Post event)
 	{
-		Level level = event.level;
-		if (event.phase == TickEvent.Phase.END && level instanceof ServerLevel serverLevel)
+		Level level = event.getLevel();
+		if (level instanceof ServerLevel serverLevel)
 		{
 			WireUpdateBuffer.get(serverLevel).sendPackets(serverLevel);
 		}
@@ -609,9 +561,11 @@ public class MoreRed
 		ServerPlayer player = event.getPlayer();
 		LevelChunk chunk = event.getChunk();
 		ChunkPos pos = chunk.getPos();
-		chunk.getCapability(PostsInChunk.CAPABILITY).ifPresent(cap -> 
-			MoreRed.CHANNEL.send(PacketDistributor.PLAYER.with(()->player), new SyncPostsInChunkPacket(pos, cap.getPositions()))
-		);
+		Set<BlockPos> postsInChunk = chunk.getData(postsInChunkAttachment.get());
+		if (postsInChunk != null && !postsInChunk.isEmpty())
+		{
+			PacketDistributor.sendToPlayer(player, new SyncPostsInChunkPacket(pos, postsInChunk));
+		}
 	}
 	
 	private static <T> DeferredRegister<T> createDeferredRegister(IEventBus modBus, ResourceKey<Registry<T>> registryKey)
@@ -621,19 +575,19 @@ public class MoreRed
 		return reg;
 	}
 	
-	private static <BLOCK extends Block, ITEM extends BlockItem> RegistryObject<BLOCK> registerBlockItem(
+	private static <BLOCK extends Block, ITEM extends BlockItem> DeferredHolder<Block, BLOCK> registerBlockItem(
 		DeferredRegister<Block> blocks,
 		DeferredRegister<Item> items,
 		String name,
 		Supplier<? extends BLOCK> blockFactory,
 		Function<? super BLOCK, ? extends ITEM> itemFactory)
 	{
-		RegistryObject<BLOCK> block = blocks.register(name, blockFactory);
+		DeferredHolder<Block, BLOCK> block = blocks.register(name, blockFactory);
 		items.register(name, () -> itemFactory.apply(block.get()));
 		return block;
 	}
 	
-	private static <BLOCK extends Block> RegistryObject<BLOCK> registerBlockItem(
+	private static <BLOCK extends Block> DeferredHolder<Block, BLOCK> registerBlockItem(
 		DeferredRegister<Block> blocks,
 		DeferredRegister<Item> items,
 		String name,
@@ -642,24 +596,24 @@ public class MoreRed
 		return registerBlockItem(blocks, items, name, blockFactory, block -> new BlockItem(block, new Item.Properties()));
 	}
 	
-	public RegistryObject<LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public DeferredHolder<Block, LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
 		LogicFunction function,
 		LogicFunctionPlateBlockFactory factory)
 	{
 		Supplier<LogicFunctionPlateBlock> blockFactory = () -> factory.makeBlock(function,
 			BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD));
-		RegistryObject<LogicFunctionPlateBlock> blockGetter = registerBlockItem(blocks, items, name, blockFactory);
+		DeferredHolder<Block, LogicFunctionPlateBlock> blockGetter = registerBlockItem(blocks, items, name, blockFactory);
 		logicPlates.put(blockGetter.getId(), blockGetter);
 		return blockGetter;
 	}
 	
-	public <B extends BitwiseLogicPlateBlock> RegistryObject<B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public <B extends BitwiseLogicPlateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
 		LogicFunction function,
 		BiFunction<BlockBehaviour.Properties, LogicFunction, B> blockFactory)
 	{
 		Supplier<B> actualBlockFactory = () -> blockFactory.apply(
 			BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD), function);
-		RegistryObject<B> rob = registerBlockItem(blocks, items, name, actualBlockFactory);
+		DeferredHolder<Block, B> rob = registerBlockItem(blocks, items, name, actualBlockFactory);
 		bitwiseLogicPlates.put(rob.getId(), rob);
 		return rob;
 	}

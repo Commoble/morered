@@ -1,0 +1,17 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 1,
+      "tag": "c:ingots/iron"
+    },
+    {
+      "count": 1,
+      "tag": "c:ingots/redstone_alloy"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:redwire_post"
+  }
+}

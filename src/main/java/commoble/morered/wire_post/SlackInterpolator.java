@@ -116,8 +116,8 @@ public class SlackInterpolator
 	@Nullable
 	public static Vec3 getWireRaytraceHit(BlockPos lower, BlockPos upper, BlockGetter world)
 	{
-		Vec3 startVec = WirePostBlockEntity.getConnectionVector(lower);
-		Vec3 endVec = WirePostBlockEntity.getConnectionVector(upper);
+		Vec3 startVec = Vec3.atCenterOf(lower);
+		Vec3 endVec = Vec3.atCenterOf(upper);
 		Vec3[] points = getInterpolatedPoints(startVec, endVec);
 		WireRayTraceSelectionContext selector = new WireRayTraceSelectionContext(lower, upper);
 		int pointCount = points.length;

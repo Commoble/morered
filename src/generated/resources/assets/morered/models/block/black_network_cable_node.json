@@ -1,6 +1,5 @@
 {
   "parent": "morered:block/colored_network_cable_node_template",
-  "render_type": "minecraft:solid",
   "textures": {
     "wire": "morered:block/black_network_cable"
   }

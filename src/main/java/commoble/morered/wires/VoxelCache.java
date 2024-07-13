@@ -1,88 +1,54 @@
 package commoble.morered.wires;
 
-import java.util.concurrent.TimeUnit;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nonnull;
-
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
-
+import commoble.morered.MoreRed;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.level.Level;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class VoxelCache extends SavedData
-{
-	public static final String ID = "morered:voxelcache";
-	private static VoxelCache clientCache = null;
-	
-	protected final Level world;
-	public final LoadingCache<BlockPos, VoxelShape> shapesByPos;
-	
-	public VoxelCache(@Nonnull Level world)
+public class VoxelCache
+{	
+	public static VoxelShape get(Level level, BlockPos pos)
 	{
-		this.world = world;
-		this.shapesByPos = CacheBuilder.newBuilder()
-			.expireAfterAccess(2, TimeUnit.MINUTES)
-			.build(new VoxelLoader());
-	}
-	
-	public static VoxelCache get(@Nonnull Level level)
-	{
-		if (level instanceof ServerLevel serverLevel)
+		int chunkX = SectionPos.blockToSectionCoord(pos.getX());
+		int chunkZ = SectionPos.blockToSectionCoord(pos.getZ());
+		var chunk = level.getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+		if (chunk == null)
+			return Shapes.empty();
+		
+		var map = chunk.getData(MoreRed.get().voxelCacheAttachment.get());
+		@Nullable VoxelShape cachedShape = map.get(pos);
+		if (cachedShape != null)
 		{
-			// data is transient, don't need to load anything
-			return serverLevel.getDataStorage().computeIfAbsent(tag -> new VoxelCache(level), () -> new VoxelCache(level), ID);
-		}
-		else
-		{
-			if (clientCache == null || clientCache.world != level)
-			{
-				clientCache = new VoxelCache(level);
-			}
-			return clientCache;
-		}
-	}
-
-	@Override
-	public CompoundTag save(CompoundTag tag)
-	{
-		return tag; //noop
-	}
-	
-	public static void clearClientCache()
-	{
-		clientCache = null;
-	}
-	
-	public VoxelShape getWireShape(BlockPos pos)
-	{
-		return this.shapesByPos.getUnchecked(pos.immutable());
-	}
-	
-	public class VoxelLoader extends CacheLoader<BlockPos, VoxelShape>
-	{
-
-		@Override
-		public VoxelShape load(BlockPos pos) throws Exception
-		{
-			Level world = VoxelCache.this.world;
-			BlockState state = world.getBlockState(pos);
-			Block block = state.getBlock();
-			if (!(block instanceof AbstractWireBlock))
-				return Shapes.empty();
-			
-			AbstractWireBlock wireBlock = (AbstractWireBlock)block;
-			
-			return wireBlock.getCachedExpandedShapeVoxel(state,world,pos);
+			return cachedShape;
 		}
 		
+		BlockState state = level.getBlockState(pos);
+		Block block = state.getBlock();
+		
+		if (!(block instanceof AbstractWireBlock wireBlock))
+		{
+			return Shapes.empty();
+		}
+		VoxelShape wireShape = wireBlock.getCachedExpandedShapeVoxel(state, level, pos);
+		map.put(pos.immutable(), wireShape);
+		return wireShape;
+	}
+	
+	public static void invalidate(Level level, BlockPos pos)
+	{
+		int chunkX = SectionPos.blockToSectionCoord(pos.getX());
+		int chunkZ = SectionPos.blockToSectionCoord(pos.getZ());
+		var chunk = level.getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
+		if (chunk == null)
+			return;
+		var map = chunk.getData(MoreRed.get().voxelCacheAttachment.get());
+		map.remove(pos);
 	}
 }

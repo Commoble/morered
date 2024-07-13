@@ -1,8 +1,6 @@
 package commoble.morered.soldering;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import org.jetbrains.annotations.Nullable;
 
 import commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
@@ -11,12 +9,11 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
 public class SolderingMenu extends AbstractContainerMenu
@@ -34,7 +31,7 @@ public class SolderingMenu extends AbstractContainerMenu
 	private final ContainerLevelAccess positionInWorld;
 	public final ResultContainer craftResult = new ResultContainer();
 	
-	public Optional<Recipe<CraftingContainer>> currentRecipe = Optional.empty();
+	public @Nullable SolderingRecipe currentRecipe = null;
 	
 	public static SolderingMenu getClientContainer(int id, Inventory playerInventory)
 	{
@@ -158,29 +155,31 @@ public class SolderingMenu extends AbstractContainerMenu
 	
 	public void onPlayerChoseRecipe(ResourceLocation recipeID)
 	{
-		this.attemptRecipeAssembly(getSolderingRecipe(this.player.level().getRecipeManager(), recipeID));
+		var recipe = getSolderingRecipe(this.player.level().getRecipeManager(), recipeID);
+		if (recipe == null)
+			return;
+		this.attemptRecipeAssembly(recipe.value());
 	}
 
-	public static Optional<Recipe<CraftingContainer>> getSolderingRecipe(RecipeManager manager, ResourceLocation id)
+	public static @Nullable RecipeHolder<SolderingRecipe> getSolderingRecipe(RecipeManager manager, ResourceLocation id)
 	{
-		@SuppressWarnings({ "unchecked", "rawtypes" })
-		Map<ResourceLocation, Recipe<CraftingContainer>> map = (Map)manager.recipes.getOrDefault(MoreRed.get().solderingRecipeType.get(), Collections.emptyMap());
-		return Optional.ofNullable(map.get(id));
+		return manager.byKeyTyped(MoreRed.get().solderingRecipeType.get(), id);
 	}
 	
 	/**
 	 * Attempts to assemble the given recipe and updates crafting result if successful
 	 * @param recipeHolder recipe holder
 	 */
-	public void attemptRecipeAssembly(Optional<Recipe<CraftingContainer>> recipeHolder)
+	public void attemptRecipeAssembly(@Nullable SolderingRecipe recipe)
 	{
-		Optional<Recipe<CraftingContainer>> filteredRecipe = recipeHolder.filter(recipe -> SolderingRecipe.doesPlayerHaveIngredients(this.player.getInventory(), recipe));
-		this.updateRecipeAndResult(filteredRecipe);
-	}
-	
-	public void updateRecipeAndResult(Optional<Recipe<CraftingContainer>> recipeHolder)
-	{
-		this.currentRecipe = recipeHolder;
-		this.craftResult.setItem(0, recipeHolder.map(recipe -> recipe.getResultItem(this.player.level().registryAccess()).copy()).orElse(ItemStack.EMPTY));
+		this.currentRecipe = recipe;
+		if (recipe == null || !SolderingRecipe.doesPlayerHaveIngredients(this.player.getInventory(), recipe))
+		{
+			this.craftResult.setItem(0, ItemStack.EMPTY);
+		}
+		else
+		{
+			this.craftResult.setItem(0, recipe.getResultItem(this.player.level().registryAccess()).copy());
+		}
 	}
 }

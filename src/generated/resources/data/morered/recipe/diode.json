@@ -1,0 +1,23 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    "r": {
+      "tag": "c:dusts/redstone"
+    },
+    "t": {
+      "item": "minecraft:redstone_torch"
+    }
+  },
+  "pattern": [
+    "trt",
+    "###"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:diode"
+  }
+}

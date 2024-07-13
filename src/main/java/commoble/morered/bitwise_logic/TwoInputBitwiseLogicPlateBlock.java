@@ -39,18 +39,13 @@ public class TwoInputBitwiseLogicPlateBlock extends BitwiseLogicPlateBlock
 			int rotationIndex = thisState.getValue(PlateBlockStateProperties.ROTATION);
 			Direction inputSideA = BlockStateUtil.getInputDirection(attachmentDir, rotationIndex, InputSide.A.rotationsFromOutput);
 			Direction inputSideC = BlockStateUtil.getInputDirection(attachmentDir, rotationIndex, InputSide.C.rotationsFromOutput);
-			BlockEntity inputTileA = world.getBlockEntity(thisPos.relative(inputSideA));
-			BlockEntity inputTileC = world.getBlockEntity(thisPos.relative(inputSideC));
-			ChanneledPowerSupplier inputA = inputTileA == null
-				? BitwiseLogicPlateBlock.NO_POWER_SUPPLIER
-				: inputTileA.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, inputSideA.getOpposite()).orElse(NO_POWER_SUPPLIER);
-			ChanneledPowerSupplier inputC = inputTileC == null
-				? BitwiseLogicPlateBlock.NO_POWER_SUPPLIER
-				: inputTileC.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, inputSideC.getOpposite()).orElse(NO_POWER_SUPPLIER);
+			ChanneledPowerSupplier inputA = world.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, thisPos.relative(inputSideA), inputSideA.getOpposite());
+			ChanneledPowerSupplier inputC = world.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, thisPos.relative(inputSideC), inputSideC.getOpposite());
+			
 			for (int i=0; i<16; i++)
 			{
-				boolean inputBitA = inputA.getPowerOnChannel(world, thisPos, thisState, attachmentDir, i) > 0;
-				boolean inputBitC = inputC.getPowerOnChannel(world, thisPos, thisState, attachmentDir, i) > 0;
+				boolean inputBitA = inputA == null ? false : inputA.getPowerOnChannel(world, thisPos, thisState, attachmentDir, i) > 0;
+				boolean inputBitC = inputC == null ? false :  inputC.getPowerOnChannel(world, thisPos, thisState, attachmentDir, i) > 0;
 				boolean outputBit = this.operator.apply(inputBitA, false, inputBitC);
 				power[i] = (byte) (outputBit ? 31 : 0);
 			}

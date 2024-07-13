@@ -1,24 +1,23 @@
 package commoble.morered.wire_post;
 
-import java.util.function.Supplier;
-
+import commoble.morered.MoreRed;
 import commoble.morered.client.ClientProxy;
+import commoble.morered.util.MoreCodecs;
+import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.network.NetworkEvent;
+import net.neoforged.neoforge.network.handling.IPayloadContext;
 
-public class WireBreakPacket
+public record WireBreakPacket(Vec3 start, Vec3 end) implements CustomPacketPayload
 {
-	public final Vec3 start;
-	public final Vec3 end;
-	
-	public WireBreakPacket(Vec3 start, Vec3 end)
-	{
-		this.start = start;
-		this.end = end;
-	}
-	
+	public static final CustomPacketPayload.Type<WireBreakPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL("wire_break"));
+	public static final StreamCodec<ByteBuf, WireBreakPacket> STREAM_CODEC = StreamCodec.composite(
+		MoreCodecs.VEC3_STREAM_CODEC, WireBreakPacket::start,
+		MoreCodecs.VEC3_STREAM_CODEC, WireBreakPacket::end,
+		WireBreakPacket::new);
 	public void write(FriendlyByteBuf buffer)
 	{
 		CompoundTag nbt = new CompoundTag();
@@ -53,10 +52,14 @@ public class WireBreakPacket
 		}
 	}
 	
-	public void handle(Supplier<NetworkEvent.Context> contextGetter)
+	public void handle(IPayloadContext context)
 	{
-		NetworkEvent.Context context = contextGetter.get();
-		context.enqueueWork(() -> ClientProxy.onWireBreakPacket(context, this));
-		context.setPacketHandled(true);
+		context.enqueueWork(() -> ClientProxy.onWireBreakPacket(this));
+	}
+
+	@Override
+	public Type<? extends CustomPacketPayload> type()
+	{
+		return TYPE;
 	}
 }

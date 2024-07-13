@@ -1,27 +1,16 @@
-
-buildscript {
-    repositories {
-        maven { url = 'https://maven.minecraftforge.net' }
-        mavenCentral()
-        maven {url='https://repo.spongepowered.org/repository/maven-public/'}
-    }
-    dependencies {
-        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
-        classpath 'org.spongepowered:mixingradle:0.7-SNAPSHOT'
-    }
+plugins {
+	id 'java-library'
+	id 'eclipse'
+	id 'idea'
+	id 'maven-publish'
+	id 'net.neoforged.gradle.userdev' version "7.0.142"
 }
-apply plugin: 'net.minecraftforge.gradle'
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'maven-publish'
 
+group = "net.commoble.${modid}"
+base { archivesName="${modid}-${mc_version}" }
 version = "${mod_version}"
-group = "commoble.${modid}" // http://maven.apache.org/guides/mini/guide-naming-conventions.html
-archivesBaseName = "${modid}-${mc_version}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(17)
-
-jarJar.enable()
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
 sourceSets
 {
@@ -35,112 +24,48 @@ sourceSets
 // include resources generated from datagen in main
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-minecraft {
-    mappings channel: 'official', version: "${mc_version}"
-    accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
-    
-    runs {
-        client {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            properties 'mixin.env.disableRefMap': 'true'
-            arg "-mixin.config="+"morered"+".mixins.json"
+minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
 
-            mods {
-                "morered" {
-                    source sourceSets.main
-                }
-            }
-        }
+runs {
+	configureEach {
+		systemProperty 'forge.logging.console.level', 'debug'
+		modSource project.sourceSets.main
+	}
 
-        server {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            properties 'mixin.env.disableRefMap': 'true'
-            arg "-mixin.config="+"morered"+".mixins.json"
+	client {
+		// Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
+		systemProperty 'forge.enabledGameTestNamespaces', project.modid
+	}
 
-            mods {
-                "morered" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        data {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            properties 'mixin.env.disableRefMap': 'true'
-            arg "-mixin.config="+"morered"+".mixins.json"
-
-            args '--mod', 'morered_datagen', '--all', '--output', file('src/generated/resources/')
-
-            mods {
-                "morered_datagen"
-                {
-					source sourceSets.datagen
-                }
-                "morered" {
-                    source sourceSets.main
-                }
-            }
-        }
-
-        // This run config launches GameTestServer and runs all registered gametests, then exits.
-        // By default, the server will crash when no gametests are provided.
-        // The gametest system is also enabled by default for other run configs under the /test command.
-        gameTestServer {
-            workingDirectory project.file('run')
-            property 'forge.logging.console.level', 'debug'
-            property 'forge.enabledGameTestNamespaces', 'morered'
-            properties 'mixin.env.disableRefMap': 'true'
-            arg "-mixin.config="+"morered"+".mixins.json"
-
-            mods {
-                morered {
-                    source sourceSets.main
-                    source sourceSets.gametest
-                }
-            }
-        }
+	server {
+		systemProperty 'forge.enabledGameTestNamespaces', project.modid
+	}
+	
+    gameTestServer {
+        systemProperty 'forge.enabledGameTestNamespaces', project.modid
     }
-}
 
-configurations {
-	shade
+    data {
+        programArguments.addAll '--mod', "morered_datagen", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+    }
 }
 
 repositories {
 	mavenCentral()
 	maven {url = "https://maven.blamejared.com/"}
 	maven {url = "https://cubicinterpolation.net/maven/"}
+	maven {url = "https://maven.terraformersmc.com"}
 }
 
 dependencies {
-    minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
-
-    // jei
-	// compile against the JEI API but do not include it at runtime
-	compileOnly(fg.deobf("mezz.jei:${jei_branch}-common-api:${jei_version}"))
-	compileOnly(fg.deobf("mezz.jei:${jei_branch}-forge-api:${jei_version}"))
-	// at runtime, use the full JEI jar for Forge
-	runtimeOnly(fg.deobf("mezz.jei:${jei_branch}-forge:${jei_version}"))
-
-	// junit dependencies
-	testImplementation('org.junit.jupiter:junit-jupiter:5.6.2')
-
-	implementation fg.deobf("commoble.jumbofurnace:jumbofurnace-${jumbofurnace_mc_version}:${jumbofurnace_version}")
-	jarJar(group: "commoble.jumbofurnace", name: "jumbofurnace-${jumbofurnace_mc_version}", version: "[${jumbofurnace_version}, ${jumbofurnace_version_next})")
-
-	implementation fg.deobf("commoble.useitemonblockevent:useitemonblockevent-${useitemonblockevent_mc_version}:${useitemonblockevent_version}")
-	jarJar(group: "commoble.useitemonblockevent", name: "useitemonblockevent-${useitemonblockevent_mc_version}", version: "[${useitemonblockevent_version}, ${useitemonblockevent_version_next})")
-
-    annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
-    
-    
-}
-
-test {
-	useJUnitPlatform()
+	implementation "net.neoforged:neoforge:${neo_version}"
+	compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+	compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+	// at runtime, use the full JEI jar for NeoForge
+	//runtimeOnly "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+	
+	compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+	runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
 }
 
 java
@@ -149,12 +74,8 @@ java
 	withJavadocJar()
 }
 
-tasks.jarJar.configure {
-    classifier ''
-}
 // Example for how to get properties into the manifest for reading by the runtime..
 jar {
-	classifier 'slim'
     manifest {
         attributes([
             "Specification-Title": "${modid}",
@@ -169,14 +90,6 @@ jar {
     }
 }
 
-reobf {
-    jarJar { }
-}
-
-// this replaces jar.finalizedBy('reobfJar') in the standard forge mod buildscript
-tasks.build.dependsOn tasks.jarJar
-jar.finalizedBy('reobfJarJar')
-
 artifacts {
 	archives javadocJar
 	archives sourcesJar
@@ -188,7 +101,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
 			artifactId project.archivesBaseName
-            artifact tasks.jarJar
+            artifact jar
 			artifact sourcesJar
 			artifact javadocJar
         }
@@ -199,10 +112,4 @@ publishing {
             url "file:///${project.projectDir}/maven"
         }
     }
-}
-
-apply plugin: 'org.spongepowered.mixin'
-
-mixin {
-    add sourceSets.main, "${modid}.refmap.json"
 }

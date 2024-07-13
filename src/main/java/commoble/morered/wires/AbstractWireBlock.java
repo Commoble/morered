@@ -39,7 +39,8 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.client.extensions.common.IClientBlockExtensions;
+import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
+import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class AbstractWireBlock extends Block
 {
@@ -229,8 +230,8 @@ public abstract class AbstractWireBlock extends Block
 	@Override
 	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
-		return worldIn instanceof Level
-			? VoxelCache.get((Level)worldIn).getWireShape(pos)
+		return worldIn instanceof Level level
+			? VoxelCache.get(level, pos)
 			: this.shapesByStateIndex[getShapeIndex(state)];
 	}
 
@@ -429,7 +430,7 @@ public abstract class AbstractWireBlock extends Block
 						edgeUpdateDirs.add(edge.sideA);
 				}
 			}
-			if (!edgeUpdateDirs.isEmpty() && !net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
+			if (!edgeUpdateDirs.isEmpty() && !EventHooks.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
 			{
 				BlockPos.MutableBlockPos mutaPos = pos.mutable();
 				for (Direction dir : edgeUpdateDirs)
@@ -553,11 +554,10 @@ public abstract class AbstractWireBlock extends Block
 	
 	protected void updateShapeCache(Level world, BlockPos pos)
 	{
-		LoadingCache<BlockPos, VoxelShape> cache = VoxelCache.get(world).shapesByPos;
-		cache.invalidate(pos);
+		VoxelCache.invalidate(world, pos);
 		for (int i=0; i<6; i++)
 		{
-			cache.invalidate(pos.relative(Direction.from3DDataValue(i)));
+			VoxelCache.invalidate(world, pos.relative(Direction.from3DDataValue(i)));
 		}
 		if (world instanceof ServerLevel)
 		{

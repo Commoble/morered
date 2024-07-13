@@ -1,0 +1,17 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 1,
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    {
+      "count": 3,
+      "tag": "c:dusts/redstone"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:nand_2_gate"
+  }
+}

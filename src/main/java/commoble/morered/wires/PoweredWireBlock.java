@@ -22,6 +22,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 {
@@ -299,7 +300,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Enti
 	protected void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates)
 	{
 		Block newBlock = newState.getBlock();
-		if (!net.minecraftforge.event.ForgeEventFactory.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
+		if (!EventHooks.onNeighborNotify(world, wirePos, newState, updateDirections, false).isCanceled())
 		{
 			// if either the old block or new block emits strong power,
 			// and a given neighbor block conducts strong power,

@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "f": {
+      "tag": "c:ingots/iron"
+    },
+    "r": {
+      "tag": "morered:red_alloy_wires"
+    },
+    "s": {
+      "tag": "c:rods/wooden"
+    }
+  },
+  "pattern": [
+    "rfs",
+    "frf",
+    "sfr"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:redwire_spool"
+  }
+}

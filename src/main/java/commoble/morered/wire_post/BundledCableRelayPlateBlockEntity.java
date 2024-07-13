@@ -8,16 +8,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
 
-public class BundledCableRelayPlateBlockEntity extends BundledCablePostBlockEntity implements ChanneledPowerSupplier
-{
-	protected final LazyOptional<ChanneledPowerSupplier> powerHolder = LazyOptional.of(() -> this);
-	
+public class BundledCableRelayPlateBlockEntity extends BundledCablePostBlockEntity
+{	
 	public BundledCableRelayPlateBlockEntity(BlockEntityType<? extends BundledCableRelayPlateBlockEntity> type, BlockPos pos, BlockState state)
 	{
 		super(type, pos, state);
@@ -28,7 +23,6 @@ public class BundledCableRelayPlateBlockEntity extends BundledCablePostBlockEnti
 		this(MoreRed.get().bundledCableRelayPlateBeType.get(), pos, state);
 	}
 
-	@Override
 	public int getPowerOnChannel(Level world, BlockPos wirePos, BlockState wireState, Direction wireFace, int channel)
 	{
 		BlockState thisState = this.getBlockState();
@@ -37,20 +31,9 @@ public class BundledCableRelayPlateBlockEntity extends BundledCablePostBlockEnti
 			: 0;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side)
+	public ChanneledPowerSupplier getChanneledPower(Direction side)
 	{
-		if (cap == MoreRedAPI.CHANNELED_POWER_CAPABILITY)
-			return (LazyOptional<T>) this.powerHolder;
-		return super.getCapability(cap, side);
-	}
-	
-	@Override
-	public void invalidateCaps()
-	{
-		super.invalidateCaps();
-		this.powerHolder.invalidate();;
+		return this::getPowerOnChannel;
 	}
 	
 	@Override
@@ -70,16 +53,13 @@ public class BundledCableRelayPlateBlockEntity extends BundledCablePostBlockEnti
 			int secondarySide = DirectionHelper.uncompressSecondSide(attachmentDirection.ordinal(), orthagonal);
 			Direction orthagonalDirection = Direction.from3DDataValue(secondarySide);
 			BlockPos neighborPos = pos.relative(orthagonalDirection);
-			BlockEntity te = this.level.getBlockEntity(neighborPos);
-			if (te == null)
-				continue;
-			te.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, orthagonalDirection.getOpposite()).ifPresent(power ->
-			{
+			ChanneledPowerSupplier power = level.getCapability(MoreRedAPI.CHANNELED_POWER_CAPABILITY, neighborPos, orthagonalDirection.getOpposite());
+			if (power != null) {
 				for (int channel=0; channel<16; channel++)
 				{
 					result[channel] = (byte)Math.max(result[channel], power.getPowerOnChannel(this.level, pos, state, attachmentDirection, channel)-1);
 				}
-			});
+			};
 		}
 		return result;
 	}

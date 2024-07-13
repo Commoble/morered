@@ -3,7 +3,6 @@ package commoble.morered.soldering;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
@@ -17,7 +16,6 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.network.NetworkHooks;
 
 public class SolderingTableBlock extends Block
 {
@@ -39,14 +37,14 @@ public class SolderingTableBlock extends Block
 	}
 
 	@Override
-	public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTrace)
+	public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult rayTrace)
 	{
 		if (player instanceof ServerPlayer serverPlayer)
 		{
 			MenuConstructor provider = SolderingMenu.getServerContainerProvider(pos);
 			Component name = Component.translatable(this.getDescriptionId());
 			MenuProvider namedProvider = new SimpleMenuProvider(provider, name);
-			NetworkHooks.openScreen(serverPlayer, namedProvider);
+			serverPlayer.openMenu(namedProvider);
 		}
 
 		return InteractionResult.SUCCESS;
