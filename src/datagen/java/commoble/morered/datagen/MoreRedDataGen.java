@@ -1,6 +1,5 @@
 package commoble.morered.datagen;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -237,6 +236,7 @@ public class MoreRedDataGen
 					SizedIngredient.of(REDSTONE_ALLOY_INGOTS,1),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1)))));
 		simpleBlock(ObjectNames.SOLDERING_TABLE, "Soldering Table", context)
+			.tags(context.blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
 			.simpleBlockItem(models)
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 				"sss",
@@ -440,6 +440,7 @@ public class MoreRedDataGen
 		BlockStateFile blockState = BlockStateFile.variants(variants);
 		BlockDataHelper blockHelper = BlockDataHelper.create(block, context.blockStates, blockState, context.lootTables, simpleLoot(block))
 			.localize(context.lang, name);
+		blockHelper.tags(context.blockTags, BlockTags.MINEABLE_WITH_PICKAXE);
 		blockHelper.simpleBlockItem(context.models);
 		return blockHelper;
 	}
@@ -506,7 +507,8 @@ public class MoreRedDataGen
 		}
 		
 		var helper = BlockDataHelper.create(block, context.blockStates, BlockStateFile.variants(variants), context.lootTables, simpleLoot(block));
-		
+
+		helper.tags(context.blockTags, BlockTags.MINEABLE_WITH_PICKAXE);
 		helper.blockItem(context.models, SimpleModel.createWithoutRenderType(mangle(blockId, "block/%s_0")))
 			.recipe(context.recipes, mangle(blockId, "%s_from_soldering"), new SolderingRecipe(new ItemStack(block.asItem()), List.of(
 				SizedIngredient.of(SMOOTH_STONE_QUARTER_SLABS, 8),
