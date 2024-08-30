@@ -6,7 +6,7 @@
       "tag": "c:quarter_slabs/smooth_stone"
     },
     "i": {
-      "item": "minecraft:redstone_torch"
+      "tag": "c:ingots/iron"
     },
     "r": {
       "tag": "c:dusts/redstone"

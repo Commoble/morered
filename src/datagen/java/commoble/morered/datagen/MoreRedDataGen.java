@@ -732,7 +732,7 @@ public class MoreRedDataGen
 		.recipe(context.recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(recipePattern), Map.of(
 		    '#', Ingredient.of(SMOOTH_STONE_QUARTER_SLABS),
 		    'r', Ingredient.of(Tags.Items.DUSTS_REDSTONE),
-		    'i', Ingredient.of(Items.REDSTONE_TORCH))));
+		    'i', Ingredient.of(Tags.Items.INGOTS_IRON))));
 		
 		return helper;
 	}
