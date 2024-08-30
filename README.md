@@ -12,7 +12,7 @@ Mods can use More Red's API in a dev environment by including the following in t
 ```
 repositories {
 	// java repo to get More Red jars from
-	maven { url "https://cubicinterpolation.net/maven/" }
+	maven { url "https://commoble.net/maven/" }
 }
 
 dependencies {
