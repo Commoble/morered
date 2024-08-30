@@ -6,11 +6,16 @@ import commoble.morered.api.ChanneledPowerSupplier;
 import commoble.morered.api.ExpandedPowerSupplier;
 import commoble.morered.api.WireConnector;
 import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.DetectorRailBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
 import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.LightningRodBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RedstoneWallTorchBlock;
+import net.minecraft.world.level.block.TrappedChestBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.core.Direction;
@@ -18,6 +23,7 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.Tags;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -41,6 +47,29 @@ public class DefaultWireProperties
 			return attachFace == AttachFace.FLOOR && wireFace == Direction.DOWN
 				|| attachFace == AttachFace.CEILING && wireFace == Direction.UP
 				|| attachFace == AttachFace.WALL && thisNeighborState.getValue(HorizontalDirectionalBlock.FACING).getOpposite() == wireFace;
+		}
+
+		if (neighborBlock instanceof RedstoneWallTorchBlock)
+		{
+			return wireFace == thisNeighborState.getValue(RedstoneWallTorchBlock.FACING).getOpposite();
+		}
+		// floor-attached blocks with unusual shapes
+		else if (neighborBlock instanceof RedstoneTorchBlock
+			|| neighborBlock instanceof DetectorRailBlock
+			|| thisNeighborState.is(BlockTags.PRESSURE_PLATES))
+		{
+			return wireFace == Direction.DOWN;
+		}
+
+		if (neighborBlock instanceof LightningRodBlock)
+		{
+			return wireFace == thisNeighborState.getValue(LightningRodBlock.FACING).getOpposite();
+		}
+		
+		// blocks that are almost but not quite solid
+		if (thisNeighborState.is(Tags.Blocks.CHESTS_TRAPPED))
+		{
+			return true;
 		}
 		
 		// we can use the tag for pressure plates since we don't need to check any properties
