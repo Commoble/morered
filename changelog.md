@@ -1,3 +1,7 @@
+# 1.21-6.0.0.2
+* Fix multiplexer and pulse gate recipes requiring the wrong ingredients
+* Allow red alloy wires to connect to redstone torches, detector rails, and lightning rods if they share an attachment face, and trapped chests
+
 # 1.21-6.0.0.1
 * Fixed soldering tables, hexidecrubrometers, and wire and cable posts not mining faster with pickaxe
 
