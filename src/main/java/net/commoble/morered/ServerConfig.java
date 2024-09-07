@@ -20,7 +20,7 @@ public record ServerConfig(ConfigValue<Double> maxWirePostConnectionRange)
 	{
 		builder.push("General Settings");
 		ConfigValue<Double> maxWirePostConnectionRange = builder
-			.comment("Maximum Plinth Connection Range")
+			.comment("Range (in blocks) that wire posts can remotely connect to each other.")
 			.translation("morered.config.max_wire_plinth_connection_range")
 			.defineInRange("max_wire_plinth_connection_range", 32D, 0D, Double.MAX_VALUE);
 		

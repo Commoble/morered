@@ -1,3 +1,18 @@
+# 1.21.2-7.0.0.0
+* Massive rewrote how wires wire to each other. This has these ramifications:
+  * Wires no longer cause cascading block updates to update themselves (except where wires are connected to redstone dust)
+  * Instead, the power of a set of wires is calculated, and then all connected wires update at once
+  * This affects red alloy wires, colored and bundled network cables, and wire/cable posts
+  * Wires, cables, and posts no longer lose power with distance; a wire network emits power equal to what it receives
+    * Exception: One unit of power is lost when receiving power from redstone dust
+  * There is now a maximum number of wire nodes which can be in a single wire network (default 1024, configurable in common config)
+    * Each attached face of a wire block counts as one node, each channel used in a bundled cable block also counts as a node
+  * Colored network cables no longer receive power from the block face they are attached to (they still emit weak power to it)
+  * Bundled cables and their relay plates will now generally connect to any block that a colored cable can
+    * If a bundled cable receives a full redstone signal, it will use all 16 channels
+  * Bitwise plates can now be connected directly to red alloy wires (this counts as receiving power on all channels)
+  
+  
 # 1.21-6.0.0.2
 * Fix multiplexer and pulse gate recipes requiring the wrong ingredients
 * Allow red alloy wires to connect to redstone torches, detector rails, and lightning rods if they share an attachment face, and trapped chests

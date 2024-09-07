@@ -1,0 +1,21 @@
+{
+	"values": {
+		"#morered:wirable/cube": {
+			"type": "morered:cube"
+		},
+		"#morered:wirable/floor": {
+			"type": "morered:floor"
+		},
+		"#morered:wirable/inverted_wall_floor_ceiling": {
+			"type": "morered:wall_floor_ceiling",
+			"invert_horizontal_facing": true
+		},
+		"redstone_wire": {
+			"type": "morered:floor",
+			"offset": -1
+		},
+		"#morered:wirable/wires": {
+			"type": "morered:wire"
+		}
+	}
+}

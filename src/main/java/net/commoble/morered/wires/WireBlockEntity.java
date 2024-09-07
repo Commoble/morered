@@ -1,8 +1,12 @@
 package net.commoble.morered.wires;
 
+import java.util.Map;
+
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -142,5 +146,10 @@ public class WireBlockEntity extends BlockEntity
 		super.onDataPacket(net, pkt, registries);	// calls load()
 		BlockState state = this.getBlockState();
 		this.level.sendBlockUpdated(this.worldPosition, state, state, 8);
+	}
+	
+	public Map<Channel, TransmissionNode> getTransmissionNodes(Direction attachmentSide)
+	{
+		
 	}
 }

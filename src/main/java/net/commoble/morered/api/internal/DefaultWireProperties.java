@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.LeverBlock;
 import net.minecraft.world.level.block.LightningRodBlock;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
 import net.minecraft.world.level.block.RedstoneWallTorchBlock;
-import net.minecraft.world.level.block.TrappedChestBlock;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.core.Direction;
