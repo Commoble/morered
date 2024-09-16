@@ -1,13 +1,14 @@
 package net.commoble.morered.future;
 
 import java.util.Set;
+import java.util.function.BiFunction;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectFunction;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.LevelAccessor;
 
 public record TransmissionNode(
 	Set<Direction> powerReaders,
 	Set<Face> connectableNodes,
-	Int2ObjectFunction<Set<Direction>> graphListener)
+	BiFunction<LevelAccessor,Integer,Set<Direction>> graphListener)
 {
 }

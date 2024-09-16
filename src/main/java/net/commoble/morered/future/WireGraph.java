@@ -9,8 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
-import java.util.function.IntConsumer;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -18,10 +18,11 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPos> blocksInGraph, List<IntConsumer> receiverNodes, int power)
+public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPos> blocksInGraph, List<BiConsumer<LevelAccessor,Integer>> receiverNodes, int power)
 {
 	public static WireGraph fromOriginNode(ServerLevel level, NodePos originNodePos, TransmissionNode originNode, Map<BlockPos, StateWirer> knownWirers)
 	{
@@ -29,7 +30,7 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 		Map<NodePos, TransmissionNode> nodesInGraph = new HashMap<>();
 		Set<BlockPos> blocksInGraph = new HashSet<>();
 		Queue<NodeAtPos> uncheckedNodesInGraph = new LinkedList<>();
-		List<IntConsumer> receiverNodes = new ArrayList<>();
+		List<BiConsumer<LevelAccessor,Integer>> receiverNodes = new ArrayList<>();
 		nodesInGraph.put(originNodePos, originNode);
 		blocksInGraph.add(originNodePos.face().pos());
 		uncheckedNodesInGraph.add(new NodeAtPos(originNodePos, originNode));
@@ -82,7 +83,7 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 						}
 						
 						// check receiver nodes, we need to remember the listeners
-						@Nullable IntConsumer targetReceiver = targetWirer.getReceiverEndpoints(level, targetPos, targetState, targetSide, nextFace).get(targetChannel);
+						@Nullable BiConsumer<LevelAccessor,Integer> targetReceiver = targetWirer.getReceiverEndpoints(level, targetPos, targetState, targetSide, nextFace).get(targetChannel);
 						if (targetReceiver != null)
 						{
 							receiverNodes.add(targetReceiver);
@@ -96,7 +97,7 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 							{
 								if (channelPower.getKey() == targetChannel)
 								{
-									int suppliedPower = channelPower.getValue();
+									int suppliedPower = channelPower.getValue().apply(level);
 									if (suppliedPower > highestPowerFound)
 									{
 										highestPowerFound = suppliedPower;
@@ -168,9 +169,9 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 		for (WireGraph graph : graphs)
 		{
 			if (graph.blocksInGraph().contains(pos))
-				return false;
+				return true;
 		}
-		return true;
+		return false;
 	}
 	
 	public Set<Face> updateListeners(ServerLevel serverLevel)
@@ -182,15 +183,15 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 			NodePos nodePos = entry.getKey();
 			BlockPos nodeBlockPos = nodePos.face().pos();
 			TransmissionNode node = entry.getValue();
-			for (Direction directionToNeighbor : node.graphListener().apply(this.power))
+			for (Direction directionToNeighbor : node.graphListener().apply(serverLevel, this.power))
 			{
 				neighborUpdatingNodes.add(new Face(nodeBlockPos, directionToNeighbor));
 			}
 		}
 		
-		for (IntConsumer receiverNode : this.receiverNodes)
+		for (BiConsumer<LevelAccessor, Integer> receiverNode : this.receiverNodes)
 		{
-			receiverNode.accept(this.power);
+			receiverNode.accept(serverLevel, this.power);
 		}
 		
 		return neighborUpdatingNodes;

@@ -1,9 +1,12 @@
 package net.commoble.morered.wires;
 
+import java.util.List;
+
 import com.google.common.cache.LoadingCache;
 
 import net.commoble.morered.api.MoreRedAPI;
 import net.commoble.morered.api.internal.WireVoxelHelpers;
+import net.commoble.morered.future.Channel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -21,13 +24,13 @@ public class RedAlloyWireBlock extends PoweredWireBlock
 
 	public RedAlloyWireBlock(Properties properties)
 	{
-		super(properties, SHAPES_BY_STATE_INDEX, RAYTRACE_BACKBOARDS, VOXEL_CACHE, true);
+		super(properties, SHAPES_BY_STATE_INDEX, RAYTRACE_BACKBOARDS, VOXEL_CACHE, true, true, List.of(Channel.wide()));
 	}
 
-	@Override
-	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
-	{
-		return MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultWireConnector())
-			.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);
-	}
+//	@Override
+//	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+//	{
+//		return MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultWireConnector())
+//			.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);
+//	}
 }

@@ -37,6 +37,7 @@ public class ObjectNames
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";
 	public static final String COLORED_NETWORK_CABLE = "colored_network_cable";
+	public static final String POWERED_WIRE = "powered_wire";
 	public static final String[] NETWORK_CABLES_BY_COLOR = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_network_cable"));
 	public static final String BUNDLED_NETWORK_CABLE = "bundled_network_cable";
 	

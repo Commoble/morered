@@ -1,11 +1,5 @@
 package net.commoble.morered.client;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.core.Direction;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.plate_blocks.InputState;
 import net.commoble.morered.plate_blocks.LatchBlock;
@@ -14,10 +8,16 @@ import net.commoble.morered.plate_blocks.LogicFunctions;
 import net.commoble.morered.plate_blocks.PulseGateBlock;
 import net.commoble.morered.wire_post.AbstractPoweredWirePostBlock;
 import net.commoble.morered.wires.Edge;
-import net.commoble.morered.wires.WireBlockEntity;
+import net.commoble.morered.wires.PoweredWireBlockEntity;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockAndTintGetter;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public class ColorHandlers
 {
@@ -153,9 +153,8 @@ public class ColorHandlers
 		if (tintIndex == 0) // reserved for particle, particle tint is hardcoded to 0
 			return UNLIT;
 		BlockEntity te = world.getBlockEntity(pos);
-		if (te instanceof WireBlockEntity)
+		if (te instanceof PoweredWireBlockEntity wire)
 		{
-			WireBlockEntity wire = (WireBlockEntity)te;
 			if (tintIndex < 7) // range is [1,6], indicating a face tint
 			{
 				int side = tintIndex-1;
@@ -171,15 +170,13 @@ public class ColorHandlers
 				Direction directionA = edge.sideA;
 				BlockPos neighborPosA = pos.relative(directionA);
 				BlockEntity neighborTileA = world.getBlockEntity(neighborPosA);
-				if (neighborTileA instanceof WireBlockEntity)
+				if (neighborTileA instanceof PoweredWireBlockEntity neighborWireA)
 				{
-					WireBlockEntity neighborWireA = (WireBlockEntity)neighborTileA;
 					Direction directionB = edge.sideB;
 					BlockPos neighborPosB = pos.relative(directionB);
 					BlockEntity neighborTileB = world.getBlockEntity(neighborPosB);
-					if (neighborTileB instanceof WireBlockEntity)
+					if (neighborTileB instanceof PoweredWireBlockEntity neighborWireB)
 					{
-						WireBlockEntity neighborWireB = (WireBlockEntity)neighborTileB;
 						double powerA = neighborWireA.getPower(directionB);
 						double powerB = neighborWireB.getPower(directionA);
 						double averagePower = (powerA + powerB)/2D;

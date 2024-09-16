@@ -166,7 +166,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		public List<BakedQuad> getQuads(BlockState state, Direction side, RandomSource rand, ModelData extraData, @Nullable RenderType renderType)
 		{
 			Long wireData = extraData.get(WireModelData.PROPERTY);
-			if (wireData == null)
+			if (wireData == null || wireData == 0)
 				return NO_QUADS;
 			long wireFlags = wireData;
 
@@ -187,26 +187,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 			}
 			
 			return quads;
-		}
-
-		@Override
-		public ModelData getModelData(BlockAndTintGetter level, BlockPos pos, BlockState state, ModelData modelData)
-		{
-			Block block = state.getBlock();
-			if (block instanceof AbstractWireBlock wireBlock)
-			{
-				return ModelData.builder()
-					.with(WireModelData.PROPERTY,
-						wireBlock.getExpandedShapeIndex(state, level, pos))
-					.build();
-			}
-			else
-			{
-				return modelData;
-			}
-		}
-		
-		
+		}		
 	}
 	
 	public static final class WireModelData
@@ -227,36 +208,6 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		public static boolean test(long flags, int bitIndex)
 		{
 			return ((1L << bitIndex) & flags) != 0;
-		}
-	}
-	
-	/**
-	 * Temporary hack to make multipart blocks with dynamic models work.
-	 * TODO stop using this when forge fixes that
-	 */
-	@Deprecated
-	public static class MultipartWireModel extends BakedModelWrapper<BakedModel>
-	{
-		public MultipartWireModel(BakedModel originalModel)
-		{
-			super(originalModel);
-		}
-
-		@Override
-		public @NotNull ModelData getModelData(@NotNull BlockAndTintGetter level, @NotNull BlockPos pos, @NotNull BlockState state, @NotNull ModelData modelData)
-		{
-			Block block = state.getBlock();
-			if (block instanceof AbstractWireBlock wireBlock)
-			{
-				return ModelData.builder()
-					.with(WireModelData.PROPERTY,
-						wireBlock.getExpandedShapeIndex(state, level, pos))
-					.build();
-			}
-			else
-			{
-				return modelData;
-			}
 		}
 	}
 }

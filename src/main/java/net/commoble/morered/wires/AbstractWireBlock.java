@@ -1,6 +1,11 @@
 package net.commoble.morered.wires;
 
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
@@ -12,10 +17,17 @@ import com.google.common.cache.LoadingCache;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.client.ClientProxy;
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.DefaultWirer;
+import net.commoble.morered.future.ExperimentalModEvents;
+import net.commoble.morered.future.Face;
+import net.commoble.morered.future.TransmissionNode;
+import net.commoble.morered.future.Wirer;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -33,6 +45,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -186,7 +199,9 @@ public abstract class AbstractWireBlock extends Block
 	protected final VoxelShape[] shapesByStateIndex;
 	protected final VoxelShape[] raytraceBackboards;
 	protected final LoadingCache<Long, VoxelShape> voxelCache;
-	protected final boolean useIndirectPower;
+	protected final Collection<Channel> channels;
+	protected final boolean readAttachedPower;
+	protected final boolean notifyAttachedNeighbors;
 
 	/**
 	 * 
@@ -196,7 +211,7 @@ public abstract class AbstractWireBlock extends Block
 	 * @param voxelCache The cache to use for this block's voxels given world context
 	 * @param useIndirectPower Whether this block is allowed to send or receive power conducted indirectly through solid cubes
 	 */
-	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower)
+	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, Collection<Channel> channels)
 	{
 		super(properties);
 		// the "default" state has to be the empty state so we can build it up one face at a time
@@ -212,14 +227,14 @@ public abstract class AbstractWireBlock extends Block
 		this.shapesByStateIndex = shapesByStateIndex;
 		this.raytraceBackboards = raytraceBackboards;
 		this.voxelCache = voxelCache;
-		this.useIndirectPower = useIndirectPower;
+		this.readAttachedPower = readAttachedPower;
+		this.notifyAttachedNeighbors = notifyAttachedNeighbors;
+		this.channels = channels;
 	}
 
-	
-	protected abstract boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState);
-	protected abstract void updatePowerAfterBlockUpdate(Level world, BlockPos wirePos, BlockState wireState);
 	protected abstract void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
-
+	protected abstract Set<Direction> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel, Set<Direction> relevantNeighbors);
+	
 	@Override
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
 	{
@@ -325,6 +340,10 @@ public abstract class AbstractWireBlock extends Block
 	@Deprecated
 	public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
+		if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
+		{
+			wire.setConnectionsWithServerUpdate(getExpandedShapeIndex(state, worldIn, pos));
+		}
 		this.updateShapeCache(worldIn, pos);
 		super.onPlace(state, worldIn, pos, oldState, isMoving);
 	}
@@ -345,9 +364,13 @@ public abstract class AbstractWireBlock extends Block
 					this.addEmptyWireToAir(state, worldIn, neighborPos, directionToNeighbor);
 				}
 			}
+			if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
+			{
+				wire.setConnectionsWithServerUpdate(getExpandedShapeIndex(state, worldIn, pos));
+			}
 		}
 		this.updateShapeCache(worldIn, pos);
-		this.updatePowerAfterBlockUpdate(worldIn, pos, state);
+		worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null, null));
 		super.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
@@ -358,11 +381,12 @@ public abstract class AbstractWireBlock extends Block
 	@Deprecated
 	public void onRemove(BlockState oldState, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
+		this.updateShapeCache(worldIn, pos);
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		boolean doPowerUpdate = true;
 		if (newState.getBlock() != this) // wire block was completely destroyed
 		{
-			this.notifyNeighbors(worldIn, pos, newState, EnumSet.allOf(Direction.class), this.useIndirectPower);
+//			this.notifyNeighbors(worldIn, pos, newState, EnumSet.allOf(Direction.class), this.useIndirectPower);
 			doPowerUpdate = false;
 		}
 		else if (this.isEmptyWireBlock(newState)) // wire block has no attached faces and consists only of fake wire edges
@@ -373,18 +397,20 @@ public abstract class AbstractWireBlock extends Block
 				// removing the block will call onReplaced again, but using the newBlock != this condition
 				worldIn.removeBlock(pos, false);
 			}
-			else
+			else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
 			{
-				// so only notify neighbors if we *don't* completely remove the block
-				this.notifyNeighbors(worldIn, pos, newState, EnumSet.allOf(Direction.class), this.useIndirectPower);
+				wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
 			}
 			doPowerUpdate = false;
 		}
-		this.updateShapeCache(worldIn, pos);
+		else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
+		{
+			wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
+		}
 		super.onRemove(oldState, worldIn, pos, newState, isMoving);
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
-			this.updatePowerAfterBlockUpdate(worldIn, pos, newState);
+			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
 	}
 
 	// called when a neighboring blockstate changes, not called on the client
@@ -395,12 +421,14 @@ public abstract class AbstractWireBlock extends Block
 		BlockPos offset = fromPos.subtract(pos);
 		Direction directionToNeighbor = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
 		long edgeFlags = this.getEdgeFlags(worldIn,pos);
+		boolean doGraphUpdate = true;
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		if (this.isEmptyWireBlock(state))
 		{
 			if (edgeFlags == 0)
 			{
 				worldIn.removeBlock(pos, false);
+				doGraphUpdate = false;
 			}
 		}
 		// if this is a non-empty wire block and the changed state is an air block
@@ -411,9 +439,15 @@ public abstract class AbstractWireBlock extends Block
 				this.addEmptyWireToAir(state, worldIn, fromPos, directionToNeighbor);
 			}
 		}
-
+		if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
+		{
+			wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(wire.getBlockState(), worldIn, pos));
+		}
 		this.updateShapeCache(worldIn, pos);
-		this.updatePowerAfterBlockUpdate(worldIn, pos, state);
+		if (doGraphUpdate)
+		{
+			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
+		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		if (edgeFlags != 0)
 		{
@@ -677,8 +711,145 @@ public abstract class AbstractWireBlock extends Block
 	
 	public VoxelShape getCachedExpandedShapeVoxel(BlockState wireState, Level world, BlockPos pos)
 	{
-		long index = this.getExpandedShapeIndex(wireState, world, pos);
+		long index = world.getBlockEntity(pos) instanceof WireBlockEntity wire
+			? wire.getConnections()
+			: 0;
 		
 		return this.voxelCache.getUnchecked(index);
+	}
+	
+	public Collection<Channel> getChannels()
+	{
+		return this.channels;
+	}
+	
+	public boolean readAttachedPower()
+	{
+		return this.readAttachedPower;
+	}
+	
+	protected Map<Direction, Map<Channel, TransmissionNode>> createNodes(Level level, BlockPos thisPos, BlockState thisState)
+	{
+		Map<Direction, Map<Channel, TransmissionNode>> map = new HashMap<>();
+		Block thisBlock = thisState.getBlock();
+		// first six connections are physical nodes
+		for (int attachmentSideIndex=0; attachmentSideIndex<6; attachmentSideIndex++)
+		{
+			if (!thisState.getValue(INTERIOR_FACES[attachmentSideIndex]))
+				continue;
+			
+			
+			Direction attachmentSide = Direction.values()[attachmentSideIndex];
+			Map<Channel, TransmissionNode> nodesByChannel = new HashMap<>();
+			Set<Direction> powerReaders = new HashSet<>();
+			Set<Face> connectableNodes = new HashSet<>();
+			Set<Direction> graphListenerNeighbors = new HashSet<>();
+			if (this.readAttachedPower)
+			{
+				powerReaders.add(attachmentSide);
+			}
+			if (this.notifyAttachedNeighbors)
+			{
+				graphListenerNeighbors.add(attachmentSide);
+			}
+			// how does this work
+			// we have transmission nodes at each node we have a side attached to
+			// and the line/edge flags determine what nodes we can connect to (these were already calculated)
+			// the next 24 flags are lines
+			for (int subsideIndex = 0; subsideIndex < 4; subsideIndex++)
+			{
+				Direction directionToLineNeighbor = Direction.values()[DirectionHelper.uncompressSecondSide(attachmentSideIndex, subsideIndex)];
+				boolean hasElbow = thisState.getValue(INTERIOR_FACES[directionToLineNeighbor.ordinal()]);
+				if (hasElbow)
+				{
+					// if there's another wire node attached in the elbow direction, we can't form a line connection
+					connectableNodes.add(new Face(thisPos, directionToLineNeighbor));
+				}
+				else
+				{
+					// if block in that direction is another wire block
+					// and we can form a convex connection to another wire block THROUGH that block
+					// then add an extra connectable face to the convex-connected face
+					// otherwise add a parallel connectable face
+					BlockPos lineNeighborPos = thisPos.relative(directionToLineNeighbor);
+					BlockState neighborState = level.getBlockState(lineNeighborPos);
+					Block neighborBlock = neighborState.getBlock();
+					BlockPos convexNeighborPos = lineNeighborPos.relative(attachmentSide);
+					if (neighborBlock == thisBlock
+						&& level.getBlockState(convexNeighborPos).getBlock() == thisBlock)
+					{
+						connectableNodes.add(new Face(convexNeighborPos, directionToLineNeighbor.getOpposite()));
+					}
+					else
+					{
+						// not a line to a reacharound neighbor, just a regular ol' line
+						// add a parallel node
+						connectableNodes.add(new Face(lineNeighborPos, attachmentSide));
+						graphListenerNeighbors.add(directionToLineNeighbor);
+					}
+				}
+			}
+			for (Channel channel : this.channels)
+			{
+				nodesByChannel.put(channel, new TransmissionNode(
+					powerReaders,
+					connectableNodes,
+					(world,power) -> this.onReceivePower(world, thisPos, thisState, attachmentSide, power, channel, graphListenerNeighbors)
+				));
+			}
+			map.put(attachmentSide, nodesByChannel);
+		}
+		
+		return map;
+	}
+	
+	
+	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+	{
+		// check convex edges first
+		if (neighborBlock == this)
+		{
+			BlockPos otherPos = neighborPos.relative(attachmentDirection);
+			BlockState otherState = world.getBlockState(otherPos);
+			if (otherState.getBlock() == this && otherState.getValue(INTERIOR_FACES[directionToWire.ordinal()]))
+			{
+				return true;
+			}
+		}
+		Wirer wirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, neighborBlock.builtInRegistryHolder().getKey());
+		if (wirer == null)
+			wirer = DefaultWirer.INSTANCE;
+		// check endpoints and transmitters
+		Face wireFace = new Face(thisPos, attachmentDirection);
+		var neighborSuppliers = wirer.getSupplierEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
+		if (!neighborSuppliers.isEmpty())
+		{
+			for (Channel channel : this.channels)
+			{
+				if (neighborSuppliers.get(channel) != null)
+					return true;
+			}
+		}
+		
+		var neighborReceivers = wirer.getReceiverEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
+		if (!neighborReceivers.isEmpty())
+		{
+			for (Channel channel : this.channels)
+			{
+				if (neighborReceivers.get(channel) != null)
+					return true;
+			}
+		}
+		var transmissionNodes = wirer.getTransmissionNodes(world, neighborPos, neighborState, attachmentDirection);
+		if (!transmissionNodes.isEmpty())
+		{
+			for (Channel channel : this.channels)
+			{
+				TransmissionNode node = transmissionNodes.get(channel);
+				if (node.connectableNodes().contains(wireFace))
+					return true;
+			}
+		}
+		return false;
 	}
 }

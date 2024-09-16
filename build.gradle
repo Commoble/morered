@@ -3,7 +3,7 @@ plugins {
 	id 'eclipse'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.gradle.userdev' version "7.0.142"
+	id 'net.neoforged.gradle.userdev' version "7.0.+"
 }
 
 group = "net.commoble.${modid}"
@@ -52,7 +52,7 @@ runs {
 repositories {
 	mavenCentral()
 	maven {url = "https://maven.blamejared.com/"}
-	maven {url = "https://cubicinterpolation.net/maven/"}
+	maven {url = "https://commoble.net/maven/"}
 	maven {url = "https://maven.terraformersmc.com"}
 }
 

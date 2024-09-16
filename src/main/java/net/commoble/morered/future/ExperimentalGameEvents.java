@@ -42,6 +42,9 @@ public class ExperimentalGameEvents
 		BlockState originState = level.getBlockState(originPos);
 		Block originBlock = originState.getBlock();
 		Wirer originWirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, originBlock.builtInRegistryHolder().key());
+		if (originWirer == null)
+			return;
+		
 		Map<NodePos, TransmissionNode> originNodes = new HashMap<>();
 		for (Direction face : Direction.values()) {
 			originWirer.getTransmissionNodes(level, originPos, originState, face).forEach((channel,node) -> {

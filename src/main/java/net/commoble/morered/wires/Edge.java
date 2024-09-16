@@ -3,6 +3,10 @@ package net.commoble.morered.wires;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.core.Direction;
+
+import com.mojang.math.OctahedralGroup;
+
+import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.BlockGetter;
 
@@ -73,5 +77,20 @@ public enum Edge
 			return neighborStateB.getBlock() == centerWireBlock && neighborStateB.getValue(propA);
 		}
 		return false;
+	}
+	
+	/**
+	 * Transforms an edge via a horizontal rotate/mirror group
+	 * @param group any of EightGroup's octahedral groups
+	 * @return Edge rotated/mirrored according to that group
+	 */
+	public Edge transform(OctahedralGroup group)
+	{
+		// edges have two directions but only certain permutations of directions are valid edges
+		Direction newSide1 = group.rotate(this.sideA);
+		int primaryIndex = newSide1.ordinal();
+		Direction newSide2 = group.rotate(this.sideB);
+		int secondaryIndex = DirectionHelper.getCompressedSecondSide(primaryIndex, newSide2.ordinal());
+		return EDGES_BY_RELEVANT_DIRECTION[primaryIndex][secondaryIndex];
 	}
 }

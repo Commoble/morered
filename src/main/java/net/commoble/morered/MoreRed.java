@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -29,10 +30,10 @@ import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.plate_blocks.LatchBlock;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock;
+import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 import net.commoble.morered.plate_blocks.LogicFunctions;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PulseGateBlock;
-import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
@@ -51,9 +52,8 @@ import net.commoble.morered.wire_post.WirePostPlateBlock;
 import net.commoble.morered.wire_post.WireSpoolItem;
 import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.BundledCableBlock;
-import net.commoble.morered.wires.BundledCableBlockEntity;
 import net.commoble.morered.wires.ColoredCableBlock;
-import net.commoble.morered.wires.ColoredCableBlockEntity;
+import net.commoble.morered.wires.PoweredWireBlockEntity;
 import net.commoble.morered.wires.RedAlloyWireBlock;
 import net.commoble.morered.wires.WireBlockEntity;
 import net.commoble.morered.wires.WireBlockItem;
@@ -169,8 +169,7 @@ public class MoreRed
 
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> redwirePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ColoredCableBlockEntity>> coloredNetworkCableBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCableBlockEntity>> bundledNetworkCableBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> poweredWireBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCableRelayPlateBlockEntity>> bundledCableRelayPlateBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChanneledPowerStorageBlockEntity>> bitwiseLogicGateBeType;
@@ -279,17 +278,15 @@ public class MoreRed
 			.build(null));
 		wireBeType = blockEntityTypes.register(ObjectNames.WIRE,
 			() -> BlockEntityType.Builder.of(WireBlockEntity::new,
-				redAlloyWireBlock.get())
-			.build(null));
-		coloredNetworkCableBeType = blockEntityTypes.register(ObjectNames.COLORED_NETWORK_CABLE,
-			() -> BlockEntityType.Builder.of(ColoredCableBlockEntity::new,
-				Arrays.stream(networkCableBlocks)
-					.map(DeferredHolder::get)
-					.toArray(ColoredCableBlock[]::new))
-			.build(null));
-		bundledNetworkCableBeType = blockEntityTypes.register(ObjectNames.BUNDLED_NETWORK_CABLE,
-			() -> BlockEntityType.Builder.of(BundledCableBlockEntity::new,
 				bundledNetworkCableBlock.get())
+			.build(null));
+		poweredWireBeType = blockEntityTypes.register(ObjectNames.POWERED_WIRE,
+			() -> BlockEntityType.Builder.of(PoweredWireBlockEntity::new,
+				Stream.concat(
+					Stream.of(redAlloyWireBlock),
+					Arrays.stream(networkCableBlocks))
+				.map(DeferredHolder::get)
+				.toArray(Block[]::new))
 			.build(null));
 		bundledCablePostBeType = blockEntityTypes.register(ObjectNames.BUNDLED_CABLE_POST,
 			() -> BlockEntityType.Builder.of(BundledCablePostBlockEntity::new,
@@ -330,7 +327,7 @@ public class MoreRed
 		
 		ServerConfig.initServerConfig();
 		
-		modBus.addListener(EventPriority.HIGH, this::onHighPriorityCommonSetup);
+//		modBus.addListener(EventPriority.HIGH, this::onHighPriorityCommonSetup);
 		modBus.addListener(this::onLoadComplete);
 		modBus.addListener(this::onRegisterCapabilities);
 		modBus.addListener(this::onRegisterPackets);
@@ -370,43 +367,43 @@ public class MoreRed
 		}
 	}
 	
-	private void onHighPriorityCommonSetup(FMLCommonSetupEvent event)
-	{
-		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
-		Map<Block, ExpandedPowerSupplier> expandedPowerSuppliers = MoreRedAPI.getExpandedPowerRegistry();
-		Map<Block, WireConnector> cableConnectors = MoreRedAPI.getCableConnectabilityRegistry();
-		
-		// add behaviour for vanilla objects
-		wireConnectors.put(Blocks.REDSTONE_WIRE, DefaultWireProperties::isRedstoneWireConnectable);
-		
-		// add behaviour for More Red objects
-		RedAlloyWireBlock redWireBlock = this.redAlloyWireBlock.get();
-		wireConnectors.put(redWireBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
-		expandedPowerSuppliers.put(redWireBlock, redWireBlock::getExpandedPower);
-		for (int i=0; i<16; i++)
-		{
-			ColoredCableBlock coloredCableBlock = networkCableBlocks[i].get();
-			wireConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
-			expandedPowerSuppliers.put(coloredCableBlock, coloredCableBlock::getExpandedPower);
-			cableConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
-		}
-		BundledCableBlock bundledCableBlock = bundledNetworkCableBlock.get();
-		cableConnectors.put(bundledCableBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
-		BundledCableRelayPlateBlock cablePlateBlock = bundledCableRelayPlateBlock.get();
-		cableConnectors.put(cablePlateBlock, cablePlateBlock::canConnectToAdjacentCable);
-		this.bitwiseLogicPlates.values().stream()
-			.map(rob -> rob.get())
-			// eclipse compiler allows a method reference to canConnectToAdjacentCable in the put here
-			// but javac doesn't like the generics, but accepts a lambda here
-			.forEach(block -> cableConnectors.put(block, (world,thisPos,thisState,wirePos,wireState,wireFace,directionToWire)->block.canConnectToAdjacentCable(world, thisPos, thisState, wirePos, wireState, wireFace, directionToWire)));
-	}
+//	private void onHighPriorityCommonSetup(FMLCommonSetupEvent event)
+//	{
+////		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
+////		Map<Block, ExpandedPowerSupplier> expandedPowerSuppliers = MoreRedAPI.getExpandedPowerRegistry();
+////		Map<Block, WireConnector> cableConnectors = MoreRedAPI.getCableConnectabilityRegistry();
+//		
+//		// add behaviour for vanilla objects
+//		wireConnectors.put(Blocks.REDSTONE_WIRE, DefaultWireProperties::isRedstoneWireConnectable);
+//		
+//		// add behaviour for More Red objects
+//		RedAlloyWireBlock redWireBlock = this.redAlloyWireBlock.get();
+//		wireConnectors.put(redWireBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
+//		expandedPowerSuppliers.put(redWireBlock, redWireBlock::getExpandedPower);
+//		for (int i=0; i<16; i++)
+//		{
+//			ColoredCableBlock coloredCableBlock = networkCableBlocks[i].get();
+//			wireConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
+//			expandedPowerSuppliers.put(coloredCableBlock, coloredCableBlock::getExpandedPower);
+//			cableConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
+//		}
+//		BundledCableBlock bundledCableBlock = bundledNetworkCableBlock.get();
+//		cableConnectors.put(bundledCableBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
+//		BundledCableRelayPlateBlock cablePlateBlock = bundledCableRelayPlateBlock.get();
+//		cableConnectors.put(cablePlateBlock, cablePlateBlock::canConnectToAdjacentCable);
+//		this.bitwiseLogicPlates.values().stream()
+//			.map(rob -> rob.get())
+//			// eclipse compiler allows a method reference to canConnectToAdjacentCable in the put here
+//			// but javac doesn't like the generics, but accepts a lambda here
+//			.forEach(block -> cableConnectors.put(block, (world,thisPos,thisState,wirePos,wireState,wireFace,directionToWire)->block.canConnectToAdjacentCable(world, thisPos, thisState, wirePos, wireState, wireFace, directionToWire)));
+//	}
 	
 	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
-		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.coloredNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
-		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
-		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledCableRelayPlateBeType.get(), (be,side) -> be.getChanneledPower(side));
-		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bitwiseLogicGateBeType.get(), (be,side) -> be.getChanneledPower(side));
+//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.coloredNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
+//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
+//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledCableRelayPlateBeType.get(), (be,side) -> be.getChanneledPower(side));
+//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bitwiseLogicGateBeType.get(), (be,side) -> be.getChanneledPower(side));
 	}
 	
 	private void onRegisterPackets(RegisterPayloadHandlersEvent event)
