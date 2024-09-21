@@ -38,6 +38,18 @@ public class DirectionHelper
 		return (secondarySide/2 < primarySide/2) ? secondarySide : secondarySide + 2;
 	}
 	
+	/**
+	 * 
+	 * @param connections long connections bitflags
+	 * @param primarySide int index of a wire attachment side
+	 * @param secondarySide int "compressed" index of the direction from an attachment side node to the neighbor the line connects to
+	 * @return true if a line exists, false otherwise
+	 */
+	public static boolean hasLineConnection(long connections, int primarySide, int secondarySide)
+	{
+		return (connections & (1 << (primarySide*4 + secondarySide + 6))) != 0L;
+	}
+	
 	// returns null if the two positions are not orthagonally adjacent
 	// otherwise, returns the direction from from to to
 	public static @Nullable Direction getDirectionToNeighborPos(BlockPos from, BlockPos to)

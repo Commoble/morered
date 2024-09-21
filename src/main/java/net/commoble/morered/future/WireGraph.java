@@ -174,19 +174,18 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 		return false;
 	}
 	
-	public Set<Face> updateListeners(ServerLevel serverLevel)
+	public Map<Face, SignalStrength> updateListeners(ServerLevel serverLevel)
 	{
-		Set<Face> neighborUpdatingNodes = new HashSet<>();
+		Map<Face, SignalStrength> neighborUpdatingNodes = new HashMap<>();
 		
 		for (var entry : this.nodesInGraph.entrySet())
 		{
 			NodePos nodePos = entry.getKey();
 			BlockPos nodeBlockPos = nodePos.face().pos();
 			TransmissionNode node = entry.getValue();
-			for (Direction directionToNeighbor : node.graphListener().apply(serverLevel, this.power))
-			{
-				neighborUpdatingNodes.add(new Face(nodeBlockPos, directionToNeighbor));
-			}
+			node.graphListener().apply(serverLevel, this.power).forEach((directionToNeighbor, signalStrength) -> {
+				neighborUpdatingNodes.merge(new Face(nodeBlockPos, directionToNeighbor), signalStrength, SignalStrength::max);
+			});
 		}
 		
 		for (BiConsumer<LevelAccessor, Integer> receiverNode : this.receiverNodes)

@@ -76,22 +76,26 @@ public class ExperimentalGameEvents
 		// how do neighbor updates work?
 		// each time we proc a listener on a transition node at nodepos, it gives us a set of directions to proc neighbor updates in
 		// we store these as a face (nodePos+direction)
-		Set<Face> nodesUpdatingNeighbors = new HashSet<>();
+		Map<Face, SignalStrength> nodesUpdatingNeighbors = new HashMap<>();
 		for (WireGraph graph : graphs)
 		{
-			nodesUpdatingNeighbors.addAll(graph.updateListeners(level));
+			graph.updateListeners(level).forEach((face,signalStrength) -> nodesUpdatingNeighbors.merge(face, signalStrength, SignalStrength::max));
 		}
 		
 		// invoke block updates on blocks which are adjacent to the graph but have no transmission nodes within it
-		for (Face updatedNodeFace : nodesUpdatingNeighbors)
-		{
+		nodesUpdatingNeighbors.forEach((updatedNodeFace, signalStrength) -> {
 			BlockPos nodeBlockPos = updatedNodeFace.pos();
 			Direction directionToNeighbor = updatedNodeFace.attachmentSide();
 			BlockPos neighborPos = nodeBlockPos.relative(directionToNeighbor);
 			if (!WireGraph.isBlockInAnyGraph(neighborPos, graphs))
 			{
-				level.neighborChanged(neighborPos, level.getBlockState(nodeBlockPos).getBlock(), nodeBlockPos);
+				Block nodeBlock = level.getBlockState(nodeBlockPos).getBlock();
+				level.neighborChanged(neighborPos, nodeBlock, nodeBlockPos);
+				if (signalStrength == SignalStrength.STRONG)
+				{
+					level.updateNeighborsAtExceptFromFacing(neighborPos, nodeBlock, directionToNeighbor.getOpposite());
+				}
 			}
-		}
+		});
 	}
 }

@@ -1,5 +1,6 @@
 package net.commoble.morered.future;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 
@@ -9,6 +10,6 @@ import net.minecraft.world.level.LevelAccessor;
 public record TransmissionNode(
 	Set<Direction> powerReaders,
 	Set<Face> connectableNodes,
-	BiFunction<LevelAccessor,Integer,Set<Direction>> graphListener)
+	BiFunction<LevelAccessor,Integer,Map<Direction, SignalStrength>> graphListener)
 {
 }

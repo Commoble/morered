@@ -57,6 +57,23 @@ public class PoweredWireBlockEntity extends WireBlockEntity
 		this.power = power;
 	}
 	
+	@Override
+	public void setConnectionsWithServerUpdate(long connections)
+	{
+		long oldConnections = this.connections;
+		super.setConnectionsWithServerUpdate(connections);
+		for (int i=0; i<6; i++)
+		{
+			if ((connections & (1 << i)) == 0)
+			{
+				this.setPower(i, 0);
+			}
+		}
+		if (connections != oldConnections)
+		{
+			this.level.updateNeighborsAt(this.worldPosition, this.getBlockState().getBlock());
+		}
+	}
 	/**
 	 * Sets the power on a given interior face
 	 * @param direction The attachment direction of the subwire to set the power of

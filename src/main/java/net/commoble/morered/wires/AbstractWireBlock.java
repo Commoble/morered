@@ -21,6 +21,7 @@ import net.commoble.morered.future.Channel;
 import net.commoble.morered.future.DefaultWirer;
 import net.commoble.morered.future.ExperimentalModEvents;
 import net.commoble.morered.future.Face;
+import net.commoble.morered.future.SignalStrength;
 import net.commoble.morered.future.TransmissionNode;
 import net.commoble.morered.future.Wirer;
 import net.commoble.morered.util.DirectionHelper;
@@ -29,6 +30,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -233,7 +235,7 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	protected abstract void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
-	protected abstract Set<Direction> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel, Set<Direction> relevantNeighbors);
+	protected abstract Map<Direction, SignalStrength> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel);
 	
 	@Override
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
@@ -410,7 +412,9 @@ public abstract class AbstractWireBlock extends Block
 		super.onRemove(oldState, worldIn, pos, newState, isMoving);
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
+		{
 			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
+		}
 	}
 
 	// called when a neighboring blockstate changes, not called on the client
@@ -446,7 +450,7 @@ public abstract class AbstractWireBlock extends Block
 		this.updateShapeCache(worldIn, pos);
 		if (doGraphUpdate)
 		{
-			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
+			worldIn.scheduleTick(pos, this, 1);
 		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		if (edgeFlags != 0)
@@ -476,6 +480,15 @@ public abstract class AbstractWireBlock extends Block
 		}
 		
 		super.neighborChanged(state, worldIn, pos, neighborBlock, fromPos, isMoving);
+	}
+	
+	
+
+	@Override
+	protected void tick(BlockState thisState, ServerLevel level, BlockPos thisPos, RandomSource rand)
+	{
+		super.tick(thisState, level, thisPos, rand);
+		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, thisPos, GameEvent.Context.of(null,null));
 	}
 
 	@Override
@@ -743,14 +756,9 @@ public abstract class AbstractWireBlock extends Block
 			Map<Channel, TransmissionNode> nodesByChannel = new HashMap<>();
 			Set<Direction> powerReaders = new HashSet<>();
 			Set<Face> connectableNodes = new HashSet<>();
-			Set<Direction> graphListenerNeighbors = new HashSet<>();
 			if (this.readAttachedPower)
 			{
 				powerReaders.add(attachmentSide);
-			}
-			if (this.notifyAttachedNeighbors)
-			{
-				graphListenerNeighbors.add(attachmentSide);
 			}
 			// how does this work
 			// we have transmission nodes at each node we have a side attached to
@@ -785,7 +793,6 @@ public abstract class AbstractWireBlock extends Block
 						// not a line to a reacharound neighbor, just a regular ol' line
 						// add a parallel node
 						connectableNodes.add(new Face(lineNeighborPos, attachmentSide));
-						graphListenerNeighbors.add(directionToLineNeighbor);
 					}
 				}
 			}
@@ -794,7 +801,7 @@ public abstract class AbstractWireBlock extends Block
 				nodesByChannel.put(channel, new TransmissionNode(
 					powerReaders,
 					connectableNodes,
-					(world,power) -> this.onReceivePower(world, thisPos, thisState, attachmentSide, power, channel, graphListenerNeighbors)
+					(world,power) -> this.onReceivePower(world, thisPos, thisState, attachmentSide, power, channel)
 				));
 			}
 			map.put(attachmentSide, nodesByChannel);

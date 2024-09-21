@@ -1,6 +1,7 @@
 package net.commoble.morered.wires;
 
 import java.util.EnumSet;
+import java.util.Map;
 import java.util.Set;
 
 import com.google.common.cache.LoadingCache;
@@ -9,6 +10,7 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.api.MoreRedAPI;
 import net.commoble.morered.api.internal.WireVoxelHelpers;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.SignalStrength;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -263,9 +265,9 @@ public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 	}
 
 	@Override
-	protected Set<Direction> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel, Set<Direction> relevantNeighbors)
+	protected Map<Direction, SignalStrength> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel)
 	{
-		return Set.of();
+		return Map.of();
 	}
 
 }

@@ -2,6 +2,8 @@ package net.commoble.morered.wires;
 
 import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -9,9 +11,8 @@ import javax.annotation.Nullable;
 import com.google.common.cache.LoadingCache;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.MoreRedAPI;
-import net.commoble.morered.api.WireConnector;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.SignalStrength;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -57,14 +58,14 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Enti
 	@Override
 	public int getSignal(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
 	{
-		return this.getPower(state,world,pos,directionFromNeighbor,false);
+		return this.getPower(state,world,pos,directionFromNeighbor);
 	}
 
 	// get the power that can be conducted through solid blocks
 	@Override
 	public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
 	{
-		return this.useIndirectPower ? this.getPower(state,world,pos,directionFromNeighbor,false) : 0;
+		return this.useIndirectPower ? this.getPower(state,world,pos,directionFromNeighbor) : 0;
 	}
 
 	@Override
@@ -101,7 +102,7 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Enti
 		return false;
 	}
 	
-	protected int getPower(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor, boolean expand)
+	protected int getPower(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
 	{
 //		return 0;
 		// power is stored in the TE (because storing it in 16 states per side is too many state combinations)
@@ -116,25 +117,24 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Enti
 		// if we have a wire attached on the given side, always use the power value of that wire
 		if (state.getValue(INTERIOR_FACES[side]))
 		{
-			int power = wire.getPower(side);
-			return expand ? power : power/2;
+			return wire.getPower(side);
 		}
 		
 		// otherwise, check the four orthagonal attachment faces and use the highest power of the side-connectable wires
-		BlockPos neighborPos = pos.relative(directionToNeighbor);
-		BlockState neighborState = world.getBlockState(neighborPos);
-		WireConnector connector = MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborState.getBlock(), MoreRedAPI.getDefaultWireConnector());
+		long connections = wire.getConnections();
 		int output = 0;
-		for (int i=0; i<4; i++)
+		for (Direction attachmentSide : Direction.values())
 		{
-			int attachmentSide = DirectionHelper.uncompressSecondSide(side, i);
-			Direction attachmentDirection = Direction.from3DDataValue(attachmentSide);
-			if (state.getValue(INTERIOR_FACES[attachmentSide]) && connector.canConnectToAdjacentWire(world, neighborPos, neighborState, pos, state, attachmentDirection, directionFromNeighbor))
+			if (attachmentSide == directionToNeighbor || attachmentSide == directionFromNeighbor)
+				continue;
+			int attachmentIndex = attachmentSide.ordinal();
+			int secondarySide = DirectionHelper.getCompressedSecondSide(attachmentIndex, side);
+			if (DirectionHelper.hasLineConnection(connections, attachmentIndex, secondarySide))
 			{
-				output = Math.max(output, wire.getPower(attachmentSide));
+				output = Math.max(output, wire.getPower(attachmentIndex));
 			}
 		}
-		return expand ? output : output/2;
+		return output;
 	}
 	
 //	public int getExpandedPower(Level world, BlockPos thisPos, BlockState thisState, BlockPos wirePos, BlockState wireState,
@@ -316,13 +316,35 @@ public abstract class PoweredWireBlock extends AbstractWireBlock implements Enti
 	}
 
 	@Override
-	protected Set<Direction> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel, Set<Direction> relevantNeighbors)
+	protected Map<Direction, SignalStrength> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel)
 	{
 		if (!(level.getBlockEntity(pos) instanceof PoweredWireBlockEntity wire) || wire.getPower(attachmentSide) == power)
-			return Set.of();
+			return Map.of();
 		
 		wire.setPower(attachmentSide, power);
-		return relevantNeighbors;
+		Map<Direction,SignalStrength> map = new HashMap<>();
+		SignalStrength strength = this.useIndirectPower ? SignalStrength.STRONG : SignalStrength.WEAK;
+		for (Direction dir : Direction.values())
+		{
+			map.put(dir, strength);
+		}
+		return map;
 	}
+
+	@Override
+	public void onRemove(BlockState oldState, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	{
+		super.onRemove(oldState, worldIn, pos, newState, isMoving);
+		if (this.notifyAttachedNeighbors && this.useIndirectPower)
+		{
+			// after doing graph updates, we may need to proc additional diagonal updates on remove
+			for (Direction directionToNeighbor : Direction.values())
+			{
+				BlockPos neighborPos = pos.relative(directionToNeighbor);
+				worldIn.updateNeighborsAtExceptFromFacing(neighborPos, newState.getBlock(), directionToNeighbor.getOpposite());
+			}
+		}
+	}
+	
 	
 }
