@@ -27,6 +27,7 @@ import net.commoble.morered.bitwise_logic.ChanneledPowerStorageBlockEntity;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseLogicPlateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseLogicPlateBlock;
 import net.commoble.morered.client.ClientProxy;
+import net.commoble.morered.future.WireUpdateBuffer;
 import net.commoble.morered.plate_blocks.LatchBlock;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock;
@@ -58,7 +59,6 @@ import net.commoble.morered.wires.RedAlloyWireBlock;
 import net.commoble.morered.wires.WireBlockEntity;
 import net.commoble.morered.wires.WireBlockItem;
 import net.commoble.morered.wires.WireCountLootFunction;
-import net.commoble.morered.wires.WireUpdateBuffer;
 import net.commoble.morered.wires.WireUpdatePacket;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -334,7 +334,6 @@ public class MoreRed
 		
 		forgeBus.addListener(EventPriority.LOW, this::onUseItemOnBlock);
 		forgeBus.addListener(EventPriority.LOW, this::onLeftClickBlock);
-		forgeBus.addListener(this::onLevelTickEnd);
 		forgeBus.addListener(this::onUseItemOnBlock);
 		forgeBus.addListener(this::onChunkWatch);
 		
@@ -541,15 +540,6 @@ public class MoreRed
 			return;
 		}
 		wireBlock.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, true);
-	}
-	
-	private void onLevelTickEnd(LevelTickEvent.Post event)
-	{
-		Level level = event.getLevel();
-		if (level instanceof ServerLevel serverLevel)
-		{
-			WireUpdateBuffer.get(serverLevel).sendPackets(serverLevel);
-		}
 	}
 	
 	// fired on the server just after vanilla chunk data is sent to the client

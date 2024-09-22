@@ -23,6 +23,7 @@ import net.commoble.morered.future.ExperimentalModEvents;
 import net.commoble.morered.future.Face;
 import net.commoble.morered.future.SignalStrength;
 import net.commoble.morered.future.TransmissionNode;
+import net.commoble.morered.future.WireUpdateBuffer;
 import net.commoble.morered.future.Wirer;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
@@ -450,7 +451,7 @@ public abstract class AbstractWireBlock extends Block
 		this.updateShapeCache(worldIn, pos);
 		if (doGraphUpdate)
 		{
-			worldIn.scheduleTick(pos, this, 1);
+			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
 		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		if (edgeFlags != 0)
@@ -480,15 +481,6 @@ public abstract class AbstractWireBlock extends Block
 		}
 		
 		super.neighborChanged(state, worldIn, pos, neighborBlock, fromPos, isMoving);
-	}
-	
-	
-
-	@Override
-	protected void tick(BlockState thisState, ServerLevel level, BlockPos thisPos, RandomSource rand)
-	{
-		super.tick(thisState, level, thisPos, rand);
-		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, thisPos, GameEvent.Context.of(null,null));
 	}
 
 	@Override
