@@ -57,7 +57,7 @@ public class WireUpdateBuffer extends SavedData
 			Block originBlock = originState.getBlock();
 			Wirer originWirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, originBlock.builtInRegistryHolder().key());
 			if (originWirer == null)
-				return;
+				continue;
 			
 			for (Direction face : Direction.values()) {
 				originWirer.getTransmissionNodes(level, originPos, originState, face).forEach((channel,node) -> {

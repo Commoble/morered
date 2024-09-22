@@ -205,6 +205,7 @@ public abstract class AbstractWireBlock extends Block
 	protected final Collection<Channel> channels;
 	protected final boolean readAttachedPower;
 	protected final boolean notifyAttachedNeighbors;
+	protected final boolean useIndirectPower;
 
 	/**
 	 * 
@@ -214,7 +215,7 @@ public abstract class AbstractWireBlock extends Block
 	 * @param voxelCache The cache to use for this block's voxels given world context
 	 * @param useIndirectPower Whether this block is allowed to send or receive power conducted indirectly through solid cubes
 	 */
-	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, Collection<Channel> channels)
+	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, boolean useIndirectPower, Collection<Channel> channels)
 	{
 		super(properties);
 		// the "default" state has to be the empty state so we can build it up one face at a time
@@ -232,10 +233,10 @@ public abstract class AbstractWireBlock extends Block
 		this.voxelCache = voxelCache;
 		this.readAttachedPower = readAttachedPower;
 		this.notifyAttachedNeighbors = notifyAttachedNeighbors;
+		this.useIndirectPower = useIndirectPower;
 		this.channels = channels;
 	}
 
-	protected abstract void notifyNeighbors(Level world, BlockPos wirePos, BlockState newState, EnumSet<Direction> updateDirections, boolean doConductedPowerUpdates);
 	protected abstract Map<Direction, SignalStrength> onReceivePower(LevelAccessor level, BlockPos pos, BlockState state, Direction attachmentSide, int power, Channel channel);
 	
 	@Override
@@ -751,6 +752,22 @@ public abstract class AbstractWireBlock extends Block
 			if (this.readAttachedPower)
 			{
 				powerReaders.add(attachmentSide);
+			}
+			if (this.useIndirectPower)
+			{
+				// add strong-power connections to wires on the other sides of attached block
+				BlockPos neighborPos = thisPos.relative(attachmentSide);
+				if (level.getBlockState(neighborPos).isRedstoneConductor(level, neighborPos))
+				{
+					for (Direction strongNeighborAttachmentSide : Direction.values())
+					{
+						if (strongNeighborAttachmentSide == attachmentSide)
+							continue;
+						Direction directionFromCubeToStrongNeighbor = strongNeighborAttachmentSide.getOpposite();
+						BlockPos strongNeighborPos = neighborPos.relative(directionFromCubeToStrongNeighbor);
+						connectableNodes.add(new Face(strongNeighborPos, strongNeighborAttachmentSide));
+					}
+				}
 			}
 			// how does this work
 			// we have transmission nodes at each node we have a side attached to

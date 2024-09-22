@@ -42,18 +42,18 @@ public class ColoredCableBlock extends PoweredWireBlock
 			: AbstractWireBlock.canWireConnectToAdjacentWireOrCable(world, thisPos, thisState, wirePos, wireState, wireFace, directionToWire);
 	}
 
-	@Override
-	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
-	{
-		// do this check first so we don't check the same behaviour twice for colored cable blocks
-		return neighborBlock instanceof ColoredCableBlock
-			? ((ColoredCableBlock)neighborBlock).canConnectToAdjacentWireOrCable(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire)
-			: MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultWireConnector())
-				.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire)
-				||
-				MoreRedAPI.getCableConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultCableConnector())
-				.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);
-	}
+//	@Override
+//	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+//	{
+//		// do this check first so we don't check the same behaviour twice for colored cable blocks
+//		return neighborBlock instanceof ColoredCableBlock
+//			? ((ColoredCableBlock)neighborBlock).canConnectToAdjacentWireOrCable(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire)
+//			: MoreRedAPI.getWireConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultWireConnector())
+//				.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire)
+//				||
+//				MoreRedAPI.getCableConnectabilityRegistry().getOrDefault(neighborBlock, MoreRedAPI.getDefaultCableConnector())
+//				.canConnectToAdjacentWire(world, neighborPos, neighborState, thisPos, thisState, attachmentDirection, directionToWire);
+//	}
 	
 //	// invoked when an adjacent TE is marked dirty or an adjacent block updates its comparator output
 //	@Override

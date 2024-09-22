@@ -159,7 +159,7 @@ public class ColorHandlers
 			{
 				int side = tintIndex-1;
 				int power = wire.getPower(side);
-				double lerpFactor = power/32D;
+				double lerpFactor = power/15D;
 				return ((int)Mth.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 			}
 			else // range is [7,18], indicating an edge tint
@@ -180,7 +180,7 @@ public class ColorHandlers
 						double powerA = neighborWireA.getPower(directionB);
 						double powerB = neighborWireB.getPower(directionA);
 						double averagePower = (powerA + powerB)/2D;
-						double lerpFactor = averagePower/32D;
+						double lerpFactor = averagePower/15D;
 						return ((int)Mth.lerp(lerpFactor, UNLIT_RED, LIT_RED)) << 16;
 					}
 				}
