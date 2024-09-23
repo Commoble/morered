@@ -8,6 +8,7 @@
   * There is now a maximum number of wire nodes which can be in a single wire network (default 1024, configurable in common config)
     * Each attached face of a wire block counts as one node, each channel used in a bundled cable block also counts as a node
   * Colored network cables no longer receive power from the block face they are attached to (they still emit weak power to it)
+  * Redwire Post Relay Plates no longer emit or receive strong power on their orthagonal sides
   * Bundled cables and their relay plates will now generally connect to any block that a colored cable can
     * If a bundled cable receives a full redstone signal, it will use all 16 channels
   * Bitwise plates can now be connected directly to red alloy wires (this counts as receiving power on all channels)
