@@ -1,6 +1,11 @@
 package net.commoble.morered.wire_post;
 
+import java.util.Map;
+
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.TransmissionNode;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
@@ -25,16 +30,22 @@ public abstract class AbstractChanneledCablePostBlock extends AbstractPostBlock
 		super(properties);
 	}
 
+//	@Override
+//	protected void notifyNeighbors(Level level, BlockPos pos, BlockState state)
+//	{
+//		// markdirty is sufficient for notifying neighbors of internal BE updates
+//		// standard block updates are sufficient for notifying neighbors of blockstate addition/removal
+//		// but we do want to notify connected BEs
+//		if (level.getBlockEntity(pos) instanceof WirePostBlockEntity be)
+//		{
+//			be.notifyConnections();
+//		}
+//	}
+
 	@Override
-	protected void notifyNeighbors(Level level, BlockPos pos, BlockState state)
+	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
 	{
-		// markdirty is sufficient for notifying neighbors of internal BE updates
-		// standard block updates are sufficient for notifying neighbors of blockstate addition/removal
-		// but we do want to notify connected BEs
-		if (level.getBlockEntity(pos) instanceof WirePostBlockEntity be)
-		{
-			be.notifyConnections();
-		}
+		return Map.of();
 	}
 	
 	@Override

@@ -212,7 +212,7 @@ public class MoreRed
 		pulseGateBlock = registerBlockItem(blocks, items, ObjectNames.PULSE_GATE,
 			() -> new PulseGateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD)));
 		redwirePostBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST,
-			() -> new WirePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostBlock::getRedstoneConnectionDirections));
+			() -> new WirePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		redwirePostPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_PLATE,
 			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
 		redwirePostRelayPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_RELAY_PLATE,

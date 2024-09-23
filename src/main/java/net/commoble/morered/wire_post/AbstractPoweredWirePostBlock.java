@@ -1,11 +1,21 @@
 package net.commoble.morered.wire_post;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ExperimentalModEvents;
+import net.commoble.morered.future.Face;
+import net.commoble.morered.future.SignalStrength;
+import net.commoble.morered.future.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -21,8 +31,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock implements EntityBlock
 {
@@ -40,13 +50,15 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	
 	// function that gets the connected directions for a given blockstate
 	private final Function<BlockState, EnumSet<Direction>> connectionGetter;
+	private final boolean connectsToAttachedBlock;
 
-	public AbstractPoweredWirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
+	public AbstractPoweredWirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter, boolean connectsToAttachedBlock)
 	{
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState()
 			.setValue(POWER, 0));
 		this.connectionGetter = connectionGetter;
+		this.connectsToAttachedBlock = connectsToAttachedBlock;
 	}
 
 	@Override
@@ -69,13 +81,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		int oldPower = state.getValue(POWER);
-		int newPower = this.getNewPower(state, world, pos);
-		if (oldPower != newPower)
-		{
-			world.setBlock(pos, state.setValue(POWER, newPower), 3);
-		}
-
+		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 	}
 
 	@Override
@@ -83,39 +89,24 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
 		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
-		int oldPower = state.getValue(POWER);
-		int newPower = this.getNewPower(state, world, pos);
-		if (oldPower != newPower)
-		{
-			world.setBlock(pos, state.setValue(POWER, newPower), 3);
-		}
+		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 
 	}
 
-	@Override
-	@Nullable
-	public BlockState getStateForPlacement(BlockPlaceContext context)
-	{
-		BlockState attachmentState = super.getStateForPlacement(context);
-		return attachmentState == null
-			? null
-			: attachmentState.setValue(POWER, this.getNewPower(attachmentState, context.getLevel(), context.getClickedPos()));
-	}
-
-	/**
-	 * Called after a block is placed next to this block
-	 * 
-	 * Update the provided state given the provided neighbor facing and neighbor
-	 * state, returning a new state. For example, fences make their connections to
-	 * the passed in state if possible, and wet concrete powder immediately returns
-	 * its solidified counterpart. Note that this method should ideally consider
-	 * only the specific face passed in.
-	 */
-	@Override
-	public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos)
-	{
-		return state.setValue(POWER, this.getNewPower(state, world, pos));
-	}
+//	/**
+//	 * Called after a block is placed next to this block
+//	 * 
+//	 * Update the provided state given the provided neighbor facing and neighbor
+//	 * state, returning a new state. For example, fences make their connections to
+//	 * the passed in state if possible, and wet concrete powder immediately returns
+//	 * its solidified counterpart. Note that this method should ideally consider
+//	 * only the specific face passed in.
+//	 */
+//	@Override
+//	public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos)
+//	{
+//		return state.setValue(POWER, this.getNewPower(state, world, pos));
+//	}
 
 	/**
 	 * Can this block provide power. Only wire currently seems to have this change
@@ -133,14 +124,18 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
 	{
-		return side != null && this.getConnectableDirections(state).contains(side.getOpposite());
+		return side != null && this.getParallelDirections(state).contains(side.getOpposite());
 	}
 	
 	@Deprecated
 	@Override
 	public int getSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction directionOfThisBlockFromCaller)
 	{
-		if (this.getConnectableDirections(blockState).contains(directionOfThisBlockFromCaller.getOpposite()))
+		if (this.getParallelDirections(blockState).contains(directionOfThisBlockFromCaller.getOpposite()))
+		{
+			return blockState.getValue(POWER);
+		}
+		else if (this.connectsToAttachedBlock && directionOfThisBlockFromCaller.getOpposite() == blockState.getValue(DIRECTION_OF_ATTACHMENT))
 		{
 			return blockState.getValue(POWER);
 		}
@@ -155,91 +150,81 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public int getDirectSignal(BlockState state, BlockGetter world, BlockPos pos, Direction directionFromNeighbor)
 	{
-		return this.getSignal(state,world,pos,directionFromNeighbor);
+		if (this.connectsToAttachedBlock && directionFromNeighbor.getOpposite() == state.getValue(DIRECTION_OF_ATTACHMENT))
+		{
+			return state.getValue(POWER);
+		}
+		else
+		{
+			return 0;
+		}
 	}
 	
-	public EnumSet<Direction> getConnectableDirections(BlockState state)
+	public EnumSet<Direction> getParallelDirections(BlockState state)
 	{
 		return this.connectionGetter.apply(state);
 	}
 	
-	/**
-	 * Returns a power level equal to one less than the highest power level among the blocks that this block can connect to
-	 * @param state The blockstate of this block
-	 * @param world The world where the blockstate lives
-	 * @param pos The position of the blockstate in the world
-	 * @return The new power level to be used by this block
-	 */
-	public int getNewPower(BlockState state, LevelAccessor world, BlockPos pos)
+	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
 	{
-		return Math.max(0, Math.max(this.getNeighborPower(state, world, pos), this.getConnectionPower(state, world, pos)) -1);
-	}
-	
-	/**
-	 * Returns the highest redstone power level among the neighbors adjacent to this block's redstone-connecting sides
-	 * @param state The blockstate of this block
-	 * @param world The world where the blockstate lives
-	 * @param pos The position of the state in the world
-	 * @return The highest redstone power level among the relevant neighbors adjacent to this block
-	 **/
-	public int getNeighborPower(BlockState state, LevelAccessor world, BlockPos pos)
-	{
-		int maxPowerFound = 0;
-		if (world instanceof Level level)
+		if (face != state.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
+			return Map.of();
+		if (!(level.getBlockEntity(pos) instanceof WirePostBlockEntity post))
+			return Map.of();
+		
+		Map<Channel, TransmissionNode> map = new HashMap<>();
+		Set<Direction> powerReaders = this.connectsToAttachedBlock
+			? Set.of(face)
+			: Set.of();
+		Set<Direction> parallelDirections = this.getParallelDirections(state);
+		Set<Face> connectableNodes = new HashSet<>();
+		// add nodes for parallel nodes
+		for (Direction directionToNeighbor : parallelDirections)
 		{
-			for (Direction dir : this.getConnectableDirections(state))
-			{
-				int signal = level.getSignal(pos.relative(dir), dir);
-				maxPowerFound = Math.max(signal, maxPowerFound);
-			}
+			BlockPos neighborPos = pos.relative(directionToNeighbor);
+			connectableNodes.add(new Face(neighborPos, face));
 		}
-		return maxPowerFound;
-	}
-	
-	/**
-	 * Returns the highest redstone power level among the posts connected to this post
-	 * @param state The blockstate of this post block
-	 * @param world The world object the blockstate lives in
-	 * @param pos The position of the blockstate in the world
-	 * @return The highest emitted redstone power level among the posts connected to this post
-	 **/
-	public int getConnectionPower(BlockState state, LevelAccessor world, BlockPos pos)
-	{
-		int maxPowerFound = 0;
-		BlockEntity be = world.getBlockEntity(pos);
-		if (be instanceof WirePostBlockEntity wire)
+		if (this.connectsToAttachedBlock)
 		{
-			for (BlockPos otherPos : wire.getRemoteConnections())
+			// add strong-connection nodes for the attachment face too
+			BlockPos neighborPos = pos.relative(face);
+			if (level.getBlockState(neighborPos).isRedstoneConductor(level, pos))
 			{
-				BlockState otherState = world.getBlockState(otherPos);
-				if (otherState.hasProperty(POWER))
+				for (Direction directionToCube : Direction.values())
 				{
-					maxPowerFound = Math.max(maxPowerFound, otherState.getValue(POWER));
+					if (directionToCube == face)
+						continue;
+					connectableNodes.add(new Face(neighborPos.relative(directionToCube.getOpposite()), directionToCube));
 				}
 			}
 		}
-		return maxPowerFound;
-	}
-	
-	@Override
-	public void notifyNeighbors(Level world, BlockPos pos, BlockState state)
-	{
-		EnumSet<Direction> neighborDirections = this.getConnectableDirections(state);
-		if (!EventHooks.onNeighborNotify(world, pos, world.getBlockState(pos), neighborDirections, false).isCanceled())
+		for (BlockPos remotePos : post.getRemoteConnections())
 		{
-			for (Direction dir : neighborDirections)
+			BlockState remoteState = level.getBlockState(remotePos);
+			if (remoteState.hasProperty(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
 			{
-				BlockPos neighborPos = pos.relative(dir);
-				world.neighborChanged(neighborPos, this, pos);
-				if (world.getBlockState(neighborPos).shouldCheckWeakPower(world, neighborPos, dir))
-				{
-					world.updateNeighborsAt(neighborPos, this);
-				}
-			}
-			if (world.getBlockEntity(pos) instanceof WirePostBlockEntity wire)
-			{
-				wire.notifyConnections();
+				connectableNodes.add(new Face(remotePos, remoteState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT)));
 			}
 		}
+		BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> graphListener = (levelAccess, power) -> {
+			// flag 2 syncs block via sendBlockUpdated but does not invoke neighborChanged
+			// the graph will invoke neighborChanged later
+			// however this will still invoke updateShape...
+			// this shouldn't be an issue since updateShape usually doesn't handle signal changes
+			levelAccess.setBlock(pos, state.setValue(POWER, power), Block.UPDATE_CLIENTS);
+			Map<Direction, SignalStrength> updateDirs = new HashMap<>();
+			for (Direction dir : powerReaders)
+			{
+				updateDirs.put(dir, SignalStrength.STRONG);
+			}
+			for (Direction dir : parallelDirections)
+			{
+				updateDirs.put(dir, SignalStrength.STRONG);
+			}
+			return updateDirs;
+		};
+		TransmissionNode node = new TransmissionNode(powerReaders, connectableNodes, graphListener);
+		map.put(Channel.wide(), node);
+		return map;
 	}
 }

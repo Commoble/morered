@@ -1,5 +1,6 @@
 package net.commoble.morered.wire_post;
 
+import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
@@ -8,6 +9,9 @@ import javax.annotation.Nullable;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ExperimentalModEvents;
+import net.commoble.morered.future.TransmissionNode;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -25,6 +29,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -46,7 +51,8 @@ public abstract class AbstractPostBlock extends Block
 			.setValue(TRANSFORM, OctahedralGroup.IDENTITY));
 	}
 	
-	protected abstract void notifyNeighbors(Level world, BlockPos pos, BlockState state);
+//	protected abstract void notifyNeighbors(Level world, BlockPos pos, BlockState state);
+	public abstract Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face);
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
@@ -69,7 +75,7 @@ public abstract class AbstractPostBlock extends Block
 	{
 		this.updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onPlace(state, world, pos, oldState, isMoving);
-		this.notifyNeighbors(world, pos, state);
+		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 	}
 
 	@Override
@@ -84,7 +90,7 @@ public abstract class AbstractPostBlock extends Block
 			}
 			this.updatePostSet(level, pos, Set<BlockPos>::remove);
 			level.removeBlockEntity(pos);
-			this.notifyNeighbors(level, pos, state);
+//			level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 		}
 	}
 	
@@ -145,5 +151,4 @@ public abstract class AbstractPostBlock extends Block
 		newState = EightGroup.mirror(newState, mirrorIn);
 		return newState;
 	}
-
 }

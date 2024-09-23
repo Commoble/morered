@@ -42,6 +42,7 @@ public class ExperimentalModEvents
 		registerWirer.accept(FloorWirer.RESOURCE_KEY, FloorWirer.CODEC);
 		registerWirer.accept(WallFloorCeilingWirer.RESOURCE_KEY, WallFloorCeilingWirer.CODEC);
 		registerWirer.accept(WireWirer.RESOURCE_KEY, WireWirer.CODEC);
+		registerWirer.accept(RedwirePostWirer.RESOURCE_KEY, RedwirePostWirer.CODEC);
 		
 		gameEvents.register(WIRE_UPDATE.location().getPath(), () -> new GameEvent(0));
 	}

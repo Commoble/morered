@@ -25,7 +25,7 @@ public class WirePostPlateBlock extends AbstractPoweredWirePostBlock
 
 	public WirePostPlateBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
 	{
-		super(properties, connectionGetter);
+		super(properties, connectionGetter, false);
 	}
 	
 	@Override

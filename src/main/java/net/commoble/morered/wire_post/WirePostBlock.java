@@ -14,9 +14,9 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class WirePostBlock extends AbstractPoweredWirePostBlock
 {
 
-	public WirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter)
+	public WirePostBlock(Properties properties)
 	{
-		super(properties, connectionGetter);
+		super(properties, WirePostBlock::noParallelConnections, true);
 	}
 	
 	@Override
@@ -28,11 +28,9 @@ public class WirePostBlock extends AbstractPoweredWirePostBlock
 			: AbstractPoweredWirePostBlock.POST_SHAPES_DUNSWE[state.hasProperty(DIRECTION_OF_ATTACHMENT) ? state.getValue(DIRECTION_OF_ATTACHMENT).ordinal() : 0];
 	}
 	
-	public static EnumSet<Direction> getRedstoneConnectionDirections(BlockState state)
+	public static EnumSet<Direction> noParallelConnections(BlockState state)
 	{
-		return state.hasProperty(DIRECTION_OF_ATTACHMENT)
-			? EnumSet.of(state.getValue(DIRECTION_OF_ATTACHMENT))
-			: AbstractPoweredWirePostBlock.NO_DIRECTIONS;
+		return AbstractPoweredWirePostBlock.NO_DIRECTIONS;
 	}
 
 }
