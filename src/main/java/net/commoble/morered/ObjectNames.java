@@ -27,6 +27,7 @@ public class ObjectNames
 	
 	public static final String SOLDERING_TABLE = "soldering_table";
 	
+	public static final String WIRE_POST = "wire_post";
 	public static final String REDWIRE_POST = "redwire_post";
 	public static final String REDWIRE_POST_PLATE = "redwire_post_plate";
 	public static final String REDWIRE_POST_RELAY_PLATE = "redwire_post_relay_plate";

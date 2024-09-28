@@ -1,12 +1,18 @@
 package net.commoble.morered.wire_post;
 
 import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.future.Channel;
 import net.commoble.morered.future.ExperimentalModEvents;
+import net.commoble.morered.future.Face;
+import net.commoble.morered.future.SignalStrength;
 import net.commoble.morered.future.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -14,6 +20,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -56,7 +63,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().redwirePostBeType.get().create(pos, state);
+		return MoreRed.get().wirePostBeType.get().create(pos, state);
 	}
 
 	@Override
@@ -88,8 +95,6 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 			post.clearTransmissionNodes();
 		}
 		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
-		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
-
 	}
 
 	@Override
@@ -159,14 +164,67 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	{
 		return this.connectionGetter.apply(state);
 	}
-	
-	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
+
+	protected Map<Direction, Map<Channel, TransmissionNode>> createTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post)
 	{
-		if (face != state.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
-			return Map.of();
-		if (!(level.getBlockEntity(pos) instanceof WirePostBlockEntity post))
-			return Map.of();
-		
-		return post.getTransmissionNodes(level, pos, state, this, face);
+		Map<Direction, Map<Channel, TransmissionNode>> allMaps = new HashMap<>();
+		for (Direction face : Direction.values())
+		{
+			Map<Channel, TransmissionNode> map = new HashMap<>();
+			Set<Direction> powerReaders = this.connectsToAttachedBlock()
+				? Set.of(face)
+				: Set.of();
+			Set<Direction> parallelDirections = this.getParallelDirections(state);
+			Set<Face> connectableNodes = new HashSet<>();
+			// add nodes for parallel nodes
+			for (Direction directionToNeighbor : parallelDirections)
+			{
+				BlockPos neighborPos = pos.relative(directionToNeighbor);
+				connectableNodes.add(new Face(neighborPos, face));
+			}
+			if (this.connectsToAttachedBlock())
+			{
+				// add strong-connection nodes for the attachment face too
+				BlockPos neighborPos = pos.relative(face);
+				if (level.getBlockState(neighborPos).isRedstoneConductor(level, pos))
+				{
+					for (Direction directionToCube : Direction.values())
+					{
+						if (directionToCube == face)
+							continue;
+						connectableNodes.add(new Face(neighborPos.relative(directionToCube.getOpposite()), directionToCube));
+					}
+				}
+			}
+			for (BlockPos remotePos : post.getRemoteConnections())
+			{
+				BlockState remoteState = level.getBlockState(remotePos);
+				if (remoteState.hasProperty(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
+				{
+					connectableNodes.add(new Face(remotePos, remoteState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT)));
+				}
+			}
+			BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> graphListener = (levelAccess, power) -> {
+				// flag 2 syncs block via sendBlockUpdated but does not invoke neighborChanged
+				// the graph will invoke neighborChanged later
+				// however this will still invoke updateShape...
+				// this shouldn't be an issue since updateShape usually doesn't handle signal changes
+				levelAccess.setBlock(pos, state.setValue(AbstractPoweredWirePostBlock.POWER, power), Block.UPDATE_CLIENTS);
+				Map<Direction, SignalStrength> updateDirs = new HashMap<>();
+				for (Direction dir : powerReaders)
+				{
+					updateDirs.put(dir, SignalStrength.STRONG);
+				}
+				for (Direction dir : parallelDirections)
+				{
+					updateDirs.put(dir, SignalStrength.STRONG);
+				}
+				return updateDirs;
+			};
+			TransmissionNode node = new TransmissionNode(powerReaders, connectableNodes, graphListener);
+			map.put(Channel.wide(), node);
+			allMaps.put(face, map);
+		}
+		return allMaps;
 	}
 }

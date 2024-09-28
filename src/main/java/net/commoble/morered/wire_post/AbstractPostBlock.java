@@ -51,8 +51,7 @@ public abstract class AbstractPostBlock extends Block
 			.setValue(TRANSFORM, OctahedralGroup.IDENTITY));
 	}
 	
-//	protected abstract void notifyNeighbors(Level world, BlockPos pos, BlockState state);
-	public abstract Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face);
+	protected abstract Map<Direction, Map<Channel, TransmissionNode>> createTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post);	
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
@@ -91,6 +90,13 @@ public abstract class AbstractPostBlock extends Block
 			level.removeBlockEntity(pos);
 //			level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 		}
+	}
+
+	@Override
+	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	{
+		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
+		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 	}
 	
 	public void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)
@@ -149,5 +155,15 @@ public abstract class AbstractPostBlock extends Block
 		BlockState newState = state.setValue(DIRECTION_OF_ATTACHMENT, newFacing);
 		newState = EightGroup.mirror(newState, mirrorIn);
 		return newState;
+	}
+	
+	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
+	{
+		if (face != state.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
+			return Map.of();
+		if (!(level.getBlockEntity(pos) instanceof WirePostBlockEntity post))
+			return Map.of();
+		
+		return post.getTransmissionNodes(level, pos, state, face, () -> this.createTransmissionNodes(level, pos, state, post));
 	}
 }

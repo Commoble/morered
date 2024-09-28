@@ -37,7 +37,6 @@ import net.commoble.morered.soldering.SolderingTableBlock;
 import net.commoble.morered.wire_post.BundledCablePostBlock;
 import net.commoble.morered.wire_post.BundledCablePostBlockEntity;
 import net.commoble.morered.wire_post.BundledCableRelayPlateBlock;
-import net.commoble.morered.wire_post.BundledCableRelayPlateBlockEntity;
 import net.commoble.morered.wire_post.FakeStateLevel;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.SyncPostsInChunkPacket;
@@ -158,11 +157,10 @@ public class MoreRed
 	
 	public final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
 
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> redwirePostBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> wirePostBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> poweredWireBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCableRelayPlateBlockEntity>> bundledCableRelayPlateBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChanneledPowerStorageBlockEntity>> bitwiseLogicGateBeType;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
@@ -261,11 +259,16 @@ public class MoreRed
 			.build()
 			);
 		
-		redwirePostBeType = blockEntityTypes.register(ObjectNames.REDWIRE_POST,
+		wirePostBeType = blockEntityTypes.register(ObjectNames.WIRE_POST,
 			() -> BlockEntityType.Builder.of(WirePostBlockEntity::new,
 				redwirePostBlock.get(),
 				redwirePostPlateBlock.get(),
 				redwirePostRelayPlateBlock.get())
+			.build(null));
+		bundledCablePostBeType = blockEntityTypes.register(ObjectNames.BUNDLED_CABLE_POST,
+			() -> BlockEntityType.Builder.of(BundledCablePostBlockEntity::new,
+				bundledCablePostBlock.get(),
+				bundledCableRelayPlateBlock.get())
 			.build(null));
 		wireBeType = blockEntityTypes.register(ObjectNames.WIRE,
 			() -> BlockEntityType.Builder.of(WireBlockEntity::new,
@@ -278,14 +281,6 @@ public class MoreRed
 					Arrays.stream(networkCableBlocks))
 				.map(DeferredHolder::get)
 				.toArray(Block[]::new))
-			.build(null));
-		bundledCablePostBeType = blockEntityTypes.register(ObjectNames.BUNDLED_CABLE_POST,
-			() -> BlockEntityType.Builder.of(BundledCablePostBlockEntity::new,
-				bundledCablePostBlock.get())
-			.build(null));
-		bundledCableRelayPlateBeType = blockEntityTypes.register(ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
-			() -> BlockEntityType.Builder.of(BundledCableRelayPlateBlockEntity::new,
-				bundledCableRelayPlateBlock.get())
 			.build(null));
 		bitwiseLogicGateBeType = blockEntityTypes.register(ObjectNames.BITWISE_LOGIC_PLATE,
 			() -> BlockEntityType.Builder.of(ChanneledPowerStorageBlockEntity::new,

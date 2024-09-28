@@ -16,12 +16,12 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
-public enum RedwirePostWirer implements Wirer
+public enum WirePostWirer implements Wirer
 {
 	INSTANCE;
 
-	public static final ResourceKey<MapCodec<? extends Wirer>> RESOURCE_KEY = ResourceKey.create(Wirer.REGISTRY_KEY, MoreRed.getModRL("redwire_post"));
-	public static final MapCodec<RedwirePostWirer> CODEC = MapCodec.unit(INSTANCE);
+	public static final ResourceKey<MapCodec<? extends Wirer>> RESOURCE_KEY = ResourceKey.create(Wirer.REGISTRY_KEY, MoreRed.getModRL("wire_post"));
+	public static final MapCodec<WirePostWirer> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override
 	public MapCodec<? extends Wirer> codec()

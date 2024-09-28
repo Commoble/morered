@@ -18,7 +18,7 @@
 			"type": "morered:wire"
 		},
 		"#morered:wirable/wire_posts": {
-			"type": "morered:redwire_post"
+			"type": "morered:wire_post"
 		}
 	}
 }

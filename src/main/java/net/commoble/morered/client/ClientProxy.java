@@ -180,9 +180,8 @@ public class ClientProxy
 
 	static void onRegisterRenderers(RegisterRenderers event)
 	{
-		event.registerBlockEntityRenderer(MoreRed.get().redwirePostBeType.get(), WirePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().wirePostBeType.get(), WirePostRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().bundledCablePostBeType.get(), BundledCablePostRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().bundledCableRelayPlateBeType.get(), BundledCablePostRenderer::new);
 	}
 
 	static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)
