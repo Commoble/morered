@@ -1,6 +1,6 @@
 {
   "values": [
-    "morered:bundled_cable_post",
-    "morered:bundled_cable_relay_plate"
+    "morered:bundle_relay",
+    "morered:bundle_junction"
   ]
 }

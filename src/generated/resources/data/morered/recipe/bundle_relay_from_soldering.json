@@ -3,11 +3,7 @@
   "ingredients": [
     {
       "count": 1,
-      "tag": "c:quarter_slabs/smooth_stone"
-    },
-    {
-      "count": 1,
-      "tag": "c:ingots/redstone_alloy"
+      "tag": "morered:bundled_network_cables"
     },
     {
       "count": 1,
@@ -16,6 +12,6 @@
   ],
   "result": {
     "count": 1,
-    "id": "morered:redwire_post_plate"
+    "id": "morered:bundle_relay"
   }
 }

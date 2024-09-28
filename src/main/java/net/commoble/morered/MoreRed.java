@@ -34,9 +34,9 @@ import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.commoble.morered.soldering.SolderingTableBlock;
-import net.commoble.morered.wire_post.BundledCablePostBlock;
+import net.commoble.morered.wire_post.BundleRelayBlock;
 import net.commoble.morered.wire_post.BundledCablePostBlockEntity;
-import net.commoble.morered.wire_post.BundledCableRelayPlateBlock;
+import net.commoble.morered.wire_post.BundleJunctionBlock;
 import net.commoble.morered.wire_post.FakeStateLevel;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.SyncPostsInChunkPacket;
@@ -142,14 +142,14 @@ public class MoreRed
 	public final DeferredHolder<Block, LatchBlock> latchBlock;
 	public final DeferredHolder<Block, PulseGateBlock> pulseGateBlock;
 	public final DeferredHolder<Block, WirePostBlock> redwirePostBlock;
-	public final DeferredHolder<Block, WirePostPlateBlock> redwirePostPlateBlock;
-	public final DeferredHolder<Block, WirePostPlateBlock> redwirePostRelayPlateBlock;
+	public final DeferredHolder<Block, WirePostPlateBlock> redwireRelayBlock;
+	public final DeferredHolder<Block, WirePostPlateBlock> redwireJunctionBlock;
 	public final DeferredHolder<Block, HexidecrubrometerBlock> hexidecrubrometerBlock;
 	public final DeferredHolder<Block, PoweredWireBlock> redAlloyWireBlock;
 	public final DeferredHolder<Block, PoweredWireBlock>[] networkCableBlocks;
 	public final DeferredHolder<Block, BundledCableBlock> bundledNetworkCableBlock;
-	public final DeferredHolder<Block, BundledCablePostBlock> bundledCablePostBlock;
-	public final DeferredHolder<Block, BundledCableRelayPlateBlock> bundledCableRelayPlateBlock;
+	public final DeferredHolder<Block, BundleRelayBlock> bundleRelayBlock;
+	public final DeferredHolder<Block, BundleJunctionBlock> bundleJunctionBlock;
 
 	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
 	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
@@ -202,16 +202,16 @@ public class MoreRed
 			() -> new PulseGateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD)));
 		redwirePostBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST,
 			() -> new WirePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
-		redwirePostPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_PLATE,
+		redwireRelayBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_RELAY,
 			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
-		redwirePostRelayPlateBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_POST_RELAY_PLATE,
+		redwireJunctionBlock = registerBlockItem(blocks, items, ObjectNames.REDWIRE_JUNCTION,
 			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
 		hexidecrubrometerBlock = registerBlockItem(blocks, items, ObjectNames.HEXIDECRUBROMETER,
 			() -> new HexidecrubrometerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
-		bundledCablePostBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_CABLE_POST,
-			() -> new BundledCablePostBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
-		bundledCableRelayPlateBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_CABLE_RELAY_PLATE,
-			() -> new BundledCableRelayPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
+		bundleRelayBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLE_RELAY,
+			() -> new BundleRelayBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
+		bundleJunctionBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLE_JUNCTION,
+			() -> new BundleJunctionBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		
 		redAlloyWireBlock = registerBlockItem(blocks, items, ObjectNames.RED_ALLOY_WIRE, 
 			() -> PoweredWireBlock.createRedAlloyWireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
@@ -262,13 +262,13 @@ public class MoreRed
 		wirePostBeType = blockEntityTypes.register(ObjectNames.WIRE_POST,
 			() -> BlockEntityType.Builder.of(WirePostBlockEntity::new,
 				redwirePostBlock.get(),
-				redwirePostPlateBlock.get(),
-				redwirePostRelayPlateBlock.get())
+				redwireRelayBlock.get(),
+				redwireJunctionBlock.get())
 			.build(null));
-		bundledCablePostBeType = blockEntityTypes.register(ObjectNames.BUNDLED_CABLE_POST,
+		bundledCablePostBeType = blockEntityTypes.register(ObjectNames.BUNDLE_RELAY,
 			() -> BlockEntityType.Builder.of(BundledCablePostBlockEntity::new,
-				bundledCablePostBlock.get(),
-				bundledCableRelayPlateBlock.get())
+				bundleRelayBlock.get(),
+				bundleJunctionBlock.get())
 			.build(null));
 		wireBeType = blockEntityTypes.register(ObjectNames.WIRE,
 			() -> BlockEntityType.Builder.of(WireBlockEntity::new,

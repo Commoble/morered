@@ -123,7 +123,7 @@ public class MoreRedDataGen
 		bitwisePlateBlock(ObjectNames.BITWISE_OR_GATE, "Bitwise OR Gate", "or_gate_symbol", context);
 		bitwisePlateBlock(ObjectNames.BITWISE_XNOR_GATE, "Bitwise XNOR Gate", "xnor_gate_symbol", context);
 		bitwisePlateBlock(ObjectNames.BITWISE_XOR_GATE, "Bitwise XOR Gate", "xor_gate_symbol", context);
-		postBlock(ObjectNames.BUNDLED_CABLE_POST, "Bundled Cable Post", context)
+		postBlock(ObjectNames.BUNDLE_RELAY, "Bundled Cable Post", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -132,7 +132,7 @@ public class MoreRedDataGen
 				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES,1),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1)))));
-		postBlock(ObjectNames.BUNDLED_CABLE_RELAY_PLATE, "Bundled Cable Relay Plate", context)
+		postBlock(ObjectNames.BUNDLE_JUNCTION, "Bundled Cable Relay Plate", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -203,7 +203,7 @@ public class MoreRedDataGen
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1),
 					SizedIngredient.of(REDSTONE_ALLOY_INGOTS,1)))));
 				
-		postBlock(ObjectNames.REDWIRE_POST_PLATE, "Redwire Post Plate", context)
+		postBlock(ObjectNames.REDWIRE_RELAY, "Redwire Post Plate", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -218,7 +218,7 @@ public class MoreRedDataGen
 					SizedIngredient.of(REDSTONE_ALLOY_INGOTS,1),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1)))));
 				
-		postBlock(ObjectNames.REDWIRE_POST_RELAY_PLATE, "Redwire Post Relay Plate", context)
+		postBlock(ObjectNames.REDWIRE_JUNCTION, "Redwire Post Relay Plate", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(

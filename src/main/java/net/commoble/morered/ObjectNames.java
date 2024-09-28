@@ -29,11 +29,12 @@ public class ObjectNames
 	
 	public static final String WIRE_POST = "wire_post";
 	public static final String REDWIRE_POST = "redwire_post";
-	public static final String REDWIRE_POST_PLATE = "redwire_post_plate";
-	public static final String REDWIRE_POST_RELAY_PLATE = "redwire_post_relay_plate";
+	public static final String REDWIRE_RELAY = "redwire_relay";
+	public static final String REDWIRE_JUNCTION = "redwire_junction";
 	
 	public static final String BUNDLED_CABLE_POST = "bundled_cable_post";
-	public static final String BUNDLED_CABLE_RELAY_PLATE = "bundled_cable_relay_plate";
+	public static final String BUNDLE_RELAY = "bundle_relay";
+	public static final String BUNDLE_JUNCTION = "bundle_junction";
 	
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";

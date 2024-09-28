@@ -140,9 +140,9 @@ public class ClientProxy
 			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().latchBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwirePostPlateBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwirePostRelayPlateBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().bundledCableRelayPlateBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().bundleJunctionBlock.get(), RenderType.cutout());
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
@@ -162,8 +162,8 @@ public class ClientProxy
 		event.register(ColorHandlers::getLatchBlockTint, MoreRed.get().latchBlock.get());
 		event.register(ColorHandlers::getPulseGateBlockTint, MoreRed.get().pulseGateBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostBlock.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostPlateBlock.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostRelayPlateBlock.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireRelayBlock.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireJunctionBlock.get());
 		event.register(ColorHandlers::getRedAlloyWireBlockTint, MoreRed.get().redAlloyWireBlock.get());
 	}
 
@@ -173,8 +173,8 @@ public class ClientProxy
 		event.register(ColorHandlers::getLatchItemTint, MoreRed.get().latchBlock.get().asItem());
 		event.register(ColorHandlers::getPulseGateItemTint, MoreRed.get().pulseGateBlock.get().asItem());
 		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostBlock.get().asItem());
-		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostPlateBlock.get().asItem());
-		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostRelayPlateBlock.get().asItem());
+		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwireRelayBlock.get().asItem());
+		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwireJunctionBlock.get().asItem());
 		event.register(ColorHandlers::getRedAlloyWireItemTint, MoreRed.get().redAlloyWireBlock.get().asItem());
 	}
 

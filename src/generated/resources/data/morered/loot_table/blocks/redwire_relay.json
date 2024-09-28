@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "morered:bundled_cable_relay_plate"
+          "name": "morered:redwire_relay"
         }
       ],
       "rolls": 1.0

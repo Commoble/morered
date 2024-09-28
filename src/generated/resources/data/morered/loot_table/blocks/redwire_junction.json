@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "morered:redwire_post_plate"
+          "name": "morered:redwire_junction"
         }
       ],
       "rolls": 1.0

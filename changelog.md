@@ -12,6 +12,15 @@
   * Bundled cables and their relay plates will now generally connect to any block that a colored cable can
     * If a bundled cable receives a full redstone signal, it will use all 16 channels
   * Bitwise plates can now be connected directly to red alloy wires (this counts as receiving power on all channels)
+  * Renamed wire post blocks to reduce word count (and their respective block ids)
+    * Redwire Post Plate -> Redwire Relay (redwire_post_plate -> redwire_relay)
+    * Redwire Post Relay Plate -> Redwire Junction (redwire_post_relay_plate -> redwire_junction
+    * Bundled Cable Post -> Bundle Relay (bundled_cable_post -> bundle_relay)
+    * Bundled Cable Relay Plate -> Bundle Junction (bundled_cable_relay_plate -> bundle_junction)
+  * Wire post blockentity ids and data have been renamed and reworked, there are now two blockentity types used by wire posts:
+    * morered:wire_post (used by redwire_post, redwire_relay, redwire_junction)
+    * morered:bundled_cable_post (used by bundle_relay, bundle_junction)
+  * Bundled cable post blockentities no longer store power data
   
   
 # 1.21.1-6.0.0.3

@@ -8,17 +8,17 @@
     "F": {
       "tag": "c:ingots/iron"
     },
-    "b": {
-      "tag": "morered:bundled_network_cables"
+    "R": {
+      "tag": "c:ingots/redstone_alloy"
     }
   },
   "pattern": [
-    " b ",
-    "bFb",
+    " F ",
+    " R ",
     "###"
   ],
   "result": {
     "count": 1,
-    "id": "morered:bundled_cable_relay_plate"
+    "id": "morered:redwire_relay"
   }
 }

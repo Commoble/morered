@@ -7,10 +7,10 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class BundledCablePostBlock extends AbstractBundledCablePostBlock
+public class BundleRelayBlock extends AbstractBundledCablePostBlock
 {
 
-	public BundledCablePostBlock(Properties properties)
+	public BundleRelayBlock(Properties properties)
 	{
 		super(properties, WirePostBlock::noParallelConnections);
 	}

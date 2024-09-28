@@ -7,10 +7,6 @@
     },
     {
       "count": 1,
-      "tag": "c:dusts/redstone"
-    },
-    {
-      "count": 1,
       "tag": "c:ingots/redstone_alloy"
     },
     {
@@ -20,6 +16,6 @@
   ],
   "result": {
     "count": 1,
-    "id": "morered:redwire_post_relay_plate"
+    "id": "morered:redwire_relay"
   }
 }

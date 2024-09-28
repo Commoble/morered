@@ -8,7 +8,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public class BundledCableRelayPlateBlock extends AbstractBundledCablePostBlock
+public class BundleJunctionBlock extends AbstractBundledCablePostBlock
 {
 	protected static final VoxelShape[] CABLE_PLATE_SHAPES_DUNSWE = {
 		Block.box(0D,0D,0D,16D,4D,16D),
@@ -28,7 +28,7 @@ public class BundledCableRelayPlateBlock extends AbstractBundledCablePostBlock
 		Shapes.or(AbstractBundledCablePostBlock.CABLE_POST_SHAPES_DUNSWE[5], CABLE_PLATE_SHAPES_DUNSWE[5]) // east
 	};
 
-	public BundledCableRelayPlateBlock(Properties properties)
+	public BundleJunctionBlock(Properties properties)
 	{
 		super(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate);
 	}

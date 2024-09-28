@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "morered:bundled_cable_post"
+          "name": "morered:bundle_relay"
         }
       ],
       "rolls": 1.0
