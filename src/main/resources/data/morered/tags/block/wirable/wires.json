@@ -1,6 +1,7 @@
 {
 	"values": [
 		"morered:red_alloy_wire",
-		"#morered:colored_network_cables"
+		"#morered:colored_network_cables",
+		"morered:bundled_network_cable"
 	]
 }
