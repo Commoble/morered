@@ -2,9 +2,11 @@ package net.commoble.morered.wire_post;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiFunction;
 
 import javax.annotation.Nonnull;
 
@@ -13,15 +15,22 @@ import com.mojang.math.OctahedralGroup;
 import com.mojang.serialization.Codec;
 
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.Face;
+import net.commoble.morered.future.SignalStrength;
+import net.commoble.morered.future.TransmissionNode;
 import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -40,6 +49,7 @@ public class WirePostBlockEntity extends BlockEntity
 	private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
 	
 	private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
+	protected Map<Direction, Map<Channel, TransmissionNode>> transmissionNodes = null;
 	
 	public static final Codec<List<BlockPos>> BLOCKPOS_LISTER = BlockPos.CODEC.listOf();
 	
@@ -114,6 +124,7 @@ public class WirePostBlockEntity extends BlockEntity
 			}
 		}
 		this.remoteConnections = new HashMap<>();
+		this.transmissionNodes = null;
 		this.onCommonDataUpdated();
 	}
 
@@ -136,6 +147,7 @@ public class WirePostBlockEntity extends BlockEntity
 	private void addConnection(BlockPos otherPos)
 	{
 		this.remoteConnections.put(otherPos.immutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
+		this.transmissionNodes = null;
 		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
 		this.onCommonDataUpdated();
 	}
@@ -143,6 +155,7 @@ public class WirePostBlockEntity extends BlockEntity
 	private void removeConnection(BlockPos otherPos)
 	{
 		this.remoteConnections.remove(otherPos);
+		this.transmissionNodes = null;
 		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
 		if (this.level instanceof ServerLevel serverLevel)
 		{
@@ -278,5 +291,84 @@ public class WirePostBlockEntity extends BlockEntity
 			boxes[i] = new AABB(points[i], points[i+1]);
 		}
 		return NestedBoundingBox.fromAABBs(boxes);
+	}
+
+	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, AbstractPoweredWirePostBlock block, Direction face)
+	{
+		if (this.level.isClientSide)
+			return Map.of();
+		if (this.transmissionNodes == null)
+		{
+			this.transmissionNodes = this.createTransmissionNodes(level, pos, state, block);
+		}
+		return this.transmissionNodes.get(face);
+	}
+
+	protected Map<Direction, Map<Channel, TransmissionNode>> createTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, AbstractPoweredWirePostBlock block)
+	{
+		Map<Direction, Map<Channel, TransmissionNode>> allMaps = new HashMap<>();
+		for (Direction face : Direction.values())
+		{
+			Map<Channel, TransmissionNode> map = new HashMap<>();
+			Set<Direction> powerReaders = block.connectsToAttachedBlock()
+				? Set.of(face)
+				: Set.of();
+			Set<Direction> parallelDirections = block.getParallelDirections(state);
+			Set<Face> connectableNodes = new HashSet<>();
+			// add nodes for parallel nodes
+			for (Direction directionToNeighbor : parallelDirections)
+			{
+				BlockPos neighborPos = pos.relative(directionToNeighbor);
+				connectableNodes.add(new Face(neighborPos, face));
+			}
+			if (block.connectsToAttachedBlock())
+			{
+				// add strong-connection nodes for the attachment face too
+				BlockPos neighborPos = pos.relative(face);
+				if (level.getBlockState(neighborPos).isRedstoneConductor(level, pos))
+				{
+					for (Direction directionToCube : Direction.values())
+					{
+						if (directionToCube == face)
+							continue;
+						connectableNodes.add(new Face(neighborPos.relative(directionToCube.getOpposite()), directionToCube));
+					}
+				}
+			}
+			for (BlockPos remotePos : this.getRemoteConnections())
+			{
+				BlockState remoteState = level.getBlockState(remotePos);
+				if (remoteState.hasProperty(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
+				{
+					connectableNodes.add(new Face(remotePos, remoteState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT)));
+				}
+			}
+			BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> graphListener = (levelAccess, power) -> {
+				// flag 2 syncs block via sendBlockUpdated but does not invoke neighborChanged
+				// the graph will invoke neighborChanged later
+				// however this will still invoke updateShape...
+				// this shouldn't be an issue since updateShape usually doesn't handle signal changes
+				levelAccess.setBlock(pos, state.setValue(AbstractPoweredWirePostBlock.POWER, power), Block.UPDATE_CLIENTS);
+				Map<Direction, SignalStrength> updateDirs = new HashMap<>();
+				for (Direction dir : powerReaders)
+				{
+					updateDirs.put(dir, SignalStrength.STRONG);
+				}
+				for (Direction dir : parallelDirections)
+				{
+					updateDirs.put(dir, SignalStrength.STRONG);
+				}
+				return updateDirs;
+			};
+			TransmissionNode node = new TransmissionNode(powerReaders, connectableNodes, graphListener);
+			map.put(Channel.wide(), node);
+			allMaps.put(face, map);
+		}
+		return allMaps;
+	}
+
+	public void clearTransmissionNodes()
+	{
+		this.transmissionNodes = null;
 	}
 }

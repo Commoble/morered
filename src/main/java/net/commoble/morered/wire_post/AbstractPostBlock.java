@@ -3,6 +3,7 @@ package net.commoble.morered.wire_post;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
 
@@ -94,14 +95,14 @@ public abstract class AbstractPostBlock extends Block
 		}
 	}
 	
-	public void updatePostSet(Level world, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
+	public void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)
 	{
 		LevelChunk chunk = world.getChunkAt(pos);
 		if (chunk != null)
 		{
 			Set<BlockPos> set = chunk.getData(MoreRed.get().postsInChunkAttachment.get());
-			consumer.accept(set, pos);
-			if (world instanceof ServerLevel serverLevel)
+			boolean setUpdated = setFunction.test(set, pos);
+			if (setUpdated && world instanceof ServerLevel serverLevel)
 			{
 				chunk.setUnsaved(true);
 				ChunkPos chunkPos = chunk.getPos();

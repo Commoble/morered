@@ -52,6 +52,8 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	private final Function<BlockState, EnumSet<Direction>> connectionGetter;
 	private final boolean connectsToAttachedBlock;
 
+	public boolean connectsToAttachedBlock() { return this.connectsToAttachedBlock; }
+
 	public AbstractPoweredWirePostBlock(Properties properties, Function<BlockState, EnumSet<Direction>> connectionGetter, boolean connectsToAttachedBlock)
 	{
 		super(properties);
@@ -88,25 +90,28 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Deprecated
 	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
+		// direct-connection posts need to update nodes if neighbor cube updates
+		if (this.connectsToAttachedBlock
+			&& pos.relative(state.getValue(DIRECTION_OF_ATTACHMENT)).equals(fromPos)
+			&& world.getBlockEntity(pos) instanceof WirePostBlockEntity post)
+		{
+			post.clearTransmissionNodes();
+		}
 		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
 		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
 
 	}
 
-//	/**
-//	 * Called after a block is placed next to this block
-//	 * 
-//	 * Update the provided state given the provided neighbor facing and neighbor
-//	 * state, returning a new state. For example, fences make their connections to
-//	 * the passed in state if possible, and wet concrete powder immediately returns
-//	 * its solidified counterpart. Note that this method should ideally consider
-//	 * only the specific face passed in.
-//	 */
-//	@Override
-//	public BlockState updateShape(BlockState state, Direction facing, BlockState facingState, LevelAccessor world, BlockPos pos, BlockPos facingPos)
-//	{
-//		return state.setValue(POWER, this.getNewPower(state, world, pos));
-//	}
+	@Override
+	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	{
+		// if state is replacing without changing the block, clear node cache
+		if (newState.is(this) && newState != state && level.getBlockEntity(pos) instanceof WirePostBlockEntity post)
+		{
+			post.clearTransmissionNodes();
+		}
+		super.onRemove(state, level, pos, newState, isMoving);
+	}
 
 	/**
 	 * Can this block provide power. Only wire currently seems to have this change
@@ -172,59 +177,6 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 		if (!(level.getBlockEntity(pos) instanceof WirePostBlockEntity post))
 			return Map.of();
 		
-		Map<Channel, TransmissionNode> map = new HashMap<>();
-		Set<Direction> powerReaders = this.connectsToAttachedBlock
-			? Set.of(face)
-			: Set.of();
-		Set<Direction> parallelDirections = this.getParallelDirections(state);
-		Set<Face> connectableNodes = new HashSet<>();
-		// add nodes for parallel nodes
-		for (Direction directionToNeighbor : parallelDirections)
-		{
-			BlockPos neighborPos = pos.relative(directionToNeighbor);
-			connectableNodes.add(new Face(neighborPos, face));
-		}
-		if (this.connectsToAttachedBlock)
-		{
-			// add strong-connection nodes for the attachment face too
-			BlockPos neighborPos = pos.relative(face);
-			if (level.getBlockState(neighborPos).isRedstoneConductor(level, pos))
-			{
-				for (Direction directionToCube : Direction.values())
-				{
-					if (directionToCube == face)
-						continue;
-					connectableNodes.add(new Face(neighborPos.relative(directionToCube.getOpposite()), directionToCube));
-				}
-			}
-		}
-		for (BlockPos remotePos : post.getRemoteConnections())
-		{
-			BlockState remoteState = level.getBlockState(remotePos);
-			if (remoteState.hasProperty(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
-			{
-				connectableNodes.add(new Face(remotePos, remoteState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT)));
-			}
-		}
-		BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> graphListener = (levelAccess, power) -> {
-			// flag 2 syncs block via sendBlockUpdated but does not invoke neighborChanged
-			// the graph will invoke neighborChanged later
-			// however this will still invoke updateShape...
-			// this shouldn't be an issue since updateShape usually doesn't handle signal changes
-			levelAccess.setBlock(pos, state.setValue(POWER, power), Block.UPDATE_CLIENTS);
-			Map<Direction, SignalStrength> updateDirs = new HashMap<>();
-			for (Direction dir : powerReaders)
-			{
-				updateDirs.put(dir, SignalStrength.STRONG);
-			}
-			for (Direction dir : parallelDirections)
-			{
-				updateDirs.put(dir, SignalStrength.STRONG);
-			}
-			return updateDirs;
-		};
-		TransmissionNode node = new TransmissionNode(powerReaders, connectableNodes, graphListener);
-		map.put(Channel.wide(), node);
-		return map;
+		return post.getTransmissionNodes(level, pos, state, this, face);
 	}
 }
