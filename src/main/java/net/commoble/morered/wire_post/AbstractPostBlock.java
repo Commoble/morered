@@ -2,7 +2,6 @@ package net.commoble.morered.wire_post;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
@@ -80,7 +79,6 @@ public abstract class AbstractPostBlock extends Block
 	}
 
 	@Override
-	@Deprecated
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		if (state.hasBlockEntity() && (!state.is(newState.getBlock()) || !newState.hasBlockEntity()))

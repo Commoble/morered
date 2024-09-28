@@ -2,7 +2,6 @@ package net.commoble.morered.client.jei;
 
 import java.util.List;
 
-import mezz.jei.api.constants.ModIds;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;

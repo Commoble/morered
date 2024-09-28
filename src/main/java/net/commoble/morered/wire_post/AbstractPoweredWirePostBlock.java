@@ -1,29 +1,19 @@
 package net.commoble.morered.wire_post;
 
 import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.function.BiFunction;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.future.Channel;
 import net.commoble.morered.future.ExperimentalModEvents;
-import net.commoble.morered.future.Face;
-import net.commoble.morered.future.SignalStrength;
 import net.commoble.morered.future.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;

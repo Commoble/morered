@@ -4,7 +4,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Function;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -24,7 +23,7 @@ import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.wires.AbstractWireBlock;
-import net.commoble.morered.wires.ColoredCableBlock;
+import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
@@ -64,6 +63,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
+@SuppressWarnings("deprecation")
 @Mod("morered_datagen")
 @EventBusSubscriber(modid="morered_datagen", bus=Bus.MOD)
 public class MoreRedDataGen
@@ -82,7 +82,6 @@ public class MoreRedDataGen
 	static final TagKey<Item> SMOOTH_STONE_QUARTER_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "quarter_slabs/smooth_stone"));
 	static final TagKey<Item> REDSTONE_ALLOY_INGOTS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ingots/redstone_alloy"));
 
-	@SuppressWarnings("deprecation")
 	@SubscribeEvent
 	static void onGatherData(GatherDataEvent event)
 	{
@@ -105,8 +104,8 @@ public class MoreRedDataGen
 		};
 		DataGenContext context = new DataGenContext(blockStates, models, wirePartModels, recipes, lootTables, blockTags, itemTags, lang);
 		
-		Function<String, Block> getBlock = s -> BuiltInRegistries.BLOCK.get(MoreRed.getModRL(s));
-		Function<String, Item> getItem = s -> BuiltInRegistries.ITEM.get(MoreRed.getModRL(s));
+//		Function<String, Block> getBlock = s -> BuiltInRegistries.BLOCK.get(MoreRed.getModRL(s));
+//		Function<String, Item> getItem = s -> BuiltInRegistries.ITEM.get(MoreRed.getModRL(s));
 		String fromSoldering = "%s_from_soldering";
 		
 		// blocks
@@ -298,11 +297,11 @@ public class MoreRedDataGen
 		// do stuff that has files for each color
 		for (int i=0; i<16; i++)
 		{
-			final DeferredHolder<Block, ColoredCableBlock> blockHolder = MoreRed.get().networkCableBlocks[i];
+			final DeferredHolder<Block, PoweredWireBlock> blockHolder = MoreRed.get().networkCableBlocks[i];
 			final ResourceLocation blockId = blockHolder.getId();
 			final String modid = blockId.getNamespace();
 			final String blockPath = blockId.getPath();
-			final ColoredCableBlock block = blockHolder.get();
+			final PoweredWireBlock block = blockHolder.get();
 			final Item item = block.asItem();
 			
 			String blockName = WordUtils.capitalize(blockPath.replace("_", " ")); 
@@ -336,6 +335,9 @@ public class MoreRedDataGen
 							Ingredient.of(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + DyeColor.values()[i].getName())))))));
 			
 			// tags
+			blockTags
+				.getOrCreateRawBuilder(MoreRed.Tags.Blocks.COLORED_NETWORK_CABLES)
+				.addElement(blockId);
 			itemTags
 				.getOrCreateRawBuilder(MoreRed.Tags.Items.COLORED_NETWORK_CABLES)
 				.addElement(blockId);
@@ -459,7 +461,6 @@ public class MoreRedDataGen
 		return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(pathFormatter, id.getPath()));
 	}
 	
-	@SuppressWarnings("deprecation")
 	static ResourceLocation blockId(Block block)
 	{
 		return block.builtInRegistryHolder().key().location();

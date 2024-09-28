@@ -1,7 +1,5 @@
 package net.commoble.morered.wires;
 
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -11,8 +9,8 @@ import com.mojang.math.OctahedralGroup;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.client.WirePartModelLoader.WireModelData;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ChannelSet;
 import net.commoble.morered.future.TransmissionNode;
-import net.commoble.morered.util.BlockStateUtil;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -156,11 +154,11 @@ public class WireBlockEntity extends BlockEntity
 		return wireBlock.createNodes(this.level, this.worldPosition, newState);
 	}
 	
-	protected Collection<Channel> getChannels()
+	protected ChannelSet getChannels()
 	{
 		return this.getBlockState().getBlock() instanceof AbstractWireBlock block
 			? block.getChannels()
-			: List.of();
+			: ChannelSet.EMPTY;
 	}
 	
 	public static long transformConnectionFlags(long oldConnections, OctahedralGroup transform)

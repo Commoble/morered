@@ -55,6 +55,7 @@ public class WireUpdateBuffer extends SavedData
 			// collect all of the nodes in this block
 			BlockState originState = level.getBlockState(originPos);
 			Block originBlock = originState.getBlock();
+			@SuppressWarnings("deprecation")
 			Wirer originWirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, originBlock.builtInRegistryHolder().key());
 			if (originWirer == null)
 				continue;

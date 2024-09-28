@@ -1,6 +1,5 @@
 package net.commoble.morered.wires;
 
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -18,6 +17,7 @@ import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ChannelSet;
 import net.commoble.morered.future.DefaultWirer;
 import net.commoble.morered.future.ExperimentalModEvents;
 import net.commoble.morered.future.Face;
@@ -31,7 +31,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -202,7 +201,7 @@ public abstract class AbstractWireBlock extends Block
 	protected final VoxelShape[] shapesByStateIndex;
 	protected final VoxelShape[] raytraceBackboards;
 	protected final LoadingCache<Long, VoxelShape> voxelCache;
-	protected final Collection<Channel> channels;
+	protected final ChannelSet channels;
 	protected final boolean readAttachedPower;
 	protected final boolean notifyAttachedNeighbors;
 	protected final boolean useIndirectPower;
@@ -215,7 +214,7 @@ public abstract class AbstractWireBlock extends Block
 	 * @param voxelCache The cache to use for this block's voxels given world context
 	 * @param useIndirectPower Whether this block is allowed to send or receive power conducted indirectly through solid cubes
 	 */
-	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, boolean useIndirectPower, Collection<Channel> channels)
+	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, boolean useIndirectPower, ChannelSet channels)
 	{
 		super(properties);
 		// the "default" state has to be the empty state so we can build it up one face at a time
@@ -382,7 +381,6 @@ public abstract class AbstractWireBlock extends Block
 	// only called on servers
 	// oldState is a state of this block, newState may or may not be
 	@Override
-	@Deprecated
 	public void onRemove(BlockState oldState, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
 	{
 		this.updateShapeCache(worldIn, pos);
@@ -724,7 +722,7 @@ public abstract class AbstractWireBlock extends Block
 		return this.voxelCache.getUnchecked(index);
 	}
 	
-	public Collection<Channel> getChannels()
+	public ChannelSet getChannels()
 	{
 		return this.channels;
 	}
@@ -805,7 +803,7 @@ public abstract class AbstractWireBlock extends Block
 					}
 				}
 			}
-			for (Channel channel : this.channels)
+			for (Channel channel : this.channels.channels())
 			{
 				nodesByChannel.put(channel, new TransmissionNode(
 					powerReaders,
@@ -832,15 +830,18 @@ public abstract class AbstractWireBlock extends Block
 				return true;
 			}
 		}
+		@SuppressWarnings("deprecation")
 		Wirer wirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, neighborBlock.builtInRegistryHolder().getKey());
 		if (wirer == null)
 			wirer = DefaultWirer.INSTANCE;
 		// check endpoints and transmitters
 		Face wireFace = new Face(thisPos, attachmentDirection);
 		var neighborSuppliers = wirer.getSupplierEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
+		var compatibleChannels = this.channels.compatibleChannels();
+		
 		if (!neighborSuppliers.isEmpty())
 		{
-			for (Channel channel : this.channels)
+			for (Channel channel : compatibleChannels)
 			{
 				if (neighborSuppliers.get(channel) != null)
 					return true;
@@ -850,7 +851,7 @@ public abstract class AbstractWireBlock extends Block
 		var neighborReceivers = wirer.getReceiverEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
 		if (!neighborReceivers.isEmpty())
 		{
-			for (Channel channel : this.channels)
+			for (Channel channel : compatibleChannels)
 			{
 				if (neighborReceivers.get(channel) != null)
 					return true;
@@ -859,10 +860,10 @@ public abstract class AbstractWireBlock extends Block
 		var transmissionNodes = wirer.getTransmissionNodes(world, neighborPos, neighborState, attachmentDirection);
 		if (!transmissionNodes.isEmpty())
 		{
-			for (Channel channel : this.channels)
+			for (Channel channel : compatibleChannels)
 			{
 				TransmissionNode node = transmissionNodes.get(channel);
-				if (node.connectableNodes().contains(wireFace))
+				if (node != null && node.connectableNodes().contains(wireFace))
 					return true;
 			}
 		}

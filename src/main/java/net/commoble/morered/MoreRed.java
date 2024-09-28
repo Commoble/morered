@@ -17,17 +17,12 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
-import net.commoble.morered.api.ExpandedPowerSupplier;
-import net.commoble.morered.api.MoreRedAPI;
-import net.commoble.morered.api.WireConnector;
 import net.commoble.morered.api.internal.APIRegistries;
-import net.commoble.morered.api.internal.DefaultWireProperties;
 import net.commoble.morered.bitwise_logic.BitwiseLogicPlateBlock;
 import net.commoble.morered.bitwise_logic.ChanneledPowerStorageBlockEntity;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseLogicPlateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseLogicPlateBlock;
 import net.commoble.morered.client.ClientProxy;
-import net.commoble.morered.future.WireUpdateBuffer;
 import net.commoble.morered.plate_blocks.LatchBlock;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock;
@@ -53,9 +48,8 @@ import net.commoble.morered.wire_post.WirePostPlateBlock;
 import net.commoble.morered.wire_post.WireSpoolItem;
 import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.BundledCableBlock;
-import net.commoble.morered.wires.ColoredCableBlock;
+import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.PoweredWireBlockEntity;
-import net.commoble.morered.wires.RedAlloyWireBlock;
 import net.commoble.morered.wires.WireBlockEntity;
 import net.commoble.morered.wires.WireBlockItem;
 import net.commoble.morered.wires.WireCountLootFunction;
@@ -95,7 +89,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -112,7 +105,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.attachment.AttachmentType;
@@ -123,7 +115,6 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickB
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent;
 import net.neoforged.neoforge.event.entity.player.UseItemOnBlockEvent.UsePhase;
 import net.neoforged.neoforge.event.level.ChunkWatchEvent;
-import net.neoforged.neoforge.event.tick.LevelTickEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
 import net.neoforged.neoforge.network.registration.PayloadRegistrar;
@@ -155,8 +146,8 @@ public class MoreRed
 	public final DeferredHolder<Block, WirePostPlateBlock> redwirePostPlateBlock;
 	public final DeferredHolder<Block, WirePostPlateBlock> redwirePostRelayPlateBlock;
 	public final DeferredHolder<Block, HexidecrubrometerBlock> hexidecrubrometerBlock;
-	public final DeferredHolder<Block, RedAlloyWireBlock> redAlloyWireBlock;
-	public final DeferredHolder<Block, ColoredCableBlock>[] networkCableBlocks;
+	public final DeferredHolder<Block, PoweredWireBlock> redAlloyWireBlock;
+	public final DeferredHolder<Block, PoweredWireBlock>[] networkCableBlocks;
 	public final DeferredHolder<Block, BundledCableBlock> bundledNetworkCableBlock;
 	public final DeferredHolder<Block, BundledCablePostBlock> bundledCablePostBlock;
 	public final DeferredHolder<Block, BundledCableRelayPlateBlock> bundledCableRelayPlateBlock;
@@ -225,11 +216,11 @@ public class MoreRed
 			() -> new BundledCableRelayPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		
 		redAlloyWireBlock = registerBlockItem(blocks, items, ObjectNames.RED_ALLOY_WIRE, 
-			() -> new RedAlloyWireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
+			() -> PoweredWireBlock.createRedAlloyWireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
 			block -> new WireBlockItem(block, new Item.Properties()));
-		networkCableBlocks = Util.make((DeferredHolder<Block, ColoredCableBlock>[])new DeferredHolder[16], array ->
+		networkCableBlocks = Util.make((DeferredHolder<Block, PoweredWireBlock>[])new DeferredHolder[16], array ->
 			Arrays.setAll(array, i -> registerBlockItem(blocks, items, ObjectNames.NETWORK_CABLES_BY_COLOR[i],
-				() -> new ColoredCableBlock(BlockBehaviour.Properties.of().mapColor(DyeColor.values()[i]).pushReaction(PushReaction.DESTROY).noCollission().instabreak(), DyeColor.values()[i]),
+				() -> PoweredWireBlock.createColoredCableBlock(BlockBehaviour.Properties.of().mapColor(DyeColor.values()[i]).pushReaction(PushReaction.DESTROY).noCollission().instabreak(), DyeColor.values()[i]),
 				block -> new WireBlockItem(block, new Item.Properties()))));
 		bundledNetworkCableBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_NETWORK_CABLE,
 			() -> new BundledCableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
@@ -350,8 +341,15 @@ public class MoreRed
 		{
 			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, getModRL(name)); }
 			
-			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
+			public static final TagKey<Block> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
+			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
+			
+			public static final TagKey<Block> WIRABLE_CUBE = tag("wirable/cube");
+			public static final TagKey<Block> WIRABLE_FLOOR = tag("wirable/floor");
+			public static final TagKey<Block> WIRABLE_INVERTED_WALL_FLOOR_CEILING = tag("wirable/inverted_wall_floor_ceiling");
+			public static final TagKey<Block> WIRABLE_WIRE_POSTS = tag("wirable/wire_posts");
+			public static final TagKey<Block> WIREABLE_WIRES = tag("wirable/wires");
 		}
 		
 		public static class Items

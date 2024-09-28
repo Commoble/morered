@@ -1,21 +1,21 @@
 package net.commoble.morered.wires;
 
-import java.util.Collection;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import com.google.common.cache.LoadingCache;
 
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.api.internal.WireVoxelHelpers;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ChannelSet;
 import net.commoble.morered.future.SignalStrength;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
@@ -24,10 +24,31 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
+public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 {
+	private static final VoxelShape[] WIRE_NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(1,2);
+	private static final VoxelShape[] WIRE_RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(2);
+	private static final VoxelShape[] WIRE_LINE_SHAPES = WireVoxelHelpers.makeLineShapes(1,2);
+	private static final VoxelShape[] WIRE_SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(WIRE_NODE_SHAPES_DUNSWE, WIRE_LINE_SHAPES);
+	private static final LoadingCache<Long, VoxelShape> WIRE_VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(WIRE_SHAPES_BY_STATE_INDEX, WIRE_LINE_SHAPES);
+
+	public static PoweredWireBlock createRedAlloyWireBlock(Properties properties)
+	{
+		return new PoweredWireBlock(properties, WIRE_SHAPES_BY_STATE_INDEX, WIRE_RAYTRACE_BACKBOARDS, WIRE_VOXEL_CACHE, true, true, ChannelSet.REDSTONE);
+	}
 	
-	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower, boolean readAttachedPower, Collection<Channel> channels)
+	private static final VoxelShape[] CABLE_NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(2, 3);
+	private static final VoxelShape[] CABLE_RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(3);
+	private static final VoxelShape[] CABLE_LINE_SHAPES = WireVoxelHelpers.makeLineShapes(2, 3);
+	private static final VoxelShape[] CABLE_SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(CABLE_NODE_SHAPES_DUNSWE, CABLE_LINE_SHAPES);
+	private static final LoadingCache<Long, VoxelShape> CABLE_VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(CABLE_SHAPES_BY_STATE_INDEX, CABLE_LINE_SHAPES);
+	
+	public static PoweredWireBlock createColoredCableBlock(Properties properties, DyeColor color)
+	{
+		return new PoweredWireBlock(properties, CABLE_SHAPES_BY_STATE_INDEX, CABLE_RAYTRACE_BACKBOARDS, CABLE_VOXEL_CACHE, false, false, ChannelSet.BY_COLOR.get(color));
+	}
+	
+	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower, boolean readAttachedPower, ChannelSet channels)
 	{
 		super(properties, shapesByStateIndex, raytraceBackboards, voxelCache, readAttachedPower, true, useIndirectPower, channels);
 	}

@@ -1,7 +1,6 @@
 package net.commoble.morered.wire_post;
 
 import java.util.EnumSet;
-import java.util.function.Function;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
