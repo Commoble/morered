@@ -23,7 +23,7 @@ import net.neoforged.neoforge.common.crafting.SizedIngredient;
 public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 {
 	public static final RecipeType<SolderingRecipe> TYPE = RecipeType.create(MoreRed.MODID, ObjectNames.SOLDERING_RECIPE, SolderingRecipe.class);
-	public static final ResourceLocation JEI_RECIPE_TEXTURE = ResourceLocation.fromNamespaceAndPath(ModIds.JEI_ID, "textures/jei/gui/gui_vanilla.png");
+	public static final ResourceLocation CRAFTING_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 	public static final String TITLE = "gui.morered.category.soldering";
 	
 	private final IDrawable background;
@@ -32,7 +32,7 @@ public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 	public SolderingCategory(IGuiHelper guiHelper)
 	{
 		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.get().solderingTableBlock.get()));
-		this.background = guiHelper.createDrawable(JEI_RECIPE_TEXTURE, 0, 60, 116, 54);
+		this.background = guiHelper.createDrawable(CRAFTING_TEXTURE, 29, 16, 116, 54);
 	}
 	
 	
