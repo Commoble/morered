@@ -97,7 +97,7 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 							{
 								if (channelPower.getKey() == targetChannel)
 								{
-									int suppliedPower = channelPower.getValue().apply(level);
+									int suppliedPower = channelPower.getValue().applyAsInt(level);
 									if (suppliedPower > highestPowerFound)
 									{
 										highestPowerFound = suppliedPower;

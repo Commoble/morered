@@ -19,6 +19,9 @@
 		},
 		"#morered:wirable/wire_posts": {
 			"type": "morered:wire_post"
+		},
+		"#morered:wirable/bitwise_gates": {
+			"type": "morered:bitwise_gate"
 		}
 	}
 }

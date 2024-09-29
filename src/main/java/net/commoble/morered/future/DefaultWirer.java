@@ -2,7 +2,7 @@ package net.commoble.morered.future;
 
 import java.util.Map;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
+import java.util.function.ToIntFunction;
 
 import org.jetbrains.annotations.Nullable;
 
@@ -41,7 +41,7 @@ public enum DefaultWirer implements Wirer
 	}
 
 	@Override
-	public Map<Channel, Function<LevelReader,Integer>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide, Face connectedFace)
+	public Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide, Face connectedFace)
 	{
 		// we allow wires to connect to vanilla power emitters by default if the block is redstone-connectable and has a connectable voxelshape
 		BlockPos wirePos = connectedFace.pos();

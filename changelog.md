@@ -1,4 +1,5 @@
 # 1.21.2-7.0.0.0
+* THis update is not compatible with existing saves from prior versions
 * Massive rewrote how wires wire to each other. This has these ramifications:
   * Wires no longer cause cascading block updates to update themselves (except where wires are connected to redstone dust)
   * Instead, the power of a set of wires is calculated, and then all connected wires update at once

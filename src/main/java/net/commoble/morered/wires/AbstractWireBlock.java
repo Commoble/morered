@@ -849,6 +849,10 @@ public abstract class AbstractWireBlock extends Block
 		}
 		
 		var neighborReceivers = wirer.getReceiverEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
+		if (neighborReceivers == null)
+		{
+			System.out.println("foop");
+		}
 		if (!neighborReceivers.isEmpty())
 		{
 			for (Channel channel : compatibleChannels)

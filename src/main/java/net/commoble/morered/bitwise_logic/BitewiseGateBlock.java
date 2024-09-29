@@ -1,14 +1,21 @@
 package net.commoble.morered.bitwise_logic;
 
-import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
+import java.util.function.ToIntFunction;
 
-import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.ChanneledPowerSupplier;
+import org.jetbrains.annotations.Nullable;
+
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ExperimentalModEvents;
+import net.commoble.morered.future.Face;
+import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
+import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
+import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -16,20 +23,19 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraft.world.ticks.TickPriority;
 import net.neoforged.neoforge.common.Tags;
 
-public abstract class BitwiseLogicPlateBlock extends PlateBlock implements EntityBlock
+public abstract class BitewiseGateBlock extends PlateBlock implements EntityBlock
 {
-	public static final int TICK_DELAY = 1;
 	public static final VoxelShape[] DOUBLE_PLATE_SHAPES_BY_DIRECTION = { // DUNSWE, direction of attachment
 		Block.box(0, 0, 0, 16, 4, 16),
 		Block.box(0, 12, 0, 16, 16, 16),
@@ -37,20 +43,16 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 		Block.box(0, 0, 12, 16, 16, 16),
 		Block.box(0, 0, 0, 4, 16, 16),
 		Block.box(12, 0, 0, 16, 16, 16) };
-	public static final ChanneledPowerSupplier NO_POWER_SUPPLIER = (world,pos,state,dir,channel)->0;
 	
-	protected abstract void updatePower(Level world, BlockPos thisPos, BlockState thisState);
-	public abstract boolean canConnectToAdjacentCable(@Nonnull BlockGetter world, @Nonnull BlockPos thisPos, @Nonnull BlockState thisState, @Nonnull BlockPos wirePos, @Nonnull BlockState wireState, @Nonnull Direction wireFace, @Nonnull Direction directionToWire);
-
-	public BitwiseLogicPlateBlock(Properties properties)
+	public abstract Map<Channel, BiConsumer<LevelAccessor, Integer>> getReceiverEndpoints(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Direction receiverSide, Face connectedFace);
+	protected abstract List<Direction> getInputDirections(BlockState thisState);
+	
+	protected LogicFunction operator;
+	
+	public BitewiseGateBlock(Properties properties, LogicFunction operator)
 	{
 		super(properties);
-	}
-
-	@Override
-	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
-	{
-		return MoreRed.get().bitwiseLogicGateBeType.get().create(pos, state);
+		this.operator = operator;
 	}
 
 	@Override
@@ -67,41 +69,26 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 		}
 	}
 	
-	/**
-	 * Called by ItemBlocks after a block is set in the world, to allow post-place
-	 * logic
-	 */
-	@Override
-	public void setPlacedBy(Level level, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
-	{
-		level.scheduleTick(pos, this, TICK_DELAY);
-	}
-	
 	// called when setBlock puts this block in the world or changes its state
 	// direction-state-dependent capabilities need to be invalidated here
 	@Override
-	protected void onPlace(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	protected void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		super.onPlace(newState, level, pos, newState, isMoving);
-		level.invalidateCapabilities(pos);
-	}
-	
-	// forge hook, signals that a neighboring block's TE data or comparator data updated
-	@Override
-	public void onNeighborChange(BlockState thisState, LevelReader levelReader, BlockPos thisPos, BlockPos neighborPos)
-	{
-		super.onNeighborChange(thisState, levelReader, thisPos, neighborPos);
-		if (levelReader instanceof Level level)
+		super.onPlace(newState, level, pos, oldState, isMoving);
+		for (Direction dir : this.getInputDirections(newState))
 		{
-			level.scheduleTick(thisPos, this, TICK_DELAY, TickPriority.HIGH);
+			level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos.relative(dir), GameEvent.Context.of(newState));
 		}
-		
+		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
+		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos.relative(primaryOutputDirection), GameEvent.Context.of(newState));
 	}
-	
+
 	@Override
-	public void tick(BlockState oldBlockState, ServerLevel level, BlockPos pos, RandomSource rand)
+	protected void onRemove(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
-		this.updatePower(level,pos,oldBlockState);
+		super.onRemove(oldState, level, pos, newState, isMoving);
+		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
+		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos.relative(primaryOutputDirection), GameEvent.Context.of(oldState));
 	}
 	
 	@Override
@@ -120,4 +107,24 @@ public abstract class BitwiseLogicPlateBlock extends PlateBlock implements Entit
 		return isPlayerHoldingStick ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
+	public Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide,
+		Face connectedFace)
+	{
+		Direction attachmentDir = supplierState.getValue(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
+		if (supplierSide != attachmentDir || connectedFace.attachmentSide() != attachmentDir || !(level.getBlockEntity(supplierPos) instanceof BitwiseGateBlockEntity gate))
+		{
+			return Map.of();
+		}
+
+		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(supplierState);
+		BlockPos wirePos = connectedFace.pos();
+		@Nullable Direction directionToNeighbor = DirectionHelper.getDirectionToNeighborPos(supplierPos, wirePos);
+		if (directionToNeighbor != primaryOutputDirection)
+		{
+			return Map.of();
+		}
+		
+		return gate.getSupplierEndpoints();
+	}
+	
 }

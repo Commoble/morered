@@ -1,132 +1,97 @@
 package net.commoble.morered.bitwise_logic;
 
-import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.ChanneledPowerSupplier;
-import net.commoble.morered.plate_blocks.PlateBlock;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.ToIntFunction;
+
+import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.ExperimentalModEvents;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
 
-public class ChanneledPowerStorageBlockEntity extends BlockEntity
+public abstract class BitwiseGateBlockEntity extends BlockEntity
 {
-	public static final String POWER = "power";
+	public static final String OUTPUT = "power";
 	
-	protected byte[] power = new byte[16];
-
-	public static ChanneledPowerStorageBlockEntity create(BlockPos pos, BlockState state)
-	{
-		return new ChanneledPowerStorageBlockEntity(MoreRed.get().bitwiseLogicGateBeType.get(), pos, state);
-	}
+	protected int output = 0;
 	
-	public ChanneledPowerStorageBlockEntity(BlockEntityType<? extends ChanneledPowerStorageBlockEntity> type, BlockPos pos, BlockState state)
+	protected Map<Channel, ToIntFunction<LevelReader>> supplierEndpoints = null;
+	
+	public BitwiseGateBlockEntity(BlockEntityType<? extends BitwiseGateBlockEntity> type, BlockPos pos, BlockState state)
 	{
 		super(type, pos, state);
 	}
 	
-	public ChanneledPowerStorageBlockEntity(BlockPos pos, BlockState state)
+	public int getOutput()
 	{
-		this(MoreRed.get().bitwiseLogicGateBeType.get(), pos, state);
+		return this.output;
 	}
 	
-	public ChanneledPowerSupplier getChanneledPower(Direction side)
+	public boolean hasOutput(int channel)
 	{
-		return side == PlateBlockStateProperties.getOutputDirection(this.getBlockState())
-			? this::getPowerOnChannel
-			: null;
+		return (this.output & (1 << channel)) != 0;
+	}
+	
+	public void setOutput(int output)
+	{
+		int oldOutput = this.output;
+		this.output = output;
+		if (oldOutput != this.output)
+		{
+			this.supplierEndpoints = null;
+			this.setChanged();
+			Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(this.getBlockState());
+			this.level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, worldPosition.relative(primaryOutputDirection), GameEvent.Context.of(this.getBlockState()));
+		}
 	}
 
-	public int getPowerOnChannel(Level level, BlockPos wirePos, BlockState wireState, Direction wireFace, int channel)
+	protected Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints()
 	{
-		BlockState thisState = this.getBlockState();
-		return wireFace == null || (thisState.getBlock() instanceof PlateBlock && wireFace == thisState.getValue(PlateBlock.ATTACHMENT_DIRECTION))
-			? this.getPower(channel)
-			: 0;
-	}
-	
-	public int getPower(int channel)
-	{
-		return this.power[channel];
-	}
-	
-	/**
-	 * 
-	 * @param newPowers An array of 16 values in the range 0-31. This will be copied.
-	 * @return true if any values changed, false otherwise
-	 */
-	public boolean setPower(byte[] newPowers)
-	{
-		boolean updated = false;
-		for (int i=0; i<16; i++)
+		if (this.supplierEndpoints == null)
 		{
-			byte newPower = newPowers[i];
-			byte oldPower = this.power[i];
-			if (newPower != oldPower)
-			{
-				this.power[i] = newPower;
-				updated = true;
-			}
+			this.supplierEndpoints = this.createSupplierEndpoints();
 		}
-		if (updated && !this.level.isClientSide)
-		{
-			this.setChanged();
-			return true;
-		}
-		return false;
+		return this.supplierEndpoints;
 	}
+
+	private static final ToIntFunction<LevelReader> ON = level -> 15;
+	private static final ToIntFunction<LevelReader> OFF = level -> 0;
 	
-	/**
-	 * Sets the power value and marks the block and TE updated if the power changed on the server
-	 * use setPower(int[]) where possible to minimize neighbor updates
-	 * @param channel The channel to set the power of, in the range [0,15]
-	 * @param newPower The power value to set the power of, in the range [0,31]
-	 * @return True if the power changed, false otherwise
-	 */
-	public boolean setPower(int channel, int newPower)
+	protected Map<Channel, ToIntFunction<LevelReader>> createSupplierEndpoints()
 	{
-		int oldPower = this.power[channel];
-		this.power[channel] = (byte)newPower;
-		if (oldPower != newPower)
+		final int output = this.getOutput();
+		Map<Channel, ToIntFunction<LevelReader>> map = new HashMap<>();
+		for (DyeColor color : DyeColor.values())
 		{
-			if (!this.level.isClientSide)
-			{
-				this.setChanged();
-			}
-			return true;
+			final var power = (output & (1 << color.ordinal())) != 0
+				? ON
+				: OFF;
+			map.put(Channel.single(color), power);
 		}
-		return false;
+		
+		return map;
 	}
 
 	@Override
 	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.saveAdditional(compound, registries);
-		compound.putByteArray(POWER, this.power.clone());
+		compound.putInt(OUTPUT, this.output);
 	}
 	
 	@Override
 	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		byte[] newPower = compound.getByteArray(POWER);
-		if (newPower.length == 16)
-			this.power = newPower.clone();
+		this.output = compound.getInt(OUTPUT);
 	}
-	
-	public void updatePower()
-	{
-		byte[] powers = this.getStrongestNeighborPower();
-		this.setPower(powers);
-	}
-
-	public byte[] getStrongestNeighborPower()
-	{
-		return new byte[16];
-	}
-
 }

@@ -18,7 +18,7 @@ import commoble.morered.datagen.BlockStateFile.WhenApply;
 import net.commoble.morered.HexidecrubrometerBlock;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.ObjectNames;
-import net.commoble.morered.bitwise_logic.TwoInputBitwiseLogicPlateBlock;
+import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe;
@@ -123,7 +123,7 @@ public class MoreRedDataGen
 		bitwisePlateBlock(ObjectNames.BITWISE_OR_GATE, "Bitwise OR Gate", "or_gate_symbol", context);
 		bitwisePlateBlock(ObjectNames.BITWISE_XNOR_GATE, "Bitwise XNOR Gate", "xnor_gate_symbol", context);
 		bitwisePlateBlock(ObjectNames.BITWISE_XOR_GATE, "Bitwise XOR Gate", "xor_gate_symbol", context);
-		postBlock(ObjectNames.BUNDLE_RELAY, "Bundled Cable Post", context)
+		postBlock(ObjectNames.BUNDLE_RELAY, "Bundle Relay", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -132,7 +132,7 @@ public class MoreRedDataGen
 				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES,1),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1)))));
-		postBlock(ObjectNames.BUNDLE_JUNCTION, "Bundled Cable Relay Plate", context)
+		postBlock(ObjectNames.BUNDLE_JUNCTION, "Bundle Junction", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -203,7 +203,7 @@ public class MoreRedDataGen
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1),
 					SizedIngredient.of(REDSTONE_ALLOY_INGOTS,1)))));
 				
-		postBlock(ObjectNames.REDWIRE_RELAY, "Redwire Post Plate", context)
+		postBlock(ObjectNames.REDWIRE_RELAY, "Redwire Relay", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -218,7 +218,7 @@ public class MoreRedDataGen
 					SizedIngredient.of(REDSTONE_ALLOY_INGOTS,1),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1)))));
 				
-		postBlock(ObjectNames.REDWIRE_JUNCTION, "Redwire Post Relay Plate", context)
+		postBlock(ObjectNames.REDWIRE_JUNCTION, "Redwire Junction", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -408,7 +408,7 @@ public class MoreRedDataGen
 	{
 		ResourceLocation blockId = MoreRed.getModRL(blockPath);
 		Block block = BuiltInRegistries.BLOCK.get(blockId);
-		ResourceLocation parent = block instanceof TwoInputBitwiseLogicPlateBlock
+		ResourceLocation parent = block instanceof TwoInputBitwiseGateBlock
 			? MoreRed.getModRL("block/two_input_bitwise_logic_plate_template")
 			: MoreRed.getModRL("block/single_input_bitwise_logic_plate_template");
 		ResourceLocation symbolLocation = MoreRed.getModRL("block/" + symbolTexture);
@@ -416,6 +416,7 @@ public class MoreRedDataGen
 		context.models.put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
 		context.models.put(mangle(blockId, "block/%s_alt"), SimpleModel.createWithoutRenderType(mangle(parent, "%s_alt")).addTexture("symbol", symbolLocation));
 		BlockDataHelper helper = plateBlock(blockPath, name, context);
+		helper.tags(context.blockTags, MoreRed.Tags.Blocks.BITWISE_GATES);
 		helper.blockItem().help(h -> h.recipe(context.recipes, mangle(h.id(), "%s_from_soldering"), new SolderingRecipe(new ItemStack(h.item()), List.of(
 			SizedIngredient.of(SMOOTH_STONE_QUARTER_SLABS, 2),
 			SizedIngredient.of(Tags.Items.GEMS_QUARTZ, 1),

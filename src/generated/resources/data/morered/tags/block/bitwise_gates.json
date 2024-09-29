@@ -1,0 +1,10 @@
+{
+  "values": [
+    "morered:bitwise_and_gate",
+    "morered:bitwise_diode",
+    "morered:bitwise_not_gate",
+    "morered:bitwise_or_gate",
+    "morered:bitwise_xnor_gate",
+    "morered:bitwise_xor_gate"
+  ]
+}

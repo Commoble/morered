@@ -45,7 +45,10 @@ public class ObjectNames
 	
 	public static final String HEXIDECRUBROMETER = "hexidecrubrometer";
 	
-	public static final String BITWISE_LOGIC_PLATE = "bitwise_logic_plate";
+	public static final String BITWISE_GATE = "bitwise_gate";
+	public static final String BITWISE_GATES = "bitwise_gates";
+	public static final String SINGLE_INPUT_BITWISE_GATE = "single_input_bitwise_gate";
+	public static final String TWO_INPUT_BITWISE_GATE = "two_input_bitwise_gate";
 	public static final String BITWISE_DIODE = "bitwise_diode";
 	public static final String BITWISE_NOT_GATE = "bitwise_not_gate";
 	public static final String BITWISE_OR_GATE = "bitwise_or_gate";

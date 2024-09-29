@@ -18,10 +18,11 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
 import net.commoble.morered.api.internal.APIRegistries;
-import net.commoble.morered.bitwise_logic.BitwiseLogicPlateBlock;
-import net.commoble.morered.bitwise_logic.ChanneledPowerStorageBlockEntity;
-import net.commoble.morered.bitwise_logic.SingleInputBitwiseLogicPlateBlock;
-import net.commoble.morered.bitwise_logic.TwoInputBitwiseLogicPlateBlock;
+import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
+import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlock;
+import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
+import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
+import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.plate_blocks.LatchBlock;
 import net.commoble.morered.plate_blocks.LogicFunction;
@@ -34,9 +35,9 @@ import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.commoble.morered.soldering.SolderingTableBlock;
+import net.commoble.morered.wire_post.BundleJunctionBlock;
 import net.commoble.morered.wire_post.BundleRelayBlock;
 import net.commoble.morered.wire_post.BundledCablePostBlockEntity;
-import net.commoble.morered.wire_post.BundleJunctionBlock;
 import net.commoble.morered.wire_post.FakeStateLevel;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.SyncPostsInChunkPacket;
@@ -135,7 +136,7 @@ public class MoreRed
 	}
 
 	public final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
-	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseLogicPlateBlock>> bitwiseLogicPlates = new HashMap<>();
+	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitewiseGateBlock>> bitwiseLogicPlates = new HashMap<>();
 	
 	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
 	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
@@ -161,7 +162,8 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> poweredWireBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ChanneledPowerStorageBlockEntity>> bitwiseLogicGateBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<SingleInputBitwiseGateBlockEntity>> singleInputBitwiseGateBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TwoInputBitwiseGateBlockEntity>> twoInputBitwiseGateBeType;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
 	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
@@ -238,8 +240,8 @@ public class MoreRed
 		
 		// bitwise logic gates store state in a TE instead of block properties
 		// they don't need to have their properties defined on construction but they do need to be registered to the TE type they use
-		BiFunction<BlockBehaviour.Properties, LogicFunction, SingleInputBitwiseLogicPlateBlock> singleInput = SingleInputBitwiseLogicPlateBlock::new;
-		BiFunction<BlockBehaviour.Properties, LogicFunction, TwoInputBitwiseLogicPlateBlock> twoInputs = TwoInputBitwiseLogicPlateBlock::new;
+		BiFunction<BlockBehaviour.Properties, LogicFunction, SingleInputBitwiseGateBlock> singleInput = SingleInputBitwiseGateBlock::new;
+		BiFunction<BlockBehaviour.Properties, LogicFunction, TwoInputBitwiseGateBlock> twoInputs = TwoInputBitwiseGateBlock::new;
 		registerBitwiseLogicGateType(blocks, items, ObjectNames.BITWISE_DIODE, LogicFunctions.INPUT_B, singleInput);
 		registerBitwiseLogicGateType(blocks, items, ObjectNames.BITWISE_NOT_GATE, LogicFunctions.NOT_B, singleInput);
 		registerBitwiseLogicGateType(blocks, items, ObjectNames.BITWISE_OR_GATE, LogicFunctions.OR, twoInputs);
@@ -282,8 +284,17 @@ public class MoreRed
 				.map(DeferredHolder::get)
 				.toArray(Block[]::new))
 			.build(null));
-		bitwiseLogicGateBeType = blockEntityTypes.register(ObjectNames.BITWISE_LOGIC_PLATE,
-			() -> BlockEntityType.Builder.of(ChanneledPowerStorageBlockEntity::new,
+		singleInputBitwiseGateBeType = blockEntityTypes.register(ObjectNames.SINGLE_INPUT_BITWISE_GATE,
+			() -> BlockEntityType.Builder.of(SingleInputBitwiseGateBlockEntity::create,
+				Util.make(() ->
+				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
+					return this.bitwiseLogicPlates.values().stream()
+						.map(rob -> rob.get())
+						.toArray(Block[]::new);
+				}))
+			.build(null));
+		twoInputBitwiseGateBeType = blockEntityTypes.register(ObjectNames.TWO_INPUT_BITWISE_GATE,
+			() -> BlockEntityType.Builder.of(TwoInputBitwiseGateBlockEntity::create,
 				Util.make(() ->
 				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
 					return this.bitwiseLogicPlates.values().stream()
@@ -339,12 +350,14 @@ public class MoreRed
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
 			public static final TagKey<Block> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
+			public static final TagKey<Block> BITWISE_GATES = tag(ObjectNames.BITWISE_GATES);
 			
 			public static final TagKey<Block> WIRABLE_CUBE = tag("wirable/cube");
 			public static final TagKey<Block> WIRABLE_FLOOR = tag("wirable/floor");
 			public static final TagKey<Block> WIRABLE_INVERTED_WALL_FLOOR_CEILING = tag("wirable/inverted_wall_floor_ceiling");
 			public static final TagKey<Block> WIRABLE_WIRE_POSTS = tag("wirable/wire_posts");
-			public static final TagKey<Block> WIREABLE_WIRES = tag("wirable/wires");
+			public static final TagKey<Block> WIRABLE = tag("wirable/wires");
+			public static final TagKey<Block> WIRABLE_BITWISE_GATES = tag("wirable/bitwise_gates");
 		}
 		
 		public static class Items
@@ -587,7 +600,7 @@ public class MoreRed
 		return blockGetter;
 	}
 	
-	public <B extends BitwiseLogicPlateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public <B extends BitewiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
 		LogicFunction function,
 		BiFunction<BlockBehaviour.Properties, LogicFunction, B> blockFactory)
 	{
