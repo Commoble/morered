@@ -1,0 +1,10 @@
+{
+	"values": {
+		"#morered:wirable/wires": {
+			"type": "morered:wire"
+		},
+		"#morered:wirable/wire_posts": {
+			"type": "morered:wire_post"
+		}
+	}
+}

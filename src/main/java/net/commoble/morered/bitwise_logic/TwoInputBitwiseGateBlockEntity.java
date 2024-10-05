@@ -1,18 +1,21 @@
 package net.commoble.morered.bitwise_logic;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+
+import org.jetbrains.annotations.Nullable;
 
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.Receiver;
 import net.commoble.morered.plate_blocks.InputSide;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -23,21 +26,30 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	
 	protected int clockwiseInput = 0;
 	protected int counterClockwiseInput = 0;
-	protected Map<Channel, BiConsumer<LevelAccessor, Integer>> clockwiseReceiverEndpoints = Util.make(() -> {
-		Map<Channel, BiConsumer<LevelAccessor, Integer>> map = new HashMap<>();
+	protected Map<Channel, Receiver> clockwiseReceiverEndpoints = Util.make(() -> {
+		Map<Channel, Receiver> map = new HashMap<>();
 		for (DyeColor color : DyeColor.values())
 		{
 			final int channel = color.ordinal(); 
-			map.put(Channel.single(color), (levelAccess, power) -> this.setClockwiseInputOnChannel(power > 0, channel));
+			map.put(Channel.single(color), new BitwiseListener(color, InputSide.A, (levelAccess, power) -> this.setClockwiseInputOnChannel(power > 0, channel)));
 		}
 		return map;
 	});
-	protected Map<Channel, BiConsumer<LevelAccessor, Integer>> counterClockwiseReceiverEndpoints = Util.make(() -> {
-		Map<Channel, BiConsumer<LevelAccessor, Integer>> map = new HashMap<>();
+	protected Map<Channel, Receiver> counterClockwiseReceiverEndpoints = Util.make(() -> {
+		Map<Channel, Receiver> map = new HashMap<>();
 		for (DyeColor color : DyeColor.values())
 		{
 			final int channel = color.ordinal(); 
-			map.put(Channel.single(color), (levelAccess, power) -> this.setCounterclockwiseInputOnChannel(power > 0, channel));
+			map.put(Channel.single(color), new BitwiseListener(color, InputSide.C, (levelAccess, power) -> this.setCounterclockwiseInputOnChannel(power > 0, channel)));
+		}
+		return map;
+	});
+	protected Map<Channel, Collection<Receiver>> allReceivers = Util.make(() -> {
+		Map<Channel, Collection<Receiver>> map = new HashMap<>();
+		for (DyeColor color : DyeColor.values())
+		{
+			Channel channel = Channel.single(color); 
+			map.put(channel, List.of(clockwiseReceiverEndpoints.get(channel), counterClockwiseReceiverEndpoints.get(channel)));
 		}
 		return map;
 	});
@@ -121,18 +133,18 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 		}
 	}
 
-	public Map<Channel, BiConsumer<LevelAccessor, Integer>> getReceiverEndpoints(InputSide side)
+	public @Nullable Receiver getReceiverEndpoints(InputSide side, Channel channel)
 	{
 		if (side == InputSide.A)
 		{
-			return this.clockwiseReceiverEndpoints;
+			return this.clockwiseReceiverEndpoints.get(channel);
 		}
 		else if (side == InputSide.C)
 		{
-			return this.counterClockwiseReceiverEndpoints;
+			return this.counterClockwiseReceiverEndpoints.get(channel);
 		}
 		else
-			return Map.of();
+			return null;
 	}
 
 	@Override
@@ -149,6 +161,33 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 		super.loadAdditional(compound, registries);
 		this.clockwiseInput = compound.getInt(CLOCKWISE_INPUT);
 		this.counterClockwiseInput = compound.getInt(COUNTERCLOCKWISE_INPUT);
+	}
+
+	public Collection<Receiver> getAllReceivers(Channel channel)
+	{
+		return this.allReceivers.getOrDefault(channel, List.of());
+	}
+
+	@Override
+	public void resetUnusedReceivers(Collection<BitwiseListener> receivers)
+	{
+		int oldClockwiseInput = this.clockwiseInput;
+		int oldCounterClockwiseInput = this.counterClockwiseInput;
+		for (BitwiseListener receiver : receivers)
+		{
+			int channel = receiver.color().ordinal();
+			int bit = 1 << channel;
+			if (receiver.inputSide() == InputSide.A)
+			{
+				oldClockwiseInput &= ~bit;
+			}
+			else
+			{
+				oldCounterClockwiseInput &= ~bit;
+			}
+		}
+		this.setClockwiseInput(oldClockwiseInput, false); // don't need to force output update twice
+		this.setCounterclockwiseInput(oldCounterClockwiseInput, true);
 	}
 	
 }

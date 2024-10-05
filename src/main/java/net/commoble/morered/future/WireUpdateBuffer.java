@@ -50,21 +50,40 @@ public class WireUpdateBuffer extends SavedData
 		Map<BlockPos, StateWirer> knownWirers = new HashMap<>();
 		Map<NodePos, TransmissionNode> originNodes = new HashMap<>();
 		
+		// if there's any receivers at the origin node(s)
+		// which are NOT tied to a graph
+		// then we should invoke them with power=0 after graphing everything else out
+		Map<PosReceiver, Set<Receiver>> unusedReceivers = new HashMap<>();
+		
 		for (BlockPos originPos : originPositions)
 		{
 			// collect all of the nodes in this block
 			BlockState originState = level.getBlockState(originPos);
 			Block originBlock = originState.getBlock();
 			@SuppressWarnings("deprecation")
-			Wirer originWirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, originBlock.builtInRegistryHolder().key());
-			if (originWirer == null)
-				continue;
-			
-			for (Direction face : Direction.values()) {
-				originWirer.getTransmissionNodes(level, originPos, originState, face).forEach((channel,node) -> {
-					originNodes.put(new NodePos(new Face(originPos, face), channel), node);
-				});
+			SignalTransmitter originTransmitter = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.SIGNAL_TRANSMITTER_DATA_MAP, originBlock.builtInRegistryHolder().key());
+			@SuppressWarnings("deprecation")
+			SignalReceiver originReceiver = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.SIGNAL_RECEIVER_DATA_MAP, originBlock.builtInRegistryHolder().key());
+			if (originTransmitter != null)
+			{
+				for (Direction face : Direction.values()) {
+					originTransmitter.getTransmissionNodes(level, originPos, originState, face).forEach((channel,node) -> {
+						originNodes.put(new NodePos(new Face(originPos, face), channel), node);
+					});
+				}
 			}
+			if (originReceiver != null)
+			{
+				PosReceiver posReceiver = new PosReceiver(originPos, originReceiver);
+				for (Channel channel : Channel.ALL)
+				{
+					for (Receiver receiver : originReceiver.getAllReceivers(level, originPos, originState, channel))
+					{
+						 unusedReceivers.computeIfAbsent(posReceiver, foo -> new HashSet<>()).add(receiver);
+					}
+				}
+			}
+			
 		}
 		originNodes.forEach((nodePos, node) -> {
 			// as we construct graphs, ignore origin nodes that exist in existing graphs
@@ -76,7 +95,7 @@ public class WireUpdateBuffer extends SavedData
 				}
 			}
 			
-			WireGraph graph = WireGraph.fromOriginNode(level, nodePos, node, knownWirers);
+			WireGraph graph = WireGraph.fromOriginNode(level, nodePos, node, knownWirers, unusedReceivers);
 			graphs.add(graph);
 		});
 		
@@ -92,6 +111,11 @@ public class WireUpdateBuffer extends SavedData
 		{
 			graph.updateListeners(level).forEach((face,signalStrength) -> nodesUpdatingNeighbors.merge(face, signalStrength, SignalStrength::max));
 		}
+		
+		// give power 0 to receivers that were marked for update but never became part of a graph
+		unusedReceivers.forEach((receiversAtPos, receiversOnChannels) -> {
+			receiversAtPos.receiver().resetUnusedReceivers(level, receiversAtPos.pos(), receiversOnChannels);
+		});
 		
 		// invoke block updates on blocks which are adjacent to the graph but have no transmission nodes within it
 		nodesUpdatingNeighbors.forEach((updatedNodeFace, signalStrength) -> {

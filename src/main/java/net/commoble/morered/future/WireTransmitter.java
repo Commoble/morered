@@ -5,19 +5,19 @@ import java.util.Map;
 import com.mojang.serialization.MapCodec;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.wire_post.AbstractPostBlock;
+import net.commoble.morered.wires.WireBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-public enum WirePostWirer implements SignalTransmitter
+public enum WireTransmitter implements SignalTransmitter
 {
 	INSTANCE;
-
-	public static final ResourceKey<MapCodec<? extends SignalTransmitter>> RESOURCE_KEY = ResourceKey.create(SignalTransmitter.REGISTRY_KEY, MoreRed.getModRL("wire_post"));
-	public static final MapCodec<WirePostWirer> CODEC = MapCodec.unit(INSTANCE);
+	
+	public static final ResourceKey<MapCodec<? extends SignalTransmitter>> RESOURCE_KEY = ResourceKey.create(SignalTransmitter.REGISTRY_KEY, MoreRed.getModRL("wire"));
+	public static final MapCodec<WireTransmitter> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override
 	public MapCodec<? extends SignalTransmitter> codec()
@@ -28,8 +28,9 @@ public enum WirePostWirer implements SignalTransmitter
 	@Override
 	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
 	{
-		if (!(state.getBlock() instanceof AbstractPostBlock postBlock))
+		if (!(level.getBlockEntity(pos) instanceof WireBlockEntity wire))
 			return Map.of();
-		return postBlock.getTransmissionNodes(level, pos, state, face);
+		
+		return wire.getTransmissionNodes(face, state);
 	}
 }

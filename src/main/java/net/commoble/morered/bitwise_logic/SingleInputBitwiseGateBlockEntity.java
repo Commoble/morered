@@ -1,17 +1,21 @@
 package net.commoble.morered.bitwise_logic;
 
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.function.BiConsumer;
+
+import org.jetbrains.annotations.Nullable;
 
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.future.Channel;
+import net.commoble.morered.future.Receiver;
+import net.commoble.morered.plate_blocks.InputSide;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -20,13 +24,21 @@ public class SingleInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	public static final String INPUT = "input";
 	
 	protected int input = 0;
-	protected Map<Channel, BiConsumer<LevelAccessor, Integer>> receiverEndpoints = Util.make(() -> {
-		Map<Channel, BiConsumer<LevelAccessor, Integer>> map = new HashMap<>();
+	protected Map<Channel, Receiver> receiverEndpoints = Util.make(() -> {
+		Map<Channel, Receiver> map = new HashMap<>();
 		for (DyeColor color : DyeColor.values())
 		{
 			final int channel = color.ordinal(); 
-			map.put(Channel.single(color), (levelAccess, power) -> this.setInputOnChannel(power > 0, channel));
+			map.put(Channel.single(color), new BitwiseListener(color, InputSide.B, (levelAccess, power) -> this.setInputOnChannel(power > 0, channel)));
 		}
+		
+		return map;
+	});
+	protected Map<Channel, Collection<Receiver>> allReceivers = Util.make(() -> {
+		Map<Channel, Collection<Receiver>> map = new HashMap<>();
+		this.receiverEndpoints.forEach((channel, receiver) -> {
+			map.put(channel, List.of(receiver));	
+		});
 		
 		return map;
 	});
@@ -90,8 +102,27 @@ public class SingleInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 		this.input = compound.getInt(INPUT);
 	}
 	
-	public Map<Channel, BiConsumer<LevelAccessor, Integer>> getReceiverEndpoints()
+	public @Nullable Receiver getReceiverEndpoint(Channel channel)
 	{
-		return this.receiverEndpoints;
+		return this.receiverEndpoints.get(channel);
 	}
+
+	public Collection<Receiver> getAllReceivers(Channel channel)
+	{
+		return this.allReceivers.getOrDefault(channel, List.of());
+	}
+
+	@Override
+	public void resetUnusedReceivers(Collection<BitwiseListener> receivers)
+	{
+		int oldInput = this.input;
+		for (BitwiseListener receiver : receivers)
+		{
+			int color = receiver.color().ordinal();
+			int bit = 1 << color;
+			oldInput &= ~bit;
+		}
+		this.setInput(oldInput, true);
+	}
+	
 }

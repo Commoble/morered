@@ -47,7 +47,7 @@ public record WireIgnoringSignalGetter(LevelReader delegate, Function<BlockPos, 
 	public int getDirectSignal(BlockPos pos, Direction directionFromNeighbor)
 	{
 		StateWirer stateWirer = wirerLookup.apply(pos);
-		return stateWirer.wirer().ignoreVanillaSignal(delegate, pos, stateWirer.state(), directionFromNeighbor)
+		return stateWirer.ignoreVanillaSignal(this.delegate)
 			? 0
 			: SignalGetter.super.getDirectSignal(pos, directionFromNeighbor);
 	}
@@ -56,7 +56,7 @@ public record WireIgnoringSignalGetter(LevelReader delegate, Function<BlockPos, 
 	public int getSignal(BlockPos pos, Direction directionFromNeighbor)
 	{
 		StateWirer stateWirer = wirerLookup.apply(pos);
-		return stateWirer.wirer().ignoreVanillaSignal(delegate, pos, stateWirer.state(), directionFromNeighbor)
+		return stateWirer.ignoreVanillaSignal(this.delegate)
 			? 0
 			: SignalGetter.super.getSignal(pos, directionFromNeighbor);
 	}

@@ -1,7 +1,6 @@
 package net.commoble.morered.future;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.ToIntFunction;
 
 import org.jetbrains.annotations.Nullable;
@@ -14,30 +13,23 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.shapes.BooleanOp;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public enum DefaultWirer implements Wirer
+public enum DefaultSource implements SignalSource
 {
 	INSTANCE;
 	
-	public static final ResourceKey<MapCodec<? extends Wirer>> RESOURCE_KEY = ResourceKey.create(Wirer.REGISTRY_KEY, MoreRed.getModRL("default"));
-	public static final MapCodec<DefaultWirer> CODEC = MapCodec.unit(INSTANCE);
+	public static final ResourceKey<MapCodec<? extends SignalSource>> RESOURCE_KEY = ResourceKey.create(SignalSource.REGISTRY_KEY, MoreRed.getModRL("default"));
+	public static final MapCodec<DefaultSource> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override
-	public MapCodec<? extends Wirer> codec()
+	public MapCodec<? extends SignalSource> codec()
 	{
 		return CODEC;
-	}
-
-	@Override
-	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
-	{
-		return Map.of();
 	}
 
 	@Override
@@ -61,11 +53,5 @@ public enum DefaultWirer implements Wirer
 		return Shapes.joinIsNotEmpty(projectedNeighborShape, wireTestShape, BooleanOp.ONLY_SECOND)
 			? Map.of()
 			: Map.of(Channel.wide(), reader -> reader.getSignal(supplierPos, directionFromNeighbor));
-	}
-
-	@Override
-	public Map<Channel,BiConsumer<LevelAccessor,Integer>> getReceiverEndpoints(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Direction receiverSide, Face connectedFace)
-	{
-		return Map.of();
 	}
 }

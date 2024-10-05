@@ -9,38 +9,30 @@ import java.util.List;
 import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 import org.jetbrains.annotations.Nullable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.SignalGetter;
 import net.minecraft.world.level.block.state.BlockState;
 
-public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPos> blocksInGraph, List<BiConsumer<LevelAccessor,Integer>> receiverNodes, int power)
+public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPos> blocksInGraph, List<Receiver> receiverNodes, int power)
 {
-	public static WireGraph fromOriginNode(ServerLevel level, NodePos originNodePos, TransmissionNode originNode, Map<BlockPos, StateWirer> knownWirers)
+	public static WireGraph fromOriginNode(ServerLevel level, NodePos originNodePos, TransmissionNode originNode, Map<BlockPos, StateWirer> knownWirers, Map<PosReceiver, Set<Receiver>> unusedReceivers)
 	{
 		// build graph
 		Map<NodePos, TransmissionNode> nodesInGraph = new HashMap<>();
 		Set<BlockPos> blocksInGraph = new HashSet<>();
 		Queue<NodeAtPos> uncheckedNodesInGraph = new LinkedList<>();
-		List<BiConsumer<LevelAccessor,Integer>> receiverNodes = new ArrayList<>();
+		List<Receiver> receiverNodes = new ArrayList<>();
 		nodesInGraph.put(originNodePos, originNode);
 		blocksInGraph.add(originNodePos.face().pos());
 		uncheckedNodesInGraph.add(new NodeAtPos(originNodePos, originNode));
 		int maxSize = ExperimentalModEvents.COMMON_CONFIG.maxWireNetworkSize().getAsInt();
-		Function<BlockPos, StateWirer> wirerLookup = targetPos -> knownWirers.computeIfAbsent(targetPos, pos -> {
-			BlockState state = level.getBlockState(targetPos);
-			@SuppressWarnings("deprecation")
-			Wirer actualWirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, state.getBlock().builtInRegistryHolder().getKey());
-			return new StateWirer(state, actualWirer == null ? DefaultWirer.INSTANCE : actualWirer);
-		});
+		Function<BlockPos, StateWirer> wirerLookup = targetPos -> knownWirers.computeIfAbsent(targetPos, pos -> StateWirer.getOrDefault(level, pos));
 		SignalGetter signalGetter = new WireIgnoringSignalGetter(level, wirerLookup);
 		
 		int highestPowerFound = 0;
@@ -64,10 +56,10 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 						BlockPos targetPos = targetFace.pos();
 						StateWirer targetStateWirer = wirerLookup.apply(targetPos);
 						BlockState targetState = targetStateWirer.state();
-						Wirer targetWirer = targetStateWirer.wirer();
+						SignalTransmitter targetTransmitter = targetStateWirer.transmitter();
 						
 						Direction targetSide = targetFace.attachmentSide();
-						@Nullable TransmissionNode targetNode = targetWirer.getTransmissionNodes(level, targetPos, targetState, targetSide).get(targetChannel);
+						@Nullable TransmissionNode targetNode = targetTransmitter.getTransmissionNodes(level, targetPos, targetState, targetSide).get(targetChannel);
 						if (targetNode != null)
 						{
 							// target node exists! but can it connect back?
@@ -83,17 +75,22 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 						}
 						
 						// check receiver nodes, we need to remember the listeners
-						@Nullable BiConsumer<LevelAccessor,Integer> targetReceiver = targetWirer.getReceiverEndpoints(level, targetPos, targetState, targetSide, nextFace).get(targetChannel);
+						@Nullable Receiver targetReceiver = targetStateWirer.receiver().getReceiverEndpoint(level, targetPos, targetState, targetSide, nextFace, targetChannel);
 						if (targetReceiver != null)
 						{
 							receiverNodes.add(targetReceiver);
+							@Nullable Set<Receiver> receiversOnChannel = unusedReceivers.get(new PosReceiver(targetPos, targetStateWirer.receiver()));
+							if (receiversOnChannel != null)
+							{
+								receiversOnChannel.remove(targetReceiver);
+							}
 						}
 						
 						// check supplier nodes too
 						if (highestPowerFound < 15)
 						{
 							powerLoop:
-							for (var channelPower : targetWirer.getSupplierEndpoints(level, targetPos, targetState, targetSide, nextFace).entrySet())
+							for (var channelPower : targetStateWirer.source().getSupplierEndpoints(level, targetPos, targetState, targetSide, nextFace).entrySet())
 							{
 								if (channelPower.getKey() == targetChannel)
 								{
@@ -188,7 +185,7 @@ public record WireGraph(Map<NodePos, TransmissionNode> nodesInGraph, Set<BlockPo
 			});
 		}
 		
-		for (BiConsumer<LevelAccessor, Integer> receiverNode : this.receiverNodes)
+		for (Receiver receiverNode : this.receiverNodes)
 		{
 			receiverNode.accept(serverLevel, this.power);
 		}

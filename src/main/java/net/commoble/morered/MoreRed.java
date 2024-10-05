@@ -347,6 +347,7 @@ public class MoreRed
 		{
 			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, getModRL(name)); }
 			
+			public static final TagKey<Block> IGNORE_VANILLA_SIGNAL = tag("ignore_vanilla_signal");
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
 			public static final TagKey<Block> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);

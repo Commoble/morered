@@ -14,11 +14,8 @@
 			"type": "morered:floor",
 			"offset": -1
 		},
-		"#morered:wirable/wires": {
-			"type": "morered:wire"
-		},
 		"#morered:wirable/wire_posts": {
-			"type": "morered:wire_post"
+			"type": "morered:none"
 		},
 		"#morered:wirable/bitwise_gates": {
 			"type": "morered:bitwise_gate"

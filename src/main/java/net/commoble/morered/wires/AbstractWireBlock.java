@@ -18,18 +18,16 @@ import com.mojang.math.OctahedralGroup;
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.future.Channel;
 import net.commoble.morered.future.ChannelSet;
-import net.commoble.morered.future.DefaultWirer;
 import net.commoble.morered.future.ExperimentalModEvents;
 import net.commoble.morered.future.Face;
 import net.commoble.morered.future.SignalStrength;
+import net.commoble.morered.future.StateWirer;
 import net.commoble.morered.future.TransmissionNode;
 import net.commoble.morered.future.WireUpdateBuffer;
-import net.commoble.morered.future.Wirer;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -169,33 +167,6 @@ public abstract class AbstractWireBlock extends Block
 				}
 			
 			});
-	}
-
-	public static boolean canWireConnectToAdjacentWireOrCable(BlockGetter world, BlockPos thisPos,
-		BlockState thisState, BlockPos wirePos, BlockState wireState, Direction wireFace, Direction directionToWire)
-	{
-		// this wire can connect to an adjacent wire's subwire if
-		// A) the direction to the other wire is orthagonal to the attachment face of the other wire
-		// (e.g. if the other wire is attached to DOWN, then we can connect if it's to the north, south, west, or east
-		// and B) this wire is also attached to the same face
-		if (wireFace.getAxis() != directionToWire.getAxis() && thisState.getValue(INTERIOR_FACES[wireFace.ordinal()]))
-			return true;
-		
-		// otherwise, check if we can connect through a wire edge
-		Block wireBlock = wireState.getBlock();
-		if (wireBlock == thisState.getBlock())
-		{
-			BlockPos diagonalPos = thisPos.relative(wireFace);
-			BlockState diagonalState = world.getBlockState(diagonalPos);
-			if (diagonalState.getBlock() == wireBlock)
-			{
-				if (diagonalState.getValue(INTERIOR_FACES[directionToWire.ordinal()]))
-				{
-					return true;
-				}
-			}
-		}
-		return false;
 	}
 
 	protected final VoxelShape[] shapesByStateIndex;
@@ -830,13 +801,10 @@ public abstract class AbstractWireBlock extends Block
 				return true;
 			}
 		}
-		@SuppressWarnings("deprecation")
-		Wirer wirer = BuiltInRegistries.BLOCK.getData(ExperimentalModEvents.WIRER_DATA_MAP, neighborBlock.builtInRegistryHolder().getKey());
-		if (wirer == null)
-			wirer = DefaultWirer.INSTANCE;
+		StateWirer neighborWirer = StateWirer.getOrDefault(world, neighborPos);
 		// check endpoints and transmitters
 		Face wireFace = new Face(thisPos, attachmentDirection);
-		var neighborSuppliers = wirer.getSupplierEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
+		var neighborSuppliers = neighborWirer.source().getSupplierEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
 		var compatibleChannels = this.channels.compatibleChannels();
 		
 		if (!neighborSuppliers.isEmpty())
@@ -848,20 +816,12 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		
-		var neighborReceivers = wirer.getReceiverEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
-		if (neighborReceivers == null)
+		for (Channel channel : compatibleChannels)
 		{
-			System.out.println("foop");
+			if (neighborWirer.receiver().getReceiverEndpoint(world, neighborPos, neighborState, attachmentDirection, wireFace, channel) != null)
+				return true;
 		}
-		if (!neighborReceivers.isEmpty())
-		{
-			for (Channel channel : compatibleChannels)
-			{
-				if (neighborReceivers.get(channel) != null)
-					return true;
-			}
-		}
-		var transmissionNodes = wirer.getTransmissionNodes(world, neighborPos, neighborState, attachmentDirection);
+		var transmissionNodes = neighborWirer.transmitter().getTransmissionNodes(world, neighborPos, neighborState, attachmentDirection);
 		if (!transmissionNodes.isEmpty())
 		{
 			for (Channel channel : compatibleChannels)

@@ -1,17 +1,21 @@
 package net.commoble.morered.bitwise_logic;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToIntFunction;
 
 import net.commoble.morered.future.Channel;
 import net.commoble.morered.future.ExperimentalModEvents;
+import net.commoble.morered.future.Receiver;
+import net.commoble.morered.plate_blocks.InputSide;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.DyeColor;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -25,6 +29,8 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 	protected int output = 0;
 	
 	protected Map<Channel, ToIntFunction<LevelReader>> supplierEndpoints = null;
+	
+	public abstract void resetUnusedReceivers(Collection<BitwiseListener> receivers);
 	
 	public BitwiseGateBlockEntity(BlockEntityType<? extends BitwiseGateBlockEntity> type, BlockPos pos, BlockState state)
 	{
@@ -93,5 +99,13 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 	{
 		super.loadAdditional(compound, registries);
 		this.output = compound.getInt(OUTPUT);
+	}
+	
+	public static record BitwiseListener(DyeColor color, InputSide inputSide, Receiver receiver) implements Receiver {
+		@Override
+		public void accept(LevelAccessor level, int power)
+		{
+			this.receiver.accept(level, power);
+		}
 	}
 }

@@ -1,7 +1,6 @@
 package net.commoble.morered.future;
 
 import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.ToIntFunction;
 
 import org.jetbrains.annotations.Nullable;
@@ -13,27 +12,20 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.state.BlockState;
 
-public enum CubeWirer implements Wirer
+public enum CubeSource implements SignalSource
 {
 	INSTANCE;
 	
-	public static final ResourceKey<MapCodec<? extends Wirer>> RESOURCE_KEY = ResourceKey.create(Wirer.REGISTRY_KEY, MoreRed.getModRL("cube"));
-	public static final MapCodec<CubeWirer> CODEC = MapCodec.unit(INSTANCE);
+	public static final ResourceKey<MapCodec<? extends SignalSource>> RESOURCE_KEY = ResourceKey.create(SignalSource.REGISTRY_KEY, MoreRed.getModRL("cube"));
+	public static final MapCodec<CubeSource> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override
-	public MapCodec<? extends Wirer> codec()
+	public MapCodec<? extends SignalSource> codec()
 	{
 		return CODEC;
-	}
-
-	@Override
-	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
-	{
-		return Map.of();
 	}
 
 	@Override
@@ -45,11 +37,4 @@ public enum CubeWirer implements Wirer
 			? Map.of()
 			: Map.of(Channel.wide(), reader -> reader.getSignal(supplierPos, directionFromNeighbor));
 	}
-
-	@Override
-	public Map<Channel,BiConsumer<LevelAccessor,Integer>> getReceiverEndpoints(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Direction receiverSide, Face connectedFace)
-	{
-		return Map.of();
-	}
-
 }
