@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToIntFunction;
 
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.ExperimentalModEvents;
-import net.commoble.morered.future.Receiver;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.Receiver;
+import net.commoble.morered.api.WireUpdateGameEvent;
 import net.commoble.morered.plate_blocks.InputSide;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.core.BlockPos;
@@ -56,7 +56,7 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 			this.supplierEndpoints = null;
 			this.setChanged();
 			Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(this.getBlockState());
-			this.level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, worldPosition.relative(primaryOutputDirection), GameEvent.Context.of(this.getBlockState()));
+			this.level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, worldPosition.relative(primaryOutputDirection), GameEvent.Context.of(this.getBlockState()));
 		}
 	}
 

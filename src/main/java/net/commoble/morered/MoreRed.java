@@ -17,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 
-import net.commoble.morered.api.internal.APIRegistries;
 import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
@@ -105,7 +104,6 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -324,8 +322,6 @@ public class MoreRed
 		
 		ServerConfig.initServerConfig();
 		
-//		modBus.addListener(EventPriority.HIGH, this::onHighPriorityCommonSetup);
-		modBus.addListener(this::onLoadComplete);
 		modBus.addListener(this::onRegisterCapabilities);
 		modBus.addListener(this::onRegisterPackets);
 		
@@ -419,12 +415,6 @@ public class MoreRed
 		r.playToClient(WireBreakPacket.TYPE, WireBreakPacket.STREAM_CODEC, WireBreakPacket::handle);
 		r.playToClient(SyncPostsInChunkPacket.TYPE, SyncPostsInChunkPacket.STREAM_CODEC, SyncPostsInChunkPacket::handle);
 		r.playToClient(WireUpdatePacket.TYPE, WireUpdatePacket.STREAM_CODEC, WireUpdatePacket::handle);
-	}
-
-	private void onLoadComplete(FMLLoadCompleteEvent event)
-	{
-		// freeze API registries -- convert to immutable maps
-		APIRegistries.freezeRegistries();
 	}
 	
 	@SuppressWarnings("deprecation")

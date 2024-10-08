@@ -8,9 +8,9 @@ import java.util.Set;
 import java.util.function.Function;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.Face;
-import net.commoble.morered.future.TransmissionNode;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.Face;
+import net.commoble.morered.api.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;

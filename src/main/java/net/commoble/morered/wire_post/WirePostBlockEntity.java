@@ -14,8 +14,8 @@ import com.mojang.math.OctahedralGroup;
 import com.mojang.serialization.Codec;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.TransmissionNode;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.TransmissionNode;
 import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;

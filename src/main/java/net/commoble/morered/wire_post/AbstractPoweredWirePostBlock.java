@@ -9,11 +9,11 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.ExperimentalModEvents;
-import net.commoble.morered.future.Face;
-import net.commoble.morered.future.SignalStrength;
-import net.commoble.morered.future.TransmissionNode;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.Face;
+import net.commoble.morered.api.SignalStrength;
+import net.commoble.morered.api.TransmissionNode;
+import net.commoble.morered.api.WireUpdateGameEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -80,7 +80,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
+		world.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, Context.of(state));
 	}
 
 	@Override

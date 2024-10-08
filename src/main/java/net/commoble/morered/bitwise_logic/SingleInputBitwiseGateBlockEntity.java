@@ -8,8 +8,8 @@ import java.util.Map;
 import org.jetbrains.annotations.Nullable;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.Receiver;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.Receiver;
 import net.commoble.morered.plate_blocks.InputSide;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;

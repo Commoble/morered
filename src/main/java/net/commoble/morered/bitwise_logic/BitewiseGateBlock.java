@@ -7,10 +7,10 @@ import java.util.function.ToIntFunction;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.ExperimentalModEvents;
-import net.commoble.morered.future.Face;
-import net.commoble.morered.future.Receiver;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.Face;
+import net.commoble.morered.api.Receiver;
+import net.commoble.morered.api.WireUpdateGameEvent;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -77,11 +77,11 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 		super.onPlace(newState, level, pos, oldState, isMoving);
 		for (Direction dir : this.getInputDirections(newState))
 		{
-			level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos.relative(dir), GameEvent.Context.of(newState));
+			level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos.relative(dir), GameEvent.Context.of(newState));
 		}
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
-		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(newState));
-		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos.relative(primaryOutputDirection), GameEvent.Context.of(newState));
+		level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(newState));
+		level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos.relative(primaryOutputDirection), GameEvent.Context.of(newState));
 	}
 
 	@Override
@@ -89,7 +89,7 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 	{
 		super.onRemove(oldState, level, pos, newState, isMoving);
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
-		level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos.relative(primaryOutputDirection), GameEvent.Context.of(oldState));
+		level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos.relative(primaryOutputDirection), GameEvent.Context.of(oldState));
 	}
 	
 	@Override

@@ -8,10 +8,9 @@ import javax.annotation.Nullable;
 import com.google.common.cache.LoadingCache;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.internal.WireVoxelHelpers;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.ChannelSet;
-import net.commoble.morered.future.SignalStrength;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.SignalStrength;
+import net.commoble.morered.api.WireVoxelHelpers;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

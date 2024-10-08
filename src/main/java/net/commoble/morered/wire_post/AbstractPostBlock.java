@@ -9,9 +9,9 @@ import javax.annotation.Nullable;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.ExperimentalModEvents;
-import net.commoble.morered.future.TransmissionNode;
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.TransmissionNode;
+import net.commoble.morered.api.WireUpdateGameEvent;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -74,7 +74,7 @@ public abstract class AbstractPostBlock extends Block
 	{
 		this.updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onPlace(state, world, pos, oldState, isMoving);
-		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
+		world.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, Context.of(state));
 	}
 
 	@Override
@@ -96,7 +96,7 @@ public abstract class AbstractPostBlock extends Block
 	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
 		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
-		world.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
+		world.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, Context.of(state));
 	}
 	
 	public void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)

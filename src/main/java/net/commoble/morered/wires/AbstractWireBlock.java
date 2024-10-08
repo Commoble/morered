@@ -15,15 +15,14 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.math.OctahedralGroup;
 
+import net.commoble.morered.api.Channel;
+import net.commoble.morered.api.Face;
+import net.commoble.morered.api.SignalStrength;
+import net.commoble.morered.api.StateWirer;
+import net.commoble.morered.api.TransmissionNode;
+import net.commoble.morered.api.WireUpdateGameEvent;
+import net.commoble.morered.api.internal.WireUpdateBuffer;
 import net.commoble.morered.client.ClientProxy;
-import net.commoble.morered.future.Channel;
-import net.commoble.morered.future.ChannelSet;
-import net.commoble.morered.future.ExperimentalModEvents;
-import net.commoble.morered.future.Face;
-import net.commoble.morered.future.SignalStrength;
-import net.commoble.morered.future.StateWirer;
-import net.commoble.morered.future.TransmissionNode;
-import net.commoble.morered.future.WireUpdateBuffer;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
@@ -344,7 +343,7 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		this.updateShapeCache(worldIn, pos);
-		worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null, null));
+		worldIn.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(null, null));
 		super.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
@@ -384,7 +383,7 @@ public abstract class AbstractWireBlock extends Block
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
 		{
-			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
+			worldIn.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(null,null));
 		}
 	}
 
@@ -421,7 +420,7 @@ public abstract class AbstractWireBlock extends Block
 		this.updateShapeCache(worldIn, pos);
 		if (doGraphUpdate)
 		{
-			worldIn.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, GameEvent.Context.of(null,null));
+			worldIn.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(null,null));
 		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		if (edgeFlags != 0)
