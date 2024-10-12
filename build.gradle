@@ -3,7 +3,17 @@ plugins {
 	id 'eclipse'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.gradle.userdev' version "7.0.+"
+	id 'net.neoforged.moddev' version '1.0.20'
+	id 'org.sinytra.wiki.toolkit' version '0.1.10'
+}
+
+tasks.named('wrapper', Wrapper).configure {
+    // Define wrapper values here so as to not have to always do so when updating gradlew.properties.
+    // Switching this to Wrapper.DistributionType.ALL will download the full gradle sources that comes with
+    // documentation attached on cursor hover of gradle classes and methods. However, this comes with increased
+    // file size for Gradle. If you do switch this to ALL, run the Gradle wrapper task twice afterwards.
+    // (Verify by checking gradle/wrapper/gradle-wrapper.properties to see if distributionUrl now points to `-all`)
+    distributionType = Wrapper.DistributionType.BIN
 }
 
 group = "net.commoble.${modid}"
@@ -23,30 +33,31 @@ sourceSets
 // include resources generated from datagen in main
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
-minecraft.accessTransformers.file rootProject.file('src/main/resources/META-INF/accesstransformer.cfg')
-
-runs {
-	configureEach {
-		systemProperty 'forge.logging.console.level', 'debug'
-		modSource project.sourceSets.main
+neoForge {
+	version = "${neo_version}"
+	mods {
+		"${modid}" {
+			sourceSet(sourceSets.main)
+		}
 	}
-
-	client {
-		// Comma-separated list of namespaces to load gametests from. Empty = all namespaces.
-		systemProperty 'forge.enabledGameTestNamespaces', project.modid
+	runs {
+		client {
+			client()
+		}
+		server {
+			server()
+		}
+		gameTestServer {
+			type = "gameTestServer"
+		}
+		data {
+			data()
+			programArguments.addAll '--mod', "morered_datagen", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+		}
+		configureEach {
+			
+		}
 	}
-
-	server {
-		systemProperty 'forge.enabledGameTestNamespaces', project.modid
-	}
-	
-    gameTestServer {
-        systemProperty 'forge.enabledGameTestNamespaces', project.modid
-    }
-
-    data {
-        programArguments.addAll '--mod', "morered_datagen", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
-    }
 }
 
 repositories {
@@ -54,39 +65,33 @@ repositories {
 	maven {url = "https://maven.blamejared.com/"}
 	maven {url = "https://commoble.net/maven/"}
 	maven {url = "https://maven.terraformersmc.com"}
+	maven { url = 'https://maven.sinytra.org/' }
+}
+
+// Sets up a dependency configuration called 'localRuntime'.
+// This configuration should be used instead of 'runtimeOnly' to declare
+// a dependency that will be present for runtime testing but that is
+// "optional", meaning it will not be pulled by dependents of this mod.
+configurations {
+    runtimeClasspath.extendsFrom localRuntime
 }
 
 dependencies {
-	implementation "net.neoforged:neoforge:${neo_version}"
 	compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
 	compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
 	// at runtime, use the full JEI jar for NeoForge
-	//runtimeOnly "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+	//localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
 	
 	compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-	runtimeOnly "dev.emi:emi-neoforge:${emi_version}"
+	localRuntime "dev.emi:emi-neoforge:${emi_version}"
+	
+	localRuntime "org.sinytra:item-asset-export-neoforge:${item_asset_export_version}"
 }
 
 java
 {
 	withSourcesJar()
 	withJavadocJar()
-}
-
-// Example for how to get properties into the manifest for reading by the runtime..
-jar {
-    manifest {
-        attributes([
-            "Specification-Title": "${modid}",
-            "Specification-Vendor": "Commoble",
-            "Specification-Version": "1", // We are version 1 of ourselves
-            "Implementation-Title": project.name,
-            "Implementation-Version": "${version}",
-            "Implementation-Vendor" :"Commoble",
-            "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ"),
-			"MixinConfigs": "${modid}.mixins.json"
-        ])
-    }
 }
 
 artifacts {
@@ -111,4 +116,17 @@ publishing {
             url "file:///${project.projectDir}/maven"
         }
     }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8' // Use the UTF-8 charset for Java compilation
+}
+
+wiki {
+	docs {
+		morered {
+			root = file('docs')
+			exportedAssetNamespaces = ['morered']
+		}
+	}
 }

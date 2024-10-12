@@ -22,6 +22,7 @@
     * morered:wire_post (used by redwire_post, redwire_relay, redwire_junction)
     * morered:bundled_cable_post (used by bundle_relay, bundle_junction)
   * Bundled cable post blockentities no longer store power data
+* Updated Bundled Network Cable texture
   
   
 # 1.21.1-6.0.0.3
