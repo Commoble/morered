@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "morered:nand_2_gate"
+          "name": "morered:two_input_nand_gate"
         }
       ],
       "rolls": 1.0

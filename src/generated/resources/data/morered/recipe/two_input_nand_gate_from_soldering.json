@@ -12,6 +12,6 @@
   ],
   "result": {
     "count": 1,
-    "id": "morered:nand_2_gate"
+    "id": "morered:two_input_nand_gate"
   }
 }

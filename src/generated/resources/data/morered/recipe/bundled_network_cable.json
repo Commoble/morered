@@ -3,7 +3,7 @@
   "category": "redstone",
   "key": {
     "#": {
-      "tag": "morered:network_cables"
+      "tag": "morered:cables"
     }
   },
   "pattern": [

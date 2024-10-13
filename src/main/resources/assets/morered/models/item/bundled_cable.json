@@ -2,8 +2,8 @@
 	"parent": "morered:block/plate_template",
 	"ambientocclusion": false,
 	"textures": {
-		"particle": "morered:block/jacketed_bundled_network_cable",
-		"wire": "morered:block/jacketed_bundled_network_cable"
+		"particle": "morered:block/jacketed_bundled_cable",
+		"wire": "morered:block/jacketed_bundled_cable"
 	},
 	"elements": [
 		{

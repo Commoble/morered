@@ -233,8 +233,8 @@ public class MoreRed
 		registerLogicGateType(blocks, items, ObjectNames.XOR_GATE, LogicFunctions.XOR_AC, LogicFunctionPlateBlock.T_INPUTS);
 		registerLogicGateType(blocks, items, ObjectNames.XNOR_GATE, LogicFunctions.XNOR_AC, LogicFunctionPlateBlock.T_INPUTS);
 		registerLogicGateType(blocks, items, ObjectNames.MULTIPLEXER, LogicFunctions.MULTIPLEX, LogicFunctionPlateBlock.THREE_INPUTS);
-		registerLogicGateType(blocks, items, ObjectNames.AND_2_GATE, LogicFunctions.AND_2, LogicFunctionPlateBlock.T_INPUTS);
-		registerLogicGateType(blocks, items, ObjectNames.NAND_2_GATE, LogicFunctions.NAND_2, LogicFunctionPlateBlock.T_INPUTS);
+		registerLogicGateType(blocks, items, ObjectNames.TWO_INPUT_AND_GATE, LogicFunctions.AND_2, LogicFunctionPlateBlock.T_INPUTS);
+		registerLogicGateType(blocks, items, ObjectNames.TWO_INPUT_NAND_GATE, LogicFunctions.NAND_2, LogicFunctionPlateBlock.T_INPUTS);
 		
 		// bitwise logic gates store state in a TE instead of block properties
 		// they don't need to have their properties defined on construction but they do need to be registered to the TE type they use
@@ -345,7 +345,7 @@ public class MoreRed
 			
 			public static final TagKey<Block> IGNORE_VANILLA_SIGNAL = tag("ignore_vanilla_signal");
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
-			public static final TagKey<Block> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
+			public static final TagKey<Block> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_CABLES);
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
 			public static final TagKey<Block> BITWISE_GATES = tag(ObjectNames.BITWISE_GATES);
 			
@@ -361,9 +361,9 @@ public class MoreRed
 		{
 			private static TagKey<Item> tag(String name) { return TagKey.create(Registries.ITEM, getModRL(name)); }
 			
-			public static final TagKey<Item> BUNDLED_NETWORK_CABLES = tag(ObjectNames.BUNDLED_NETWORK_CABLES);
-			public static final TagKey<Item> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_NETWORK_CABLES);
-			public static final TagKey<Item> NETWORK_CABLES = tag(ObjectNames.NETWORK_CABLES);
+			public static final TagKey<Item> BUNDLED_NETWORK_CABLES = tag(ObjectNames.BUNDLED_CABLES);
+			public static final TagKey<Item> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_CABLES);
+			public static final TagKey<Item> NETWORK_CABLES = tag(ObjectNames.CABLES);
 			public static final TagKey<Item> RED_ALLOY_WIRES = tag(ObjectNames.RED_ALLOY_WIRES);
 			public static final TagKey<Item> RED_ALLOYABLE_INGOTS = tag(ObjectNames.RED_ALLOYABLE_INGOTS);
 		}

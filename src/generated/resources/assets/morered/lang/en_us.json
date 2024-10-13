@@ -1,5 +1,4 @@
 {
-  "block.morered.and_2_gate": "Two Input AND Gate",
   "block.morered.and_gate": "AND Gate",
   "block.morered.bitwise_and_gate": "Bitwise AND Gate",
   "block.morered.bitwise_diode": "Bitwise Diode",
@@ -24,7 +23,6 @@
   "block.morered.lime_network_cable": "Lime Network Cable",
   "block.morered.magenta_network_cable": "Magenta Network Cable",
   "block.morered.multiplexer": "Multiplexer",
-  "block.morered.nand_2_gate": "Two Input NAND Gate",
   "block.morered.nand_gate": "NAND Gate",
   "block.morered.nor_gate": "NOR Gate",
   "block.morered.not_gate": "NOT Gate",
@@ -40,6 +38,8 @@
   "block.morered.redwire_relay": "Redwire Relay",
   "block.morered.soldering_table": "Soldering Table",
   "block.morered.stone_plate": "Stone Plate",
+  "block.morered.two_input_and_gate": "Two Input AND Gate",
+  "block.morered.two_input_nand_gate": "Two Input NAND Gate",
   "block.morered.white_network_cable": "White Network Cable",
   "block.morered.xnor_gate": "XNOR Gate",
   "block.morered.xor_gate": "XOR Gate",

@@ -9,7 +9,7 @@
 		"plate_torch": "morered:block/plate_torch",
 		"input_a_overlay": "morered:block/nand_gate_input_a_overlay",
 		"edge": "morered:block/not_gate_input_overlay",
-		"middle_overlay": "morered:block/and_2_gate_middle_overlay",
+		"middle_overlay": "morered:block/two_input_and_gate_middle_overlay",
 		"diode": "block/stone"
 	},
 	"elements": [

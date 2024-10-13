@@ -3,7 +3,7 @@
   "category": "redstone",
   "ingredients": [
     {
-      "tag": "morered:bundled_network_cables"
+      "tag": "morered:bundled_cables"
     },
     {
       "tag": "c:ingots/iron"

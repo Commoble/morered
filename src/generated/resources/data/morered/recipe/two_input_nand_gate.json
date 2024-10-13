@@ -13,12 +13,12 @@
     }
   },
   "pattern": [
-    "#t#",
+    "#r#",
     "trt",
     "###"
   ],
   "result": {
     "count": 1,
-    "id": "morered:and_2_gate"
+    "id": "morered:two_input_nand_gate"
   }
 }

@@ -24,9 +24,11 @@ public class MoreCodecs
 	@SuppressWarnings("unchecked")
 	public static <T> Codec<T> dispatch(ResourceKey<Registry<MapCodec<? extends T>>> registryKey, Function<? super T, ? extends MapCodec<? extends T>> typeCodec)
 	{
-		return Codec.lazyInitialized(() -> 
-			((Registry<MapCodec<? extends T>>)BuiltInRegistries.REGISTRY.get(registryKey))
-			.byNameCodec()
-			.dispatch(typeCodec, mapCodec -> mapCodec));
+		return Codec.lazyInitialized(() -> {
+			// eclipsec and javac need to agree on the generics, so this might look strange
+			Registry<?> uncastRegistry = BuiltInRegistries.REGISTRY.get(registryKey.location());
+			Registry<MapCodec<? extends T>> registry = (Registry<MapCodec<? extends T>>) uncastRegistry;
+			return registry.byNameCodec().dispatch(typeCodec, Function.identity());
+		});
 	}
 }

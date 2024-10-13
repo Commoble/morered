@@ -109,7 +109,7 @@ public class MoreRedDataGen
 		String fromSoldering = "%s_from_soldering";
 		
 		// blocks
-		redstonePlateBlock(ObjectNames.AND_2_GATE, "Two Input AND Gate", context, 4,
+		redstonePlateBlock(ObjectNames.TWO_INPUT_AND_GATE, "Two Input AND Gate", context, 4,
 			"#t#",
 			"trt",
 			"###");
@@ -165,7 +165,7 @@ public class MoreRedDataGen
 			"#r#",
 			"rir",
 			"#r#");
-		redstonePlateBlock(ObjectNames.NAND_2_GATE, "Two Input NAND Gate", context, 3,
+		redstonePlateBlock(ObjectNames.TWO_INPUT_NAND_GATE, "Two Input NAND Gate", context, 3,
 			"#r#",
 			"trt",
 			"###");

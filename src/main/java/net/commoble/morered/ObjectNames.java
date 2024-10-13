@@ -17,8 +17,8 @@ public class ObjectNames
 	public static final String XOR_GATE = "xor_gate";
 	public static final String XNOR_GATE = "xnor_gate";
 	public static final String MULTIPLEXER = "multiplexer";
-	public static final String AND_2_GATE = "and_2_gate";
-	public static final String NAND_2_GATE = "nand_2_gate";
+	public static final String TWO_INPUT_AND_GATE = "two_input_and_gate";
+	public static final String TWO_INPUT_NAND_GATE = "two_input_nand_gate";
 
 	public static final String LATCH = "latch";
 	public static final String PULSE_GATE = "pulse_gate";
@@ -38,7 +38,7 @@ public class ObjectNames
 	
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";
-	public static final String COLORED_NETWORK_CABLE = "colored_network_cable";
+	public static final String COLORED_NETWORK_CABLE = "colored_cable";
 	public static final String POWERED_WIRE = "powered_wire";
 	public static final String[] NETWORK_CABLES_BY_COLOR = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_network_cable"));
 	public static final String BUNDLED_NETWORK_CABLE = "bundled_network_cable";
@@ -63,9 +63,9 @@ public class ObjectNames
 	
 	// tags
 	public static final String BUNDLED_CABLE_POSTS = "bundled_cable_posts";
-	public static final String BUNDLED_NETWORK_CABLES = "bundled_network_cables";
-	public static final String COLORED_NETWORK_CABLES = "colored_network_cables";
-	public static final String NETWORK_CABLES = "network_cables";
+	public static final String BUNDLED_CABLES = "bundled_cables";
+	public static final String COLORED_CABLES = "colored_cables";
+	public static final String CABLES = "cables";
 	public static final String RED_ALLOY_WIRES = "red_alloy_wires";
 	public static final String RED_ALLOYABLE_INGOTS = "red_alloyable_ingots";
 	public static final String REDWIRE_POSTS = "redwire_posts";
