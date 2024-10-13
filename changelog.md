@@ -20,8 +20,8 @@
 * Renamed some blocks to reduce word count (and their respective block ids):
   * Redwire Post Plate -> Redwire Relay (redwire_post_plate -> redwire_relay)
   * Redwire Post Relay Plate -> Redwire Junction (redwire_post_relay_plate -> redwire_junction
-  * Bundled Cable Post -> Bundle Relay (bundled_cable_post -> bundle_relay)
-  * Bundled Cable Relay Plate -> Bundle Junction (bundled_cable_relay_plate -> bundle_junction)
+  * Bundled Cable Post -> Cable Relay (bundled_cable_post -> cable_relay)
+  * Bundled Cable Relay Plate -> Cable Junction (bundled_cable_relay_plate -> cable_junction)
   * Bundled Network Cable -> Bundled Cable (bundled_network_cable -> bundled_cable)
   * {Color} Network Cable -> {Color} Cable ({color}_network_cable -> {color}_cable)
     * e.g. Orange Network Cable is now simply called Orange Cable
