@@ -1,0 +1,21 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 2,
+      "tag": "c:quarter_slabs/smooth_stone"
+    },
+    {
+      "count": 1,
+      "tag": "c:ingots/iron"
+    },
+    {
+      "count": 1,
+      "tag": "morered:bundled_cables"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:cable_junction"
+  }
+}

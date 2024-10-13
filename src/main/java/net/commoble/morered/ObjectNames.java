@@ -31,17 +31,16 @@ public class ObjectNames
 	public static final String REDWIRE_POST = "redwire_post";
 	public static final String REDWIRE_RELAY = "redwire_relay";
 	public static final String REDWIRE_JUNCTION = "redwire_junction";
-	
-	public static final String BUNDLED_CABLE_POST = "bundled_cable_post";
-	public static final String BUNDLE_RELAY = "bundle_relay";
-	public static final String BUNDLE_JUNCTION = "bundle_junction";
+
+	public static final String CABLE_JUNCTION = "cable_junction";
+	public static final String CABLE_RELAY = "cable_relay";
 	
 	public static final String WIRE = "wire";
 	public static final String RED_ALLOY_WIRE = "red_alloy_wire";
-	public static final String COLORED_NETWORK_CABLE = "colored_cable";
+	public static final String COLORED_CABLE = "colored_cable";
 	public static final String POWERED_WIRE = "powered_wire";
-	public static final String[] NETWORK_CABLES_BY_COLOR = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_network_cable"));
-	public static final String BUNDLED_NETWORK_CABLE = "bundled_network_cable";
+	public static final String[] COLORED_CABLES_BY_COLOR = Util.make(new String[16], array -> Arrays.setAll(array, i -> DyeColor.values()[i] + "_cable"));
+	public static final String BUNDLED_CABLE = "bundled_cable";
 	
 	public static final String HEXIDECRUBROMETER = "hexidecrubrometer";
 	
@@ -62,7 +61,7 @@ public class ObjectNames
 	public static final String BUNDLED_CABLE_SPOOL = "bundled_cable_spool";
 	
 	// tags
-	public static final String BUNDLED_CABLE_POSTS = "bundled_cable_posts";
+	public static final String CABLE_POSTS = "cable_posts";
 	public static final String BUNDLED_CABLES = "bundled_cables";
 	public static final String COLORED_CABLES = "colored_cables";
 	public static final String CABLES = "cables";

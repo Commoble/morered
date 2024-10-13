@@ -34,9 +34,9 @@ import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.commoble.morered.soldering.SolderingTableBlock;
-import net.commoble.morered.wire_post.BundleJunctionBlock;
-import net.commoble.morered.wire_post.BundleRelayBlock;
-import net.commoble.morered.wire_post.BundledCablePostBlockEntity;
+import net.commoble.morered.wire_post.CableJunctionBlock;
+import net.commoble.morered.wire_post.CableRelayBlock;
+import net.commoble.morered.wire_post.CablePostBlockEntity;
 import net.commoble.morered.wire_post.FakeStateLevel;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.SyncPostsInChunkPacket;
@@ -145,10 +145,10 @@ public class MoreRed
 	public final DeferredHolder<Block, WirePostPlateBlock> redwireJunctionBlock;
 	public final DeferredHolder<Block, HexidecrubrometerBlock> hexidecrubrometerBlock;
 	public final DeferredHolder<Block, PoweredWireBlock> redAlloyWireBlock;
-	public final DeferredHolder<Block, PoweredWireBlock>[] networkCableBlocks;
-	public final DeferredHolder<Block, BundledCableBlock> bundledNetworkCableBlock;
-	public final DeferredHolder<Block, BundleRelayBlock> bundleRelayBlock;
-	public final DeferredHolder<Block, BundleJunctionBlock> bundleJunctionBlock;
+	public final DeferredHolder<Block, PoweredWireBlock>[] coloredCableBlocks;
+	public final DeferredHolder<Block, BundledCableBlock> bundledCableBlock;
+	public final DeferredHolder<Block, CableRelayBlock> cableRelayBlock;
+	public final DeferredHolder<Block, CableJunctionBlock> cableJunctionBlock;
 
 	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
 	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
@@ -157,7 +157,7 @@ public class MoreRed
 	public final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
 
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> wirePostBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<BundledCablePostBlockEntity>> bundledCablePostBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<CablePostBlockEntity>> cablePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> poweredWireBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<SingleInputBitwiseGateBlockEntity>> singleInputBitwiseGateBeType;
@@ -208,19 +208,19 @@ public class MoreRed
 			() -> new WirePostPlateBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F), WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
 		hexidecrubrometerBlock = registerBlockItem(blocks, items, ObjectNames.HEXIDECRUBROMETER,
 			() -> new HexidecrubrometerBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
-		bundleRelayBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLE_RELAY,
-			() -> new BundleRelayBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
-		bundleJunctionBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLE_JUNCTION,
-			() -> new BundleJunctionBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
+		cableRelayBlock = registerBlockItem(blocks, items, ObjectNames.CABLE_RELAY,
+			() -> new CableRelayBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
+		cableJunctionBlock = registerBlockItem(blocks, items, ObjectNames.CABLE_JUNCTION,
+			() -> new CableJunctionBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F)));
 		
 		redAlloyWireBlock = registerBlockItem(blocks, items, ObjectNames.RED_ALLOY_WIRE, 
 			() -> PoweredWireBlock.createRedAlloyWireBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
 			block -> new WireBlockItem(block, new Item.Properties()));
-		networkCableBlocks = Util.make((DeferredHolder<Block, PoweredWireBlock>[])new DeferredHolder[16], array ->
-			Arrays.setAll(array, i -> registerBlockItem(blocks, items, ObjectNames.NETWORK_CABLES_BY_COLOR[i],
+		coloredCableBlocks = Util.make((DeferredHolder<Block, PoweredWireBlock>[])new DeferredHolder[16], array ->
+			Arrays.setAll(array, i -> registerBlockItem(blocks, items, ObjectNames.COLORED_CABLES_BY_COLOR[i],
 				() -> PoweredWireBlock.createColoredCableBlock(BlockBehaviour.Properties.of().mapColor(DyeColor.values()[i]).pushReaction(PushReaction.DESTROY).noCollission().instabreak(), DyeColor.values()[i]),
 				block -> new WireBlockItem(block, new Item.Properties()))));
-		bundledNetworkCableBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_NETWORK_CABLE,
+		bundledCableBlock = registerBlockItem(blocks, items, ObjectNames.BUNDLED_CABLE,
 			() -> new BundledCableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollission().instabreak()),
 			block -> new WireBlockItem(block, new Item.Properties()));
 		
@@ -265,20 +265,20 @@ public class MoreRed
 				redwireRelayBlock.get(),
 				redwireJunctionBlock.get())
 			.build(null));
-		bundledCablePostBeType = blockEntityTypes.register(ObjectNames.BUNDLE_RELAY,
-			() -> BlockEntityType.Builder.of(BundledCablePostBlockEntity::new,
-				bundleRelayBlock.get(),
-				bundleJunctionBlock.get())
+		cablePostBeType = blockEntityTypes.register(ObjectNames.CABLE_RELAY,
+			() -> BlockEntityType.Builder.of(CablePostBlockEntity::new,
+				cableRelayBlock.get(),
+				cableJunctionBlock.get())
 			.build(null));
 		wireBeType = blockEntityTypes.register(ObjectNames.WIRE,
 			() -> BlockEntityType.Builder.of(WireBlockEntity::new,
-				bundledNetworkCableBlock.get())
+				bundledCableBlock.get())
 			.build(null));
 		poweredWireBeType = blockEntityTypes.register(ObjectNames.POWERED_WIRE,
 			() -> BlockEntityType.Builder.of(PoweredWireBlockEntity::new,
 				Stream.concat(
 					Stream.of(redAlloyWireBlock),
-					Arrays.stream(networkCableBlocks))
+					Arrays.stream(coloredCableBlocks))
 				.map(DeferredHolder::get)
 				.toArray(Block[]::new))
 			.build(null));
@@ -322,7 +322,6 @@ public class MoreRed
 		
 		ServerConfig.initServerConfig();
 		
-		modBus.addListener(this::onRegisterCapabilities);
 		modBus.addListener(this::onRegisterPackets);
 		
 		forgeBus.addListener(EventPriority.LOW, this::onUseItemOnBlock);
@@ -344,8 +343,8 @@ public class MoreRed
 			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, getModRL(name)); }
 			
 			public static final TagKey<Block> IGNORE_VANILLA_SIGNAL = tag("ignore_vanilla_signal");
-			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.BUNDLED_CABLE_POSTS);
-			public static final TagKey<Block> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_CABLES);
+			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.CABLE_POSTS);
+			public static final TagKey<Block> COLORED_CABLES = tag(ObjectNames.COLORED_CABLES);
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);
 			public static final TagKey<Block> BITWISE_GATES = tag(ObjectNames.BITWISE_GATES);
 			
@@ -361,51 +360,12 @@ public class MoreRed
 		{
 			private static TagKey<Item> tag(String name) { return TagKey.create(Registries.ITEM, getModRL(name)); }
 			
-			public static final TagKey<Item> BUNDLED_NETWORK_CABLES = tag(ObjectNames.BUNDLED_CABLES);
-			public static final TagKey<Item> COLORED_NETWORK_CABLES = tag(ObjectNames.COLORED_CABLES);
-			public static final TagKey<Item> NETWORK_CABLES = tag(ObjectNames.CABLES);
+			public static final TagKey<Item> BUNDLED_CABLES = tag(ObjectNames.BUNDLED_CABLES);
+			public static final TagKey<Item> COLORED_CABLES = tag(ObjectNames.COLORED_CABLES);
+			public static final TagKey<Item> CABLES = tag(ObjectNames.CABLES);
 			public static final TagKey<Item> RED_ALLOY_WIRES = tag(ObjectNames.RED_ALLOY_WIRES);
 			public static final TagKey<Item> RED_ALLOYABLE_INGOTS = tag(ObjectNames.RED_ALLOYABLE_INGOTS);
 		}
-	}
-	
-//	private void onHighPriorityCommonSetup(FMLCommonSetupEvent event)
-//	{
-////		Map<Block, WireConnector> wireConnectors = MoreRedAPI.getWireConnectabilityRegistry();
-////		Map<Block, ExpandedPowerSupplier> expandedPowerSuppliers = MoreRedAPI.getExpandedPowerRegistry();
-////		Map<Block, WireConnector> cableConnectors = MoreRedAPI.getCableConnectabilityRegistry();
-//		
-//		// add behaviour for vanilla objects
-//		wireConnectors.put(Blocks.REDSTONE_WIRE, DefaultWireProperties::isRedstoneWireConnectable);
-//		
-//		// add behaviour for More Red objects
-//		RedAlloyWireBlock redWireBlock = this.redAlloyWireBlock.get();
-//		wireConnectors.put(redWireBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
-//		expandedPowerSuppliers.put(redWireBlock, redWireBlock::getExpandedPower);
-//		for (int i=0; i<16; i++)
-//		{
-//			ColoredCableBlock coloredCableBlock = networkCableBlocks[i].get();
-//			wireConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
-//			expandedPowerSuppliers.put(coloredCableBlock, coloredCableBlock::getExpandedPower);
-//			cableConnectors.put(coloredCableBlock, coloredCableBlock::canConnectToAdjacentWireOrCable);
-//		}
-//		BundledCableBlock bundledCableBlock = bundledNetworkCableBlock.get();
-//		cableConnectors.put(bundledCableBlock, AbstractWireBlock::canWireConnectToAdjacentWireOrCable);
-//		BundledCableRelayPlateBlock cablePlateBlock = bundledCableRelayPlateBlock.get();
-//		cableConnectors.put(cablePlateBlock, cablePlateBlock::canConnectToAdjacentCable);
-//		this.bitwiseLogicPlates.values().stream()
-//			.map(rob -> rob.get())
-//			// eclipse compiler allows a method reference to canConnectToAdjacentCable in the put here
-//			// but javac doesn't like the generics, but accepts a lambda here
-//			.forEach(block -> cableConnectors.put(block, (world,thisPos,thisState,wirePos,wireState,wireFace,directionToWire)->block.canConnectToAdjacentCable(world, thisPos, thisState, wirePos, wireState, wireFace, directionToWire)));
-//	}
-	
-	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
-	{
-//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.coloredNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
-//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledNetworkCableBeType.get(), (be,side) -> be.getChanneledPower(side));
-//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bundledCableRelayPlateBeType.get(), (be,side) -> be.getChanneledPower(side));
-//		event.registerBlockEntity(MoreRedAPI.CHANNELED_POWER_CAPABILITY, this.bitwiseLogicGateBeType.get(), (be,side) -> be.getChanneledPower(side));
 	}
 	
 	private void onRegisterPackets(RegisterPayloadHandlersEvent event)

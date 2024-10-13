@@ -1,20 +1,20 @@
 {
   "values": [
-    "morered:white_network_cable",
-    "morered:orange_network_cable",
-    "morered:magenta_network_cable",
-    "morered:light_blue_network_cable",
-    "morered:yellow_network_cable",
-    "morered:lime_network_cable",
-    "morered:pink_network_cable",
-    "morered:gray_network_cable",
-    "morered:light_gray_network_cable",
-    "morered:cyan_network_cable",
-    "morered:purple_network_cable",
-    "morered:blue_network_cable",
-    "morered:brown_network_cable",
-    "morered:green_network_cable",
-    "morered:red_network_cable",
-    "morered:black_network_cable"
+    "morered:white_cable",
+    "morered:orange_cable",
+    "morered:magenta_cable",
+    "morered:light_blue_cable",
+    "morered:yellow_cable",
+    "morered:lime_cable",
+    "morered:pink_cable",
+    "morered:gray_cable",
+    "morered:light_gray_cable",
+    "morered:cyan_cable",
+    "morered:purple_cable",
+    "morered:blue_cable",
+    "morered:brown_cable",
+    "morered:green_cable",
+    "morered:red_cable",
+    "morered:black_cable"
   ]
 }

@@ -123,16 +123,16 @@ public class MoreRedDataGen
 		bitwisePlateBlock(ObjectNames.BITWISE_OR_GATE, "Bitwise OR Gate", "or_gate_symbol", context);
 		bitwisePlateBlock(ObjectNames.BITWISE_XNOR_GATE, "Bitwise XNOR Gate", "xnor_gate_symbol", context);
 		bitwisePlateBlock(ObjectNames.BITWISE_XOR_GATE, "Bitwise XOR Gate", "xor_gate_symbol", context);
-		postBlock(ObjectNames.BUNDLE_RELAY, "Bundle Relay", context)
+		postBlock(ObjectNames.CABLE_RELAY, "Cable Relay", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
-					Ingredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES),
+					Ingredient.of(MoreRed.Tags.Items.BUNDLED_CABLES),
 					Ingredient.of(Tags.Items.INGOTS_IRON))))
 				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
-					SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES,1),
+					SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_CABLES,1),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON,1)))));
-		postBlock(ObjectNames.BUNDLE_JUNCTION, "Bundle Junction", context)
+		postBlock(ObjectNames.CABLE_JUNCTION, "Cable Junction", context)
 			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.blockItem()
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -140,19 +140,19 @@ public class MoreRedDataGen
 					"bFb",
 					"###"), Map.of(
 					'#', Ingredient.of(SMOOTH_STONE_QUARTER_SLABS),
-					'b', Ingredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES),
+					'b', Ingredient.of(MoreRed.Tags.Items.BUNDLED_CABLES),
 					'F', Ingredient.of(Tags.Items.INGOTS_IRON))))
 				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					SizedIngredient.of(SMOOTH_STONE_QUARTER_SLABS, 2),
 					SizedIngredient.of(Tags.Items.INGOTS_IRON, 1),
-					SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES, 1)))));
-		wireBlock(ObjectNames.BUNDLED_NETWORK_CABLE, "Bundled Network Cable", context)
+					SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_CABLES, 1)))));
+		wireBlock(ObjectNames.BUNDLED_CABLE, "Bundled Cable", context)
 			.blockItem()
-			.tags(itemTags,  MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES)
+			.tags(itemTags,  MoreRed.Tags.Items.BUNDLED_CABLES)
 			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 3, CraftingBookCategory.REDSTONE, List.of(
 					"#",
 					"#",
-					"#"), Map.of('#', Ingredient.of(MoreRed.Tags.Items.NETWORK_CABLES)))));
+					"#"), Map.of('#', Ingredient.of(MoreRed.Tags.Items.CABLES)))));
 		redstonePlateBlock(ObjectNames.DIODE, "Diode", context, 3,
 			"trt",
 			"###");
@@ -265,7 +265,7 @@ public class MoreRedDataGen
 		    "###");
 		
 		// other items
-		spool(ObjectNames.BUNDLED_CABLE_SPOOL, "Bundled Cable Spool", context, MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES);
+		spool(ObjectNames.BUNDLED_CABLE_SPOOL, "Bundled Cable Spool", context, MoreRed.Tags.Items.BUNDLED_CABLES);
 		spool(ObjectNames.REDWIRE_SPOOL, "Redwire Spool", context, MoreRed.Tags.Items.RED_ALLOY_WIRES);
 		simpleItem(ObjectNames.RED_ALLOY_INGOT, "Red Alloy Ingot", context)
 			.tags(itemTags, REDSTONE_ALLOY_INGOTS);
@@ -284,9 +284,9 @@ public class MoreRedDataGen
 			.addTag(Tags.Items.INGOTS_IRON);
 		
 		// tags in tags
-		itemTags.tag(MoreRed.Tags.Items.NETWORK_CABLES)
-			.addTag(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES)
-			.addTag(MoreRed.Tags.Items.COLORED_NETWORK_CABLES);
+		itemTags.tag(MoreRed.Tags.Items.CABLES)
+			.addTag(MoreRed.Tags.Items.BUNDLED_CABLES)
+			.addTag(MoreRed.Tags.Items.COLORED_CABLES);
 		
 		// misc. translations
 		lang.add("itemGroup.morered", "More Red");
@@ -297,7 +297,7 @@ public class MoreRedDataGen
 		// do stuff that has files for each color
 		for (int i=0; i<16; i++)
 		{
-			final DeferredHolder<Block, PoweredWireBlock> blockHolder = MoreRed.get().networkCableBlocks[i];
+			final DeferredHolder<Block, PoweredWireBlock> blockHolder = MoreRed.get().coloredCableBlocks[i];
 			final ResourceLocation blockId = blockHolder.getId();
 			final String modid = blockId.getNamespace();
 			final String blockPath = blockId.getPath();
@@ -306,7 +306,7 @@ public class MoreRedDataGen
 			
 			String blockName = WordUtils.capitalize(blockPath.replace("_", " ")); 
 			
-			wireBlock(ObjectNames.NETWORK_CABLES_BY_COLOR[i], blockName, context);
+			wireBlock(ObjectNames.COLORED_CABLES_BY_COLOR[i], blockName, context);
 			
 			ResourceLocation blockTexture = mangle(blockId, "block/%s");
 			
@@ -315,13 +315,13 @@ public class MoreRedDataGen
 			List<String> blockModelTypes = ImmutableList.of("edge","elbow","line","node");
 			blockModelTypes.forEach(modelType->
 				context.models.put(MoreRed.getModRL(String.format("block/%s_%s", blockPath, modelType)),
-					SimpleModel.createWithoutRenderType(MoreRed.getModRL(String.format("block/colored_network_cable_%s_template", modelType)))
+					SimpleModel.createWithoutRenderType(MoreRed.getModRL(String.format("block/colored_cable_%s_template", modelType)))
 						.addTexture("wire",blockTexture)));
 
 			// generate item models
 			models.put(
 				ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), String.format("item/%s", blockId.getPath())),
-				SimpleModel.createWithoutRenderType(ResourceLocation.fromNamespaceAndPath(modid, "item/colored_network_cable_template"))
+				SimpleModel.createWithoutRenderType(ResourceLocation.fromNamespaceAndPath(modid, "item/colored_cable_template"))
 					.addTexture("wire", blockTexture));	
 
 			// generate recipe
@@ -336,10 +336,10 @@ public class MoreRedDataGen
 			
 			// tags
 			blockTags
-				.getOrCreateRawBuilder(MoreRed.Tags.Blocks.COLORED_NETWORK_CABLES)
+				.getOrCreateRawBuilder(MoreRed.Tags.Blocks.COLORED_CABLES)
 				.addElement(blockId);
 			itemTags
-				.getOrCreateRawBuilder(MoreRed.Tags.Items.COLORED_NETWORK_CABLES)
+				.getOrCreateRawBuilder(MoreRed.Tags.Items.COLORED_CABLES)
 				.addElement(blockId);
 			itemTags.getOrCreateRawBuilder(TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "dyed/" + DyeColor.values()[i].getName())))
 				.addElement(blockId);
@@ -421,7 +421,7 @@ public class MoreRedDataGen
 			SizedIngredient.of(SMOOTH_STONE_QUARTER_SLABS, 2),
 			SizedIngredient.of(Tags.Items.GEMS_QUARTZ, 1),
 			SizedIngredient.of(Tags.Items.DUSTS_REDSTONE, 1),
-			SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_NETWORK_CABLES, 1)))));
+			SizedIngredient.of(MoreRed.Tags.Items.BUNDLED_CABLES, 1)))));
 		return helper;
 	}
 	

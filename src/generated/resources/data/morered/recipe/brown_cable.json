@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": {
+      "type": "neoforge:intersection",
+      "children": [
+        {
+          "tag": "minecraft:wool"
+        },
+        {
+          "tag": "c:dyed/brown"
+        }
+      ]
+    },
+    "w": {
+      "tag": "morered:red_alloy_wires"
+    }
+  },
+  "pattern": [
+    "www",
+    "w#w",
+    "www"
+  ],
+  "result": {
+    "count": 8,
+    "id": "morered:brown_cable"
+  }
+}

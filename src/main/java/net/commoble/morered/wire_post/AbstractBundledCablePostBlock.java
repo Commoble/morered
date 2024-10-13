@@ -43,7 +43,7 @@ public abstract class AbstractBundledCablePostBlock extends AbstractPostBlock im
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().bundledCablePostBeType.get().create(pos, state);
+		return MoreRed.get().cablePostBeType.get().create(pos, state);
 	}
 
 	protected Map<Direction, Map<Channel, TransmissionNode>> createTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post)

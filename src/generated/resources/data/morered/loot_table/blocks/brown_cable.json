@@ -1,0 +1,24 @@
+{
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "morered:set_wire_count"
+            }
+          ],
+          "name": "morered:brown_cable"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ]
+}

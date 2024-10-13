@@ -1,6 +1,0 @@
-{
-  "parent": "morered:block/colored_network_cable_line_template",
-  "textures": {
-    "wire": "morered:block/cyan_network_cable"
-  }
-}

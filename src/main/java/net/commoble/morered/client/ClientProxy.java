@@ -142,7 +142,7 @@ public class ClientProxy
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().bundleJunctionBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), RenderType.cutout());
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
@@ -181,7 +181,7 @@ public class ClientProxy
 	static void onRegisterRenderers(RegisterRenderers event)
 	{
 		event.registerBlockEntityRenderer(MoreRed.get().wirePostBeType.get(), WirePostRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().bundledCablePostBeType.get(), BundledCablePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().cablePostBeType.get(), BundledCablePostRenderer::new);
 	}
 
 	static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)

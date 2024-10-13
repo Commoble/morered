@@ -1,0 +1,6 @@
+{
+  "parent": "morered:block/colored_cable_line_template",
+  "textures": {
+    "wire": "morered:block/light_blue_cable"
+  }
+}

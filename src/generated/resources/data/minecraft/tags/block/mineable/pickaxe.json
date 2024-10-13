@@ -1,7 +1,7 @@
 {
   "values": [
-    "morered:bundle_relay",
-    "morered:bundle_junction",
+    "morered:cable_relay",
+    "morered:cable_junction",
     "morered:hexidecrubrometer",
     "morered:redwire_post",
     "morered:redwire_relay",

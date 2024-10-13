@@ -1,0 +1,17 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 1,
+      "tag": "morered:bundled_cables"
+    },
+    {
+      "count": 1,
+      "tag": "c:ingots/iron"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:cable_relay"
+  }
+}

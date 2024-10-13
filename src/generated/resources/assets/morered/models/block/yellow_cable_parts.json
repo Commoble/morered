@@ -1,0 +1,9 @@
+{
+  "edge": {
+    "parent": "morered:block/yellow_cable_edge"
+  },
+  "line": {
+    "parent": "morered:block/yellow_cable_line"
+  },
+  "loader": "morered:wire_parts"
+}
