@@ -280,8 +280,7 @@ public class MoreRedDataGen
 		itemTags.tag(SMOOTH_STONE_SLABS)
 			.add(Items.SMOOTH_STONE_SLAB.builtInRegistryHolder().key());
 		itemTags.tag(MoreRed.Tags.Items.RED_ALLOYABLE_INGOTS)
-			.addTag(Tags.Items.INGOTS_COPPER)
-			.addTag(Tags.Items.INGOTS_IRON);
+			.addTag(Tags.Items.INGOTS_COPPER);
 		
 		// tags in tags
 		itemTags.tag(MoreRed.Tags.Items.CABLES)

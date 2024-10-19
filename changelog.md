@@ -1,6 +1,6 @@
 # 1.21.2-7.0.0.0
 * THis update is not compatible with existing saves from prior versions
-* Massive rewrote how wires wire to each other. This has these ramifications:
+* Fundamentally changed how wires wire to each other. This has these ramifications:
   * Wires no longer cause cascading block updates to update themselves (except where wires are connected to redstone dust)
   * Instead, the power of a set of wires is calculated, and then all connected wires update at once
   * This affects red alloy wires, colored and bundled network cables, and wire/cable posts
@@ -28,6 +28,7 @@
 * Block ids of two-input AND/NAND gate have changed to match their localized names:
   * and_2_gate -> two_input_and_gate
   * nand_2_gate -> two_input_nand_Gate
+* Red Alloy Ingots are now only craftable from copper ingots (no longer craftable from iron ingots)
 * Updated Bundled Network Cable texture
   
   
