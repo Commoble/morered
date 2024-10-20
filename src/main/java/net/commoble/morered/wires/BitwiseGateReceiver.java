@@ -8,12 +8,13 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mojang.serialization.MapCodec;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.ExMachinaRegistries;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.Receiver;
+import net.commoble.exmachina.api.SignalReceiver;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.ObjectNames;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.Receiver;
-import net.commoble.morered.api.SignalReceiver;
 import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
 import net.commoble.morered.bitwise_logic.BitwiseGateBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -27,7 +28,7 @@ public enum BitwiseGateReceiver implements SignalReceiver
 {
 	INSTANCE;
 	
-	public static final ResourceKey<MapCodec<? extends SignalReceiver>> RESOURCE_KEY = ResourceKey.create(SignalReceiver.REGISTRY_KEY, MoreRed.getModRL(ObjectNames.BITWISE_GATE));
+	public static final ResourceKey<MapCodec<? extends SignalReceiver>> RESOURCE_KEY = ResourceKey.create(ExMachinaRegistries.SIGNAL_RECEIVER_TYPE, MoreRed.getModRL(ObjectNames.BITWISE_GATE));
 	public static final MapCodec<BitwiseGateReceiver> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override

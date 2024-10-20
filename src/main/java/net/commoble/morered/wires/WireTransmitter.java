@@ -4,10 +4,11 @@ import java.util.Map;
 
 import com.mojang.serialization.MapCodec;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.ExMachinaRegistries;
+import net.commoble.exmachina.api.SignalTransmitter;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.SignalTransmitter;
-import net.commoble.morered.api.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
@@ -18,7 +19,7 @@ public enum WireTransmitter implements SignalTransmitter
 {
 	INSTANCE;
 	
-	public static final ResourceKey<MapCodec<? extends SignalTransmitter>> RESOURCE_KEY = ResourceKey.create(SignalTransmitter.REGISTRY_KEY, MoreRed.getModRL("wire"));
+	public static final ResourceKey<MapCodec<? extends SignalTransmitter>> RESOURCE_KEY = ResourceKey.create(ExMachinaRegistries.SIGNAL_TRANSMITTER_TYPE, MoreRed.getModRL("wire"));
 	public static final MapCodec<WireTransmitter> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override

@@ -15,13 +15,12 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.mojang.math.OctahedralGroup;
 
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.SignalStrength;
-import net.commoble.morered.api.StateWirer;
-import net.commoble.morered.api.TransmissionNode;
-import net.commoble.morered.api.WireUpdateGameEvent;
-import net.commoble.morered.api.internal.WireUpdateBuffer;
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
+import net.commoble.exmachina.api.SignalStrength;
+import net.commoble.exmachina.api.StateWirer;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
@@ -44,7 +43,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
@@ -343,7 +341,7 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		this.updateShapeCache(worldIn, pos);
-		worldIn.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(null, null));
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
 		super.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
@@ -383,7 +381,7 @@ public abstract class AbstractWireBlock extends Block
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
 		{
-			worldIn.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(null,null));
+			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
 		}
 	}
 
@@ -420,7 +418,7 @@ public abstract class AbstractWireBlock extends Block
 		this.updateShapeCache(worldIn, pos);
 		if (doGraphUpdate)
 		{
-			worldIn.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(null,null));
+			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
 		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 		if (edgeFlags != 0)
@@ -569,7 +567,7 @@ public abstract class AbstractWireBlock extends Block
 		}
 		if (world instanceof ServerLevel)
 		{
-			WireUpdateBuffer.get((ServerLevel)world).enqueue(pos);
+			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
 		}
 	}
 

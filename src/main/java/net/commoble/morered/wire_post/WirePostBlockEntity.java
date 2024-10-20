@@ -13,9 +13,9 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.math.OctahedralGroup;
 import com.mojang.serialization.Codec;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.TransmissionNode;
 import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;

@@ -6,6 +6,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -16,7 +17,12 @@ import org.apache.logging.log4j.Logger;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.MapCodec;
 
+import net.commoble.exmachina.api.ExMachinaRegistries;
+import net.commoble.exmachina.api.SignalReceiver;
+import net.commoble.exmachina.api.SignalSource;
+import net.commoble.exmachina.api.SignalTransmitter;
 import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
@@ -35,8 +41,8 @@ import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.commoble.morered.soldering.SolderingTableBlock;
 import net.commoble.morered.wire_post.CableJunctionBlock;
-import net.commoble.morered.wire_post.CableRelayBlock;
 import net.commoble.morered.wire_post.CablePostBlockEntity;
+import net.commoble.morered.wire_post.CableRelayBlock;
 import net.commoble.morered.wire_post.FakeStateLevel;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.SyncPostsInChunkPacket;
@@ -46,12 +52,16 @@ import net.commoble.morered.wire_post.WirePostBlockEntity;
 import net.commoble.morered.wire_post.WirePostPlateBlock;
 import net.commoble.morered.wire_post.WireSpoolItem;
 import net.commoble.morered.wires.AbstractWireBlock;
+import net.commoble.morered.wires.BitwiseGateReceiver;
+import net.commoble.morered.wires.BitwiseGateSource;
 import net.commoble.morered.wires.BundledCableBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.PoweredWireBlockEntity;
 import net.commoble.morered.wires.WireBlockEntity;
 import net.commoble.morered.wires.WireBlockItem;
 import net.commoble.morered.wires.WireCountLootFunction;
+import net.commoble.morered.wires.WirePostWirer;
+import net.commoble.morered.wires.WireTransmitter;
 import net.commoble.morered.wires.WireUpdatePacket;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -106,7 +116,6 @@ import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
@@ -191,6 +200,9 @@ public class MoreRed
 		DeferredRegister<LootItemFunctionType<?>> lootFunctions = createDeferredRegister(modBus, Registries.LOOT_FUNCTION_TYPE);
 		DeferredRegister<AttachmentType<?>> attachmentTypes = createDeferredRegister(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 		DeferredRegister<DataComponentType<?>> dataComponentTypes = createDeferredRegister(modBus, Registries.DATA_COMPONENT_TYPE);
+		var signalSourceTypes = createDeferredRegister(modBus, ExMachinaRegistries.SIGNAL_SOURCE_TYPE);
+		var signalTransmitterTypes = createDeferredRegister(modBus, ExMachinaRegistries.SIGNAL_TRANSMITTER_TYPE);
+		var signalReceiverTypes = createDeferredRegister(modBus, ExMachinaRegistries.SIGNAL_RECEIVER_TYPE);
 		
 		solderingTableBlock = registerBlockItem(blocks, items, ObjectNames.SOLDERING_TABLE,
 			() -> new SolderingTableBlock(BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion()));
@@ -319,6 +331,15 @@ public class MoreRed
 		spooledPostComponent = dataComponentTypes.register(ObjectNames.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
 			.networkSynchronized(BlockPos.STREAM_CODEC)
 			.build());
+
+		BiConsumer<ResourceKey<MapCodec<? extends SignalSource>>, MapCodec<? extends SignalSource>> registerSource = (key,codec) -> signalSourceTypes.register(key.location().getPath(), () -> codec);
+		BiConsumer<ResourceKey<MapCodec<? extends SignalTransmitter>>, MapCodec<? extends SignalTransmitter>> registerTransmitter = (key,codec) -> signalTransmitterTypes.register(key.location().getPath(), () -> codec);
+		BiConsumer<ResourceKey<MapCodec<? extends SignalReceiver>>, MapCodec<? extends SignalReceiver>> registerReceiver = (key,codec) -> signalReceiverTypes.register(key.location().getPath(), () -> codec);
+
+		registerSource.accept(BitwiseGateSource.RESOURCE_KEY, BitwiseGateSource.CODEC);
+		registerTransmitter.accept(WireTransmitter.RESOURCE_KEY, WireTransmitter.CODEC);
+		registerTransmitter.accept(WirePostWirer.RESOURCE_KEY, WirePostWirer.CODEC);
+		registerReceiver.accept(BitwiseGateReceiver.RESOURCE_KEY, BitwiseGateReceiver.CODEC);
 		
 		ServerConfig.initServerConfig();
 		
@@ -342,7 +363,6 @@ public class MoreRed
 		{
 			private static TagKey<Block> tag(String name) { return TagKey.create(Registries.BLOCK, getModRL(name)); }
 			
-			public static final TagKey<Block> IGNORE_VANILLA_SIGNAL = tag("ignore_vanilla_signal");
 			public static final TagKey<Block> BUNDLED_CABLE_POSTS = tag(ObjectNames.CABLE_POSTS);
 			public static final TagKey<Block> COLORED_CABLES = tag(ObjectNames.COLORED_CABLES);
 			public static final TagKey<Block> REDWIRE_POSTS = tag(ObjectNames.REDWIRE_POSTS);

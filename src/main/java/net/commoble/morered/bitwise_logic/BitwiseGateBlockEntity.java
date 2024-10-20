@@ -5,9 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.ToIntFunction;
 
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Receiver;
-import net.commoble.morered.api.WireUpdateGameEvent;
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.Receiver;
+import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.morered.plate_blocks.InputSide;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.core.BlockPos;
@@ -20,7 +20,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 
 public abstract class BitwiseGateBlockEntity extends BlockEntity
 {
@@ -56,7 +55,7 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 			this.supplierEndpoints = null;
 			this.setChanged();
 			Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(this.getBlockState());
-			this.level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, worldPosition.relative(primaryOutputDirection), GameEvent.Context.of(this.getBlockState()));
+			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, worldPosition.relative(primaryOutputDirection));
 		}
 	}
 

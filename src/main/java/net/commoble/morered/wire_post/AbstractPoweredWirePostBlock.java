@@ -8,12 +8,12 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
+import net.commoble.exmachina.api.SignalStrength;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.SignalStrength;
-import net.commoble.morered.api.TransmissionNode;
-import net.commoble.morered.api.WireUpdateGameEvent;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.LivingEntity;
@@ -28,7 +28,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
-import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock implements EntityBlock
@@ -80,7 +79,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		world.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, Context.of(state));
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
 	}
 
 	@Override
@@ -222,7 +221,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 				return updateDirs;
 			};
 			TransmissionNode node = new TransmissionNode(powerReaders, connectableNodes, graphListener);
-			map.put(Channel.wide(), node);
+			map.put(Channel.redstone(), node);
 			allMaps.put(face, map);
 		}
 		return allMaps;

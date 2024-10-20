@@ -6,9 +6,9 @@ import org.jetbrains.annotations.Nullable;
 
 import com.mojang.math.OctahedralGroup;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.TransmissionNode;
 import net.commoble.morered.client.WirePartModelLoader.WireModelData;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;

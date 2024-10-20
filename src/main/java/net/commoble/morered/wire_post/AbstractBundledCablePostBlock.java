@@ -7,10 +7,10 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.TransmissionNode;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;

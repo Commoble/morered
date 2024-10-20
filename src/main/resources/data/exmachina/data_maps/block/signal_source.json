@@ -1,0 +1,10 @@
+{
+	"values": {
+		"#morered:wirable/wire_posts": {
+			"type": "morered:none"
+		},
+		"#morered:wirable/bitwise_gates": {
+			"type": "morered:bitwise_gate"
+		}
+	}
+}

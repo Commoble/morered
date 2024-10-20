@@ -8,10 +8,10 @@ import javax.annotation.Nullable;
 
 import com.mojang.math.OctahedralGroup;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.TransmissionNode;
-import net.commoble.morered.api.WireUpdateGameEvent;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,7 +29,6 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -74,7 +73,7 @@ public abstract class AbstractPostBlock extends Block
 	{
 		this.updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onPlace(state, world, pos, oldState, isMoving);
-		world.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, Context.of(state));
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
 	}
 
 	@Override
@@ -96,7 +95,7 @@ public abstract class AbstractPostBlock extends Block
 	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
 	{
 		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
-		world.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, Context.of(state));
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
 	}
 	
 	public void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)

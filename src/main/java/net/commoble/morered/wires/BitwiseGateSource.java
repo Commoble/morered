@@ -5,11 +5,12 @@ import java.util.function.ToIntFunction;
 
 import com.mojang.serialization.MapCodec;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.ExMachinaRegistries;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.SignalSource;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.ObjectNames;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.SignalSource;
 import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -22,7 +23,7 @@ public enum BitwiseGateSource implements SignalSource
 {
 	INSTANCE;
 	
-	public static final ResourceKey<MapCodec<? extends SignalSource>> RESOURCE_KEY = ResourceKey.create(SignalSource.REGISTRY_KEY, MoreRed.getModRL(ObjectNames.BITWISE_GATE));
+	public static final ResourceKey<MapCodec<? extends SignalSource>> RESOURCE_KEY = ResourceKey.create(ExMachinaRegistries.SIGNAL_SOURCE_TYPE, MoreRed.getModRL(ObjectNames.BITWISE_GATE));
 	public static final MapCodec<BitwiseGateSource> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override

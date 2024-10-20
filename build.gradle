@@ -27,7 +27,6 @@ sourceSets
 	main
 	gametest
 	datagen
-	generated
 }
 
 // include resources generated from datagen in main
@@ -63,7 +62,7 @@ neoForge {
 repositories {
 	mavenCentral()
 	maven {url = "https://maven.blamejared.com/"}
-	maven {url = "https://commoble.net/maven/"}
+	maven {url = "https://maven.commoble.net"}
 	maven {url = "https://maven.terraformersmc.com"}
 	maven { url = 'https://maven.sinytra.org/' }
 }
@@ -77,6 +76,13 @@ configurations {
 }
 
 dependencies {
+	jarJar(implementation("net.commoble.exmachina:exmachina-${exmachina_mc_version}")) {
+		version {
+			strictly "[${exmachina_min_version}, ${exmachina_next_version})"
+			prefer "${exmachina_version}"
+		}
+	}
+
 	compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
 	compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
 	// at runtime, use the full JEI jar for NeoForge

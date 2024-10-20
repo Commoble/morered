@@ -7,10 +7,10 @@ import java.util.function.ToIntFunction;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.Receiver;
-import net.commoble.morered.api.WireUpdateGameEvent;
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.Receiver;
+import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -27,7 +27,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.gameevent.GameEvent;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -77,11 +76,11 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 		super.onPlace(newState, level, pos, oldState, isMoving);
 		for (Direction dir : this.getInputDirections(newState))
 		{
-			level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos.relative(dir), GameEvent.Context.of(newState));
+			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos.relative(dir));
 		}
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
-		level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos, GameEvent.Context.of(newState));
-		level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos.relative(primaryOutputDirection), GameEvent.Context.of(newState));
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos);
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
 	}
 
 	@Override
@@ -89,7 +88,7 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 	{
 		super.onRemove(oldState, level, pos, newState, isMoving);
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
-		level.gameEvent(WireUpdateGameEvent.RESOURCE_KEY, pos.relative(primaryOutputDirection), GameEvent.Context.of(oldState));
+		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
 	}
 	
 	@Override

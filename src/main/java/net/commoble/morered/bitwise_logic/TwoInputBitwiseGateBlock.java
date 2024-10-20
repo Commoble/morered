@@ -5,10 +5,10 @@ import java.util.List;
 
 import org.jetbrains.annotations.Nullable;
 
+import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.Receiver;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.api.Channel;
-import net.commoble.morered.api.Face;
-import net.commoble.morered.api.Receiver;
 import net.commoble.morered.plate_blocks.InputSide;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
