@@ -1,0 +1,33 @@
+---
+title: Client Config
+hide_meta: true
+---
+
+The client config allows client-relevant settings of More Red to be configured by specific clients.
+The client config file is automatically generated at `<your minecraft instance folder>/config/morered-client.toml`
+the first time the Minecraft client is launched with the More Red mod installed.
+Changes to the client config file while Minecraft is running are automatically noticed by a file watcher, causing the changes to take effect instantly.
+
+The following options are configurable:
+
+| Parameter | Type | Default Value | Description
+| --- | - | - | -
+showPlacementPreview | boolean | true | Whether to render the render preview for blocks that have render previews
+previewPlacementOpacity | float range: [0.0, 1.0] | 0.4 | Opacity of the render preview for blocks that have render previews
+
+The default config file is as follows:
+
+```toml
+[Rendering]
+	#Render preview of plate blocks before placing them
+	showPlacementPreview = true
+	#Opacity of the render preview. Higher value = less transparent, lower = more transparent
+	#Range: 0.0 ~ 1.0
+	previewPlacementOpacity = 0.4
+```
+
+## History
+| Version | Changelog
+| --- | -
+| 1.16.5-2.1.0.0 | Fixed incorrect description of previewPlacementOpacity parameter in client config
+| 1.0.0.0 | Added to game

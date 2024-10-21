@@ -1,0 +1,125 @@
+---
+title: Tintindexes
+hide_meta: true
+---
+
+Tintindexes are used in minecraft's [model json format](https://minecraft.wiki/Model#Block_models)
+to assign specific hardcoded tinting functions to specific quads of block and item models.
+Currently, these functions are assigned to specific block instances, and can only be created or replaced via mods.
+Some examples of tint indexes from vanilla minecraft include coloring grass and other plants based on biome,
+or determining how red redstone dust is based on its power level, or coloring spawn eggs items based on the color values assigned to their respective entity type.
+
+More Red uses several custom tinting functions for several of its blocks.
+
+## Logic Plates
+
+Logic plate blocks such as the [AND Gate](/en/mod/morered/docs/content/redstone_logic/and_gate)
+use a tinting function that tints different overlays of the model based on their blockstate properties.
+These blocks have three blockstate properties, `input_a`, `input_b`, and `input_c`,
+representing whether the given input sides (located 90, 180, and 270 degrees clockwise from the output side, respectively,
+while observing the top of the block) are receiving power.
+Logic plates with two inputs generally only use inputs A and C, while logic plates with one inputs generally only use input B.
+
+![Image identifying the sides of a logic plate](https://commoble.net/images/morered/sides.png)
+
+If the tintindex of the given quad is less than 1, no tinting will be applied to the quad (-1 is the default when a tintindex is unspecified, and is never tinted; 0 is reserved for block particles, which are not tinted by this function).
+
+If the tintindex of the quad is 1 or greater, then that tintindex indicates which of the following functions is to be used, given boolean inputs A, B, and C:
+
+| Tintindex | Function Name | Function
+| --- | - | -
+| 1 | FALSE | false
+| 2 | TRUE | true
+| 3 | A | A
+| 4 | B | B
+| 5 | C | C
+| 6 | NOT A | !A
+| 7 | NOT B | !B
+| 8 | NOT C | !C
+| 9 | AND | A && B && C
+| 10 | NAND | !(A && B && C)
+| 11 | OR | A \|\| B \|\| C
+| 12 | NOR | !(A \|\| B \|\| C)
+| 13 | XOR AC | A != C
+| 14 | XNOR AC | A == C
+| 15 | MULTIPLEX | if B then C, else A
+| 16 | A NOR A NOR C | !(A \|\| !(A \|\| C))
+| 17 | C NOR A NOR C | !(C \|\| !(A \|\| C))
+| 18* | SET LATCH | `powered` && !C
+| 19* | UNSET LATCH | !`powered` && !A
+| 20 | AND 2 | A && C
+| 21 | NAND 2 | !(A && C)
+
+`*`SET LATCH and UNSET LATCH use the internal state of latches in addition to the input states
+
+If the function evaluates to TRUE, then the quad's colors are not tinted. If the function evaluates to FALSE, then the quad's colors are multiplied by `#560000` (darkening the red and removing any green or blue).
+
+Items of blocks that use this tinting function are tinted as if all of the inputs are false.
+
+## Red Alloy Wire
+[Red Alloy Wires](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire)
+tint different sections of their model to represent how much redstone power that segment of the wire is currently charged with.
+
+![Image displaying lit and unlit red alloy wire](https://commoble.net/images/morered/red_alloy_wire_lit_unlit.png)
+
+As the wires' json models are used to generate many baked models in different orientations,
+the [Rotate Tints](/en/mod/morered/docs/pack_development/tintindexes#rotate-tints) model loader is used to denote which segment of the wire
+the original model json's quads belong to (so that it can be determined which segment of the block entity to check the power of when tinting the block).
+
+For the block, if the tintindex of a quad is less than 0 or greater than 18, then no tinting is applied to the quad's colors. If the tintindex is 0 (the tintindex used for particles), then the quad's colors are multiplied by the RGB color `#560000`.
+
+If the tint index is in the range [1,18] inclusive, then the quad's red channel is multiplied by a hexidecimal color in the range [`#56`, `#FF`], and the quad's green and blue channels are multiplied by 0. If the tint index is in the range [1,6] inclusive, then the color depends on the power stored in the wire block's block entity for the respective interior face (the quad is part of the wire segment attached in that direction). If the tint index is in the range [7,18] inclusive, then the color depends on the average of the power stored in two adjacent wire blocks (the quad is part of a convex edge connecting two wire blocks).
+
+| Tint Index | Wire Segment Type | Power Source
+| --- | - | -
+| -1 | N/A | Always On
+| 0 | Item and Particle | Always Off
+| 1 | Face | Down
+| 2 | Face | Up
+| 3 | Face | North
+| 4 | Face | South
+| 5 | Face | West
+| 6 | Face | East
+| 7 | Edge | Down and North
+| 8 | Edge | Down and South
+| 9 | Edge | Down and West
+| 10 | Edge | Down and East
+| 11 | Edge | Up and North
+| 12 | Edge | Up and South
+| 13 | Edge | Up and West
+| 14 | Edge | Up and East
+| 15 | Edge | North and West
+| 16 | Edge | North and East
+| 17 | Edge | South and West
+| 18 | Edge | South and East
+
+Because the wire model defined by the json is effectively copied and rotated into different positions by the wire model loader,
+only a small number of wire models need to be specified;
+these declare the tint index of the appropriate wire segment as depicted in the model json.
+Due to this, only tint indexes 1, 5, and 9 are currently used in the block model jsons.
+
+The red alloy wire's item uses the unlit `#560000` tint if the tintindex >= 0, and applies no tint otherwise.
+
+## Redwire Posts
+
+Redwire Posts and their items use a tinting function that applies only to tintindex 1;
+quads assigned tintindex 1 have their green and blue channels multiplied by 0,
+and their red channel multiplied by a hexidecimal color in the range `#56`, `#FF`, depending on the value of the `power` property of the rendered blockstate.
+
+![Image displaying lit and unlit redwire posts](https://commoble.net/images/morered/redwire_posts_lit_unlit.png)
+
+The following blocks use this tinting function:
+
+* [Redwire Junction](/en/mod/morered/docs/content/wires_and_cables/redwire_junction)
+* [Redwire Post](/en/mod/morered/docs/content/wires_and_cables/redwire_post)
+* [Redwire Relay](/en/mod/morered/docs/content/wires_and_cables/redwire_relay)
+
+The items of these blocks apply the tinting function as if the block was unpowered.
+
+## History
+
+| Version | Changelog
+|---|-
+|1.16.5-2.1.0.0 | Added color tinting used by red alloy wires
+|1.15.2-1.0.1.0 | Added color tinting used by redwire posts
+|1.0.0.0 | Added color tinting used by logic plates

@@ -1,0 +1,89 @@
+---
+title: Stone Plate
+id: morered:stone_plate
+type: block
+---
+
+Stone Plates are primarily used as ingredients for making logic gates; they can also be used for building or decoration.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 3x [<ModAsset width={32} height={32} location='smooth_stone_slab'/> Smooth Stone Slab](https://minecraft.wiki/Smooth_Stone_Slab)
+			</td>
+			<td>
+				* 12x Stone Plate
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Stone Plates](https://commoble.net/images/morered/recipes/stone_plate_recipe.png)
+			</td>
+		</tr>
+		<tr>
+			<td>Stonecutting</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='smooth_stone'/> Smooth Stone](https://minecraft.wiki/Smooth_Stone)
+			</td>
+			<td>
+				* 8x Stone Plate
+			</td>
+			<td>
+				![Stone Plates from Stonecutting Smooth Stone](https://commoble.net/images/morered/recipes/stone_plates_from_stonecutting_smooth_stone.png)
+			</td>
+		</tr>
+		<tr>
+			<td>Stonecutting</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='smooth_stone_slab'/> Smooth Stone Slab](https://minecraft.wiki/Smooth_Stone_Slab)
+			</td>
+			<td>
+				* 4x Stone Plate
+			</td>
+			<td>
+				![Stone Plates from Stonecutting Smooth Stone Slab](https://commoble.net/images/morered/recipes/stone_plates_from_stonecutting_smooth_stone_slab.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Stone Plates are one-eighth the height of a block (or one-fourth the height of a slab).
+
+Stone Plates can be placed on walls, floors, or ceilings.
+
+![Stone Plates placed in several orientations](https://commoble.net/images/morered/stone_plates.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+
+## History
+| Version | Changelog
+| --- | -
+| 1.16.5-2.1.0.0 | Regular Stone Plates can now be mined faster with a pickaxe
+| 1.0.0.0 | Added to game

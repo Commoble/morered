@@ -1,0 +1,92 @@
+---
+title: Multiplexer
+id: morered:multiplexer
+type: block
+---
+
+The Multiplexer is a block with three sides capable of receiving redstone input and one side that may emit maximum-strength redstone power; the input side opposite to the output determines which of the other two inputs the output is.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)
+				* 4x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+				* 1x [<ModAsset width={32} height={32} location='iron_ingot'/> Iron Ingot](https://minecraft.wiki/Iron_Ingot)
+			</td>
+			<td>
+				* 1x Multiplexer
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Multiplexers](https://commoble.net/images/morered/recipes/multiplexer_recipe.png)
+			</td>
+		</tr>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)
+				* 1x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+				* 1x [<ModAsset width={32} height={32} location='iron_ingot'/> Iron Ingot](https://minecraft.wiki/Iron_Ingot)
+			</td>
+			<td>
+				* 1x Multiplexer
+			</td>
+			<td>
+				![Soldering Recipe for Multiplexers](https://commoble.net/images/morered/recipes/multiplexer_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The Multiplexer can be placed in 24 different orientations, on floors, walls, and ceilings.
+
+When placing the block, the flat side will be placed against the face clicked by the player, and the output side will point to the edge of the clicked face nearest to where the player clicked. A transparent preview is rendered to assist with orienting the block; this can be disabled in the [Client Config](/en/mod/morered/configuration/client_config) if this is undesired.
+
+![A preview of an Multiplexer about to be placed against a wall with the output facing up](https://commoble.net/images/morered/multiplexer_preview.png)
+
+The multiplexer has three input sides, designated A, B, and C (the sides 90, 180, and 270 degrees from the output while facing the top of the block, respectively). While input B is off, the output side emits power while side A is powered. While input B is on, the output side emits power while side C is powered.
+
+![Multiplexers in all eight input combinations](https://commoble.net/images/morered/multiplexer_combinations.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `input_a` | `{false, true}` | Whether the input side clockwise from the output is receiving power
+| `input_b` | `{false, true}` | Whether the input side opposite from the output is receiving power
+| `input_c` | `{false, true}` | Whether the input side counterclockwise from the output is receiving power
+
+| Tint Index | Tint Value
+| --- | -
+| 1+ | [See Logic Gate Tintindexes](../pack_development/tintindexes#Logic-Gates)
+
+## History
+| Version | Changelog
+| --- | -
+| 1.16.3-2.0.0.0 | More Red recipes now use tag ingredients instead of specific items in more places
+| 1.0.0.0 | Added to game

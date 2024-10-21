@@ -1,0 +1,88 @@
+---
+title: Diode
+id: morered:diode
+type: block
+---
+
+The Diode is a block that outputs maximum-strength redstone power from its output side while its input side is receiving power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 3x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)
+				* 2x [<ModAsset width={32} height={32} location='redstone_torch'/> Redstone Torch](https://minecraft.wiki/Redstone_Torch)
+				* 1x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+			</td>
+			<td>
+				* 1x Diode
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Diodes](https://commoble.net/images/morered/recipes/diode_recipe.png)
+			</td>
+		</tr>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)
+				* 3x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+			</td>
+			<td>
+				* 1x Diode
+			</td>
+			<td>
+				![Soldering Crafting Recipe for Diode](https://commoble.net/images/morered/recipes/diode_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The Diode can be placed in 24 different orientations, on floors, walls, and ceilings.
+
+When placing the block, the flat side will be placed against the face clicked by the player, and the output side will point to the edge of the clicked face nearest to where the player clicked. A transparent preview is rendered to assist with orienting the block; this can be disabled in the [Client Config](/en/mod/morered/configuration/client_config) if this is undesired.
+
+![A preview of a Diode about to be placed against a wall with the output facing up](https://commoble.net/images/morered/diode_preview.png)
+
+While the input side of the diode is receiving power, the diode emits a maximum-strength redstone signal from its output side. While its input side is not receiving redstone power, no output power is emitted.
+
+![Diodes in both input combinations](https://commoble.net/images/morered/diode_combinations.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `input_b` | `{false, true}` | Whether the input side opposite from the output is receiving power
+
+| Tint Index | Tint Value
+| --- | -
+| 1+ | [See Logic Gate Tintindexes](../pack_development/tintindexes#Logic-Gates)
+
+## History
+| Version | Changelog
+| --- | -
+| 1.16.3-2.0.0.0 | More Red recipes now use tag ingredients instead of specific items in more places
+| 1.0.0.0 | Added to game

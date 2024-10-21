@@ -1,0 +1,30 @@
+---
+title: Server Config
+hide_meta: true
+---
+
+The server config file allows the configuration of settings which are synced from server to clients.
+The client config file is automatically generated at `<your minecraft instance folder>/config/morered-server.toml`
+the first time a client or server launches.
+Changes to the server config file while Minecraft is running are automatically noticed by a file watcher, causing the changes to take effect instantly.
+
+The following parameters are configurable:
+
+| Parameter | Type | Default Value | Description
+| --- | - | - | -
+| max_wire_plinth_connection_range | Non-Negative Float | 32.0 | Maximum connection range (in block units) for blocks can be connected by [Redwire Spools](/en/mod/morered/docs/content/wires_and_cables/redwire_spool) or [Bundled Cable Spools](/en/mod/morered/docs/content/wires_and_cables/bundled_cable_spool)
+
+The default config file is as follows:
+
+```toml
+["General Settings"]
+	#Range (in blocks) that wire posts can remotely connect to each other.
+	#Range: 0.0 ~ 1.7976931348623157E308
+	max_wire_plinth_connection_range = 32.0
+
+```
+
+## History
+| Version | Changelog
+| --- | -
+| 1.15.2-1.0.1.0 | Added to game

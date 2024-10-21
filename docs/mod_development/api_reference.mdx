@@ -1,0 +1,64 @@
+---
+title: API Reference
+hide_meta: true
+---
+
+<Callout type='warning'>API documentation is still under construction</Callout>
+
+As of 1.22, More Red uses the [Ex Machina](https://github.com/Commoble/exmachina) framework to get all the wires and cables to connect to each other nicely.
+
+Mods can add compatibility with the wire system by depending on Ex Machina. See the Ex Machina github for dependency information.
+
+## The Signal Graph
+
+Ex Machina's Signal Graph system handles
+* Listening to graph update requests
+* The connecting of wire blocks and assembling them into graph networks
+* Determining the highest input signal provided to a given signal graph
+* Updating all wire blocks in the graph simultaneously (avoiding cascading block updates)
+* Updating non-graph neighbor blocks adjacent to the graph
+
+Blocks can be made graphable by assigning [data map](https://docs.neoforged.net/docs/resources/server/datamaps/) components to blocks;
+there are three datamaps used to define this behavior:
+
+* `data/exmachina/data_maps/block/signal_source.json` specifies Signal Sources which only provide power to adjacent graphs
+* `data/exmachina/data_maps/block/signal_transmitter.json` specifies Signal Transmitters which provide unique graph nodes, can read vanilla redstone signals from neighbors, and listen to signal changes
+* `data/exmachina/data_maps/block/signal_receiver.json` specifies Signal Receivers which can only listen to signal updates of adjacent graphs
+
+A block with no datamap components acts as a default signal source, which connects to wires and provides its vanilla signal to the graph if it meets these conditions:
+* It provides vanilla redstone signal
+* It can connect to redstone dust (`IBlockExtension#canConnectRedstone` returns true)
+* Its block support shape reaches the side of the block adjacent to a connecting wire and is at least as large as a Red Alloy Wire cross-section (2x2 sixteenths at the center of the edge of the block)
+
+Ex Machina also assigns additional signal source components to vanilla blocks which ought to connect to wires but do not meet this criteria:
+```json
+{
+	"values": {
+		"#exmachina:wirable/cube": { // trapped chests
+			"type": "exmachina::cube" // wires on any adjacent face can connect to the block
+		},
+		"#exmachina:wirable/floor": { // redstone floor torches, detector rails, pressure plates
+			"type": "exmachina:floor" // wires on the floor next to the block can connect to it
+		},
+		"#exmachina:wirable/inverted_wall_floor_ceiling": { // buttons, levers, redstone wall torches
+			"type": "exmachina:wall_floor_ceiling", // wires attached to the same wall as the block can connect to it
+			"invert_horizontal_facing": true
+		},
+		"redstone_wire": {
+			"type": "exmachina:floor",
+			"offset": -1 // one unit of redstone power is lost when wires receive signal from redstone dust
+		}
+	}
+}
+```
+Mods with similar blocks can add compatibility without compiling against Ex Machina by adding them to these tags,
+or by adding them to a datamap using exmachina's builtin source types (cube, floor, wall_floor_ceiling).
+
+Mods which wish to add specialized compatibility (such as for interfacing with bundled cables) should depend on Ex Machina
+and register source/transmitter/receiver codecs for their block (registry keys for deferredregisters are available in `ExMachinaRegistries`)
+which can be referred to in the data maps.
+
+Graph updates can be requested by invoking `SignalGraphUpdateGameEvent#scheduleSignalGraphUpdate(BlockPos)`, which causes a graph update to occur at that position
+at the end of the current level tick.
+
+Blocks which act as both signal graph transmitters and provide vanilla redstone signal should be added to the `exmachina:ignore_vanilla_signal` block tag

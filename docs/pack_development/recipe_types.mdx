@@ -1,0 +1,48 @@
+---
+title: Recipe Types
+hide_meta: true
+---
+
+More Red adds the following recipe serializers for use in recipe jsons.
+
+## Soldering
+
+Soldering recipes are used by the [Soldering Table](/en/mod/morered/docs/content/soldering_table). Soldering recipe jsons have the following json format:
+
+```json
+{
+	"type": "morered:soldering",
+	"ingredients":
+	[
+		{ <ingredient> },
+		{ <ingredient> },
+		{ <ingredient...> }
+	],
+	"result":
+	{
+		"item": <namespaced-item-id>,
+		"count": <integer>,
+		"nbt": <nbt-object>
+	}
+}
+```
+
+Where:
+* `"ingredients"` is a list of Sized Ingredient objects
+  * This can be a [vanilla ingredient type](https://minecraft.wiki/Recipe/Ingredient), or an ingredient added by other mods. Sized Ingredients may also have a "count" field, regardless of what type of ingredient it is.
+* `"result"` is an object specifying the crafting result of the recipe, defined by the following fields:
+ * `"item"` is the namespaced ID of the crafting result item, e.g. `"minecraft:apple"`
+ * `"count"` is the stack size of the crafting result itemstack; it defaults to 1 if not specified
+ * `"nbt"` is an optional NBT tag to apply to the output itemstack; it is ignored if not specified
+
+Numerous examples of soldering recipe jsons can found in More Red's data files, such as [and_gate_from_soldering](https://github.com/Commoble/morered/blob/main/src/generated/resources/data/morered/recipes/and_gate_from_soldering.json).
+
+Soldering recipes currently only support up to at most nine ingredients per recipe.
+
+## History
+
+| Version | Changelog
+|---|-
+| 6.0.0.0 | Now uses Sized Ingredients, which may have a "count" field
+| 4.0.0.0 | The gatecrafting_plinth block has been renamed to soldering_table. The gatecrafting recipe type has been renamed to soldering. Gatecrafting recipe files have been renamed accordingly.
+| 1.0.0.0 | Added gatecrafting recipes to game

@@ -1,0 +1,108 @@
+---
+title: Red Alloy Wire
+id: morered:red_alloy_wire
+type: block
+---
+
+Red Alloy Wire blocks can transmit redstone power along floors, walls, and ceilings, and around corners.
+
+![Red Alloy Wire](https://commoble.net/images/morered/red_alloy_wire.png)
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 3x [<ModAsset width={32} height={32} location='morered:red_alloy_ingot'/> Red Alloy Ingot](/en/mod_morered/docs/content/building_and_crafting/red_alloy_ingot)
+			</td>
+			<td>
+				* 12x Red Alloy Wire
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Red Alloy Wire](https://commoble.net/images/morered/recipes/red_alloy_wire_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Red Alloy Wires can be attached to solid faces of blocks;
+attaching a wire to a face consumes a wire item, and breaking that wire or the block that the wire is attached to causes a wire item to be dropped.
+
+All connected wires will share redstone power, and read and emit strong power to the blocks they are attached to.
+They will also form parallel connections to redstone-emitting blocks which are solid on that side and at least as large as the wire
+(such as [Redstone Cubes](https://minecraft.wiki/w/Block_of_Redstone) or [Repeaters](https://minecraft.wiki/w/Redstone_Repeater)).
+
+![](https://www.commoble.net/images/morered/wire_parts_lines.png)
+
+Unlike redstone dust, there is no power falloff when power is being transmitted through wires (though one unit of power is lost when a wire receives power from redstone dust).
+Instead, there is a maximum network size of 1024 connected wire nodes (where a wire node consists of a block position, an attachment face, and a signal channel).
+[Redwire Junctions](/en/mod/morered/docs/content/wires_and_cables/redwire_junction),
+[Redwire Posts](/en/mod/morered/docs/content/wires_and_cables/redwire_post),
+and [Redwire Relays](/en/mod/morered/docs/content/wires_and_cables/redwire_relay)
+connected by [Redwire Spools](/en/mod/morered/docs/content/wires_and_cables/redwire_spool) are recommended for long-distance signal transmission.
+
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `down` | `{"false", "true"}` | Whether the wire is attached to the bottom of its blockspace
+| `up` | `{"false", "true"}` | Whether the wire is attached to the top of its blockspace
+| `north` | `{"false", "true"}` | Whether the wire is attached to the north
+| `south` | `{"false", "true"}` | Whether the wire is attached to the south
+| `west` | `{"false", "true"}` | Whether the wire is attached to the west
+| `east` | `{"false", "true"}` | Whether the wire is attached to the east
+| `transform` | `{"identity", "rot_180_face_xz", "rot_90_y_neg", "rot_80_y_pos", "invert_x", "invert_z", "swap_xz", "swap_neg_xz"}` | Set when the block is rotated/mirrored by structure generation or similar mechanics; it ensures blockentity data is transformed accordingly. When placed by a player, this will always be `"identity"`
+
+| BlockEntity Data | Format | Description
+| --- | - | -
+| `"power"` | Integer Array (6 values) | Array of the power value stored in each face (in DUNSWE order); each value has valid range [0,15]
+
+## History
+<table>
+	<thead><tr><th>Version</th><th>Changelog</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>1.22-7.0.0.0</td>
+			<td>
+				<ul>
+					<li>Rewrote how wires connect and transmit power; all wires in a network update at once instead of causing cascading block updates</li>
+					<li>Can now connect to bundled cables and bitwise gates</li>
+					<li>No longer loses power over distance; instead has a maximum network size (default 1024, configurable)</li>
+				</ul>
+			</td>
+		</tr>
+		<tr><td>1.21-6.0.0.2</td><td>Allow red alloy wires to connect to redstone torches, detector rails, and lightning rods if they share an attachment face, and trapped chests</td></tr>
+		<tr>
+			<td>1.20.1-4.0.0.0</td>
+			<td>
+				<ul>
+					<li>Added `transform` blockstate property</li>
+					<li>`connections` are now stored as relative positions instead of absolute positions</li>
+				</ul>
+			</td>
+		</tr>
+		<tr><td>1.16.5-2.1.0.0</td><td>Added to game</td></tr>
+	</tbody>
+</table>

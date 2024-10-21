@@ -1,0 +1,30 @@
+---
+title: Loot Components
+hide_meta: true
+---
+
+More Red adds the following data types for use with loot tables.
+
+## Loot Functions
+
+### Set Wire Count
+
+The `morered:set_wire_count` loot function modifies the count of an itemstack based on the blockstate properties of the wire block that dropped the item, such that a number of wires are dropped equal to the number of wires in the broken blockstate. It is only effective in loot table entries that have blockstate context, and only effective for blocks that extend AbstractWireBlock:
+
+* [Red Alloy Wire](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire)
+* [Colored Cables](/en/mod/morered/docs/content/wires_and_cables/colored_cables)
+* [Bundled Cable](/en/mod/morered/docs/content/wires_and_cables/bundled_cable)
+
+The function has no arguments; the following function object is sufficient:
+
+```json
+{
+	"function": "morered:set_wire_count"
+}
+```
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.16.5-2.1.0.0 | Added "morered:set_wire_count" loot function for use with wire blocks

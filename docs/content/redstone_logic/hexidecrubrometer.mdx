@@ -1,0 +1,67 @@
+---
+title: Hexidecrubrometer
+id: morered:hexidecrubrometer
+type: block
+---
+
+The Hexidecrubrometer is a block that displays the amount of redstone power being supplied to its backside; the power is displayed in hexidecimal format (16 possible values, using 0-9 and A through F).
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '250px'}}>
+				* 8x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)
+				* 9x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+				* 4x [<ModAsset width={32} height={32} location='quartz'/> Nether Quartz](https://minecraft.wiki/Nether_Quartz)
+			</td>
+			<td>
+				* 1x Hexidecrubrometer
+			</td>
+			<td>
+				![Soldering Recipe for Hexidecrubrometers](https://commoble.net/images/morered/recipes/hexidecrubrometer_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The hexidecrubrometer displays the redstone power or comparator output of the block behind it, whichever is higher.
+
+When the hexidecrubrometer blockitem is used to place a block into the world, the block will be placed with its display face facing toward the player.
+
+![Hexidecrubrometers being used to measure redstone power and chest fullness](https://commoble.net/images/morered/hexidecrubrometer_uses.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `power` | `[0, 15]` | Redstone power level received
+| `face` | `{"floor", "wall", "ceiling"}` | Whether the block is facing down, sideways, or up
+| `rotation` | `{"north", "south", "west", "east"}` | Horizontal direction the block is facing
+
+## History
+| Version | Changelog
+| --- | -
+| 1.16.3-2.0.0.0 | Added to game
