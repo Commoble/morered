@@ -3,7 +3,6 @@ package net.commoble.morered.wire_post;
 import javax.annotation.Nonnull;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.ServerConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.server.level.ServerLevel;
@@ -90,7 +89,7 @@ public class WireSpoolItem extends Item
 						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 					}
 					// if post wasn't connected, connect them if they're close enough
-					else if (pos.closerThan(lastPos, ServerConfig.INSTANCE.maxWirePostConnectionRange().get()))
+					else if (pos.closerThan(lastPos, MoreRed.SERVERCONFIG.maxWirePostConnectionRange().get()))
 					{
 						stack.remove(spooledPost);
 						if (level.getBlockEntity(lastPos) instanceof WirePostBlockEntity lastPost)
@@ -135,7 +134,7 @@ public class WireSpoolItem extends Item
 	
 	public boolean shouldRemoveConnection(BlockPos connectionPos, Level world, Entity holder)
 	{
-		double maxDistance = ServerConfig.INSTANCE.maxWirePostConnectionRange().get();
+		double maxDistance = MoreRed.SERVERCONFIG.maxWirePostConnectionRange().get();
 		if (holder.position().distanceToSqr(Vec3.atCenterOf(connectionPos)) > maxDistance*maxDistance)
 		{
 			return true;

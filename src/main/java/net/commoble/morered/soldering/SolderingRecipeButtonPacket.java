@@ -12,7 +12,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 /** Packet sent from client to server when client clicks a recipe button in the soldering screen **/
 public record SolderingRecipeButtonPacket(ResourceLocation recipeId) implements CustomPacketPayload
 {
-	public static final CustomPacketPayload.Type<SolderingRecipeButtonPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL("soldering_recipe_button"));
+	public static final CustomPacketPayload.Type<SolderingRecipeButtonPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.id("soldering_recipe_button"));
 	public static final StreamCodec<ByteBuf, SolderingRecipeButtonPacket> STREAM_CODEC = ResourceLocation.STREAM_CODEC
 		.map(SolderingRecipeButtonPacket::new, SolderingRecipeButtonPacket::recipeId);
 	

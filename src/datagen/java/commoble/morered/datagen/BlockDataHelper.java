@@ -1,6 +1,7 @@
 package commoble.morered.datagen;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +27,13 @@ public record BlockDataHelper(Block block)
 		blockstates.put(helper.id(), blockstate);
 		lootTables.put(ResourceLocation.fromNamespaceAndPath(helper.id().getNamespace(), String.format("blocks/%s", helper.id().getPath())), lootTable);
 		return helper;
+	}
+	
+	public static BlockDataHelper create(Block block,
+		Map<ResourceLocation, BlockStateFile> blockstates, Function<Block, BlockStateFile> blockstate,
+		Map<ResourceLocation, LootTable> lootTables, Function<Block, LootTable> lootTable)
+	{
+		return create(block, blockstates, blockstate.apply(block), lootTables, lootTable.apply(block));
 	}
 	
 	public BlockDataHelper localize(LanguageProvider langProvider, String localizedName)

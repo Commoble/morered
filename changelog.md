@@ -30,7 +30,19 @@
   * nand_2_gate -> two_input_nand_Gate
 * Red Alloy Ingots are now only craftable from copper ingots (no longer craftable from iron ingots)
 * Updated Bundled Network Cable texture
-  
+* Added all the item-transportation content from the Tubes Reloaded mod, which is now More Red content instead:
+  * Tubes
+  * Colored Tubes
+  * Redstone Tubes
+  * Shunts
+  * Loaders
+  * Extractors
+  * Filters
+  * Osmosis Filters
+  * Multifilters
+  * Distributors
+  * Pliers  
+* Using the pliers (or wrenches from other mods) on logic gate blocks now rotates them (no longer rotatable with sticks)
   
 # 1.21.1-6.0.0.3
 * Fix soldering recipes rendering wrong in JEI. Fixes #40

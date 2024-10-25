@@ -4,6 +4,7 @@ import java.util.EnumSet;
 
 import javax.annotation.Nullable;
 
+import net.commoble.morered.CommonTags;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -19,7 +20,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.ticks.TickPriority;
-import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class RedstonePlateBlock extends PlateBlock
@@ -72,10 +72,10 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	
 	public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		boolean isPlayerHoldingStick = stack.is(Tags.Items.RODS_WOODEN);
+		boolean isPlayerHoldingWrench = stack.is(CommonTags.Items.WRENCHES);
 		
-		// rotate the block when the player pokes it with a stick
-		if (isPlayerHoldingStick && !level.isClientSide)
+		// rotate the block when the player pokes it with a wrench
+		if (isPlayerHoldingWrench && !level.isClientSide)
 		{
 			int newRotation = (state.getValue(ROTATION) + 1) % 4;
 			BlockState newState = state.setValue(ROTATION, newRotation);
@@ -86,7 +86,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			level.setBlockAndUpdate(pos, newState);
 		}
 		
-		return isPlayerHoldingStick ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+		return isPlayerHoldingWrench ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 	@Deprecated

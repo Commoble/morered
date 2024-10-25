@@ -11,7 +11,7 @@ import mezz.jei.api.recipe.RecipeIngredientRole;
 import mezz.jei.api.recipe.RecipeType;
 import mezz.jei.api.recipe.category.IRecipeCategory;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.ObjectNames;
+import net.commoble.morered.Names;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
@@ -21,7 +21,7 @@ import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 {
-	public static final RecipeType<SolderingRecipe> TYPE = RecipeType.create(MoreRed.MODID, ObjectNames.SOLDERING_RECIPE, SolderingRecipe.class);
+	public static final RecipeType<SolderingRecipe> TYPE = RecipeType.create(MoreRed.MODID, Names.SOLDERING_RECIPE, SolderingRecipe.class);
 	public static final ResourceLocation CRAFTING_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 	public static final String TITLE = "gui.morered.category.soldering";
 	

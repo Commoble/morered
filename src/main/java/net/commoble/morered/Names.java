@@ -5,7 +5,7 @@ import java.util.Arrays;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.Util;
 
-public class ObjectNames
+public class Names
 {
 	// blocks and blockitems
 	public static final String DIODE = "diode";
@@ -54,11 +54,24 @@ public class ObjectNames
 	public static final String BITWISE_AND_GATE = "bitwise_and_gate";
 	public static final String BITWISE_XOR_GATE = "bitwise_xor_gate";
 	public static final String BITWISE_XNOR_GATE = "bitwise_xnor_gate";
+	
+	public static final String TUBE = "tube";
+	public static final String SHUNT = "shunt";
+	public static final String LOADER = "loader";
+	public static final String REDSTONE_TUBE = "redstone_tube";
+	public static final String EXTRACTOR = "extractor";
+	public static final String FILTER = "filter";
+	public static final String MULTIFILTER = "multifilter";
+	public static final String OSMOSIS_FILTER = "osmosis_filter";
+	public static final String OSMOSIS_SLIME = "osmosis_slime";
+	public static final String DISTRIBUTOR = "distributor";
+	public static final String[] COLORED_TUBE_NAMES = Arrays.stream(DyeColor.values()).map(color -> color.toString() + "_tube").toArray(String[]::new);
 
 	// raw items
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
 	public static final String REDWIRE_SPOOL = "redwire_spool";
 	public static final String BUNDLED_CABLE_SPOOL = "bundled_cable_spool";
+	public static final String PLIERS = "pliers";
 	
 	// tags
 	public static final String CABLE_POSTS = "cable_posts";
@@ -68,13 +81,17 @@ public class ObjectNames
 	public static final String RED_ALLOY_WIRES = "red_alloy_wires";
 	public static final String RED_ALLOYABLE_INGOTS = "red_alloyable_ingots";
 	public static final String REDWIRE_POSTS = "redwire_posts";
+	public static final String COLORED_TUBES = "colored_tubes";
+	public static final String TUBES = "tubes";
 	
 	// capabilities
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";
+	public static final String TUBES_IN_CHUNK = "tubes_in_chunk";
 	public static final String VOXEL_CACHE = "voxel_cache";
 	
 	// data components
 	public static final String SPOOLED_POST = "spooled_post";
+	public static final String PLIERED_TUBE = "pliered_tube";
 	
 	// recipe types
 	public static final String SOLDERING_RECIPE = "soldering";

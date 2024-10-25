@@ -22,9 +22,9 @@ import net.minecraft.world.level.block.state.BlockState;
 public class ColorHandlers
 {
 	
-	public static final int NO_TINT = 0xFFFFFF;
-	public static final int LIT = 0xFFFFFF;
-	public static final int UNLIT = 0x560000;
+	public static final int NO_TINT = 0xFFFFFFFF;
+	public static final int LIT = 0xFFFFFFFF;
+	public static final int UNLIT = 0xFF560000;
 	public static final int LIT_RED = LIT >> 16;
 	public static final int UNLIT_RED = UNLIT >> 16;
 	

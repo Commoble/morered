@@ -14,7 +14,7 @@ import net.commoble.exmachina.api.Face;
 import net.commoble.exmachina.api.Receiver;
 import net.commoble.exmachina.api.SignalReceiver;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.ObjectNames;
+import net.commoble.morered.Names;
 import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
 import net.commoble.morered.bitwise_logic.BitwiseGateBlockEntity;
 import net.minecraft.core.BlockPos;
@@ -28,7 +28,7 @@ public enum BitwiseGateReceiver implements SignalReceiver
 {
 	INSTANCE;
 	
-	public static final ResourceKey<MapCodec<? extends SignalReceiver>> RESOURCE_KEY = ResourceKey.create(ExMachinaRegistries.SIGNAL_RECEIVER_TYPE, MoreRed.getModRL(ObjectNames.BITWISE_GATE));
+	public static final ResourceKey<MapCodec<? extends SignalReceiver>> RESOURCE_KEY = ResourceKey.create(ExMachinaRegistries.SIGNAL_RECEIVER_TYPE, MoreRed.id(Names.BITWISE_GATE));
 	public static final MapCodec<BitwiseGateReceiver> CODEC = MapCodec.unit(INSTANCE);
 
 	@Override

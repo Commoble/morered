@@ -14,7 +14,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record WireUpdatePacket(Set<BlockPos> positions) implements CustomPacketPayload
 {
-	public static final CustomPacketPayload.Type<WireUpdatePacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL("wire_update"));
+	public static final CustomPacketPayload.Type<WireUpdatePacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.id("wire_update"));
 	public static final StreamCodec<ByteBuf, WireUpdatePacket> STREAM_CODEC = BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list())
 		.map(Set::copyOf, List::copyOf)
 		.map(WireUpdatePacket::new, WireUpdatePacket::positions);

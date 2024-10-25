@@ -13,7 +13,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record WireBreakPacket(Vec3 start, Vec3 end) implements CustomPacketPayload
 {
-	public static final CustomPacketPayload.Type<WireBreakPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL("wire_break"));
+	public static final CustomPacketPayload.Type<WireBreakPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.id("wire_break"));
 	public static final StreamCodec<ByteBuf, WireBreakPacket> STREAM_CODEC = StreamCodec.composite(
 		MoreCodecs.VEC3_STREAM_CODEC, WireBreakPacket::start,
 		MoreCodecs.VEC3_STREAM_CODEC, WireBreakPacket::end,

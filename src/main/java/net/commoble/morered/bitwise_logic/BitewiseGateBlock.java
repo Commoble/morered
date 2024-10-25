@@ -11,6 +11,7 @@ import net.commoble.exmachina.api.Channel;
 import net.commoble.exmachina.api.Face;
 import net.commoble.exmachina.api.Receiver;
 import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
+import net.commoble.morered.CommonTags;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -30,7 +31,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.common.Tags;
 
 public abstract class BitewiseGateBlock extends PlateBlock implements EntityBlock
 {
@@ -94,17 +94,17 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 	@Override
 	public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		boolean isPlayerHoldingStick = stack.is(Tags.Items.RODS_WOODEN);
+		boolean isPlayerHoldingWrench = stack.is(CommonTags.Items.WRENCHES);
 		
-		// rotate the block when the player pokes it with a stick
-		if (isPlayerHoldingStick && !level.isClientSide)
+		// rotate the block when the player pokes it with a wrench
+		if (isPlayerHoldingWrench && !level.isClientSide)
 		{
 			int newRotation = (state.getValue(ROTATION) + 1) % 4;
 			BlockState newState = state.setValue(ROTATION, newRotation);
 			level.setBlockAndUpdate(pos, newState);
 		}
 		
-		return isPlayerHoldingStick ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+		return isPlayerHoldingWrench ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 	public Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide,

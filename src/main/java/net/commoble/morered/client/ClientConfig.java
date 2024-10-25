@@ -1,21 +1,10 @@
 package net.commoble.morered.client;
 
-import net.commoble.morered.MoreRed;
-import net.commoble.morered.util.ConfigHelper;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.common.ModConfigSpec.ConfigValue;
 
 public record ClientConfig(ConfigValue<Boolean> showPlacementPreview, ConfigValue<Double> previewPlacementOpacity)
-{
-	public static ClientConfig INSTANCE;
-	
-	// TODO move to ClientProxy
-	public static void initClientConfig()
-	{
-		INSTANCE = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.CLIENT, ClientConfig::create);
-	}
-	
+{	
 	public static ClientConfig create(ModConfigSpec.Builder builder)
 	{
 		builder.push("Rendering");

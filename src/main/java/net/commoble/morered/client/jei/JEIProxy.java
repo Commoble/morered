@@ -24,7 +24,7 @@ import net.minecraft.world.item.crafting.RecipeManager;
 @JeiPlugin
 public class JEIProxy implements IModPlugin
 {
-	public static final ResourceLocation ID = MoreRed.getModRL(MoreRed.MODID);
+	public static final ResourceLocation ID = MoreRed.id(MoreRed.MODID);
 	
 	@Nullable
 	private SolderingCategory solderingCategory;

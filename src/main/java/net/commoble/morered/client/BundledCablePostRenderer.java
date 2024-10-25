@@ -38,7 +38,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 	public static final RenderType CABLE_RENDER_TYPE = ExtraRenderTypes.CABLE_RENDER_TYPE;
 
 	@SuppressWarnings("deprecation")
-	public static final Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,MoreRed.getModRL("block/bundled_network_cable")); 
+	public static final Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,MoreRed.id("block/bundled_network_cable")); 
 
 	public static final float[] REDS = {0.71F, 0.31F, 0.19F};
 	public static final float[] GREENS = {0.19F, 0.48F, 0.29F};

@@ -10,15 +10,17 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.google.common.collect.ImmutableSet;
-
+import net.commoble.morered.IsWasSprintPacket;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.ObjectNames;
+import net.commoble.morered.Names;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe;
+import net.commoble.morered.transportation.RaytraceHelper;
+import net.commoble.morered.transportation.TubeBreakPacket;
 import net.commoble.morered.util.BlockStateUtil;
+import net.commoble.morered.util.ConfigHelper;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.WireBreakPacket;
 import net.commoble.morered.wires.AbstractWireBlock;
@@ -37,6 +39,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -54,8 +57,10 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
+import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
@@ -66,17 +71,22 @@ import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ClientProxy
-{	
-	private static final Set<BlockPos> NO_POSTS = ImmutableSet.of();
+{
+	public static final ClientConfig CLIENTCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.CLIENT, ClientConfig::create);
 	
 	// block positions are in absolute world coordinates, not local chunk coords
 	private static Map<ChunkPos, Set<BlockPos>> clientPostsInChunk = new HashMap<>();
+	private static Map<ChunkPos, Set<BlockPos>> clientTubesInChunk = new HashMap<>();
+	private static boolean isHoldingSprint = false;
 	
 	public static void clear()
 	{
 		clientPostsInChunk = new HashMap<>();
+		clientTubesInChunk = new HashMap<>();
+		isHoldingSprint = false;
 	}
 	
 	public static void updatePostsInChunk(ChunkPos pos, Set<BlockPos> posts)
@@ -96,7 +106,29 @@ public class ClientProxy
 	@Nonnull
 	public static Set<BlockPos> getPostsInChunk(ChunkPos pos)
 	{
-		return clientPostsInChunk.getOrDefault(pos, NO_POSTS);
+		return clientPostsInChunk.getOrDefault(pos, Set.of());
+	}
+	
+	public static boolean getWasSprinting()
+	{
+		return isHoldingSprint;
+	}
+	
+	public static void setIsSprintingAndNotifyServer(boolean isSprinting)
+	{
+		// mark the capability on the client and send a packet to the server to do the same
+		isHoldingSprint = isSprinting;
+		PacketDistributor.sendToServer(new IsWasSprintPacket(isSprinting));
+	}
+	
+	public static void updateTubesInChunk(ChunkPos pos, Set<BlockPos> tubes)
+	{
+		clientTubesInChunk.put(pos, tubes);
+	}
+	
+	public static Set<BlockPos> getTubesInChunk(ChunkPos pos)
+	{
+		return clientTubesInChunk.getOrDefault(pos, Set.of());
 	}
 
 	public static void initializeAbstractWireBlockClient(AbstractWireBlock block, Consumer<IClientBlockExtensions> consumer)
@@ -116,8 +148,6 @@ public class ClientProxy
 
 	public static void addClientListeners(IEventBus modBus, IEventBus forgeBus)
 	{
-		ClientConfig.initClientConfig();
-		
 		modBus.addListener(ClientProxy::onClientSetup);
 		modBus.addListener(ClientProxy::onRegisterModelLoaders);
 		modBus.addListener(ClientProxy::onRegisterBlockColors);
@@ -129,6 +159,7 @@ public class ClientProxy
 		forgeBus.addListener(ClientProxy::onClientLogOut);
 		forgeBus.addListener(ClientProxy::onHighlightBlock);
 		forgeBus.addListener(ClientProxy::onInteract);
+		forgeBus.addListener(ClientProxy::onClientTick);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -148,12 +179,18 @@ public class ClientProxy
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
 	{
 		event.register(MoreRed.get().solderingMenuType.get(), SolderingScreen::new);
+		event.register(MoreRed.get().loaderMenu.get(), StandardSizeContainerScreenFactory.of(
+			MoreRed.id("textures/gui/loader.png"), MoreRed.get().loaderBlock.get().getDescriptionId()));
+		event.register(MoreRed.get().filterMenu.get(), StandardSizeContainerScreenFactory.of(
+			MoreRed.id("textures/gui/filter.png"), MoreRed.get().filterBlock.get().getDescriptionId()));
+		event.register(MoreRed.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
+			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.get().multiFilterBlock.get().getDescriptionId()));
 	}
 
 	public static void onRegisterModelLoaders(ModelEvent.RegisterGeometryLoaders event)
 	{
-		event.register(MoreRed.getModRL(ObjectNames.WIRE_PARTS), WirePartModelLoader.INSTANCE);
-		event.register(MoreRed.getModRL(ObjectNames.ROTATE_TINTS), TintRotatingModelLoader.INSTANCE);
+		event.register(MoreRed.id(Names.WIRE_PARTS), WirePartModelLoader.INSTANCE);
+		event.register(MoreRed.id(Names.ROTATE_TINTS), TintRotatingModelLoader.INSTANCE);
 	}
 
 	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
@@ -182,6 +219,10 @@ public class ClientProxy
 	{
 		event.registerBlockEntityRenderer(MoreRed.get().wirePostBeType.get(), WirePostRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().cablePostBeType.get(), BundledCablePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().tubeEntity.get(), TubeBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().redstoneTubeEntity.get(), TubeBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().filterEntity.get(), FilterBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().osmosisFilterEntity.get(), OsmosisFilterBlockEntityRenderer::new);
 	}
 
 	static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)
@@ -198,7 +239,7 @@ public class ClientProxy
 
 	static void onHighlightBlock(RenderHighlightEvent.Block event)
 	{
-		if (ClientConfig.INSTANCE.showPlacementPreview().get())
+		if (ClientProxy.CLIENTCONFIG.showPlacementPreview().get())
 		{
 			@SuppressWarnings("resource")
 			LocalPlayer player = Minecraft.getInstance().player;
@@ -234,6 +275,21 @@ public class ClientProxy
 						}
 					}
 				}
+			}
+		}
+	}
+	
+	private static void onClientTick(ClientTickEvent.Post event)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		
+		if (mc.player != null)
+		{
+			boolean sprintIsDown = mc.options.keySprint.isDown();
+			boolean sprintWasDown = ClientProxy.getWasSprinting();
+			if (sprintWasDown != sprintIsDown)	// change in sprint key detected
+			{
+				ClientProxy.setIsSprintingAndNotifyServer(sprintIsDown);
 			}
 		}
 	}
@@ -344,6 +400,26 @@ public class ClientProxy
 		if (world != null)
 		{
 			packet.positions().forEach(pos -> VoxelCache.invalidate(world, pos));
+		}
+	}
+
+	public static void onTubeBreakPacket(TubeBreakPacket packet)
+	{
+		Minecraft mc = Minecraft.getInstance();
+		ClientLevel level = mc.level;
+		
+		if (level != null)
+		{
+			Vec3[] points = RaytraceHelper.getInterpolatedPoints(packet.start(), packet.end());
+			ParticleEngine manager = mc.particleEngine;
+			BlockState state = level.getBlockState(BlockPos.containing(packet.start()));
+			
+			for (Vec3 point : points)
+			{
+				manager.add(
+					new TerrainParticle(level, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
+						.setPower(0.2F).scale(0.6F));
+			}
 		}
 	}
 

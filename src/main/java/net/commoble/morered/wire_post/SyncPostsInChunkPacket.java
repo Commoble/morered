@@ -5,7 +5,7 @@ import java.util.Set;
 
 import io.netty.buffer.ByteBuf;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.ObjectNames;
+import net.commoble.morered.Names;
 import net.commoble.morered.client.ClientProxy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -16,7 +16,7 @@ import net.neoforged.neoforge.network.handling.IPayloadContext;
 
 public record SyncPostsInChunkPacket(ChunkPos chunkPos, Set<BlockPos> postsInChunk) implements CustomPacketPayload
 {
-	public static final CustomPacketPayload.Type<SyncPostsInChunkPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.getModRL(ObjectNames.POSTS_IN_CHUNK));
+	public static final CustomPacketPayload.Type<SyncPostsInChunkPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.id(Names.POSTS_IN_CHUNK));
 	public static final StreamCodec<ByteBuf, SyncPostsInChunkPacket> STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.VAR_LONG.map(ChunkPos::new, ChunkPos::toLong), SyncPostsInChunkPacket::chunkPos,
 		BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).map(Set::copyOf,List::copyOf), SyncPostsInChunkPacket::postsInChunk,

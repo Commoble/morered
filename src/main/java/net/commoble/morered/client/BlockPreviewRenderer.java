@@ -95,7 +95,7 @@ public class BlockPreviewRenderer extends ModelBlockRenderer
 			b *= shade;
 		}
 
-		float alpha = ClientConfig.INSTANCE.previewPlacementOpacity().get().floatValue();
+		float alpha = ClientProxy.CLIENTCONFIG.previewPlacementOpacity().get().floatValue();
 
 		buffer.putBulkData(matrixEntry, quadIn, new float[] { tintA, tintB, tintC, tintD }, r, g, b, alpha, new int[] { brightness0, brightness1, brightness2, brightness3 },
 			combinedOverlayIn, true);
