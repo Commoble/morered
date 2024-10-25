@@ -269,7 +269,10 @@ public class MoreRedDataGen
 		    "ttt",
 		    "###");
 		
-		tubeBlock(Names.TUBE, "Tube", context, tubeBlockState(MoreRed.get().tubeBlock.get()))
+		BlockDataHelper.create(MoreRed.get().tubeBlock.get(),
+			blockStates, MoreRedDataGen::tubeBlockState,
+			lootTables, MoreRedDataGen::simpleLoot)
+			.localize(lang, "Tube")
 			.tags(context.blockTags, MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
 			.simpleBlockItem(context.models)
 			.help(helper -> helper
