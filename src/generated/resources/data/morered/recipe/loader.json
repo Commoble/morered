@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "P": {
+      "item": "minecraft:piston"
+    },
+    "S": {
+      "item": "morered:shunt"
+    },
+    "s": {
+      "tag": "c:cobblestones"
+    }
+  },
+  "pattern": [
+    "sss",
+    "P S",
+    "sss"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:loader"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "r": {
+      "tag": "c:dusts/redstone"
+    },
+    "t": {
+      "tag": "morered:tubes"
+    }
+  },
+  "pattern": [
+    " r ",
+    "rtr",
+    " r "
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:redstone_tube"
+  }
+}

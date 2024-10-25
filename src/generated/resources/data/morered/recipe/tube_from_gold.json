@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "G": {
+      "tag": "c:glass_blocks/colorless"
+    },
+    "i": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "pattern": [
+    "iGi"
+  ],
+  "result": {
+    "count": 8,
+    "id": "morered:tube"
+  }
+}

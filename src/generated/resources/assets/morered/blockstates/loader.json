@@ -1,0 +1,33 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "morered:block/loader",
+      "uvlock": true,
+      "x": 90
+    },
+    "facing=east": {
+      "model": "morered:block/loader",
+      "uvlock": true,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "morered:block/loader",
+      "uvlock": true
+    },
+    "facing=south": {
+      "model": "morered:block/loader",
+      "uvlock": true,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "morered:block/loader",
+      "uvlock": true,
+      "x": 270
+    },
+    "facing=west": {
+      "model": "morered:block/loader",
+      "uvlock": true,
+      "y": 270
+    }
+  }
+}

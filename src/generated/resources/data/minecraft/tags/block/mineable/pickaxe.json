@@ -7,6 +7,16 @@
     "morered:redwire_relay",
     "morered:redwire_junction",
     "morered:soldering_table",
-    "morered:stone_plate"
+    "morered:stone_plate",
+    "morered:tube",
+    "morered:redstone_tube",
+    "morered:distributor",
+    "morered:extractor",
+    "morered:shunt",
+    "morered:filter",
+    "morered:multifilter",
+    "morered:loader",
+    "morered:osmosis_filter",
+    "#morered:colored_tubes"
   ]
 }

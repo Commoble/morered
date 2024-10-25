@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "C": {
+      "tag": "c:chests"
+    },
+    "f": {
+      "item": "morered:filter"
+    },
+    "i": {
+      "tag": "c:ingots/iron"
+    }
+  },
+  "pattern": [
+    "ifi",
+    "fCf",
+    "ifi"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:multifilter"
+  }
+}

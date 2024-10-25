@@ -1,0 +1,6 @@
+{
+  "parent": "morered:block/tube",
+  "textures": {
+    "all": "morered:block/white_tube"
+  }
+}

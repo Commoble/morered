@@ -1,0 +1,24 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "G": {
+      "tag": "c:fence_gates"
+    },
+    "c": {
+      "tag": "c:cobblestones"
+    },
+    "s": {
+      "item": "morered:shunt"
+    }
+  },
+  "pattern": [
+    "csc",
+    "sGs",
+    "csc"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:distributor"
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "G": {
+      "type": "neoforge:intersection",
+      "children": [
+        {
+          "tag": "c:glass_blocks"
+        },
+        {
+          "tag": "c:dyed/yellow"
+        }
+      ]
+    },
+    "i": {
+      "tag": "c:ingots/gold"
+    }
+  },
+  "pattern": [
+    "iGi"
+  ],
+  "result": {
+    "count": 8,
+    "id": "morered:yellow_tube"
+  }
+}
