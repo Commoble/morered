@@ -179,10 +179,8 @@ public class ClientProxy
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
 	{
 		event.register(MoreRed.get().solderingMenuType.get(), SolderingScreen::new);
-		event.register(MoreRed.get().loaderMenu.get(), StandardSizeContainerScreenFactory.of(
-			MoreRed.id("textures/gui/loader.png"), MoreRed.get().loaderBlock.get().getDescriptionId()));
-		event.register(MoreRed.get().filterMenu.get(), StandardSizeContainerScreenFactory.of(
-			MoreRed.id("textures/gui/filter.png"), MoreRed.get().filterBlock.get().getDescriptionId()));
+		event.register(MoreRed.get().loaderMenu.get(), LoaderScreen::new);
+		event.register(MoreRed.get().filterMenu.get(), SingleSlotMenuScreen::new);
 		event.register(MoreRed.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
 			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.get().multiFilterBlock.get().getDescriptionId()));
 	}
