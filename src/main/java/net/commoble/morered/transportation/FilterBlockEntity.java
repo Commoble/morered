@@ -78,9 +78,11 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	}
 	
 	////// NBT and syncing
-	
-	protected void writeData(CompoundTag compound, HolderLookup.Provider registries)
+
+	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
+	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
+		super.saveAdditional(compound, registries);
 		if (!this.filterStack.isEmpty())
 		{
 			Tag inventory = this.filterStack.save(registries);
@@ -88,32 +90,23 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 		}
 	}
 	
-	protected void readData(CompoundTag compound, HolderLookup.Provider registries)
-	{
-		CompoundTag inventory = compound.getCompound(INV_KEY);
-		this.filterStack = ItemStack.parseOptional(registries, inventory);
-	}
-
-	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
-	{
-		super.saveAdditional(compound, registries);
-		this.writeData(compound, registries);
-	}
-	
 	@Override
 	/** read **/
 	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		this.readData(compound, registries);
+		CompoundTag inventory = compound.getCompound(INV_KEY);
+		this.filterStack = ItemStack.parseOptional(registries, inventory);
 	}
 	
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
 		CompoundTag tag = super.getUpdateTag(registries);
-		this.writeData(tag, registries);
+		Tag inventory = this.filterStack.isEmpty()
+			? new CompoundTag()
+			: filterStack.save(registries);
+		tag.put(INV_KEY, inventory);
 		return tag;
 	}
 
