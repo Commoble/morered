@@ -15,6 +15,7 @@ import commoble.morered.datagen.BlockStateFile.Multipart;
 import commoble.morered.datagen.BlockStateFile.PropertyValue;
 import commoble.morered.datagen.BlockStateFile.Variants;
 import commoble.morered.datagen.BlockStateFile.WhenApply;
+import net.commoble.morered.CommonTags;
 import net.commoble.morered.HexidecrubrometerBlock;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
@@ -401,6 +402,7 @@ public class MoreRedDataGen
 			.tags(itemTags, REDSTONE_ALLOY_INGOTS);
 		Util.make(MoreRed.get().tubingPliers.get(), pliers -> ItemDataHelper.create(pliers, models, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
 			.addTexture("layer0", mangle(MoreRed.id(Names.PLIERS), "item/%s")))
+			.tags(itemTags, CommonTags.Items.WRENCHES)
 			.recipe(recipes, RecipeHelpers.shaped(pliers, 1, CraftingBookCategory.MISC,
 				List.of("  I", "It ", " I "),
 				Map.of(

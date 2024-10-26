@@ -21,7 +21,7 @@ import net.commoble.exmachina.api.ExMachinaRegistries;
 import net.commoble.exmachina.api.SignalReceiver;
 import net.commoble.exmachina.api.SignalSource;
 import net.commoble.exmachina.api.SignalTransmitter;
-import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
+import net.commoble.morered.bitwise_logic.BitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
@@ -174,7 +174,7 @@ public class MoreRed
 	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
 
 	public final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
-	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitewiseGateBlock>> bitwiseLogicPlates = new HashMap<>();
+	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseGateBlock>> bitwiseLogicPlates = new HashMap<>();
 	
 	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
 	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
@@ -796,7 +796,7 @@ public class MoreRed
 		return blockGetter;
 	}
 	
-	public <B extends BitewiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public <B extends BitwiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
 		LogicFunction function,
 		BiFunction<BlockBehaviour.Properties, LogicFunction, B> blockFactory)
 	{

@@ -21,7 +21,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 
-public class SingleInputBitwiseGateBlock extends BitewiseGateBlock
+public class SingleInputBitwiseGateBlock extends BitwiseGateBlock
 {
 	public SingleInputBitwiseGateBlock(Properties properties, LogicFunction operator)
 	{

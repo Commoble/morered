@@ -158,6 +158,9 @@ public class ExtractorBlock extends Block
 	{
 		if (stack.is(CommonTags.Items.WRENCHES))
 		{
+			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
+				0.1F + level.random.nextFloat()*0.1F,
+				0.7F + level.random.nextFloat()*0.1F);
 			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
 			return ItemInteractionResult.SUCCESS;
 		}

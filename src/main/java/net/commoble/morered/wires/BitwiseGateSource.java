@@ -11,7 +11,7 @@ import net.commoble.exmachina.api.Face;
 import net.commoble.exmachina.api.SignalSource;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
-import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
+import net.commoble.morered.bitwise_logic.BitwiseGateBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceKey;
@@ -36,7 +36,7 @@ public enum BitwiseGateSource implements SignalSource
 	public Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide,
 		Face connectedFace)
 	{
-		if (supplierState.getBlock() instanceof BitewiseGateBlock block)
+		if (supplierState.getBlock() instanceof BitwiseGateBlock block)
 		{
 			return block.getSupplierEndpoints(level, supplierPos, supplierState, supplierSide, connectedFace);
 		}

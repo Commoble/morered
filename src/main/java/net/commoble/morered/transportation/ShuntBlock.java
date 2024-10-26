@@ -5,6 +5,8 @@ import net.commoble.morered.CommonTags;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -148,6 +150,9 @@ public class ShuntBlock extends Block implements EntityBlock
 	{
 		if (stack.is(CommonTags.Items.WRENCHES))
 		{
+			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
+				0.1F + level.random.nextFloat()*0.1F,
+				0.7F + level.random.nextFloat()*0.1F);
 			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
 			return ItemInteractionResult.SUCCESS;
 		}

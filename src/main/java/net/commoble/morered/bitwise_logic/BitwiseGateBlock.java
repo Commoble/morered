@@ -18,6 +18,8 @@ import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -32,7 +34,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-public abstract class BitewiseGateBlock extends PlateBlock implements EntityBlock
+public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 {
 	public static final VoxelShape[] DOUBLE_PLATE_SHAPES_BY_DIRECTION = { // DUNSWE, direction of attachment
 		Block.box(0, 0, 0, 16, 4, 16),
@@ -48,7 +50,7 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 	
 	protected LogicFunction operator;
 	
-	public BitewiseGateBlock(Properties properties, LogicFunction operator)
+	public BitwiseGateBlock(Properties properties, LogicFunction operator)
 	{
 		super(properties);
 		this.operator = operator;
@@ -99,6 +101,9 @@ public abstract class BitewiseGateBlock extends PlateBlock implements EntityBloc
 		// rotate the block when the player pokes it with a wrench
 		if (isPlayerHoldingWrench && !level.isClientSide)
 		{
+			level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
+				0.1F + level.random.nextFloat()*0.1F,
+				0.7F + level.random.nextFloat()*0.1F);
 			int newRotation = (state.getValue(ROTATION) + 1) % 4;
 			BlockState newState = state.setValue(ROTATION, newRotation);
 			level.setBlockAndUpdate(pos, newState);

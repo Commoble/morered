@@ -47,11 +47,6 @@ public class PliersItem extends Item
 		{
 			return this.onUseOnTube(world, pos, tube, context.getItemInHand(), context.getPlayer(), context.getClickedFace());
 		}
-		BlockState state = world.getBlockState(pos);
-		if (context.getItemInHand().is(CommonTags.Items.WRENCHES))
-		{
-			return this.useOnRotatable(world, pos, state);
-		}
 		return super.useOn(context);
 	}
 	

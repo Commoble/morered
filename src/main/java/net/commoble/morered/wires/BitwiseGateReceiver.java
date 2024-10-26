@@ -15,7 +15,7 @@ import net.commoble.exmachina.api.Receiver;
 import net.commoble.exmachina.api.SignalReceiver;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
-import net.commoble.morered.bitwise_logic.BitewiseGateBlock;
+import net.commoble.morered.bitwise_logic.BitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.BitwiseGateBlockEntity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -41,7 +41,7 @@ public enum BitwiseGateReceiver implements SignalReceiver
 	public @Nullable Receiver getReceiverEndpoint(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Direction receiverSide,
 		Face connectedFace, Channel channel)
 	{
-		if (receiverState.getBlock() instanceof BitewiseGateBlock block)
+		if (receiverState.getBlock() instanceof BitwiseGateBlock block)
 		{
 			return block.getReceiverEndpoint(level, receiverPos, receiverState, receiverSide, connectedFace, channel);
 		}
@@ -51,7 +51,7 @@ public enum BitwiseGateReceiver implements SignalReceiver
 	@Override
 	public Collection<Receiver> getAllReceivers(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Channel channel)
 	{
-		if (receiverState.getBlock() instanceof BitewiseGateBlock block)
+		if (receiverState.getBlock() instanceof BitwiseGateBlock block)
 		{
 			return block.getAllReceivers(level, receiverPos, receiverState, channel);
 		}

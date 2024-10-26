@@ -8,6 +8,8 @@ import net.commoble.morered.CommonTags;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
@@ -77,6 +79,9 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		// rotate the block when the player pokes it with a wrench
 		if (isPlayerHoldingWrench && !level.isClientSide)
 		{
+			level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
+				0.1F + level.random.nextFloat()*0.1F,
+				0.7F + level.random.nextFloat()*0.1F);
 			int newRotation = (state.getValue(ROTATION) + 1) % 4;
 			BlockState newState = state.setValue(ROTATION, newRotation);
 			for (InputSide side : this.getInputSides())
