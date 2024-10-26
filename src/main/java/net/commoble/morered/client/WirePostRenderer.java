@@ -54,7 +54,7 @@ public class WirePostRenderer implements BlockEntityRenderer<WirePostBlockEntity
 		light = Mth.clamp(light, 0, 15);
 		int power = state.hasProperty(AbstractPoweredWirePostBlock.POWER) ? state.getValue(AbstractPoweredWirePostBlock.POWER) : 0;
 		double lerpFactor = power / 15D;
-		return (int)Mth.lerp(lerpFactor, ColorHandlers.UNLIT_RED, ColorHandlers.LIT_RED) * light / 15;
+		return (int)Mth.lerp(lerpFactor, ColorHandlers.UNLIT_RED & 0xFF, ColorHandlers.LIT_RED & 0xFF) * light / 15;
 	}
 
 	// heavily based on fishing rod line renderer
