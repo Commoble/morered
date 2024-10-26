@@ -3,7 +3,6 @@ package net.commoble.morered.transportation;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import net.commoble.morered.CommonTags;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.BlockSide;
 import net.minecraft.core.BlockPos;
@@ -21,10 +20,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -150,26 +146,6 @@ public class PliersItem extends Item
 				0.7F + level.random.nextFloat()*0.1F);
 		}
 		
-		return InteractionResult.SUCCESS;
-	}
-	
-	private InteractionResult useOnRotatable(Level level, BlockPos pos, BlockState state)
-	{
-		level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-			0.1F + level.random.nextFloat()*0.1F,
-			0.7F + level.random.nextFloat()*0.1F);
-		
-		if (!level.isClientSide)
-		{
-			for (Property<?> property : new Property<?>[] {BlockStateProperties.FACING, BlockStateProperties.HORIZONTAL_FACING})
-			{
-				if (state.hasProperty(property))
-				{
-					level.setBlock(pos, state.cycle(property), Block.UPDATE_ALL);
-					break;
-				}
-			}
-		}
 		return InteractionResult.SUCCESS;
 	}
 
