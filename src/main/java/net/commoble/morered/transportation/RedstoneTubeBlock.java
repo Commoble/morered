@@ -47,39 +47,13 @@ public class RedstoneTubeBlock extends TubeBlock
 			? (BlockEntityTicker<T>) TubeBlockEntity.TICKER
 			: super.getTicker(level, state, type);
 	}
-
-	/**
-	 * @deprecated call via
-	 *             {@link IBlockState#getWeakPower(IBlockAccess,BlockPos,EnumFacing)}
-	 *             whenever possible. Implementing/overriding is fine.
-	 */
-	@Deprecated
+	
 	@Override
 	public int getSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side)
 	{
 		return blockState.getValue(POWERED) ? 15 : 0;
 	}
-
-	/**
-	 * @deprecated call via
-	 *             {@link IBlockState#getStrongPower(IBlockAccess,BlockPos,EnumFacing)}
-	 *             whenever possible. Implementing/overriding is fine.
-	 */
-	@Deprecated
-	@Override
-	public int getDirectSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side)
-	{
-		return blockState.getValue(POWERED) ? 15 : 0;
-	}
-
-	/**
-	 * Can this block provide power. Only wire currently seems to have this change
-	 * based on its state.
-	 * 
-	 * @deprecated call via {@link IBlockState#canProvidePower()} whenever possible.
-	 *             Implementing/overriding is fine.
-	 */
-	@Deprecated
+	
 	@Override
 	public boolean isSignalSource(BlockState state)
 	{
