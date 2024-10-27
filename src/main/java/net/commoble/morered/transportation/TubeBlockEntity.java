@@ -44,7 +44,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 public class TubeBlockEntity extends BlockEntity
 {
 	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
-	public static final String INV_NBT_KEY_RESET = "inventory_reset";
+	public static final String INV_NBT_KEY_RESET = "inventory";
 	public static final String CONNECTIONS = "connections";
 	
 	public static final AABB EMPTY_AABB = new AABB(0,0,0,0,0,0);

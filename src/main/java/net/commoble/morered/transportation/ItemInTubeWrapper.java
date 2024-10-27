@@ -28,9 +28,9 @@ public class ItemInTubeWrapper
 		// move in the move list, but the renderer will handle it differently
 	
 	public static final String MOVES_REMAINING_TAG = "moves";
-	public static final String TICKS_REMAINING_TAG = "ticksRemaining";
-	public static final String TICKS_DURATION_TAG = "maxDurationInTicks";
-	public static final String IS_FRESHLY_INSERTED = "isFreshly";
+	public static final String TICKS_REMAINING_TAG = "ticks_remaining";
+	public static final String TICKS_DURATION_TAG = "max_duration";
+	public static final String IS_FRESHLY_INSERTED = "fresh";
 	public static final String ITEM = "item";
 	
 	/** It would be a good idea to supply this constructor with a copy of a list when using an existing list **/
