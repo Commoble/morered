@@ -101,7 +101,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Override
 	public void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		if (level instanceof ServerLevel serverLevel)
+		if (level instanceof ServerLevel serverLevel && !newState.is(oldState.getBlock()))
 		{
 			TubesInChunk.updateTubeSet(serverLevel, pos, Set<BlockPos>::add);
 		}
@@ -111,12 +111,13 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Override
 	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
 	{
-		if (level instanceof ServerLevel serverLevel)
+		boolean changedBlock = !state.is(newState.getBlock());
+		if (level instanceof ServerLevel serverLevel && changedBlock)
 		{
 			TubesInChunk.updateTubeSet(serverLevel, pos, Set<BlockPos>::remove);
 		}
 		BlockEntity te = level.getBlockEntity(pos);
-		if (te instanceof TubeBlockEntity tube && !state.is(newState.getBlock()))
+		if (te instanceof TubeBlockEntity tube && changedBlock)
 		{
 			tube.dropItems();
 			tube.clearRemoteConnections();
