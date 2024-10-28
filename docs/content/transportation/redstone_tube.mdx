@@ -1,0 +1,110 @@
+---
+title: Redstone Tube
+id: morered:redstone_tube
+type: block
+---
+
+Redstone Tubes behave identically to [Tubes](/en/mod/morered/docs/content/transportation/tube), but also emit redstone signal when items pass through them.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+				* 1x [<ModAsset width={32} height={32} location='morered:tube'/> Tube](/en/mod/morered/docs/content/transportation/tube)
+			</td>
+			<td>
+				* 1x Redstone Tube
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Redstone Tubes](https://commoble.net/images/morered/recipes/redstone_tube_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+While items are travelling through the Redstone Tube block, the block will emit a weak redstone signal of strength 15.
+
+![Redstone Tube emitting redstone signal](https://commoble.net/images/tubesreloaded/redstone_tube.png)
+
+This signal will last the duration of the item's travel time (10 ticks on default settings).
+If items are continually passing through the tube at a faster rate,
+the signal will not cease until all items have left the tube.
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `powered` | `{"false", "true"}` | Whether the tube emits signal
+| `down` | `{"false", "true"}` | Whether the tube is connected to the block below it
+| `up` | `{"false", "true"}` | Whether the tube is connected to the block above it
+| `north` | `{"false", "true"}` | Whether the tube is connected to the north
+| `south` | `{"false", "true"}` | Whether the tube is connected to the south
+| `west` | `{"false", "true"}` | Whether the tube is connected to the west
+| `east` | `{"false", "true"}` | Whether the tube is connected to the east
+| `waterlogged` | `{"false", "true"}` | Whether the tube is waterlogged
+| `transform` | `{"identity", "rot_180_face_xz", "rot_90_y_neg", "rot_80_y_pos", "invert_x", "invert_z", "swap_xz", "swap_neg_xz"}` | Set when the block is rotated/mirrored by structure generation or similar mechanics; it ensures blockentity data is transformed accordingly. When placed by a player, this will always be `"identity"`
+
+<table>
+	<thead><tr><th>BlockEntity Data</th><th>Format</th><th>Description</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>`connections`</td>
+			<td><ul><li>List of block positions in [X,Y,Z] format</li><li>e.g. `[[2, 5, -6], [2, 5, -9]]`</li></ul></td>
+			<td>Relative distances to other blocks which this tube is connected to</td>
+		</tr>
+		<tr>
+			<td>`inventory`</td>
+			<td>
+				```json
+				[
+					{
+						"item": {}, // itemstack object
+						"moves": [], // move list
+						"ticks_remaining": integer,
+						"max_duration": integer,
+						"fresh": boolean
+					}
+				]
+				```
+			</td>
+			<td>
+				List of the items currently travelling through the tube:
+				* `item` is an itemstack object in standard vanilla format (with sub-fields id, count, components)
+				* `moves` is the item's remaining moves encoded as a list of pairs of numbers [`dir0`, `count0`, `dir1`, `count1`, etc] where `dirN`, `countN` indicates `count` moves in the `dir` direction, where `dirN` is a direction ordinal in DUNSWE order
+				  * e.g. [0, 5, 4, 2] indicates DOWN 5 blocks followed by WEST 2 blocks
+				* `ticks_remaining` is the number of ticks remaining in this tube before it moves to the next tube
+				* `max_duration` is the total number of ticks the item spends in the tube
+				* `fresh` indicates the tube is the tube which the item was originally inserted into (as opposed to a tube the item travelled to from another tube)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## History
+| Version | Changelog
+| --- | -
+| 1.22-7.0.0.0 | Added to More Red

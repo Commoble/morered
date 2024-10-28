@@ -1,0 +1,71 @@
+---
+title: Shunt
+id: morered:shunt
+type: block
+---
+
+Shunts are an item-handling block which accept items on five sides and eject them on the sixth.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='morered:tube'/> Tube](/en/mod/morered/docs/content/transportation/tube)
+				* 1x [<ModAsset width={32} height={32} location='cobblestone'/> Cobblestone](https://minecraft.wiki/Cobblestone)
+			</td>
+			<td>
+				* 1x Shunt
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Shunts](https://commoble.net/images/morered/recipes/shunt_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Shunts have five input sides and one output side; the output side is slightly wider than the inputs.
+
+![](https://commoble.net/images/tubesreloaded/shunt.png)
+
+When an itemstack is inserted into a shunt, the shunt first attempts to insert the item into an available inventory adjacent to its output side.
+If this fails or no such inventory exists, the item is ejected into the world.
+Other item-handling blocks will perceive the Shunt as having a single inventory slot which is always open.
+
+Powering the shunt with redstone will disable it and prevent it from accepting items.
+
+Using the [Pliers](/en/mod/morered/docs/content/transportation/pliers) or another mod's wrenchlike item on a shunt will rotate it.
+
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Output direction
+
+## History
+| Version | Changelog
+| --- | -
+| 1.22-7.0.0.0 | Added to More Red

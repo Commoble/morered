@@ -1,0 +1,140 @@
+---
+title: Tube
+id: morered:tube
+type: block
+---
+
+Tubes can transport items from one place to another place.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='copper_ingot'/> Copper Ingot](https://minecraft.wiki/Copper_Ingot)
+				* 1x [<ModAsset width={32} height={32} location='glass'/> Glass](https://minecraft.wiki/Glass)
+			</td>
+			<td>
+				* 2x Tube
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Tubes (From Copper Ingots)](https://commoble.net/images/morered/recipes/tube_recipe_from_copper.png)
+			</td>
+		</tr>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='gold_ingot'/> Gold Ingot](https://minecraft.wiki/Gold_Ingot)
+				* 1x [<ModAsset width={32} height={32} location='glass'/> Glass](https://minecraft.wiki/Glass)
+			</td>
+			<td>
+				* 8x Tube
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Tubes (From Gold Ingots)](https://commoble.net/images/morered/recipes/tube_recipe_from_gold.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+When tube blocks are placed adjacently, they connect to each other. Tubes will also form connections to item-handling blocks, such as hoppers and chests.
+
+![Tube blocks connecting a hopper to a chest](https://commoble.net/images/tubesreloaded/tube.png)
+
+If this tube network is connected to at least one non-tube block which items can be inserted into (such as a chest),
+then items can be inserted into the tube via hoppers or similar blocks.
+These items will then be automatically routed to the nearest inventory which can accept the block.
+
+If no inventories are available (or all inventories are full), items cannot be inserted into tubes.
+If an inventory becomes full while an item is en-route to that inventory,
+the item will attempt to reroute itself to the next-nearest inventory once it reaches the closed inventory;
+if there are no more remaining open inventories, the item is ejected into the world.
+A [Shunt](/en/mod/morered/docs/content/transportation/shunt) always accepts items, and can be useful for handling "overflow" items.
+
+Items in tubes have a travel duration of 10 ticks per block (or a travel speed of two blocks per second).
+There is a "soft cap" of 400 connected tube blocks in a single network, above which this travel rate begins to slow down,
+and a "hard cap" of 500 connected tube blocks, above which tubes cease connecting to each other.
+These values can be set in the [Server Config](/en/mod/morered/docs/configuration/server_config).
+
+[Pliers](/en/mod/morered/docs/content/transportation/pliers) can be used to connect two non-adjacent tubes together;
+these tubes count as being one block apart for routing and travel duration.
+
+Tubes can also be waterlogged.
+
+![](https://commoble.net/images/tubesreloaded/waterTubes.gif)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `down` | `{"false", "true"}` | Whether the tube is connected to the block below it
+| `up` | `{"false", "true"}` | Whether the tube is connected to the block above it
+| `north` | `{"false", "true"}` | Whether the tube is connected to the north
+| `south` | `{"false", "true"}` | Whether the tube is connected to the south
+| `west` | `{"false", "true"}` | Whether the tube is connected to the west
+| `east` | `{"false", "true"}` | Whether the tube is connected to the east
+| `waterlogged` | `{"false", "true"}` | Whether the tube is waterlogged
+| `transform` | `{"identity", "rot_180_face_xz", "rot_90_y_neg", "rot_80_y_pos", "invert_x", "invert_z", "swap_xz", "swap_neg_xz"}` | Set when the block is rotated/mirrored by structure generation or similar mechanics; it ensures blockentity data is transformed accordingly. When placed by a player, this will always be `"identity"`
+
+<table>
+	<thead><tr><th>BlockEntity Data</th><th>Format</th><th>Description</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>`connections`</td>
+			<td><ul><li>List of block positions in [X,Y,Z] format</li><li>e.g. `[[2, 5, -6], [2, 5, -9]]`</li></ul></td>
+			<td>Relative distances to other blocks which this tube is connected to</td>
+		</tr>
+		<tr>
+			<td>`inventory`</td>
+			<td>
+				```json
+				[
+					{
+						"item": {}, // itemstack object
+						"moves": [], // move list
+						"ticks_remaining": integer,
+						"max_duration": integer,
+						"fresh": boolean
+					}
+				]
+				```
+			</td>
+			<td>
+				List of the items currently travelling through the tube:
+				* `item` is an itemstack object in standard vanilla format (with sub-fields id, count, components)
+				* `moves` is the item's remaining moves encoded as a list of pairs of numbers [`dir0`, `count0`, `dir1`, `count1`, etc] where `dirN`, `countN` indicates `count` moves in the `dir` direction, where `dirN` is a direction ordinal in DUNSWE order
+				  * e.g. [0, 5, 4, 2] indicates DOWN 5 blocks followed by WEST 2 blocks
+				* `ticks_remaining` is the number of ticks remaining in this tube before it moves to the next tube
+				* `max_duration` is the total number of ticks the item spends in the tube
+				* `fresh` indicates the tube is the tube which the item was originally inserted into (as opposed to a tube the item travelled to from another tube)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## History
+| Version | Changelog
+| --- | -
+| 1.22-7.0.0.0 | Added to More Red
