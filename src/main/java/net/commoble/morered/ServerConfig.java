@@ -15,7 +15,6 @@ public record ServerConfig(
 {	
 	public static ServerConfig create(ModConfigSpec.Builder builder)
 	{
-		builder.push("General Settings");
 		DoubleValue maxWirePostConnectionRange = builder
 			.comment("Range (in blocks) that wire posts can remotely connect to each other.")
 			.translation("morered.config.max_wire_plinth_connection_range")
@@ -43,7 +42,7 @@ public record ServerConfig(
 		DoubleValue maxTubeConnectionRange = builder
 			.comment("Maximum range at which tubes can be remotely connected to each other. This also affects how many nearby chunks are checked for longtube intersections when placing a block.")
 			.translation("tubesreloaded.config.max_remote_tube_connection_range")
-			.defineInRange("max_remote_tube_connection_range", 16D, 0D, Double.MAX_VALUE);
+			.defineInRange("max_remote_tube_connection_range", 32D, 0D, Double.MAX_VALUE);
 		
 		return new ServerConfig(
 			maxWirePostConnectionRange,

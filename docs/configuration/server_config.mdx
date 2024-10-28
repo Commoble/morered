@@ -13,18 +13,42 @@ The following parameters are configurable:
 | Parameter | Type | Default Value | Description
 | --- | - | - | -
 | max_wire_plinth_connection_range | Non-Negative Float | 32.0 | Maximum connection range (in block units) for blocks can be connected by [Redwire Spools](/en/mod/morered/docs/content/wires_and_cables/redwire_spool) or [Bundled Cable Spools](/en/mod/morered/docs/content/wires_and_cables/bundled_cable_spool)
+| soft_tube_cap | Positive Integer | 400 | Soft cap on how many tubes can exist in a contiguous network of tubes. Items are transported slowlier in networks of greater size than this value, sigifying to the player that they have too many tubes.
+| hard_tube_cap | Positive Integer | 500 | Hard cap on how many tubes can exist in a contiguous network of tubes. If a player attempts to make a network of greater size from this value, not all tubes in the attempted network will become part of that network.
+| ticks_in_tube | Positive Integer | 10 | Base time in ticks that a moving itemstack spends in each individual tube block. Adjusted by other factors.
+| max_items_in_tube | Positive Integer | 2147483647 | Max items that can fit in a single tube. A tube block will break if the number of itemstacks contained with them is greater than this value, dropping their items on the ground
+| osmosis_filter_transfer_rate | Positive Integer | 8 | Osmosis filter automatic item transfer rate in ticks per item. The default value of 8 is the same as vanilla hoppers.
+| max_remote_tube_connection_range | Non-Negative Float | 32.0 | Maximum range at which tubes can be remotely connected to each other. This also affects how many nearby chunks are checked for longtube intersections when placing a block.
 
 The default config file is as follows:
 
 ```toml
-["General Settings"]
-	#Range (in blocks) that wire posts can remotely connect to each other.
-	#Range: 0.0 ~ 1.7976931348623157E308
-	max_wire_plinth_connection_range = 32.0
+#Range (in blocks) that wire posts can remotely connect to each other.
+#Range: 0.0 ~ 1.7976931348623157E308
+max_wire_plinth_connection_range = 32.0
+#Soft cap on how many tubes can exist in a contiguous network of tubes. Items are transported slowlier in networks of greater size than this value, sigifying to the player that they have too many tubes.
+#Range: 1 ~ 10000
+soft_tube_cap = 400
+#Hard cap on how many tubes can exist in a contiguous network of tubes. If a player attempts to make a network of greater size from this value, not all tubes in the attempted network will become part of that network.
+#Range: 1 ~ 10000
+hard_tube_cap = 500
+#Base time in ticks that a moving itemstack spends in each individual tube block. Adjusted by other factors.
+#Range: 1 ~ 72000
+ticks_in_tube = 10
+#Max items that can fit in a single tube. A tube block will break if the number of itemstacks contained with them is greater than this value, dropping their items on the ground
+#Range: > 1
+max_items_in_tube = 2147483647
+#Osmosis filter automatic item transfer rate in ticks per item. The default value of 8 is the same as vanilla hoppers.
+#Range: > 1
+osmosis_filter_transfer_rate = 8
+#Maximum range at which tubes can be remotely connected to each other. This also affects how many nearby chunks are checked for longtube intersections when placing a block.
+#Range: 0.0 ~ 1.7976931348623157E308
+max_remote_tube_connection_range = 32.0
 
 ```
 
 ## History
 | Version | Changelog
 | --- | -
+| 1.22-7.0.0.0 | Added soft_tube_cap, hard_tube_cap, ticks_in_tube, max_items_in_tube, osmosis_filter_transfer_rate, max_remote_tube_connection_range
 | 1.15.2-1.0.1.0 | Added to game
