@@ -12,10 +12,14 @@ import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeBookCategories;
+import net.minecraft.world.item.crafting.RecipeBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
@@ -25,22 +29,30 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 {
 	public static final MapCodec<SolderingRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
 			ItemStack.CODEC.fieldOf("result").forGetter(SolderingRecipe::result),
-			SizedIngredient.FLAT_CODEC.listOf().fieldOf("ingredients").forGetter(SolderingRecipe::ingredients)
+			SizedIngredient.NESTED_CODEC.listOf().fieldOf("ingredients").forGetter(SolderingRecipe::ingredients)
 		).apply(builder, SolderingRecipe::new));
 	
 	public static final StreamCodec<RegistryFriendlyByteBuf, SolderingRecipe> STREAM_CODEC = StreamCodec.composite(
 		ItemStack.STREAM_CODEC, SolderingRecipe::result,
 		SizedIngredient.STREAM_CODEC.apply(ByteBufCodecs.list()), SolderingRecipe::ingredients,
 		SolderingRecipe::new);
+	
+	// can't deal with RecipeHolder generics
+	public record SolderingRecipeHolder(ResourceLocation id, SolderingRecipe recipe) {
+		public static final StreamCodec<RegistryFriendlyByteBuf, SolderingRecipeHolder> STREAM_CODEC = StreamCodec.composite(
+			ResourceLocation.STREAM_CODEC, SolderingRecipeHolder::id,
+			SolderingRecipe.STREAM_CODEC, SolderingRecipeHolder::recipe,
+			SolderingRecipeHolder::new);
+	}
 
 	@Override
-	public RecipeType<?> getType()
+	public RecipeType<? extends Recipe<CraftingInput>> getType()
 	{
 		return MoreRed.get().solderingRecipeType.get();
 	}
 
 	@Override
-	public RecipeSerializer<?> getSerializer()
+	public RecipeSerializer<? extends Recipe<CraftingInput>> getSerializer()
 	{
 		return MoreRed.get().solderingSerializer.get();
 	}
@@ -84,18 +96,6 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 	}
 
 	@Override
-	public boolean canCraftInDimensions(int x, int y)
-	{
-		return x*y <= ingredients.size();
-	}
-
-	@Override
-	public ItemStack getResultItem(Provider provider)
-	{
-		return this.result;
-	}
-
-	@Override
 	public boolean isSpecial()
 	{
 		return true; // keeps vanilla recipe book from logspamming
@@ -105,5 +105,17 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 	public boolean showNotification()
 	{
 		return false;
+	}
+
+	@Override
+	public PlacementInfo placementInfo()
+	{
+		return PlacementInfo.NOT_PLACEABLE;
+	}
+
+	@Override
+	public RecipeBookCategory recipeBookCategory()
+	{
+		return RecipeBookCategories.CRAFTING_MISC;
 	}
 }

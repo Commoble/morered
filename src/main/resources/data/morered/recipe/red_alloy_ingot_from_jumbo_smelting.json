@@ -3,10 +3,10 @@
 	"ingredients":
 	[
 		{
-			"tag": "morered:red_alloyable_ingots"
+			"ingredient": "#morered:red_alloyable_ingots"
 		},
 		{
-			"tag": "c:dusts/redstone",
+			"ingredient": "#c:dusts/redstone",
 			"count": 4
 		}
 	],

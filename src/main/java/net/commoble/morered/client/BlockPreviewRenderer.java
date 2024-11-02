@@ -61,7 +61,7 @@ public class BlockPreviewRenderer extends ModelBlockRenderer
 			state,
 			pos,
 			matrix,
-			renderTypeBuffer.getBuffer(Sheets.translucentCullBlockSheet()),
+			renderTypeBuffer.getBuffer(Sheets.translucentItemSheet()),
 			false,
 			level.random,
 			state.getSeed(pos),

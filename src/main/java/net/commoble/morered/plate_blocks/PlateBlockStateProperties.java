@@ -7,7 +7,7 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.Vec3;
 
@@ -27,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
  */
 public class PlateBlockStateProperties
 {
-	public static final DirectionProperty ATTACHMENT_DIRECTION = BlockStateProperties.FACING;
+	public static final EnumProperty<Direction> ATTACHMENT_DIRECTION = BlockStateProperties.FACING;
 	public static final IntegerProperty ROTATION = IntegerProperty.create("rotation", 0,3);
 	
 	/** The first input clockwise from the output **/

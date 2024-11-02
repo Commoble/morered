@@ -80,7 +80,7 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
 		
 		Minecraft mc = Minecraft.getInstance();
 		var blockRenderer = mc.getBlockRenderer();
-		RenderType bufferType = Sheets.translucentCullBlockSheet();
+		RenderType bufferType = Sheets.translucentItemSheet();
 		RenderType renderType = RenderType.translucent();
 		BakedModel blockModel = blockRenderer.getBlockModel(renderState);
 		blockRenderer.getModelRenderer().tesselateWithAO(

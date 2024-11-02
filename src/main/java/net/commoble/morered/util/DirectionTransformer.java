@@ -136,8 +136,8 @@ public class DirectionTransformer
 	 */
 	public static Vec3[][] getVertexPairs(Direction startSide, Direction endSide)
 	{
-		Vec3i startSideVec = startSide.getNormal();
-		Vec3i endSideVec = endSide.getNormal();
+		Vec3i startSideVec = startSide.getUnitVec3i();
+		Vec3i endSideVec = endSide.getUnitVec3i();
 		Direction[] startEdgeDirections = ORTHAGONAL_ROTATION_TABLE[startSide.ordinal()];
 		double tubeSideOffset = 4F/16F;	// distance from center of tube to center of side
 		double tubeEdgeOffset = 2F/16F; // distance from center of side of tube to center of edge of hole
@@ -148,9 +148,9 @@ public class DirectionTransformer
 		{
 			// determine the vertices of the origin side
 			Direction firstOrthagonal = startEdgeDirections[i];
-			Vec3i firstOrthagonalSideVec = firstOrthagonal.getNormal();
+			Vec3i firstOrthagonalSideVec = firstOrthagonal.getUnitVec3i();
 			Direction secondOrthagonal = startEdgeDirections[(i+1) % 4];;
-			Vec3i secondOrthagonalSideVec = secondOrthagonal.getNormal();
+			Vec3i secondOrthagonalSideVec = secondOrthagonal.getUnitVec3i();
 			result[i][0] = getVertexOffset(startSideVec, firstOrthagonalSideVec, secondOrthagonalSideVec, tubeSideOffset, tubeEdgeOffset, tubeCornerOffset);
 				
 			// now we do the end side
@@ -172,8 +172,8 @@ public class DirectionTransformer
 				// second orthagonal also rotates in the opposite direction
 				Direction firstEndOrthagonal = getRotatedDirection(endSide, startSide, firstOrthagonal);
 				Direction secondEndOrthagonal = getRotatedDirection(endSide, startSide, secondOrthagonal);
-				Vec3i firstEndSideVec = firstEndOrthagonal.getNormal();
-				Vec3i secondEndSideVec = secondEndOrthagonal.getNormal();
+				Vec3i firstEndSideVec = firstEndOrthagonal.getUnitVec3i();
+				Vec3i secondEndSideVec = secondEndOrthagonal.getUnitVec3i();
 				result[i][1] = getVertexOffset(endSideVec, firstEndSideVec, secondEndSideVec, tubeSideOffset, tubeEdgeOffset, tubeCornerOffset);
 			}
 		}

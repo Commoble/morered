@@ -60,7 +60,7 @@ public class DirectionHelper
 		for (int i = 0; i < directionCount; i++)
 		{
 			Direction dir = dirs[i];
-			if (dir.getNormal().equals(offset))
+			if (dir.getUnitVec3i().equals(offset))
 			{
 				return dir;
 			}

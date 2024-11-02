@@ -21,7 +21,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -94,7 +94,7 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 	}
 	
 	@Override
-	public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
 		boolean isPlayerHoldingWrench = stack.is(CommonTags.Items.WRENCHES);
 		
@@ -109,7 +109,7 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 			level.setBlockAndUpdate(pos, newState);
 		}
 		
-		return isPlayerHoldingWrench ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 	public Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide,

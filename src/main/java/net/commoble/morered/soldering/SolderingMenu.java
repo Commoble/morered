@@ -4,7 +4,8 @@ import org.jetbrains.annotations.Nullable;
 
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -13,6 +14,7 @@ import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeManager;
 
@@ -153,15 +155,15 @@ public class SolderingMenu extends AbstractContainerMenu
 	}
 	
 	
-	public void onPlayerChoseRecipe(ResourceLocation recipeID)
+	public void onPlayerChoseRecipe(ServerPlayer serverPlayer, ResourceKey<Recipe<?>> recipeID)
 	{
-		var recipe = getSolderingRecipe(this.player.level().getRecipeManager(), recipeID);
+		var recipe = getSolderingRecipe(serverPlayer.getServer().getRecipeManager(), recipeID);
 		if (recipe == null)
 			return;
 		this.attemptRecipeAssembly(recipe.value());
 	}
 
-	public static @Nullable RecipeHolder<SolderingRecipe> getSolderingRecipe(RecipeManager manager, ResourceLocation id)
+	public static @Nullable RecipeHolder<SolderingRecipe> getSolderingRecipe(RecipeManager manager, ResourceKey<Recipe<?>> id)
 	{
 		return manager.byKeyTyped(MoreRed.get().solderingRecipeType.get(), id);
 	}
@@ -178,7 +180,7 @@ public class SolderingMenu extends AbstractContainerMenu
 		}
 		else
 		{
-			this.craftResult.setItem(0, recipe.getResultItem(this.player.level().registryAccess()).copy());
+			this.craftResult.setItem(0, recipe.result().copy());
 		}
 	}
 }

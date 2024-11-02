@@ -28,6 +28,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock implements EntityBlock
@@ -84,16 +85,15 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 
 	@Override
 	@Deprecated
-	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, Orientation orientation, boolean isMoving)
 	{
 		// direct-connection posts need to update nodes if neighbor cube updates
 		if (this.connectsToAttachedBlock
-			&& pos.relative(state.getValue(DIRECTION_OF_ATTACHMENT)).equals(fromPos)
 			&& world.getBlockEntity(pos) instanceof WirePostBlockEntity post)
 		{
 			post.clearTransmissionNodes();
 		}
-		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
+		super.neighborChanged(state, world, pos, blockIn, orientation, isMoving);
 	}
 
 	@Override

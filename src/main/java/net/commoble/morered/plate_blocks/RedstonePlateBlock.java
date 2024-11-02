@@ -11,7 +11,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -20,6 +20,8 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.ticks.TickPriority;
 import net.neoforged.neoforge.event.EventHooks;
@@ -72,7 +74,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 		return state;
 	}
 	
-	public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
 		boolean isPlayerHoldingWrench = stack.is(CommonTags.Items.WRENCHES);
 		
@@ -91,7 +93,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			level.setBlockAndUpdate(pos, newState);
 		}
 		
-		return isPlayerHoldingWrench ? ItemInteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
 	}
 
 	@Deprecated
@@ -152,9 +154,9 @@ public abstract class RedstonePlateBlock extends PlateBlock
 
 	@Override
 	@Deprecated
-	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving)
 	{
-		super.neighborChanged(state, worldIn, pos, blockIn, fromPos, isMoving);
+		super.neighborChanged(state, worldIn, pos, blockIn, orientation, isMoving);
 		// if any inputs changed, schedule a tick
 		InputState oldInputState = InputState.getInput(state);
 		InputState newInputState = InputState.getWorldPowerState(worldIn, state, pos);
@@ -192,10 +194,9 @@ public abstract class RedstonePlateBlock extends PlateBlock
 			for (Direction outputDirection : outputDirections)
 			{
 				BlockPos outputPos = pos.relative(outputDirection);
-				{
-					level.neighborChanged(outputPos, this, pos);
-				}
-				level.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite());
+				Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(level, outputDirection, null);
+				level.neighborChanged(outputPos, this, orientation);
+				level.updateNeighborsAtExceptFromFacing(outputPos, this, outputDirection.getOpposite(), orientation);
 			}
 		}
 	}

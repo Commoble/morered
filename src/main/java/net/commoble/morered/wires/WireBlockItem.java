@@ -83,7 +83,7 @@ public class WireBlockItem extends BlockItem
 				}
 
 				// return SUCCESS for client thread worlds, CONSUME for server thread worlds (same as regular blockitem)
-				return InteractionResult.sidedSuccess(world.isClientSide);
+				return InteractionResult.SUCCESS;
 			}
 		}
 		

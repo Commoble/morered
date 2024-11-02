@@ -3,15 +3,15 @@
   "ingredients": [
     {
       "count": 8,
-      "tag": "c:quarter_slabs/smooth_stone"
+      "ingredient": "#c:quarter_slabs/smooth_stone"
     },
     {
       "count": 9,
-      "tag": "c:dusts/redstone"
+      "ingredient": "#c:dusts/redstone"
     },
     {
       "count": 4,
-      "tag": "c:gems/quartz"
+      "ingredient": "#c:gems/quartz"
     }
   ],
   "result": {

@@ -6,13 +6,13 @@ import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.MapCodec;
 
 import net.commoble.morered.MoreRed;
+import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 // loot function to set the count of a wire block's loot's dropped wire items
@@ -27,7 +27,7 @@ public class WireCountLootFunction implements LootItemFunction
 	@Override
 	public ItemStack apply(ItemStack input, LootContext context)
 	{
-		BlockState state = context.getParamOrNull(LootContextParams.BLOCK_STATE);
+		BlockState state = context.getParameter(LootContextParams.BLOCK_STATE);
 		Block block = state.getBlock();
 		if (block instanceof AbstractWireBlock)
 		{
@@ -43,7 +43,7 @@ public class WireCountLootFunction implements LootItemFunction
 	}
 	
 	@Override
-	public Set<LootContextParam<?>> getReferencedContextParams()
+	public Set<ContextKey<?>> getReferencedContextParams()
 	{
 		return ImmutableSet.of(LootContextParams.BLOCK_STATE);
 	}

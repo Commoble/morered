@@ -1,5 +1,6 @@
 package net.commoble.morered.client;
 
+import java.util.List;
 import java.util.function.Function;
 
 import org.joml.Matrix4f;
@@ -8,22 +9,21 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 
 import net.commoble.morered.client.TintRotatingModelLoader.TintRotatingModelGeometry;
-import net.commoble.morered.mixin.ClientElementsModelAccess;
 import net.commoble.morered.wires.Edge;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModel;
+import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.client.resources.model.UnbakedModel.Resolver;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.client.model.ElementsModel;
-import net.neoforged.neoforge.client.model.IModelBuilder;
 import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
 import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.SimpleUnbakedGeometry;
+import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
 
 /**
  model loader that "rotates" a tintindex in a predefined way
@@ -53,95 +53,78 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
 	public TintRotatingModelGeometry read(JsonObject modelContents, JsonDeserializationContext context)
 	{
 		// we use the vanilla model loader to parse everything
-		ElementsModel proxy = ElementsModel.Loader.INSTANCE.read(modelContents, context);
+//		ElementsModel proxy = ElementsModel.Loader.INSTANCE.read(modelContents, context);
+        BlockModel proxy = context.deserialize(modelContents.get("model"), BlockModel.class);
+		
         return new TintRotatingModelGeometry(proxy);
 	}
 	
-	public static class TintRotatingModelGeometry extends SimpleUnbakedGeometry<TintRotatingModelGeometry>
+	public static class TintRotatingModelGeometry implements IUnbakedGeometry<TintRotatingModelGeometry>
 	{
-		private final ElementsModel elementsModel;
+		private final BlockModel blockModel;
 		
-		public TintRotatingModelGeometry(ElementsModel proxy)
+		public TintRotatingModelGeometry(BlockModel proxy)
 		{
-			this.elementsModel = proxy;
+			this.blockModel = proxy;
+		}
+			
+		@SuppressWarnings("deprecation")
+		@Override
+		public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
+			List<ItemOverride> overrides)
+		{
+			BakedModel baseModel = blockModel.bake(spriteGetter, modelState, false);
+			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(blockModel, false)
+				.particle(spriteGetter.apply(blockModel.getMaterial("particle")));
+			Matrix4f rotation = modelState.getRotation().getMatrix();
+			for (Direction dir : Direction.values())
+			{
+				// don't worry about deprecated getQuads, the basemodel doesn't use modeldata and we don't have modeldata in context anyway 
+				for (BakedQuad quad : baseModel.getQuads(null, dir, null))
+				{
+					builder.addCulledFace(dir, getTintRotatedQuad(quad, rotation));
+				}
+			}
+			for (BakedQuad quad : baseModel.getQuads(null, null, null))
+			{
+				builder.addUnculledFace(getTintRotatedQuad(quad, rotation));
+			}
+			return builder.build();
 		}
 
 		@Override
-		public void addQuads(IGeometryBakingContext context, IModelBuilder<?> modelBuilder, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter,
-			ModelState modelTransform)
+		public void resolveDependencies(Resolver resolver, IGeometryBakingContext owner)
 		{
-			IModelBuilder<?> builderWrapper = new TintRotatingModelBuilder(modelBuilder, modelTransform);
-			// it's a protected method in a forge class so we have to either use accessors or reflection to get at it
-			((ClientElementsModelAccess)(Object)(this.elementsModel)).callAddQuads(context, builderWrapper, bakery, spriteGetter, modelTransform);
-		}
-
-		@Override
-		public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext owner)
-		{
-			this.elementsModel.resolveParents(modelGetter, owner);
-		}
-	}
-	
-	public static class TintRotatingModelBuilder implements IModelBuilder<TintRotatingModelBuilder>
-	{
-		private final IModelBuilder<?> delegate;
-		private final Matrix4f rotation;
-		
-		public TintRotatingModelBuilder(IModelBuilder<?> delegate, ModelState modelTransform)
-		{
-			this.delegate = delegate;
-			this.rotation = modelTransform.getRotation().getMatrix();
-		}
-
-		@Override
-		public TintRotatingModelBuilder addCulledFace(Direction facing, BakedQuad quad)
-		{
-			BakedQuad tintRotatedQuad = this.getTintRotatedQuad(quad);
-			this.delegate.addCulledFace(facing,tintRotatedQuad);
-			return this;
-		}
-
-		@Override
-		public TintRotatingModelBuilder addUnculledFace(BakedQuad quad)
-		{
-			BakedQuad tintRotatedQuad = this.getTintRotatedQuad(quad);
-			this.delegate.addUnculledFace(tintRotatedQuad);
-			return this;
-		}
-
-		@Override
-		public BakedModel build()
-		{
-			return this.delegate.build();
+			this.blockModel.resolveDependencies(resolver);
 		}
 		
-		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad)
+		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad, Matrix4f rotation)
 		{
-			int newTint = this.rotateTint(baseQuad.getTintIndex());
-			return new BakedQuad(baseQuad.getVertices(), newTint, baseQuad.getDirection(), baseQuad.getSprite(), baseQuad.isShade());
+			int newTint = this.rotateTint(baseQuad.getTintIndex(), rotation);
+			return new BakedQuad(baseQuad.getVertices(), newTint, baseQuad.getDirection(), baseQuad.getSprite(), baseQuad.isShade(), baseQuad.getLightEmission(), baseQuad.hasAmbientOcclusion());
 		}
 		
-		protected int rotateTint(int baseTint)
+		protected int rotateTint(int baseTint, Matrix4f rotation)
 		{
 			return baseTint < 1 ? baseTint
-				: baseTint < 7 ? this.rotateSide(baseTint)
-				: baseTint < 19 ? this.rotateEdge(baseTint)
+				: baseTint < 7 ? this.rotateSide(baseTint, rotation)
+				: baseTint < 19 ? this.rotateEdge(baseTint, rotation)
 				: baseTint;
 		}
 		
-		protected int rotateSide(int baseTint)
+		protected int rotateSide(int baseTint, Matrix4f rotation)
 		{
 			int ordinal = baseTint - 1;
 			Direction baseDir = Direction.from3DDataValue(ordinal);
-			Direction newDir = Direction.rotate(this.rotation, baseDir);
+			Direction newDir = Direction.rotate(rotation, baseDir);
 			return newDir.ordinal() + 1;
 		}
 		
-		protected int rotateEdge(int baseTint)
+		protected int rotateEdge(int baseTint, Matrix4f rotation)
 		{
 			int ordinal = baseTint - 7;
 			
-			return EdgeRotation.getRotatedEdge(Edge.values()[ordinal], this.rotation).ordinal() + 7;
+			return EdgeRotation.getRotatedEdge(Edge.values()[ordinal], rotation).ordinal() + 7;
 		}
 	}
 }

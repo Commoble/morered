@@ -26,9 +26,9 @@ import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -39,7 +39,7 @@ public abstract class AbstractPostBlock extends Block
 	// this gives the block 48 states (6*8)
 	// we could optimize it to 24 (3*8) by having the facing be up/down/sideways and using the transform to handle sideways facing,
 	// but that makes the logic a lot grittier and we'd have to refactor the blockstate files
-	public static final DirectionProperty DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
+	public static final EnumProperty<Direction> DIRECTION_OF_ATTACHMENT = BlockStateProperties.FACING;
 	public static final EnumProperty<OctahedralGroup> TRANSFORM = EightGroup.TRANSFORM;
 
 	public AbstractPostBlock(Properties properties)
@@ -92,9 +92,9 @@ public abstract class AbstractPostBlock extends Block
 	}
 
 	@Override
-	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving)
 	{
-		super.neighborChanged(state, world, pos, blockIn, fromPos, isMoving);
+		super.neighborChanged(state, world, pos, blockIn, orientation, isMoving);
 		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
 	}
 	
@@ -107,7 +107,7 @@ public abstract class AbstractPostBlock extends Block
 			boolean setUpdated = setFunction.test(set, pos);
 			if (setUpdated && world instanceof ServerLevel serverLevel)
 			{
-				chunk.setUnsaved(true);
+				chunk.markUnsaved();
 				ChunkPos chunkPos = chunk.getPos();
 				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, chunkPos, new SyncPostsInChunkPacket(chunkPos, set));
 			}

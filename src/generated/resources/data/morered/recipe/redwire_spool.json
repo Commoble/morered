@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "f": {
-      "tag": "c:ingots/iron"
-    },
-    "r": {
-      "tag": "morered:red_alloy_wires"
-    },
-    "s": {
-      "tag": "c:rods/wooden"
-    }
+    "f": "#c:ingots/iron",
+    "r": "#morered:red_alloy_wires",
+    "s": "#c:rods/wooden"
   },
   "pattern": [
     "rfs",

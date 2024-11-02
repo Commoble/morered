@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": {
-      "tag": "c:quarter_slabs/smooth_stone"
-    },
-    "i": {
-      "tag": "c:ingots/iron"
-    },
-    "r": {
-      "tag": "c:dusts/redstone"
-    }
+    "#": "#c:quarter_slabs/smooth_stone",
+    "i": "#c:ingots/iron",
+    "r": "#c:dusts/redstone"
   },
   "pattern": [
     "rir",

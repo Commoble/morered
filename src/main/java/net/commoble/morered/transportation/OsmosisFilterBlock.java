@@ -1,7 +1,9 @@
 package net.commoble.morered.transportation;
 
-import net.commoble.morered.util.WorldHelper;
+import org.jetbrains.annotations.Nullable;
+
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionResult;
@@ -16,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -104,10 +107,9 @@ public class OsmosisFilterBlock extends FilterBlock
 	}
 	
 	@Override
-	@Deprecated
-	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, BlockPos neighborPos, boolean isMoving)
+	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, @Nullable Orientation orientation, boolean isMoving)
 	{
-		super.neighborChanged(thisState, level, thisPos, neighborBlock, neighborPos, isMoving);
+		super.neighborChanged(thisState, level, thisPos, neighborBlock, orientation, isMoving);
 		this.updateState(level, thisPos, thisState);
 	}
 	

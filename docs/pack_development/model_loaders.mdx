@@ -66,7 +66,15 @@ The Wire Parts model loader is used by the following blocks:
 
 The `morered:rotate_tints` model loader is used to ensure that [red alloy wires](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire)
 have the correct [tintindexes](/en/mod/morered/docs/pack_development/tintindexes) when rotated by the wire part loader and the blockstate json.
-It uses the same format as [vanilla model jsons](https://minecraft.wiki/Model#Block_models), but with `"loader": "morered:rotate_tints"` specified.
+It has the following JSON format:
+```json
+{
+	"loader": "morered:rotate_tints",
+	"model": {
+		// any model json
+	}
+}
+```
 
 Tintindexes in a rotate_tints model loader will be transformed into other tintindexes if the model is rotated;
 the tintindex assigned to each orientation is described in [tintindexes](/en/mod/morered/docs/pack_development/tintindexes#red-alloy-wire).
@@ -78,4 +86,5 @@ Currently, only red alloy wires use the Rotate Tints model loader.
 
 | Version | Changelog
 |---|-
+|1.22-7.0.0.0| Rotate Tints's delegate model is now specified in a "model" field instead of in the root object
 |1.16.5-2.1.0.0 | Added Wire Parts and Rotate Tints model loaders

@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "building",
   "ingredients": [
-    {
-      "item": "morered:shunt"
-    },
-    {
-      "item": "minecraft:item_frame"
-    }
+    "morered:shunt",
+    "minecraft:item_frame"
   ],
   "result": {
     "count": 1,

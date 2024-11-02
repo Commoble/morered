@@ -1,5 +1,7 @@
 package net.commoble.morered.transportation;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.commoble.morered.CommonTags;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
@@ -7,7 +9,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
@@ -21,7 +23,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
@@ -32,7 +35,7 @@ import net.neoforged.neoforge.items.IItemHandler;
 public class ExtractorBlock extends Block
 {
 	// output is current facing, input is face.getOpposite()
-	public static final DirectionProperty FACING = DirectionalBlock.FACING;
+	public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
 	protected final VoxelShape[] shapes;
@@ -45,7 +48,7 @@ public class ExtractorBlock extends Block
 	}
 
 	@Override
-	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, BlockPos neighborPos, boolean isMoving)
+	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, @Nullable Orientation orientation, boolean isMoving)
 	{
 		if (!level.isClientSide())
 		{
@@ -154,7 +157,7 @@ public class ExtractorBlock extends Block
 	}
 
 	@Override
-	protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
 	{
 		if (stack.is(CommonTags.Items.WRENCHES))
 		{
@@ -162,7 +165,7 @@ public class ExtractorBlock extends Block
 				0.1F + level.random.nextFloat()*0.1F,
 				0.7F + level.random.nextFloat()*0.1F);
 			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
-			return ItemInteractionResult.SUCCESS;
+			return InteractionResult.SUCCESS;
 		}
 		return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
 	}

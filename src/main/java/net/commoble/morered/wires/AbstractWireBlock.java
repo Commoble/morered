@@ -1,12 +1,10 @@
 package net.commoble.morered.wires;
 
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -21,12 +19,12 @@ import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.StateWirer;
 import net.commoble.exmachina.api.TransmissionNode;
-import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -35,6 +33,7 @@ import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.PipeBlock;
@@ -43,14 +42,13 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
-import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class AbstractWireBlock extends Block
 {
@@ -223,7 +221,7 @@ public abstract class AbstractWireBlock extends Block
 
 	// overriding this so we don't delegate to getShape for the render shape (to reduce lookups of the extended shape)
 	@Override
-	public VoxelShape getOcclusionShape(BlockState state, BlockGetter worldIn, BlockPos pos)
+	public VoxelShape getOcclusionShape(BlockState state)
 	{
 		return this.shapesByStateIndex[getShapeIndex(state)];
 	}
@@ -235,7 +233,15 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	@Override
-	public BlockState updateShape(BlockState thisState, Direction directionToNeighbor, BlockState neighborState, LevelAccessor world, BlockPos thisPos, BlockPos neighborPos)
+	public BlockState updateShape(
+		BlockState thisState,
+		LevelReader world,
+		ScheduledTickAccess ticker,
+		BlockPos thisPos,
+		Direction directionToNeighbor,
+		BlockPos neighborPos,
+		BlockState neighborState,
+		RandomSource random)
 	{
 		BooleanProperty sideProperty = INTERIOR_FACES[directionToNeighbor.ordinal()];
 		if (thisState.getValue(sideProperty)) // if wire is attached on the relevant face, check if it should be disattached
@@ -296,12 +302,6 @@ public abstract class AbstractWireBlock extends Block
 		return neighborState.isFaceSturdy(world, neighborPos, sideOfNeighbor)
 			? this.defaultBlockState().setValue(INTERIOR_FACES[directionToNeighbor.ordinal()], true)
 			: null;
-	}
-
-	@Override
-	public void initializeClient(Consumer<IClientBlockExtensions> consumer)
-	{
-		ClientProxy.initializeAbstractWireBlockClient(this, consumer);
 	}
 	
 	// called when a different block instance is replaced with this one
@@ -387,11 +387,8 @@ public abstract class AbstractWireBlock extends Block
 
 	// called when a neighboring blockstate changes, not called on the client
 	@Override
-	@Deprecated
-	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighborBlock, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighborBlock, Orientation orientation, boolean isMoving)
 	{
-		BlockPos offset = fromPos.subtract(pos);
-		Direction directionToNeighbor = Direction.fromDelta(offset.getX(), offset.getY(), offset.getZ());
 		long edgeFlags = this.getEdgeFlags(worldIn,pos);
 		boolean doGraphUpdate = true;
 		// if this is an empty wire block, remove it if no edges are valid anymore
@@ -404,11 +401,16 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		// if this is a non-empty wire block and the changed state is an air block
-		else if (worldIn.isEmptyBlock(fromPos))
+		else
 		{
-			if (directionToNeighbor != null)
+			// check neighbors for empty blocks and add empty wires where needed
+			for (Direction directionToNeighbor : Direction.values())
 			{
-				this.addEmptyWireToAir(state, worldIn, fromPos, directionToNeighbor);
+				BlockPos fromPos = pos.relative(directionToNeighbor);
+				if (worldIn.isEmptyBlock(fromPos))
+				{
+					this.addEmptyWireToAir(state, worldIn, fromPos, directionToNeighbor);
+				}
 			}
 		}
 		if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
@@ -421,33 +423,33 @@ public abstract class AbstractWireBlock extends Block
 			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
 		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
-		if (edgeFlags != 0)
-		{
-			EnumSet<Direction> edgeUpdateDirs = EnumSet.noneOf(Direction.class);
-			Edge[] edges = Edge.values();
-			for (int edgeFlag = 0; edgeFlag < 12; edgeFlag++)
-			{
-				if ((edgeFlags & (1 << edgeFlag)) != 0)
-				{
-					Edge edge = edges[edgeFlag];
-					if (edge.sideA == directionToNeighbor)
-						edgeUpdateDirs.add(edge.sideB);
-					else if (edge.sideB == directionToNeighbor)
-						edgeUpdateDirs.add(edge.sideA);
-				}
-			}
-			if (!edgeUpdateDirs.isEmpty() && !EventHooks.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
-			{
-				BlockPos.MutableBlockPos mutaPos = pos.mutable();
-				for (Direction dir : edgeUpdateDirs)
-				{
-					BlockPos neighborPos = mutaPos.setWithOffset(pos, dir);
-					worldIn.neighborChanged(neighborPos, this, pos);
-				}
-			}
-		}
+//		if (edgeFlags != 0)
+//		{
+//			EnumSet<Direction> edgeUpdateDirs = EnumSet.noneOf(Direction.class);
+//			Edge[] edges = Edge.values();
+//			for (int edgeFlag = 0; edgeFlag < 12; edgeFlag++)
+//			{
+//				if ((edgeFlags & (1 << edgeFlag)) != 0)
+//				{
+//					Edge edge = edges[edgeFlag];
+//					if (edge.sideA == directionToNeighbor)
+//						edgeUpdateDirs.add(edge.sideB);
+//					else if (edge.sideB == directionToNeighbor)
+//						edgeUpdateDirs.add(edge.sideA);
+//				}
+//			}
+//			if (!edgeUpdateDirs.isEmpty() && !EventHooks.onNeighborNotify(worldIn, pos, state, edgeUpdateDirs, false).isCanceled())
+//			{
+//				BlockPos.MutableBlockPos mutaPos = pos.mutable();
+//				for (Direction dir : edgeUpdateDirs)
+//				{
+//					BlockPos neighborPos = mutaPos.setWithOffset(pos, dir);
+//					worldIn.neighborChanged(neighborPos, this, orientation);
+//				}
+//			}
+//		}
 		
-		super.neighborChanged(state, worldIn, pos, neighborBlock, fromPos, isMoving);
+		super.neighborChanged(state, worldIn, pos, neighborBlock, orientation, isMoving);
 	}
 
 	@Override

@@ -3,7 +3,7 @@ plugins {
 	id 'eclipse'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version '1.0.20'
+	id 'net.neoforged.moddev' version '1.0.+'
 	id 'org.sinytra.wiki.toolkit' version '0.1.10'
 }
 
@@ -76,20 +76,15 @@ configurations {
 }
 
 dependencies {
-	jarJar(implementation("net.commoble.exmachina:exmachina-${exmachina_mc_version}")) {
-		version {
-			strictly "[${exmachina_min_version}, ${exmachina_next_version})"
-			prefer "${exmachina_version}"
-		}
-	}
+	jarJar(implementation("net.commoble.exmachina:exmachina-${exmachina_mc_version}:${exmachina_version}"))
 
-	compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-	compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+	//compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
+	//compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
 	// at runtime, use the full JEI jar for NeoForge
 	//localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
 	
-	compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-	localRuntime "dev.emi:emi-neoforge:${emi_version}"
+	//compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
+	//localRuntime "dev.emi:emi-neoforge:${emi_version}"
 	
 	localRuntime "org.sinytra:item-asset-export-neoforge:${item_asset_export_version}"
 }

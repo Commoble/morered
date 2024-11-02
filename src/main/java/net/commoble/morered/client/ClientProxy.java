@@ -1,5 +1,6 @@
 package net.commoble.morered.client;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,7 @@ import net.commoble.morered.Names;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
-import net.commoble.morered.soldering.SolderingRecipe;
+import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.transportation.RaytraceHelper;
 import net.commoble.morered.transportation.TubeBreakPacket;
 import net.commoble.morered.util.BlockStateUtil;
@@ -37,15 +38,12 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -68,6 +66,7 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
+import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -80,12 +79,14 @@ public class ClientProxy
 	// block positions are in absolute world coordinates, not local chunk coords
 	private static Map<ChunkPos, Set<BlockPos>> clientPostsInChunk = new HashMap<>();
 	private static Map<ChunkPos, Set<BlockPos>> clientTubesInChunk = new HashMap<>();
+	private static List<SolderingRecipeHolder> solderingRecipes = new ArrayList<>();
 	private static boolean isHoldingSprint = false;
 	
 	public static void clear()
 	{
 		clientPostsInChunk = new HashMap<>();
 		clientTubesInChunk = new HashMap<>();
+		solderingRecipes = new ArrayList<>();
 		isHoldingSprint = false;
 	}
 	
@@ -130,20 +131,18 @@ public class ClientProxy
 	{
 		return clientTubesInChunk.getOrDefault(pos, Set.of());
 	}
-
-	public static void initializeAbstractWireBlockClient(AbstractWireBlock block, Consumer<IClientBlockExtensions> consumer)
+	
+	public static void updateSolderingRecipes(List<SolderingRecipeHolder> recipes)
 	{
-		consumer.accept(new IClientBlockExtensions() {
+		solderingRecipes = recipes
+			.stream()
+			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().getItem().getDescriptionId())))
+			.toList();
+	}
 
-			@Override
-			public boolean addHitEffects(BlockState state, Level Level, HitResult target, ParticleEngine manager)
-			{
-				// if we have no wires here, we have no shape, so return true to disable particles
-				// (otherwise the particle manager crashes because it performs an unsupported operation on the empty shape)
-				return block.getWireCount(state) == 0;
-			}
-			
-		});
+	public static List<SolderingRecipeHolder> getAllSolderingRecipes()
+	{
+		return solderingRecipes;
 	}
 
 	public static void addClientListeners(IEventBus modBus, IEventBus forgeBus)
@@ -154,6 +153,7 @@ public class ClientProxy
 		modBus.addListener(ClientProxy::onRegisterItemColors);
 		modBus.addListener(ClientProxy::onRegisterRenderers);
 		modBus.addListener(ClientProxy::onRegisterScreens);
+		modBus.addListener(ClientProxy::onRegisterClientExtensions);
 		
 		forgeBus.addListener(ClientProxy::onClientLogIn);
 		forgeBus.addListener(ClientProxy::onClientLogOut);
@@ -183,6 +183,26 @@ public class ClientProxy
 		event.register(MoreRed.get().filterMenu.get(), SingleSlotMenuScreen::new);
 		event.register(MoreRed.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
 			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.get().multiFilterBlock.get().getDescriptionId()));
+	}
+	
+	private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
+	{
+		Consumer<AbstractWireBlock> registerWireBlock = block -> event.registerBlock(
+			new IClientBlockExtensions() {
+				@Override
+				public boolean addHitEffects(BlockState state, Level Level, HitResult target, ParticleEngine manager)
+				{
+					// if we have no wires here, we have no shape, so return true to disable particles
+					// (otherwise the particle manager crashes because it performs an unsupported operation on the empty shape)
+					return block.getWireCount(state) == 0;
+				}
+			}, block);
+		registerWireBlock.accept(MoreRed.get().redAlloyWireBlock.get());
+		registerWireBlock.accept(MoreRed.get().bundledCableBlock.get());
+		for (var block : MoreRed.get().coloredCableBlocks)
+		{
+			registerWireBlock.accept(block.get());
+		}
 	}
 
 	public static void onRegisterModelLoaders(ModelEvent.RegisterGeometryLoaders event)
@@ -324,7 +344,7 @@ public class ClientProxy
 					return;
 				if (!world.getWorldBorder().isWithinBounds(pos))
 					return;
-				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getTimer().getGameTimeDeltaPartialTick(false));
+				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
 				if (faceToBreak == null)
 					return;
 				Direction hitNormal = faceToBreak.getOpposite();
@@ -419,13 +439,5 @@ public class ClientProxy
 						.setPower(0.2F).scale(0.6F));
 			}
 		}
-	}
-
-	public static List<RecipeHolder<SolderingRecipe>> getAllSolderingRecipes(RecipeManager manager, RegistryAccess registries)
-	{
-		return manager.getAllRecipesFor(MoreRed.get().solderingRecipeType.get())
-			.stream()
-			.sorted(Comparator.comparing(recipe -> I18n.get(recipe.value().getResultItem(registries).getDescriptionId())))
-			.toList();
 	}
 }

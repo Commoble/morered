@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": {
-      "tag": "c:quarter_slabs/smooth_stone"
-    },
-    "F": {
-      "tag": "c:ingots/iron"
-    },
-    "b": {
-      "tag": "morered:bundled_cables"
-    }
+    "#": "#c:quarter_slabs/smooth_stone",
+    "F": "#c:ingots/iron",
+    "b": "#morered:bundled_cables"
   },
   "pattern": [
     " b ",

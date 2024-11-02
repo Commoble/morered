@@ -32,6 +32,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -144,7 +145,7 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		this.remoteConnections.put(otherPos.immutable(), this.getNestedBoundingBoxForConnectedPos(otherPos));
 		this.transmissionNodes = null;
-		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
+		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), ExperimentalRedstoneUtils.initialOrientation(level, null, null));
 		this.onCommonDataUpdated();
 	}
 
@@ -152,7 +153,7 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		this.remoteConnections.remove(otherPos);
 		this.transmissionNodes = null;
-		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), otherPos);
+		this.level.neighborChanged(this.worldPosition, this.getBlockState().getBlock(), ExperimentalRedstoneUtils.initialOrientation(level, null, null));
 		if (this.level instanceof ServerLevel serverLevel)
 		{
 			// only send one break packet when breaking two connections
@@ -169,9 +170,7 @@ public class WirePostBlockEntity extends BlockEntity
 	public void notifyConnections()
 	{
 		this.getRemoteConnections()
-			.forEach(connectionPos -> this.level.neighborChanged(connectionPos, this.getBlockState().getBlock(), this.worldPosition));
-//			world.notifyNeighborsOfStateExcept(neighborPos, this, dir);
-			
+			.forEach(connectionPos -> this.level.neighborChanged(connectionPos, this.getBlockState().getBlock(), ExperimentalRedstoneUtils.initialOrientation(level, null, null)));
 	}
 
 	public AABB getRenderBoundingBox()

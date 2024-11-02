@@ -2,21 +2,11 @@
 	"type": "minecraft:crafting_shapeless",
 	"ingredients": 
 	[
-		{
-			"tag": "morered:red_alloyable_ingots"
-		},
-		{
-			"tag": "c:dusts/redstone"
-		},
-		{
-			"tag": "c:dusts/redstone"
-		},
-		{
-			"tag": "c:dusts/redstone"
-		},
-		{
-			"tag": "c:dusts/redstone"
-		}
+		"#morered:red_alloyable_ingots",
+		"#c:dusts/redstone",
+		"#c:dusts/redstone",
+		"#c:dusts/redstone",
+		"#c:dusts/redstone"
 	],
 	"result": 
 	{

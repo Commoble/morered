@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.level.redstone.Orientation;
 
 public class HexidecrubrometerBlock extends Block
 {
@@ -88,12 +89,13 @@ public class HexidecrubrometerBlock extends Block
 	{
 		if (world instanceof ServerLevel serverLevel && pos.relative(getReadingDirection(state)).equals(neighbor))
 		{
-	          state.handleNeighborChanged(serverLevel, pos, world.getBlockState(neighbor).getBlock(), neighbor, false);
+			// it's okay to pass a null orientation here, vanilla does it at the onNeighborChange call site
+			state.handleNeighborChanged(serverLevel, pos, world.getBlockState(neighbor).getBlock(), null, false);
 		}
 	}
 
 	@Override
-	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block fromBlock, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block fromBlock, Orientation orientation, boolean isMoving)
 	{
 		int newValue = getInputValue(world,pos,state);
 		int oldValue = state.getValue(POWER);

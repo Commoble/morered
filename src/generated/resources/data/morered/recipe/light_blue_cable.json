@@ -3,19 +3,13 @@
   "category": "redstone",
   "key": {
     "#": {
-      "type": "neoforge:intersection",
+      "neoforge:ingredient_type": "neoforge:intersection",
       "children": [
-        {
-          "tag": "minecraft:wool"
-        },
-        {
-          "tag": "c:dyed/light_blue"
-        }
+        "#minecraft:wool",
+        "#c:dyed/light_blue"
       ]
     },
-    "w": {
-      "tag": "morered:red_alloy_wires"
-    }
+    "w": "#morered:red_alloy_wires"
   },
   "pattern": [
     "www",

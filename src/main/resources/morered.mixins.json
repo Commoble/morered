@@ -4,10 +4,10 @@
 	"compatibilityLevel": "JAVA_21",
 	"mixins": 
 	[
+		"PlayerListMixin"
 	],
 	"client": 
 	[
-		"ClientElementsModelAccess",
 		"MultiPlayerGameModeAccess"
 	],
 	"injectors": 

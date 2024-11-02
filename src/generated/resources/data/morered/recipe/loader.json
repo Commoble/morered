@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "P": {
-      "item": "minecraft:piston"
-    },
-    "S": {
-      "item": "morered:shunt"
-    },
-    "s": {
-      "tag": "c:cobblestones"
-    }
+    "P": "minecraft:piston",
+    "S": "morered:shunt",
+    "s": "#c:cobblestones"
   },
   "pattern": [
     "sss",

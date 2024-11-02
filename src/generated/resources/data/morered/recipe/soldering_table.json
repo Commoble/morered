@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": {
-      "item": "minecraft:red_nether_bricks"
-    },
-    "b": {
-      "tag": "c:rods/blaze"
-    },
-    "s": {
-      "tag": "c:quarter_slabs/smooth_stone"
-    }
+    "#": "minecraft:red_nether_bricks",
+    "b": "#c:rods/blaze",
+    "s": "#c:quarter_slabs/smooth_stone"
   },
   "pattern": [
     "sss",

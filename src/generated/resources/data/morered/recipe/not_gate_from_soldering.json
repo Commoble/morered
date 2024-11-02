@@ -3,11 +3,11 @@
   "ingredients": [
     {
       "count": 1,
-      "tag": "c:quarter_slabs/smooth_stone"
+      "ingredient": "#c:quarter_slabs/smooth_stone"
     },
     {
       "count": 2,
-      "tag": "c:dusts/redstone"
+      "ingredient": "#c:dusts/redstone"
     }
   ],
   "result": {

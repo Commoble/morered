@@ -13,12 +13,12 @@ import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 
 public class MultiFilterBlock extends AbstractFilterBlock implements EntityBlock
 {
-	public static final DirectionProperty FACING = DirectionalBlock.FACING;
+	public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
 	
 	public MultiFilterBlock(Properties props)
 	{

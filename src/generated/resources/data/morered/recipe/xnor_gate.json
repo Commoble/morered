@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "redstone",
   "key": {
-    "#": {
-      "tag": "c:quarter_slabs/smooth_stone"
-    },
-    "t": {
-      "item": "minecraft:redstone_torch"
-    }
+    "#": "#c:quarter_slabs/smooth_stone",
+    "t": "minecraft:redstone_torch"
   },
   "pattern": [
     "#t#",

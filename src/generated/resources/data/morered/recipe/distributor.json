@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "G": {
-      "tag": "c:fence_gates"
-    },
-    "c": {
-      "tag": "c:cobblestones"
-    },
-    "s": {
-      "item": "morered:shunt"
-    }
+    "G": "#c:fence_gates",
+    "c": "#c:cobblestones",
+    "s": "morered:shunt"
   },
   "pattern": [
     "csc",

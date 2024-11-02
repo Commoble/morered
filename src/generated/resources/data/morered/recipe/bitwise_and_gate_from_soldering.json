@@ -3,19 +3,19 @@
   "ingredients": [
     {
       "count": 2,
-      "tag": "c:quarter_slabs/smooth_stone"
+      "ingredient": "#c:quarter_slabs/smooth_stone"
     },
     {
       "count": 1,
-      "tag": "c:gems/quartz"
+      "ingredient": "#c:gems/quartz"
     },
     {
       "count": 1,
-      "tag": "c:dusts/redstone"
+      "ingredient": "#c:dusts/redstone"
     },
     {
       "count": 1,
-      "tag": "morered:bundled_cables"
+      "ingredient": "#morered:bundled_cables"
     }
   ],
   "result": {

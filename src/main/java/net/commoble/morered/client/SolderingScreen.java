@@ -3,12 +3,12 @@ package net.commoble.morered.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.Tesselator;
 
 import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
+import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
@@ -17,12 +17,15 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.RenderType;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
@@ -57,7 +60,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		ClientLevel world = this.minecraft.level;
-		List<RecipeHolder<SolderingRecipe>> recipes = world != null ? ClientProxy.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()) : ImmutableList.of();
+		List<SolderingRecipeHolder> recipes = world != null ? ClientProxy.getAllSolderingRecipes() : List.of();
 		this.scrollPanel = new SolderingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
 		this.addWidget(this.scrollPanel);
 	}
@@ -65,14 +68,25 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
 	{
-		this.renderBackground(graphics, mouseX, mouseY, partialTicks);
 		super.render(graphics, mouseX, mouseY, partialTicks);
 		if (this.scrollPanel != null)
 		{
+			graphics.pose().pushPose();
 			this.scrollPanel.render(graphics, mouseX, mouseY, 0);
+			graphics.pose().popPose();
 		}
+		// the scrollpanel messes with the rendering of the labels, so do those here instead
+		graphics.pose().pushPose();
+		graphics.pose().translate(this.leftPos, this.topPos, 0F);
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
+		graphics.pose().popPose();
 		this.renderTooltip(graphics, mouseX, mouseY);
 	}
+
+    @Override
+    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    }
 	
 	public void renderItemStack(GuiGraphics graphics, ItemStack stack, int x, int y)
 	{
@@ -101,7 +115,8 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		
-		graphics.blit(TRADING_SCREEN, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
+		// screenStartX, screenStartY, textureU, textureV, blitWidth, blitHeight, fileWidth, fileHeight
+		graphics.blit(RenderType::guiTextured, TRADING_SCREEN, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
 		
 		// stretch the arrow over the crafting slot background
 		int arrowU = 186;
@@ -112,7 +127,8 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int arrowScreenX = xStart + arrowU - tiles*arrowWidth;
 		int arrowScreenY = yStart + arrowV;
 		int blitWidth = arrowWidth*tiles;
-		graphics.blit(TRADING_SCREEN, arrowScreenX, arrowScreenY, blitWidth, arrowHeight, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		// screenStartX, screenStartY, textureU, textureV, blitToWidth, blitToHeight, blitFromWidth, blitFromHeight, fileWidth, fileHeight
+		graphics.blit(RenderType::guiTextured, TRADING_SCREEN, arrowScreenX, arrowScreenY, arrowU, arrowV,  blitWidth, arrowHeight, arrowWidth, arrowHeight, 512, 256);
 	}
 
 	@Override
@@ -122,25 +138,32 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		return (this.scrollPanel.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
 	}
 
+	@Override
+	public boolean mouseScrolled(double mouseX, double mouseY, double deltaX, double deltaY)
+	{
+		return this.scrollPanel.mouseScrolled(mouseX, mouseY, deltaX, deltaY)
+			|| super.mouseScrolled(mouseX, mouseY, deltaX, deltaY);
+	}
+
 	public static class RecipeButton extends ExtendedButton
 	{
 		private final int baseY;
 		private final SolderingScreen screen;
-		private final RecipeHolder<SolderingRecipe> recipe;
+		private final SolderingRecipeHolder recipe;
 		public ItemStack tooltipItem = ItemStack.EMPTY;
 
-		public RecipeButton(SolderingScreen screen, RecipeHolder<SolderingRecipe> recipe, int x, int y, int width)
+		public RecipeButton(SolderingScreen screen, SolderingRecipeHolder recipe, int x, int y, int width)
 		{
-			super(x, y, width, getHeightForRecipe(recipe.value()), Component.literal(""), button -> onButtonClicked(screen.menu, recipe));
+			super(x, y, width, getHeightForRecipe(recipe.recipe()), Component.literal(""), button -> onButtonClicked(screen.menu, recipe));
 			this.baseY = y;
 			this.screen = screen;
 			this.recipe = recipe;
 		}
 		
-		public static void onButtonClicked(SolderingMenu container, RecipeHolder<SolderingRecipe> recipe)
+		public static void onButtonClicked(SolderingMenu container, SolderingRecipeHolder recipe)
 		{
 			PacketDistributor.sendToServer(new SolderingRecipeButtonPacket(recipe.id()));
-			container.attemptRecipeAssembly(recipe.value());
+			container.attemptRecipeAssembly(recipe.recipe());
 		}
 		
 		public static int getHeightForRecipe(SolderingRecipe recipe)
@@ -167,12 +190,12 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	        	int thisX = this.getX();
 	        	int thisY = this.getY();
 	            super.renderWidget(graphics, mouseX, mouseY, partial);
-	            List<SizedIngredient> ingredients = this.recipe.value().ingredients();
+	            List<SizedIngredient> ingredients = this.recipe.recipe().ingredients();
 	            int ingredientCount = ingredients.size();
 	            // render ingredients
 	            for (int ingredientIndex=0; ingredientIndex<ingredientCount; ingredientIndex++)
 	            {
-	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).getItems());
+	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).ingredient().items()).getDefaultInstance();
 
 	            	int itemRow = ingredientIndex / 3;
 	            	int itemColumn = ingredientIndex % 3;
@@ -199,10 +222,10 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		            int arrowU = 15;
 		            int arrowV = 171;
 		    		RenderSystem.setShaderTexture(0, TRADING_SCREEN);
-		            graphics.blit(TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		            graphics.blit(RenderType::guiTextured, TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
-		            ItemStack outputStack = this.recipe.value().getResultItem(this.screen.minecraft.level.registryAccess());
+		            ItemStack outputStack = this.recipe.recipe().result();
 		            if (!outputStack.isEmpty())
 		            {
 			            int itemX = thisX + 2 + (18*4);
@@ -220,18 +243,18 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	        }
 		}
 	    
-	    public static ItemStack getIngredientVariant(ItemStack[] variants)
+	    public static Item getIngredientVariant(List<Holder<Item>> variants)
 	    {
-	    	int variantCount = variants.length;
+	    	int variantCount = variants.size();
 	    	if (variantCount > 0)
 	    	{
             	// if this ingredient has multiple stacks, cycle through them
             	int variantIndex = (int)((Util.getMillis() / 1000L) / variantCount);
-            	return variants[Mth.clamp(variantIndex, 0, variantCount - 1)];
+            	return variants.get(Mth.clamp(variantIndex, 0, variantCount - 1)).value();
 	    	}
 	    	else
 	    	{
-	    		return ItemStack.EMPTY;
+	    		return Items.AIR;
 	    	}
 	    }
 
@@ -252,7 +275,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		public ItemStack tooltipItem = ItemStack.EMPTY;
 		public final int totalButtonHeight;
 		
-		public SolderingScrollPanel(Minecraft client, SolderingScreen screen, List<RecipeHolder<SolderingRecipe>> recipes, int left, int top, int width, int height)
+		public SolderingScrollPanel(Minecraft client, SolderingScreen screen, List<SolderingRecipeHolder> recipes, int left, int top, int width, int height)
 		{
 			super(client, width, height, top, left);
 			int buttonWidth = 90;
@@ -261,7 +284,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 			Level world = client.level;
 			if (world != null)
 			{
-				for (RecipeHolder<SolderingRecipe> recipe : ClientProxy.getAllSolderingRecipes(world.getRecipeManager(), world.registryAccess()))
+				for (SolderingRecipeHolder recipe : ClientProxy.getAllSolderingRecipes())
 				{
 					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
 					this.buttons.add(recipeButton);

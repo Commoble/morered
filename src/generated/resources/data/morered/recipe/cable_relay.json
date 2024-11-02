@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shapeless",
   "category": "redstone",
   "ingredients": [
-    {
-      "tag": "morered:bundled_cables"
-    },
-    {
-      "tag": "c:ingots/iron"
-    }
+    "#morered:bundled_cables",
+    "#c:ingots/iron"
   ],
   "result": {
     "count": 1,

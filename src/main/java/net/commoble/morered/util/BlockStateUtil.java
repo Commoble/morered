@@ -244,6 +244,6 @@ public class BlockStateUtil
 		float y = (float) (axis == Axis.Y ? 0F : hitVec.y*2 - 1);
 		float z = (float) (axis == Axis.Z ? 0F : hitVec.z*2 - 1);
 		
-		return Direction.getNearest(x, y, z);
+		return Direction.getApproximateNearest(x, y, z);
 	}
 }

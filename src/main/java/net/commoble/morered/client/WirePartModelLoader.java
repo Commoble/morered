@@ -14,15 +14,14 @@ import net.commoble.morered.client.WirePartModelLoader.WirePartGeometry;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverrides;
+import net.minecraft.client.renderer.block.model.ItemOverride;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.UnbakedModel.Resolver;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
@@ -57,8 +56,8 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		}
 
 		@Override
-		public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelTransform,
-			ItemOverrides overrides)
+		public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
+			List<ItemOverride> overrides)
 		{
 			BakedModel[] lineModels = new BakedModel[24];
 			BakedModel[] edgeModels = new BakedModel[12];
@@ -71,7 +70,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 				{
 					int index = side*4 + subSide;
 					ModelState transform = FaceRotation.getFaceRotation(side, subSide);
-					lineModels[index] = this.lineModel.bake(bakery, this.lineModel, spriteGetter, transform, useBlockLight);
+					lineModels[index] = this.lineModel.bake(baker, spriteGetter, transform);
 				}
 			}
 			
@@ -82,7 +81,7 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 				// down comes first, then up, then the sides
 				// the "default" edge with no rotation has to be on the middle sides to ignore the z-axis, we'll use bottom-west
 				ModelState transform = EdgeRotation.EDGE_ROTATIONS[edge];
-				edgeModels[edge] = this.edgeModel.bake(bakery, this.edgeModel, spriteGetter, transform, useBlockLight);
+				edgeModels[edge] = this.edgeModel.bake(baker, spriteGetter, transform);
 			}
 			
 			return new WirePartModelLoader.WirePartModel(context.useAmbientOcclusion(), context.isGui3d(), useBlockLight,
@@ -92,10 +91,10 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		}
 
 		@Override
-		public void resolveParents(Function<ResourceLocation, UnbakedModel> modelGetter, IGeometryBakingContext context)
+		public void resolveDependencies(Resolver resolver, IGeometryBakingContext context)
 		{
-			this.lineModel.resolveParents(modelGetter);
-			this.edgeModel.resolveParents(modelGetter);
+			this.lineModel.resolveDependencies(resolver);
+			this.edgeModel.resolveDependencies(resolver);
 		}
 	}
 	
@@ -148,12 +147,6 @@ public class WirePartModelLoader implements IGeometryLoader<WirePartGeometry>
 		public TextureAtlasSprite getParticleIcon()
 		{
 			return this.particle;
-		}
-
-		@Override
-		public ItemOverrides getOverrides()
-		{
-			return ItemOverrides.EMPTY;
 		}
 
 		@Override

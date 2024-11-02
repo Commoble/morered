@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "G": {
-      "tag": "c:glass_blocks/colorless"
-    },
-    "i": {
-      "tag": "c:ingots/gold"
-    }
+    "G": "#c:glass_blocks/colorless",
+    "i": "#c:ingots/gold"
   },
   "pattern": [
     "iGi"

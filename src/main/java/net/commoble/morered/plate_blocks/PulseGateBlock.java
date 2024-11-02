@@ -18,6 +18,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.ticks.TickPriority;
 
 public class PulseGateBlock extends RedstonePlateBlock
@@ -77,8 +78,7 @@ public class PulseGateBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	@Deprecated
-	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, Orientation orientation, boolean isMoving)
 	{
 		// if any inputs changed, schedule a tick
 		boolean oldHasInput = state.getValue(INPUT_B);
@@ -104,7 +104,6 @@ public class PulseGateBlock extends RedstonePlateBlock
 		}
 	}
 
-	@Deprecated
 	@Override
 	public int getSignal(BlockState state, BlockGetter blockAccess, BlockPos pos, Direction sideOfAdjacentBlock)
 	{

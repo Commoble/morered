@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "r": {
-      "tag": "c:dusts/redstone"
-    },
-    "t": {
-      "tag": "morered:tubes"
-    }
+    "r": "#c:dusts/redstone",
+    "t": "#morered:tubes"
   },
   "pattern": [
     " r ",

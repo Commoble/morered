@@ -3,19 +3,13 @@
   "category": "building",
   "key": {
     "G": {
-      "type": "neoforge:intersection",
+      "neoforge:ingredient_type": "neoforge:intersection",
       "children": [
-        {
-          "tag": "c:glass_blocks"
-        },
-        {
-          "tag": "c:dyed/cyan"
-        }
+        "#c:glass_blocks",
+        "#c:dyed/cyan"
       ]
     },
-    "i": {
-      "tag": "c:ingots/copper"
-    }
+    "i": "#c:ingots/copper"
   },
   "pattern": [
     "iGi"

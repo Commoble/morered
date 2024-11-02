@@ -2,8 +2,10 @@ package net.commoble.morered.soldering;
 
 import io.netty.buffer.ByteBuf;
 import net.commoble.morered.MoreRed;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
@@ -28,7 +30,7 @@ public record SolderingRecipeButtonPacket(ResourceLocation recipeId) implements 
 			AbstractContainerMenu container = player.containerMenu;
 			if (container instanceof SolderingMenu menu)
 			{
-				menu.onPlayerChoseRecipe(this.recipeId);
+				menu.onPlayerChoseRecipe(player, ResourceKey.create(Registries.RECIPE, recipeId));
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package net.commoble.morered.client;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -55,7 +56,7 @@ public class StandardSizeContainerScreenFactory<ContainerType extends AbstractCo
 		{
 			int xStart = (this.width - this.imageWidth) / 2;
 			int yStart = (this.height - this.imageHeight) / 2;
-			graphics.blit(this.texture, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight);
+			graphics.blit(RenderType::guiTextured, this.texture, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
 		}
 	}
 }

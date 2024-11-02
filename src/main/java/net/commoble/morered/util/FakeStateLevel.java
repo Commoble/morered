@@ -48,9 +48,9 @@ public class FakeStateLevel implements BlockGetter
 	}
 
 	@Override
-	public int getMinBuildHeight()
+	public int getMinY()
 	{
-		return this.delegate.getMinBuildHeight();
+		return this.delegate.getMinY();
 	}
 	
 }

@@ -77,7 +77,7 @@ public class SolderingResultSlot extends Slot
 	{
 		if (recipe != null && SolderingRecipe.doesPlayerHaveIngredients(playerInventory, recipe))
 		{
-			this.set(recipe.getResultItem(playerInventory.player.level().registryAccess()).copy());
+			this.set(recipe.result().copy());
 			this.container.currentRecipe = recipe;
 		}
 		else

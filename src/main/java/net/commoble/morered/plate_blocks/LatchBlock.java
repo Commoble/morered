@@ -16,12 +16,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
 public class LatchBlock extends RedstonePlateBlock
 {
-	public static final DirectionProperty ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
+	public static final EnumProperty<Direction> ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
 	public static final IntegerProperty ROTATION = PlateBlockStateProperties.ROTATION;
 	public static final BooleanProperty INPUT_A = PlateBlockStateProperties.INPUT_A;
 	public static final BooleanProperty INPUT_C = PlateBlockStateProperties.INPUT_C;

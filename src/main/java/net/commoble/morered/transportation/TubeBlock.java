@@ -10,18 +10,20 @@ import javax.annotation.Nullable;
 import com.google.common.collect.ImmutableList;
 import com.mojang.math.OctahedralGroup;
 
-import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.Mirror;
@@ -39,6 +41,7 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.pathfinder.PathComputationType;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -131,13 +134,13 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	 */
 	@Override
 	@Deprecated
-	public void neighborChanged(BlockState state, Level level, BlockPos pos, Block blockIn, BlockPos fromPos, boolean isMoving)
+	public void neighborChanged(BlockState state, Level level, BlockPos pos, Block blockIn, Orientation orientation, boolean isMoving)
 	{
 		if (!level.isClientSide && level.getBlockEntity(pos) instanceof TubeBlockEntity tube)
 		{
 			tube.onPossibleNetworkUpdateRequired();
 		}
-		super.neighborChanged(state, level, pos, blockIn, fromPos, isMoving);
+		super.neighborChanged(state, level, pos, blockIn, orientation, isMoving);
 	}
 
 	/**
@@ -246,14 +249,14 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	 *            The state that is currently at the position offset of the provided face to the stateIn at currentPos
 	 */
 	@Override
-	public BlockState updateShape(BlockState stateIn, Direction facing, BlockState facingState, LevelAccessor level, BlockPos currentPos, BlockPos facingPos)
+	public BlockState updateShape(BlockState thisState, LevelReader level, ScheduledTickAccess ticker, BlockPos currentPos, Direction facing, BlockPos facingPos, BlockState facingState, RandomSource random)
 	{
-		if (stateIn.getValue(WATERLOGGED))
+		if (thisState.getValue(WATERLOGGED))
 		{
-			level.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
+			ticker.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
 
-		return stateIn.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(facing), Boolean.valueOf(this.canConnectTo(level, currentPos, facing)));
+		return thisState.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(facing), Boolean.valueOf(this.canConnectTo(level, currentPos, facing)));
 	}
 
 	/// model shapes

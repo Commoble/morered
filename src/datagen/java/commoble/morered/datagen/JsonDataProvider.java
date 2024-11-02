@@ -32,6 +32,7 @@ import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 
+import net.minecraft.core.HolderLookup;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
@@ -60,35 +61,37 @@ import net.minecraft.resources.ResourceLocation;
  *			An ID-to-object map that defines the objects to generate jsons
  *			from and where the jsons will be generated.
  */
-public record JsonDataProvider<T>(PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects, String uniqueName) implements DataProvider
+public record JsonDataProvider<T>(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects, String uniqueName) implements DataProvider
 {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	
-	public static <T> JsonDataProvider<T> create(PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects)
+	public static <T> JsonDataProvider<T> create(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects)
 	{
-		return named(packOutput, generator, target, folder, codec, objects, folder);
+		return named(registries, packOutput, generator, target, folder, codec, objects, folder);
 	}
 	
-	public static <T> JsonDataProvider<T> named(PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects, String uniqueName)
+	public static <T> JsonDataProvider<T> named(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects, String uniqueName)
 	{
-		return new JsonDataProvider<>(packOutput, generator, target, folder, codec, objects, uniqueName);
+		return new JsonDataProvider<>(registries, packOutput, generator, target, folder, codec, objects, uniqueName);
 	}
 	
 	@Override
 	public CompletableFuture<?> run(CachedOutput cache)
 	{
-		PathProvider pathProvider = packOutput.createPathProvider(target, folder);
-		List<CompletableFuture<?>> results = new ArrayList<>();
-		for (var entry : this.objects.entrySet())
-		{
-			var id = entry.getKey();
-			this.codec.encodeStart(JsonOps.INSTANCE, entry.getValue())
-				.resultOrPartial(s -> LOGGER.error("{} failed to encode {}: {}", this.getName(), id, s))
-				.ifPresent(json -> {
-					results.add(DataProvider.saveStable(cache, json, pathProvider.json(id)));
-				});
-		}
-		return CompletableFuture.allOf(results.toArray(CompletableFuture[]::new));
+		return registries.thenCompose(registries -> {
+			PathProvider pathProvider = packOutput.createPathProvider(target, folder);
+			List<CompletableFuture<?>> results = new ArrayList<>();
+			for (var entry : this.objects.entrySet())
+			{
+				var id = entry.getKey();
+				this.codec.encodeStart(registries.createSerializationContext(JsonOps.INSTANCE), entry.getValue())
+					.resultOrPartial(s -> LOGGER.error("{} failed to encode {}: {}", this.getName(), id, s))
+					.ifPresent(json -> {
+						results.add(DataProvider.saveStable(cache, json, pathProvider.json(id)));
+					});
+			}
+			return CompletableFuture.allOf(results.toArray(CompletableFuture[]::new));
+		});
 	}
 
 	/**

@@ -21,6 +21,8 @@ import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
@@ -181,7 +183,8 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 			for (Direction directionToNeighbor : Direction.values())
 			{
 				BlockPos neighborPos = pos.relative(directionToNeighbor);
-				worldIn.updateNeighborsAtExceptFromFacing(neighborPos, newState.getBlock(), directionToNeighbor.getOpposite());
+				Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(worldIn, directionToNeighbor, null);
+				worldIn.updateNeighborsAtExceptFromFacing(neighborPos, newState.getBlock(), directionToNeighbor.getOpposite(), orientation);
 			}
 		}
 	}

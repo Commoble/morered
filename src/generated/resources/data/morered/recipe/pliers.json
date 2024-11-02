@@ -2,12 +2,8 @@
   "type": "minecraft:crafting_shaped",
   "category": "misc",
   "key": {
-    "I": {
-      "tag": "c:ingots/iron"
-    },
-    "t": {
-      "tag": "morered:tubes"
-    }
+    "I": "#c:ingots/iron",
+    "t": "#morered:tubes"
   },
   "pattern": [
     "  I",

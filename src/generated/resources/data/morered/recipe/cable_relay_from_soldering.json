@@ -3,11 +3,11 @@
   "ingredients": [
     {
       "count": 1,
-      "tag": "morered:bundled_cables"
+      "ingredient": "#morered:bundled_cables"
     },
     {
       "count": 1,
-      "tag": "c:ingots/iron"
+      "ingredient": "#c:ingots/iron"
     }
   ],
   "result": {

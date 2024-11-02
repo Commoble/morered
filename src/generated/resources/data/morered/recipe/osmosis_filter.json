@@ -2,15 +2,9 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "f": {
-      "item": "morered:filter"
-    },
-    "h": {
-      "item": "minecraft:hopper"
-    },
-    "s": {
-      "tag": "c:slime_balls"
-    }
+    "f": "morered:filter",
+    "h": "minecraft:hopper",
+    "s": "#c:slime_balls"
   },
   "pattern": [
     "f",
