@@ -128,7 +128,6 @@ public class DirectionTransformer
 	
 	/**
 	 * 
-	 * @param startCenter
 	 * @param startSide
 	 * @param endSide
 	 * @return A Vector3d[4][2], an array of four pairs of vertices in local coordinate space.

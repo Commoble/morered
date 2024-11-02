@@ -18,6 +18,7 @@ import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
+import net.commoble.morered.transportation.FilterMenu;
 import net.commoble.morered.transportation.RaytraceHelper;
 import net.commoble.morered.transportation.TubeBreakPacket;
 import net.commoble.morered.util.BlockStateUtil;
@@ -180,7 +181,7 @@ public class ClientProxy
 	{
 		event.register(MoreRed.get().solderingMenuType.get(), SolderingScreen::new);
 		event.register(MoreRed.get().loaderMenu.get(), LoaderScreen::new);
-		event.register(MoreRed.get().filterMenu.get(), SingleSlotMenuScreen::new);
+		event.<FilterMenu, SingleSlotMenuScreen<FilterMenu>>register(MoreRed.get().filterMenu.get(), SingleSlotMenuScreen::new);
 		event.register(MoreRed.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
 			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.get().multiFilterBlock.get().getDescriptionId()));
 	}
