@@ -43,6 +43,9 @@
   * Distributors
   * Pliers  
 * Using the pliers (or wrenches from other mods) on logic gate blocks now rotates them (no longer rotatable with sticks)
+* "morered:rotate_tints" model loader now specifies a delegate model in a "model" field instead of in the root json object
+* APIs for wirability are refactored and now part of the exmachina library (More Red no longer has any java APIs itself)
+* Temporarily disabled JEI/EMI compatibility for soldering recipes as recipe viewers aren't ported yet
   
 # 1.21.1-6.0.0.3
 * Fix soldering recipes rendering wrong in JEI. Fixes #40
