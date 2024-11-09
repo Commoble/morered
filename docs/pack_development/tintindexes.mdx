@@ -20,7 +20,7 @@ representing whether the given input sides (located 90, 180, and 270 degrees clo
 while observing the top of the block) are receiving power.
 Logic plates with two inputs generally only use inputs A and C, while logic plates with one inputs generally only use input B.
 
-![Image identifying the sides of a logic plate](https://commoble.net/images/morered/sides.png)
+![Image identifying the sides of a logic plate](https://commoble.s3.us-east-1.amazonaws.com/images/morered/sides.png)
 
 If the tintindex of the given quad is less than 1, no tinting will be applied to the quad (-1 is the default when a tintindex is unspecified, and is never tinted; 0 is reserved for block particles, which are not tinted by this function).
 
@@ -60,7 +60,7 @@ Items of blocks that use this tinting function are tinted as if all of the input
 [Red Alloy Wires](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire)
 tint different sections of their model to represent how much redstone power that segment of the wire is currently charged with.
 
-![Image displaying lit and unlit red alloy wire](https://commoble.net/images/morered/red_alloy_wire_lit_unlit.png)
+![Image displaying lit and unlit red alloy wire](https://commoble.s3.us-east-1.amazonaws.com/images/morered/red_alloy_wire_lit_unlit.png)
 
 As the wires' json models are used to generate many baked models in different orientations,
 the [Rotate Tints](/en/mod/morered/docs/pack_development/tintindexes#rotate-tints) model loader is used to denote which segment of the wire
@@ -106,7 +106,7 @@ Redwire Posts and their items use a tinting function that applies only to tintin
 quads assigned tintindex 1 have their green and blue channels multiplied by 0,
 and their red channel multiplied by a hexidecimal color in the range `#56`, `#FF`, depending on the value of the `power` property of the rendered blockstate.
 
-![Image displaying lit and unlit redwire posts](https://commoble.net/images/morered/redwire_posts_lit_unlit.png)
+![Image displaying lit and unlit redwire posts](https://commoble.s3.us-east-1.amazonaws.com/images/morered/redwire_posts_lit_unlit.png)
 
 The following blocks use this tinting function:
 
