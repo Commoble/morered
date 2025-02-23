@@ -1,21 +1,12 @@
 package net.commoble.morered.bitwise_logic;
 
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.function.ToIntFunction;
 
-import org.jetbrains.annotations.Nullable;
-
-import net.commoble.exmachina.api.Channel;
-import net.commoble.exmachina.api.Face;
-import net.commoble.exmachina.api.Receiver;
 import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.morered.CommonTags;
-import net.commoble.morered.plate_blocks.LogicFunction;
+import net.commoble.morered.plate_blocks.BitwiseLogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
-import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
@@ -26,7 +17,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
@@ -44,13 +34,11 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 		Block.box(0, 0, 0, 4, 16, 16),
 		Block.box(12, 0, 0, 16, 16, 16) };
 	
-	public abstract @Nullable Receiver getReceiverEndpoint(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Direction receiverSide, Face connectedFace, Channel channel);
-	public abstract Collection<Receiver> getAllReceivers(BlockGetter level, BlockPos receiverPos, BlockState receiverState, Channel channel);
 	protected abstract List<Direction> getInputDirections(BlockState thisState);
 	
-	protected LogicFunction operator;
+	protected BitwiseLogicFunction operator;
 	
-	public BitwiseGateBlock(Properties properties, LogicFunction operator)
+	public BitwiseGateBlock(Properties properties, BitwiseLogicFunction operator)
 	{
 		super(properties);
 		this.operator = operator;
@@ -76,13 +64,7 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 	protected void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		super.onPlace(newState, level, pos, oldState, isMoving);
-		for (Direction dir : this.getInputDirections(newState))
-		{
-			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos.relative(dir));
-		}
-		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
 		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos);
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
 	}
 
 	@Override
@@ -110,26 +92,5 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 		}
 		
 		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
-	}
-
-	public Map<Channel, ToIntFunction<LevelReader>> getSupplierEndpoints(BlockGetter level, BlockPos supplierPos, BlockState supplierState, Direction supplierSide,
-		Face connectedFace)
-	{
-		Direction attachmentDir = supplierState.getValue(PlateBlockStateProperties.ATTACHMENT_DIRECTION);
-		if (supplierSide != attachmentDir || connectedFace.attachmentSide() != attachmentDir || !(level.getBlockEntity(supplierPos) instanceof BitwiseGateBlockEntity gate))
-		{
-			return Map.of();
-		}
-
-		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(supplierState);
-		BlockPos wirePos = connectedFace.pos();
-		@Nullable Direction directionToNeighbor = DirectionHelper.getDirectionToNeighborPos(supplierPos, wirePos);
-		if (directionToNeighbor != primaryOutputDirection)
-		{
-			return Map.of();
-		}
-		
-		return gate.getSupplierEndpoints();
-	}
-	
+	}	
 }

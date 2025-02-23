@@ -37,6 +37,7 @@ public class OsmosisSlimeBlock extends DirectionalBlock
 	}
 
 	@Override
+	@Deprecated
 	public BlockState mirror(BlockState state, Mirror mirrorIn)
 	{
 		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));

@@ -1,5 +1,7 @@
 package net.commoble.morered.wire_post;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiPredicate;
@@ -15,6 +17,7 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
@@ -50,7 +53,7 @@ public abstract class AbstractPostBlock extends Block
 			.setValue(TRANSFORM, OctahedralGroup.IDENTITY));
 	}
 	
-	protected abstract Map<Direction, Map<Channel, TransmissionNode>> createTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post);	
+	protected abstract Map<Channel, Collection<TransmissionNode>> createTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post);	
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
@@ -156,13 +159,11 @@ public abstract class AbstractPostBlock extends Block
 		return newState;
 	}
 	
-	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face)
+	public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel)
 	{
-		if (face != state.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
-			return Map.of();
 		if (!(level.getBlockEntity(pos) instanceof WirePostBlockEntity post))
-			return Map.of();
+			return List.of();
 		
-		return post.getTransmissionNodes(level, pos, state, face, () -> this.createTransmissionNodes(level, pos, state, post));
+		return post.getTransmissionNodes(levelKey, level, pos, state, channel, () -> this.createTransmissionNodes(levelKey, level, pos, state, post));
 	}
 }

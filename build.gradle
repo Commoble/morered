@@ -60,6 +60,7 @@ neoForge {
 }
 
 repositories {
+	mavenLocal()
 	mavenCentral()
 	maven {url = "https://maven.blamejared.com/"}
 	maven {url = "https://maven.commoble.net"}

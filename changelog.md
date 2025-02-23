@@ -1,3 +1,7 @@
+# 1.21.3-7.1.0.0
+* Updated to exmachina 0.8.0.2-beta
+* Bitwise logic gates now actually apply bitwise operators instead of applying boolean operators 16 times, which should make them slightly more efficient
+
 # 1.21.2-7.0.0.0
 * THis update is not compatible with existing saves from prior versions
 * Fundamentally changed how wires wire to each other. This has these ramifications:

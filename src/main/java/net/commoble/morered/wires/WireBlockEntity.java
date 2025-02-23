@@ -1,5 +1,7 @@
 package net.commoble.morered.wires;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -18,6 +20,9 @@ import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -27,7 +32,7 @@ public class WireBlockEntity extends BlockEntity
 {
 	public static final String CONNECTIONS = "connections";
 	protected long connections = 0;
-	protected Map<Direction, Map<Channel, TransmissionNode>> nodes = null;
+	protected Map<Channel, Collection<TransmissionNode>> nodes = null;
 	
 	public WireBlockEntity(BlockPos pos, BlockState state)
 	{
@@ -127,14 +132,14 @@ public class WireBlockEntity extends BlockEntity
 		this.level.sendBlockUpdated(this.worldPosition, state, state, 8);
 	}
 	
-	public Map<Channel, TransmissionNode> getTransmissionNodes(Direction attachmentSide, BlockState newState)
+	public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter blockGetter, BlockState newState, Channel channel)
 	{
 		if (this.nodes == null)
 		{
 			this.nodes = this.createNodes(newState);
 		}
-		@Nullable Map<Channel, TransmissionNode> nodes = this.nodes.get(attachmentSide);
-		return nodes == null ? Map.of() : nodes;
+		@Nullable Collection<TransmissionNode> nodes = this.nodes.get(channel);
+		return nodes == null ? List.of() : nodes;
 	}
 
 	@Override
@@ -145,7 +150,7 @@ public class WireBlockEntity extends BlockEntity
 			.build();
 	}
 	
-	protected Map<Direction, Map<Channel, TransmissionNode>> createNodes(BlockState newState)
+	protected Map<Channel, Collection<TransmissionNode>> createNodes(BlockState newState)
 	{
 		if (!(newState.getBlock() instanceof AbstractWireBlock wireBlock))
 			return Map.of();

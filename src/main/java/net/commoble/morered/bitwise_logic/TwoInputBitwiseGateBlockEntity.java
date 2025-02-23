@@ -1,21 +1,24 @@
 package net.commoble.morered.bitwise_logic;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import org.jetbrains.annotations.Nullable;
+import java.util.Set;
 
 import net.commoble.exmachina.api.Channel;
-import net.commoble.exmachina.api.Receiver;
+import net.commoble.exmachina.api.NodeShape;
+import net.commoble.exmachina.api.SignalGraphKey;
+import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.plate_blocks.InputSide;
-import net.minecraft.Util;
+import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
+import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.DyeColor;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
@@ -26,33 +29,6 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	
 	protected int clockwiseInput = 0;
 	protected int counterClockwiseInput = 0;
-	protected Map<Channel, Receiver> clockwiseReceiverEndpoints = Util.make(() -> {
-		Map<Channel, Receiver> map = new HashMap<>();
-		for (DyeColor color : DyeColor.values())
-		{
-			final int channel = color.ordinal(); 
-			map.put(Channel.single(color), new BitwiseListener(color, InputSide.A, (levelAccess, power) -> this.setClockwiseInputOnChannel(power > 0, channel)));
-		}
-		return map;
-	});
-	protected Map<Channel, Receiver> counterClockwiseReceiverEndpoints = Util.make(() -> {
-		Map<Channel, Receiver> map = new HashMap<>();
-		for (DyeColor color : DyeColor.values())
-		{
-			final int channel = color.ordinal(); 
-			map.put(Channel.single(color), new BitwiseListener(color, InputSide.C, (levelAccess, power) -> this.setCounterclockwiseInputOnChannel(power > 0, channel)));
-		}
-		return map;
-	});
-	protected Map<Channel, Collection<Receiver>> allReceivers = Util.make(() -> {
-		Map<Channel, Collection<Receiver>> map = new HashMap<>();
-		for (DyeColor color : DyeColor.values())
-		{
-			Channel channel = Channel.single(color); 
-			map.put(channel, List.of(clockwiseReceiverEndpoints.get(channel), counterClockwiseReceiverEndpoints.get(channel)));
-		}
-		return map;
-	});
 
 	public TwoInputBitwiseGateBlockEntity(BlockEntityType<? extends TwoInputBitwiseGateBlockEntity> type, BlockPos pos, BlockState state)
 	{
@@ -113,38 +89,20 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 			this.setChanged();
 		}
 	}
+
+	@Override
+	protected void resetOutput()
+	{
+		this.updateOutput();
+	}
 	
 	public void updateOutput()
 	{
 		if (this.getBlockState().getBlock() instanceof TwoInputBitwiseGateBlock block)
 		{
-			byte output = 0;
-			for (int i=0; i<16; i++)
-			{
-				int bit = 1 << i;
-				boolean cwInputBit = (this.clockwiseInput & bit) != 0;
-				boolean ccwInputBit = (this.counterClockwiseInput & bit) != 0;
-				if (block.operator.apply(cwInputBit, false, ccwInputBit))
-				{
-					output |= bit;
-				}
-			}
+			int output = block.operator.apply(this.clockwiseInput, 0, counterClockwiseInput);
 			this.setOutput(output);
 		}
-	}
-
-	public @Nullable Receiver getReceiverEndpoints(InputSide side, Channel channel)
-	{
-		if (side == InputSide.A)
-		{
-			return this.clockwiseReceiverEndpoints.get(channel);
-		}
-		else if (side == InputSide.C)
-		{
-			return this.counterClockwiseReceiverEndpoints.get(channel);
-		}
-		else
-			return null;
 	}
 
 	@Override
@@ -163,31 +121,41 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 		this.counterClockwiseInput = compound.getInt(COUNTERCLOCKWISE_INPUT);
 	}
 
-	public Collection<Receiver> getAllReceivers(Channel channel)
-	{
-		return this.allReceivers.getOrDefault(channel, List.of());
-	}
-
 	@Override
-	public void resetUnusedReceivers(Collection<BitwiseListener> receivers)
+	protected List<TransmissionNode> createInputNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel, int channelIndex, Direction attachmentDir, Direction outputDir)
 	{
-		int oldClockwiseInput = this.clockwiseInput;
-		int oldCounterClockwiseInput = this.counterClockwiseInput;
-		for (BitwiseListener receiver : receivers)
-		{
-			int channel = receiver.color().ordinal();
-			int bit = 1 << channel;
-			if (receiver.inputSide() == InputSide.A)
-			{
-				oldClockwiseInput &= ~bit;
-			}
-			else
-			{
-				oldCounterClockwiseInput &= ~bit;
-			}
-		}
-		this.setClockwiseInput(oldClockwiseInput, false); // don't need to force output update twice
-		this.setCounterclockwiseInput(oldCounterClockwiseInput, true);
+		int rotationIndex = state.getValue(PlateBlockStateProperties.ROTATION);
+		Direction clockwiseSide = BlockStateUtil.getInputDirection(attachmentDir, rotationIndex, InputSide.A.rotationsFromOutput);
+		Direction counterClockwiseSide = BlockStateUtil.getInputDirection(attachmentDir, rotationIndex, InputSide.C.rotationsFromOutput);
+		NodeShape clockwiseShape = NodeShape.ofSideSide(attachmentDir, clockwiseSide);
+		NodeShape counterClockwiseShape = NodeShape.ofSideSide(attachmentDir, counterClockwiseSide);
+		NodeShape clockwiseNeighborShape = NodeShape.ofSideSide(attachmentDir, counterClockwiseSide);
+		NodeShape counterClockwiseNeighborShape = NodeShape.ofSideSide(attachmentDir, clockwiseSide);
+		SignalGraphKey clockwiseNeighborNode = new SignalGraphKey(levelKey, pos.relative(clockwiseSide), clockwiseNeighborShape, channel);
+		SignalGraphKey counterClockwiseNeighborNode = new SignalGraphKey(levelKey, pos.relative(counterClockwiseSide), counterClockwiseNeighborShape, channel);
+		
+		return List.of(
+			new TransmissionNode(
+				clockwiseShape,
+				BitwiseGateBlockEntity.INPUT_SOURCE,
+				Set.of(clockwiseSide),
+				Set.of(clockwiseNeighborNode),
+				(levelAccess, power) -> {
+					this.setClockwiseInputOnChannel(power > 0, channelIndex);
+					return Map.of();
+				}
+			),
+			new TransmissionNode(
+				counterClockwiseShape,
+				BitwiseGateBlockEntity.INPUT_SOURCE,
+				Set.of(counterClockwiseSide),
+				Set.of(counterClockwiseNeighborNode),
+				(levelAccess, power) -> {
+					this.setCounterclockwiseInputOnChannel(power > 0, channelIndex);
+					return Map.of();
+				}
+			)
+		);
 	}
 	
 }

@@ -1,5 +1,7 @@
 package net.commoble.morered.wires;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -14,11 +16,14 @@ import com.google.common.cache.LoadingCache;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.exmachina.api.Channel;
-import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.NodeShape;
+import net.commoble.exmachina.api.SignalComponent;
+import net.commoble.exmachina.api.SignalGraphKey;
 import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.StateWirer;
 import net.commoble.exmachina.api.TransmissionNode;
+import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
@@ -645,7 +650,7 @@ public abstract class AbstractWireBlock extends Block
 	 * @param pos position of the blockstate
 	 * @return An index usable by the voxel cache
 	 */
-	public long getExpandedShapeIndex(BlockState state, BlockGetter world, BlockPos pos)
+	public long getExpandedShapeIndex(BlockState state, Level world, BlockPos pos)
 	{
 		// for each of the six interior faces a wire block can have a wire attached to,
 		// that face can be connected to any of the four orthagonally adjacent blocks
@@ -702,93 +707,100 @@ public abstract class AbstractWireBlock extends Block
 		return this.readAttachedPower;
 	}
 	
-	protected Map<Direction, Map<Channel, TransmissionNode>> createNodes(Level level, BlockPos thisPos, BlockState thisState)
+	protected Map<Channel, Collection<TransmissionNode>> createNodes(Level level, BlockPos thisPos, BlockState thisState)
 	{
-		Map<Direction, Map<Channel, TransmissionNode>> map = new HashMap<>();
+		Map<Channel, Collection<TransmissionNode>> nodesByChannel = new HashMap<>();
 		Block thisBlock = thisState.getBlock();
-		// first six connections are physical nodes
-		for (int attachmentSideIndex=0; attachmentSideIndex<6; attachmentSideIndex++)
-		{
-			if (!thisState.getValue(INTERIOR_FACES[attachmentSideIndex]))
-				continue;
-			
-			
-			Direction attachmentSide = Direction.values()[attachmentSideIndex];
-			Map<Channel, TransmissionNode> nodesByChannel = new HashMap<>();
-			Set<Direction> powerReaders = new HashSet<>();
-			Set<Face> connectableNodes = new HashSet<>();
-			if (this.readAttachedPower)
+		for (Channel channel : this.channels.channels()) {
+			Collection<TransmissionNode> nodesOnChannel = new ArrayList<>();
+
+			// first six connections are physical nodes
+			for (int attachmentSideIndex=0; attachmentSideIndex<6; attachmentSideIndex++)
 			{
-				powerReaders.add(attachmentSide);
-			}
-			if (this.useIndirectPower)
-			{
-				// add strong-power connections to wires on the other sides of attached block
-				BlockPos neighborPos = thisPos.relative(attachmentSide);
-				if (level.getBlockState(neighborPos).isRedstoneConductor(level, neighborPos))
+				if (!thisState.getValue(INTERIOR_FACES[attachmentSideIndex]))
+					continue;
+				
+				
+				Direction attachmentSide = Direction.values()[attachmentSideIndex];
+				Set<Direction> powerReaders = new HashSet<>();
+				Set<SignalGraphKey> connectableNodes = new HashSet<>();
+				var levelKey = level.dimension();
+				if (this.readAttachedPower)
 				{
-					for (Direction strongNeighborAttachmentSide : Direction.values())
+					powerReaders.add(attachmentSide);
+				}
+				if (this.useIndirectPower)
+				{
+					// add strong-power connections to wires on the other sides of attached block
+					BlockPos neighborPos = thisPos.relative(attachmentSide);
+					if (level.getBlockState(neighborPos).isRedstoneConductor(level, neighborPos))
 					{
-						if (strongNeighborAttachmentSide == attachmentSide)
-							continue;
-						Direction directionFromCubeToStrongNeighbor = strongNeighborAttachmentSide.getOpposite();
-						BlockPos strongNeighborPos = neighborPos.relative(directionFromCubeToStrongNeighbor);
-						connectableNodes.add(new Face(strongNeighborPos, strongNeighborAttachmentSide));
+						for (Direction strongNeighborAttachmentSide : Direction.values())
+						{
+							if (strongNeighborAttachmentSide == attachmentSide)
+								continue;
+							Direction directionFromCubeToStrongNeighbor = strongNeighborAttachmentSide.getOpposite();
+							BlockPos strongNeighborPos = neighborPos.relative(directionFromCubeToStrongNeighbor);
+							NodeShape strongNeighborNodeShape = NodeShape.ofSide(strongNeighborAttachmentSide);
+							connectableNodes.add(new SignalGraphKey(levelKey, strongNeighborPos, strongNeighborNodeShape, channel));
+						}
 					}
 				}
-			}
-			// how does this work
-			// we have transmission nodes at each node we have a side attached to
-			// and the line/edge flags determine what nodes we can connect to (these were already calculated)
-			// the next 24 flags are lines
-			for (int subsideIndex = 0; subsideIndex < 4; subsideIndex++)
-			{
-				Direction directionToLineNeighbor = Direction.values()[DirectionHelper.uncompressSecondSide(attachmentSideIndex, subsideIndex)];
-				boolean hasElbow = thisState.getValue(INTERIOR_FACES[directionToLineNeighbor.ordinal()]);
-				if (hasElbow)
+				// how does this work
+				// we have transmission nodes at each node we have a side attached to
+				// and the line/edge flags determine what nodes we can connect to (these were already calculated)
+				// the next 24 flags are lines
+				for (int subsideIndex = 0; subsideIndex < 4; subsideIndex++)
 				{
-					// if there's another wire node attached in the elbow direction, we can't form a line connection
-					connectableNodes.add(new Face(thisPos, directionToLineNeighbor));
-				}
-				else
-				{
-					// if block in that direction is another wire block
-					// and we can form a convex connection to another wire block THROUGH that block
-					// then add an extra connectable face to the convex-connected face
-					// otherwise add a parallel connectable face
-					BlockPos lineNeighborPos = thisPos.relative(directionToLineNeighbor);
-					BlockState neighborState = level.getBlockState(lineNeighborPos);
-					Block neighborBlock = neighborState.getBlock();
-					BlockPos convexNeighborPos = lineNeighborPos.relative(attachmentSide);
-					if (neighborBlock == thisBlock
-						&& level.getBlockState(convexNeighborPos).getBlock() == thisBlock)
+					Direction directionToLineNeighbor = Direction.values()[DirectionHelper.uncompressSecondSide(attachmentSideIndex, subsideIndex)];
+					boolean hasElbow = thisState.getValue(INTERIOR_FACES[directionToLineNeighbor.ordinal()]);
+					if (hasElbow)
 					{
-						connectableNodes.add(new Face(convexNeighborPos, directionToLineNeighbor.getOpposite()));
+						// if there's another wire node attached in the elbow direction, we can't form a line connection
+						// but we can connect to the other half of the elbow
+						connectableNodes.add(new SignalGraphKey(levelKey, thisPos, NodeShape.ofSide(directionToLineNeighbor), channel));
 					}
 					else
 					{
-						// not a line to a reacharound neighbor, just a regular ol' line
-						// add a parallel node
-						connectableNodes.add(new Face(lineNeighborPos, attachmentSide));
+						// if block in that direction is another wire block
+						// and we can form a convex connection to another wire block THROUGH that block
+						// then add an extra connectable face to the convex-connected face
+						// otherwise add a parallel connectable face
+						BlockPos lineNeighborPos = thisPos.relative(directionToLineNeighbor);
+						BlockState neighborState = level.getBlockState(lineNeighborPos);
+						Block neighborBlock = neighborState.getBlock();
+						BlockPos convexNeighborPos = lineNeighborPos.relative(attachmentSide);
+						if (neighborBlock == thisBlock
+							&& level.getBlockState(convexNeighborPos).getBlock() == thisBlock)
+						{
+							connectableNodes.add(new SignalGraphKey(levelKey, convexNeighborPos, NodeShape.ofSide(directionToLineNeighbor.getOpposite()), channel));
+						}
+						else
+						{
+							// not a line to a reacharound neighbor, just a regular ol' line
+							// add a parallel node
+							connectableNodes.add(new SignalGraphKey(levelKey, lineNeighborPos, NodeShape.ofSideSide(attachmentSide, directionToLineNeighbor.getOpposite()), channel));
+						}
 					}
 				}
-			}
-			for (Channel channel : this.channels.channels())
-			{
-				nodesByChannel.put(channel, new TransmissionNode(
+				
+				NodeShape wireNodeShape = NodeShape.ofSide(attachmentSide);
+				nodesOnChannel.add(new TransmissionNode(
+					wireNodeShape,
+					MoreRed.NO_SOURCE,
 					powerReaders,
 					connectableNodes,
 					(world,power) -> this.onReceivePower(world, thisPos, thisState, attachmentSide, power, channel)
 				));
 			}
-			map.put(attachmentSide, nodesByChannel);
+			nodesByChannel.put(channel, nodesOnChannel);
 		}
 		
-		return map;
+		return nodesByChannel;
 	}
 	
 	
-	protected boolean canAdjacentBlockConnectToFace(BlockGetter world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
+	protected boolean canAdjacentBlockConnectToFace(Level world, BlockPos thisPos, BlockState thisState, Block neighborBlock, Direction attachmentDirection, Direction directionToWire, BlockPos neighborPos, BlockState neighborState)
 	{
 		// check convex edges first
 		if (neighborBlock == this)
@@ -802,32 +814,25 @@ public abstract class AbstractWireBlock extends Block
 		}
 		StateWirer neighborWirer = StateWirer.getOrDefault(world, neighborPos);
 		// check endpoints and transmitters
-		Face wireFace = new Face(thisPos, attachmentDirection);
-		var neighborSuppliers = neighborWirer.source().getSupplierEndpoints(world, neighborPos, neighborState, attachmentDirection, wireFace);
-		var compatibleChannels = this.channels.compatibleChannels();
+		var levelKey = world.dimension();
+		SignalComponent neighborComponent = neighborWirer.component();
 		
-		if (!neighborSuppliers.isEmpty())
+		for (Channel ourChannel : this.channels.channels())
 		{
-			for (Channel channel : compatibleChannels)
+			SignalGraphKey wireNode = new SignalGraphKey(levelKey, thisPos, NodeShape.ofSide(attachmentDirection), ourChannel);
+			for (Channel theirChannel : ourChannel.getConnectableChannels())
 			{
-				if (neighborSuppliers.get(channel) != null)
-					return true;
-			}
-		}
-		
-		for (Channel channel : compatibleChannels)
-		{
-			if (neighborWirer.receiver().getReceiverEndpoint(world, neighborPos, neighborState, attachmentDirection, wireFace, channel) != null)
-				return true;
-		}
-		var transmissionNodes = neighborWirer.transmitter().getTransmissionNodes(world, neighborPos, neighborState, attachmentDirection);
-		if (!transmissionNodes.isEmpty())
-		{
-			for (Channel channel : compatibleChannels)
-			{
-				TransmissionNode node = transmissionNodes.get(channel);
-				if (node != null && node.connectableNodes().contains(wireFace))
-					return true;
+				var neighborNodes = neighborComponent.getTransmissionNodes(levelKey, world, neighborPos, neighborState, theirChannel);
+				for (TransmissionNode node : neighborNodes)
+				{
+					for (SignalGraphKey keyPreferredByNeighbor : node.connectableNodes())
+					{
+						if (wireNode.isValidFor(keyPreferredByNeighbor))
+						{
+							return true;
+						}
+					}
+				}
 			}
 		}
 		return false;

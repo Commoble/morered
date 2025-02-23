@@ -1,21 +1,25 @@
 package net.commoble.morered.wire_post;
 
+import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.commoble.exmachina.api.Channel;
-import net.commoble.exmachina.api.Face;
+import net.commoble.exmachina.api.NodeShape;
+import net.commoble.exmachina.api.SignalGraphKey;
 import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
@@ -164,66 +168,66 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 		return this.connectionGetter.apply(state);
 	}
 
-	protected Map<Direction, Map<Channel, TransmissionNode>> createTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post)
+	protected Map<Channel, Collection<TransmissionNode>> createTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, WirePostBlockEntity post)
 	{
-		Map<Direction, Map<Channel, TransmissionNode>> allMaps = new HashMap<>();
-		for (Direction face : Direction.values())
+		Map<Channel, Collection<TransmissionNode>> map = new HashMap<>();
+		Direction attachmentFace = state.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT);
+		Set<Direction> powerReaders = this.connectsToAttachedBlock()
+			? Set.of(attachmentFace)
+			: Set.of();
+		Set<Direction> parallelDirections = this.getParallelDirections(state);
+		Set<SignalGraphKey> connectableNodes = new HashSet<>();
+		// add nodes for parallel nodes
+		for (Direction directionToNeighbor : parallelDirections)
 		{
-			Map<Channel, TransmissionNode> map = new HashMap<>();
-			Set<Direction> powerReaders = this.connectsToAttachedBlock()
-				? Set.of(face)
-				: Set.of();
-			Set<Direction> parallelDirections = this.getParallelDirections(state);
-			Set<Face> connectableNodes = new HashSet<>();
-			// add nodes for parallel nodes
-			for (Direction directionToNeighbor : parallelDirections)
-			{
-				BlockPos neighborPos = pos.relative(directionToNeighbor);
-				connectableNodes.add(new Face(neighborPos, face));
-			}
-			if (this.connectsToAttachedBlock())
-			{
-				// add strong-connection nodes for the attachment face too
-				BlockPos neighborPos = pos.relative(face);
-				if (level.getBlockState(neighborPos).isRedstoneConductor(level, pos))
-				{
-					for (Direction directionToCube : Direction.values())
-					{
-						if (directionToCube == face)
-							continue;
-						connectableNodes.add(new Face(neighborPos.relative(directionToCube.getOpposite()), directionToCube));
-					}
-				}
-			}
-			for (BlockPos remotePos : post.getRemoteConnections())
-			{
-				BlockState remoteState = level.getBlockState(remotePos);
-				if (remoteState.hasProperty(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
-				{
-					connectableNodes.add(new Face(remotePos, remoteState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT)));
-				}
-			}
-			BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> graphListener = (levelAccess, power) -> {
-				// flag 2 syncs block via sendBlockUpdated but does not invoke neighborChanged
-				// the graph will invoke neighborChanged later
-				// however this will still invoke updateShape...
-				// this shouldn't be an issue since updateShape usually doesn't handle signal changes
-				levelAccess.setBlock(pos, state.setValue(AbstractPoweredWirePostBlock.POWER, power), Block.UPDATE_CLIENTS);
-				Map<Direction, SignalStrength> updateDirs = new HashMap<>();
-				for (Direction dir : powerReaders)
-				{
-					updateDirs.put(dir, SignalStrength.STRONG);
-				}
-				for (Direction dir : parallelDirections)
-				{
-					updateDirs.put(dir, SignalStrength.STRONG);
-				}
-				return updateDirs;
-			};
-			TransmissionNode node = new TransmissionNode(powerReaders, connectableNodes, graphListener);
-			map.put(Channel.redstone(), node);
-			allMaps.put(face, map);
+			Direction directionToPost = directionToNeighbor.getOpposite();
+			BlockPos neighborPos = pos.relative(directionToNeighbor);
+			connectableNodes.add(new SignalGraphKey(levelKey, neighborPos, NodeShape.ofSideSide(attachmentFace, directionToPost), Channel.redstone()));
 		}
-		return allMaps;
+		if (this.connectsToAttachedBlock())
+		{
+			// add strong-connection nodes for the attachment face too
+			BlockPos neighborPos = pos.relative(attachmentFace);
+			if (level.getBlockState(neighborPos).isRedstoneConductor(level, pos))
+			{
+				for (Direction directionToCube : Direction.values())
+				{
+					if (directionToCube == attachmentFace)
+						continue;
+					connectableNodes.add(new SignalGraphKey(levelKey, neighborPos.relative(directionToCube.getOpposite()), NodeShape.ofSide(directionToCube), Channel.redstone()));
+				}
+			}
+		}
+		for (BlockPos remotePos : post.getRemoteConnections())
+		{
+			BlockState remoteState = level.getBlockState(remotePos);
+			if (remoteState.hasProperty(AbstractPostBlock.DIRECTION_OF_ATTACHMENT))
+			{
+				connectableNodes.add(new SignalGraphKey(levelKey, remotePos, NodeShape.ofSide(remoteState.getValue(AbstractPostBlock.DIRECTION_OF_ATTACHMENT)), Channel.redstone()));
+			}
+		}
+		BiFunction<LevelAccessor, Integer, Map<Direction, SignalStrength>> graphListener = (levelAccess, power) -> {
+			// if no change in power, don't change power or update neighbors
+			if (power == state.getValue(POWER))
+				return Map.of();
+			// flag 2 syncs block via sendBlockUpdated but does not invoke neighborChanged
+			// the graph will invoke neighborChanged later
+			// however this will still invoke updateShape...
+			// this shouldn't be an issue since updateShape usually doesn't handle signal changes
+			levelAccess.setBlock(pos, state.setValue(AbstractPoweredWirePostBlock.POWER, power), Block.UPDATE_CLIENTS);
+			Map<Direction, SignalStrength> updateDirs = new HashMap<>();
+			for (Direction dir : powerReaders)
+			{
+				updateDirs.put(dir, SignalStrength.STRONG);
+			}
+			for (Direction dir : parallelDirections)
+			{
+				updateDirs.put(dir, SignalStrength.STRONG);
+			}
+			return updateDirs;
+		};
+		TransmissionNode node = new TransmissionNode(NodeShape.ofSide(attachmentFace), MoreRed.NO_SOURCE, powerReaders, connectableNodes, graphListener);
+		map.put(Channel.redstone(), List.of(node));
+		return map;
 	}
 }

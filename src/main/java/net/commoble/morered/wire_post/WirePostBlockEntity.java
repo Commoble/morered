@@ -1,6 +1,7 @@
 package net.commoble.morered.wire_post;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,14 +20,15 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -46,7 +48,7 @@ public class WirePostBlockEntity extends BlockEntity
 	private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
 	
 	private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
-	protected Map<Direction, Map<Channel, TransmissionNode>> transmissionNodes = null;
+	protected Map<Channel, Collection<TransmissionNode>> transmissionNodes = null;
 	
 	public static final Codec<List<BlockPos>> BLOCKPOS_LISTER = BlockPos.CODEC.listOf();
 	
@@ -288,15 +290,16 @@ public class WirePostBlockEntity extends BlockEntity
 		return NestedBoundingBox.fromAABBs(boxes);
 	}
 
-	public Map<Channel, TransmissionNode> getTransmissionNodes(BlockGetter level, BlockPos pos, BlockState state, Direction face, Supplier<Map<Direction,Map<Channel,TransmissionNode>>> nodeFactory)
+	public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel, Supplier<Map<Channel,Collection<TransmissionNode>>> nodeFactory)
 	{
 		if (this.level.isClientSide)
-			return Map.of();
+			return List.of();
 		if (this.transmissionNodes == null)
 		{
 			this.transmissionNodes = nodeFactory.get();
 		}
-		return this.transmissionNodes.get(face);
+		var nodes = this.transmissionNodes.get(channel);
+		return nodes != null ? nodes : List.of();
 	}
 
 	public void clearTransmissionNodes()

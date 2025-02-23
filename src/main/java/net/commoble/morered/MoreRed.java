@@ -11,6 +11,7 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
@@ -18,15 +19,16 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 
 import net.commoble.exmachina.api.ExMachinaRegistries;
-import net.commoble.exmachina.api.SignalReceiver;
-import net.commoble.exmachina.api.SignalSource;
-import net.commoble.exmachina.api.SignalTransmitter;
+import net.commoble.exmachina.api.SignalComponent;
 import net.commoble.morered.bitwise_logic.BitwiseGateBlock;
+import net.commoble.morered.bitwise_logic.BitwiseGateSignalComponent;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
 import net.commoble.morered.client.ClientProxy;
+import net.commoble.morered.plate_blocks.BitwiseLogicFunction;
+import net.commoble.morered.plate_blocks.BitwiseLogicFunctions;
 import net.commoble.morered.plate_blocks.LatchBlock;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock;
@@ -79,16 +81,14 @@ import net.commoble.morered.wire_post.WirePostBlockEntity;
 import net.commoble.morered.wire_post.WirePostPlateBlock;
 import net.commoble.morered.wire_post.WireSpoolItem;
 import net.commoble.morered.wires.AbstractWireBlock;
-import net.commoble.morered.wires.BitwiseGateReceiver;
-import net.commoble.morered.wires.BitwiseGateSource;
 import net.commoble.morered.wires.BundledCableBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.PoweredWireBlockEntity;
 import net.commoble.morered.wires.WireBlockEntity;
 import net.commoble.morered.wires.WireBlockItem;
 import net.commoble.morered.wires.WireCountLootFunction;
-import net.commoble.morered.wires.WirePostWirer;
-import net.commoble.morered.wires.WireTransmitter;
+import net.commoble.morered.wires.WirePostSignalComponent;
+import net.commoble.morered.wires.WireSignalComponent;
 import net.commoble.morered.wires.WireUpdatePacket;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
@@ -125,6 +125,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -174,6 +175,7 @@ public class MoreRed
 	}
 
 	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
+	public static final ToIntFunction<LevelReader> NO_SOURCE = reader -> 0;
 
 	public final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
 	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseGateBlock>> bitwiseLogicPlates = new HashMap<>();
@@ -262,9 +264,7 @@ public class MoreRed
 		DeferredRegister<LootItemFunctionType<?>> lootFunctions = defreg(modBus, Registries.LOOT_FUNCTION_TYPE);
 		DeferredRegister<AttachmentType<?>> attachmentTypes = defreg(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 		DeferredRegister<DataComponentType<?>> dataComponentTypes = defreg(modBus, Registries.DATA_COMPONENT_TYPE);
-		var signalSourceTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_SOURCE_TYPE);
-		var signalTransmitterTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_TRANSMITTER_TYPE);
-		var signalReceiverTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_RECEIVER_TYPE);
+		var signalComponentTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
 		
 		solderingTableBlock = registerBlockItem(blocks, items, Names.SOLDERING_TABLE,
 			() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion(),
@@ -328,14 +328,14 @@ public class MoreRed
 		
 		// bitwise logic gates store state in a TE instead of block properties
 		// they don't need to have their properties defined on construction but they do need to be registered to the TE type they use
-		BiFunction<BlockBehaviour.Properties, LogicFunction, SingleInputBitwiseGateBlock> singleInput = SingleInputBitwiseGateBlock::new;
-		BiFunction<BlockBehaviour.Properties, LogicFunction, TwoInputBitwiseGateBlock> twoInputs = TwoInputBitwiseGateBlock::new;
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_DIODE, LogicFunctions.INPUT_B, singleInput);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_NOT_GATE, LogicFunctions.NOT_B, singleInput);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_OR_GATE, LogicFunctions.OR, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_AND_GATE, LogicFunctions.AND_2, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XOR_GATE, LogicFunctions.XOR_AC, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XNOR_GATE, LogicFunctions.XNOR_AC, twoInputs);
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, SingleInputBitwiseGateBlock> singleInput = SingleInputBitwiseGateBlock::new;
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, TwoInputBitwiseGateBlock> twoInputs = TwoInputBitwiseGateBlock::new;
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_DIODE, BitwiseLogicFunctions.INPUT_B, singleInput);
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_NOT_GATE, BitwiseLogicFunctions.NOT_B, singleInput);
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_OR_GATE, BitwiseLogicFunctions.OR, twoInputs);
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_AND_GATE, BitwiseLogicFunctions.AND_2, twoInputs);
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XOR_GATE, BitwiseLogicFunctions.XOR_AC, twoInputs);
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XNOR_GATE, BitwiseLogicFunctions.XNOR_AC, twoInputs);
 		List<Supplier<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
 		
 		this.tubeBlock = registerBlockItem(blocks, items, Names.TUBE,
@@ -510,15 +510,12 @@ public class MoreRed
 		
 		wireCountLootFunction = lootFunctions.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
 
-		BiConsumer<ResourceKey<MapCodec<? extends SignalSource>>, MapCodec<? extends SignalSource>> registerSource = (key,codec) -> signalSourceTypes.register(key.location().getPath(), () -> codec);
-		BiConsumer<ResourceKey<MapCodec<? extends SignalTransmitter>>, MapCodec<? extends SignalTransmitter>> registerTransmitter = (key,codec) -> signalTransmitterTypes.register(key.location().getPath(), () -> codec);
-		BiConsumer<ResourceKey<MapCodec<? extends SignalReceiver>>, MapCodec<? extends SignalReceiver>> registerReceiver = (key,codec) -> signalReceiverTypes.register(key.location().getPath(), () -> codec);
+		BiConsumer<ResourceKey<MapCodec<? extends SignalComponent>>, MapCodec<? extends SignalComponent>> registerSignalComponent = (key,codec) -> signalComponentTypes.register(key.location().getPath(), () -> codec);
 
-		registerSource.accept(BitwiseGateSource.RESOURCE_KEY, BitwiseGateSource.CODEC);
-		registerTransmitter.accept(WireTransmitter.RESOURCE_KEY, WireTransmitter.CODEC);
-		registerTransmitter.accept(WirePostWirer.RESOURCE_KEY, WirePostWirer.CODEC);
-		registerReceiver.accept(BitwiseGateReceiver.RESOURCE_KEY, BitwiseGateReceiver.CODEC);
-		
+		registerSignalComponent.accept(WireSignalComponent.RESOURCE_KEY, WireSignalComponent.CODEC);
+		registerSignalComponent.accept(WirePostSignalComponent.RESOURCE_KEY, WirePostSignalComponent.CODEC);
+		registerSignalComponent.accept(BitwiseGateSignalComponent.RESOURCE_KEY, BitwiseGateSignalComponent.CODEC);
+
 		// menu types
 		
 		modBus.addListener(this::onRegisterPackets);
@@ -848,8 +845,8 @@ public class MoreRed
 	}
 	
 	public <B extends BitwiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
-		LogicFunction function,
-		BiFunction<BlockBehaviour.Properties, LogicFunction, B> blockFactory)
+		BitwiseLogicFunction function,
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, B> blockFactory)
 	{
 		DeferredHolder<Block, B> rob = registerBlockItem(blocks, items, name,
 			() -> BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD),
