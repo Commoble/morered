@@ -15,6 +15,7 @@ import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.SimpleBakedModel;
+import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.util.context.ContextMap;
 import net.neoforged.neoforge.client.model.ExtendedUnbakedModel;
@@ -67,7 +68,7 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<TintRotatingM
 		@Override
 		public BakedModel bake(TextureSlots textures, ModelBaker baker, ModelState modelState, boolean useAmbientOcclusion, boolean usesBlockLight, ItemTransforms itemTransforms, ContextMap additionalProperties)
 		{
-			BakedModel baseModel = blockModel.bake(textures, baker, modelState, useAmbientOcclusion, usesBlockLight, itemTransforms, additionalProperties);
+			BakedModel baseModel = UnbakedModel.bakeWithTopModelValues(blockModel, baker, modelState);
 			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(
 				baseModel.useAmbientOcclusion(),
 				baseModel.usesBlockLight(),

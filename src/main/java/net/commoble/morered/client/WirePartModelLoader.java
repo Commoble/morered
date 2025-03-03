@@ -67,7 +67,7 @@ public class WirePartModelLoader implements UnbakedModelLoader<WirePartGeometry>
 				{
 					int index = side*4 + subSide;
 					ModelState transform = FaceRotation.getFaceRotation(side, subSide);
-					lineModels[index] = this.lineModel.bake(textures, baker, transform, useAmbientOcclusion, usesBlockLight, itemTransforms, additionalProperties);
+					lineModels[index] = UnbakedModel.bakeWithTopModelValues(this.lineModel, baker, transform);
 				}
 			}
 			
@@ -78,7 +78,7 @@ public class WirePartModelLoader implements UnbakedModelLoader<WirePartGeometry>
 				// down comes first, then up, then the sides
 				// the "default" edge with no rotation has to be on the middle sides to ignore the z-axis, we'll use bottom-west
 				ModelState transform = EdgeRotation.EDGE_ROTATIONS[edge];
-				edgeModels[edge] = this.edgeModel.bake(textures, baker, transform, useAmbientOcclusion, usesBlockLight, itemTransforms, additionalProperties);
+				edgeModels[edge] = UnbakedModel.bakeWithTopModelValues(this.edgeModel, baker, transform);
 			}
 			
 			return new WirePartModelLoader.WirePartModel(useAmbientOcclusion, usesBlockLight,
