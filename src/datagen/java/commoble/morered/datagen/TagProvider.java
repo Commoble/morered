@@ -3,8 +3,6 @@ package commoble.morered.datagen;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 
-import org.jetbrains.annotations.Nullable;
-
 import com.google.common.collect.Maps;
 
 import net.minecraft.core.HolderLookup;
@@ -16,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
 import net.neoforged.fml.ModLoadingContext;
-import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
@@ -28,12 +25,12 @@ public class TagProvider<T> extends TagsProvider<T>
 	protected final Map<ResourceLocation, TagBuilder> subclassBuilders = Maps.newLinkedHashMap();
 	public static <T> TagProvider<T> create(GatherDataEvent event, ResourceKey<Registry<T>> registry, CompletableFuture<HolderLookup.Provider> holders)
 	{
-		return new TagProvider<>(event.getGenerator(), registry, holders, ModLoadingContext.get().getActiveContainer().getModId(), event.getExistingFileHelper());
+		return new TagProvider<>(event.getGenerator(), registry, holders, ModLoadingContext.get().getActiveContainer().getModId());
 	}
 	
-	protected TagProvider(DataGenerator dataGenerator, ResourceKey<Registry<T>> registry, CompletableFuture<HolderLookup.Provider> holders, String modId, @Nullable ExistingFileHelper existingFileHelper)
+	protected TagProvider(DataGenerator dataGenerator, ResourceKey<Registry<T>> registry, CompletableFuture<HolderLookup.Provider> holders, String modId)
 	{
-		super(dataGenerator.getPackOutput(), registry, holders, modId, existingFileHelper);
+		super(dataGenerator.getPackOutput(), registry, holders, modId);
 	}
 
    public TagBuilder getOrCreateRawBuilder(TagKey<T> tagKey) {

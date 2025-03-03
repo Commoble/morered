@@ -99,7 +99,7 @@ public class PliersItem extends Item
 					{
 						removePlieredTube(stack);
 						PacketDistributor.sendToPlayer(serverPlayer, new TubeBreakPacket(startVec, endVec));
-						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 					}
 					// if we clicked the same side of two different tubes, deny the connection attempt (fixes an edge case)
@@ -107,7 +107,7 @@ public class PliersItem extends Item
 					{
 						removePlieredTube(stack);
 						PacketDistributor.sendToPlayer(serverPlayer, new TubeBreakPacket(startVec, endVec));
-						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, endVec.x, endVec.y, endVec.z, 5, .05, .05, .05, 0);
+						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, false, endVec.x, endVec.y, endVec.z, 5, .05, .05, .05, 0);
 						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 					}
 					else if (state.getBlock() instanceof TubeBlock tubeBlock && !tubeBlock.hasConnectionOnSide(state, activatedSide))

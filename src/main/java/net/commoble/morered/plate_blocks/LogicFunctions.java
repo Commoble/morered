@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 public class LogicFunctions
 {
 	public static final Int2ObjectMap<LogicFunction> TINTINDEXES = new Int2ObjectOpenHashMap<>();
+	private static int maxIndex = 0;
 	
 	// we explicitly enumerate these because the model jsons' tintindexes need literal ints and I want to see which ints are for what
 	// particles have tintindex 0 for some reason, start counting at 1 so we don't tint particles
@@ -37,6 +38,13 @@ public class LogicFunctions
 	public static LogicFunction registerTintIndex(int index, LogicFunction function)
 	{
 		TINTINDEXES.put(index, function);
+		if (index > maxIndex)
+			maxIndex = index;
 		return function;
+	}
+	
+	public static int maxIndex()
+	{
+		return maxIndex;
 	}
 }

@@ -84,7 +84,7 @@ public class WireSpoolItem extends Item
 					{
 						stack.remove(spooledPost);
 						PacketDistributor.sendToPlayer(serverPlayer, new WireBreakPacket(Vec3.atCenterOf(lowerPos), Vec3.atCenterOf(upperPos)));
-						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
+						serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 						
 						serverPlayer.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
 					}

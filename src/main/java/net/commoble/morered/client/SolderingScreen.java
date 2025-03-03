@@ -195,7 +195,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	            // render ingredients
 	            for (int ingredientIndex=0; ingredientIndex<ingredientCount; ingredientIndex++)
 	            {
-	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).ingredient().items()).getDefaultInstance();
+	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).ingredient().getValues().stream().toList()).getDefaultInstance();
 
 	            	int itemRow = ingredientIndex / 3;
 	            	int itemColumn = ingredientIndex % 3;

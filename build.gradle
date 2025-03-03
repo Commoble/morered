@@ -49,8 +49,8 @@ neoForge {
 		gameTestServer {
 			type = "gameTestServer"
 		}
-		data {
-			data()
+		clientData {
+			clientData()
 			programArguments.addAll '--mod', "morered_datagen", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
 		}
 		configureEach {

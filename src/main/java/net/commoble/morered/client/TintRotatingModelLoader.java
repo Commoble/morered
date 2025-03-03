@@ -1,8 +1,5 @@
 package net.commoble.morered.client;
 
-import java.util.List;
-import java.util.function.Function;
-
 import org.joml.Matrix4f;
 
 import com.google.gson.JsonDeserializationContext;
@@ -12,18 +9,16 @@ import net.commoble.morered.client.TintRotatingModelLoader.TintRotatingModelGeom
 import net.commoble.morered.wires.Edge;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemOverride;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.renderer.block.model.ItemTransforms;
+import net.minecraft.client.renderer.block.model.TextureSlots;
 import net.minecraft.client.resources.model.BakedModel;
-import net.minecraft.client.resources.model.Material;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.SimpleBakedModel;
-import net.minecraft.client.resources.model.UnbakedModel.Resolver;
 import net.minecraft.core.Direction;
-import net.neoforged.neoforge.client.model.geometry.IGeometryBakingContext;
-import net.neoforged.neoforge.client.model.geometry.IGeometryLoader;
-import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
+import net.minecraft.util.context.ContextMap;
+import net.neoforged.neoforge.client.model.ExtendedUnbakedModel;
+import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 
 /**
  model loader that "rotates" a tintindex in a predefined way
@@ -45,7 +40,7 @@ import net.neoforged.neoforge.client.model.geometry.IUnbakedGeometry;
  we will then sneakily replace the quads when we bake them, updating the tintindexes
  based on the model transform to more appropriate values
  */
-public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingModelGeometry>
+public class TintRotatingModelLoader implements UnbakedModelLoader<TintRotatingModelGeometry>
 {
 	public static final TintRotatingModelLoader INSTANCE = new TintRotatingModelLoader();
 
@@ -59,7 +54,7 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
         return new TintRotatingModelGeometry(proxy);
 	}
 	
-	public static class TintRotatingModelGeometry implements IUnbakedGeometry<TintRotatingModelGeometry>
+	public static class TintRotatingModelGeometry implements ExtendedUnbakedModel
 	{
 		private final BlockModel blockModel;
 		
@@ -70,12 +65,16 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
 			
 		@SuppressWarnings("deprecation")
 		@Override
-		public BakedModel bake(IGeometryBakingContext context, ModelBaker baker, Function<Material, TextureAtlasSprite> spriteGetter, ModelState modelState,
-			List<ItemOverride> overrides)
+		public BakedModel bake(TextureSlots textures, ModelBaker baker, ModelState modelState, boolean useAmbientOcclusion, boolean usesBlockLight, ItemTransforms itemTransforms, ContextMap additionalProperties)
 		{
-			BakedModel baseModel = blockModel.bake(spriteGetter, modelState, false);
-			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(blockModel, false)
-				.particle(spriteGetter.apply(blockModel.getMaterial("particle")));
+			BakedModel baseModel = blockModel.bake(textures, baker, modelState, useAmbientOcclusion, usesBlockLight, itemTransforms, additionalProperties);
+			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(
+				baseModel.useAmbientOcclusion(),
+				baseModel.usesBlockLight(),
+				baseModel.isGui3d(),
+				baseModel.getTransforms())
+				.particle(baseModel.getParticleIcon());
+
 			Matrix4f rotation = modelState.getRotation().getMatrix();
 			for (Direction dir : Direction.values())
 			{
@@ -93,7 +92,7 @@ public class TintRotatingModelLoader implements IGeometryLoader<TintRotatingMode
 		}
 
 		@Override
-		public void resolveDependencies(Resolver resolver, IGeometryBakingContext owner)
+		public void resolveDependencies(Resolver resolver)
 		{
 			this.blockModel.resolveDependencies(resolver);
 		}

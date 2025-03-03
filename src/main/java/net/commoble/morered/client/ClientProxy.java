@@ -64,6 +64,7 @@ import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderer
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
+import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
@@ -151,7 +152,7 @@ public class ClientProxy
 		modBus.addListener(ClientProxy::onClientSetup);
 		modBus.addListener(ClientProxy::onRegisterModelLoaders);
 		modBus.addListener(ClientProxy::onRegisterBlockColors);
-		modBus.addListener(ClientProxy::onRegisterItemColors);
+		modBus.addListener(ClientProxy::onRegisterItemModels);
 		modBus.addListener(ClientProxy::onRegisterRenderers);
 		modBus.addListener(ClientProxy::onRegisterScreens);
 		modBus.addListener(ClientProxy::onRegisterClientExtensions);
@@ -205,8 +206,13 @@ public class ClientProxy
 			registerWireBlock.accept(block.get());
 		}
 	}
+	
+	private static void onRegisterItemModels(RegisterItemModelsEvent event)
+	{
+		event.register(MoreRed.id(Names.LOGIC_GATE), UnbakedLogicGateModel.CODEC);
+	}
 
-	public static void onRegisterModelLoaders(ModelEvent.RegisterGeometryLoaders event)
+	public static void onRegisterModelLoaders(ModelEvent.RegisterLoaders event)
 	{
 		event.register(MoreRed.id(Names.WIRE_PARTS), WirePartModelLoader.INSTANCE);
 		event.register(MoreRed.id(Names.ROTATE_TINTS), TintRotatingModelLoader.INSTANCE);
@@ -221,17 +227,6 @@ public class ClientProxy
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireRelayBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireJunctionBlock.get());
 		event.register(ColorHandlers::getRedAlloyWireBlockTint, MoreRed.get().redAlloyWireBlock.get());
-	}
-
-	public static void onRegisterItemColors(RegisterColorHandlersEvent.Item event)
-	{
-		MoreRed.get().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockItemTint, rob.get().asItem()));
-		event.register(ColorHandlers::getLatchItemTint, MoreRed.get().latchBlock.get().asItem());
-		event.register(ColorHandlers::getPulseGateItemTint, MoreRed.get().pulseGateBlock.get().asItem());
-		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwirePostBlock.get().asItem());
-		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwireRelayBlock.get().asItem());
-		event.register(ColorHandlers::getRedwirePostItemTint, MoreRed.get().redwireJunctionBlock.get().asItem());
-		event.register(ColorHandlers::getRedAlloyWireItemTint, MoreRed.get().redAlloyWireBlock.get().asItem());
 	}
 
 	static void onRegisterRenderers(RegisterRenderers event)

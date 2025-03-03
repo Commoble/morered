@@ -90,7 +90,7 @@ public class MoreRedDataGen
 	static final TagKey<Item> REDSTONE_ALLOY_INGOTS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ingots/redstone_alloy"));
 
 	@SubscribeEvent
-	static void onGatherData(GatherDataEvent event)
+	static void onGatherData(GatherDataEvent.Client event)
 	{
 		DataGenerator generator = event.getGenerator();
 		CompletableFuture<HolderLookup.Provider> holders = event.getLookupProvider();
@@ -505,15 +505,15 @@ public class MoreRedDataGen
 					.tags(itemTags, MoreRed.Tags.Items.COLORED_TUBES, color.getDyedTag()));
 		}
 
-		generator.addProvider(event.includeClient(), JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockStateFile.CODEC, blockStates));
-		generator.addProvider(event.includeClient(), JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
-		generator.addProvider(event.includeClient(), JsonDataProvider.named(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", WirePartModelDefinition.CODEC, wirePartModels, "morered wire models"));
-		generator.addProvider(event.includeClient(), lang);
+		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockStateFile.CODEC, blockStates));
+		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
+		generator.addProvider(true, JsonDataProvider.named(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", WirePartModelDefinition.CODEC, wirePartModels, "morered wire models"));
+		generator.addProvider(true, lang);
 
-		generator.addProvider(event.includeServer(), JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables));
-		generator.addProvider(event.includeServer(), JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "recipe", Recipe.CODEC, recipes));
-		generator.addProvider(event.includeServer(), blockTags);
-		generator.addProvider(event.includeServer(), itemTags);
+		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables));
+		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "recipe", Recipe.CODEC, recipes));
+		generator.addProvider(true, blockTags);
+		generator.addProvider(true, itemTags);
 	}
 	
 	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context)

@@ -1,6 +1,7 @@
 {
 	"render_type": "translucent",
 	"textures": {
+		"particle": "block/slime_block",
 		"slime": "block/slime_block"
 	},
 	"elements": [
