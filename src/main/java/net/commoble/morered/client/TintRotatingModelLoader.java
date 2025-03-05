@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
 import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.TextureSlots;
+import net.minecraft.client.renderer.block.model.TextureSlots.Data;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
@@ -98,6 +99,12 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<TintRotatingM
 			this.blockModel.resolveDependencies(resolver);
 		}
 		
+		@Override
+		public Data getTextureSlots()
+		{
+			return blockModel.getTextureSlots();
+		}
+
 		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad, Matrix4f rotation)
 		{
 			int newTint = this.rotateTint(baseQuad.getTintIndex(), rotation);

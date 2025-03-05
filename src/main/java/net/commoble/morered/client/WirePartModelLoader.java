@@ -43,17 +43,8 @@ public class WirePartModelLoader implements UnbakedModelLoader<WirePartGeometry>
         return new WirePartGeometry(lineModel, edgeModel);
 	}
 	
-	public static class WirePartGeometry implements ExtendedUnbakedModel
+	public static record WirePartGeometry(BlockModel lineModel, BlockModel edgeModel) implements ExtendedUnbakedModel
 	{
-		private final BlockModel lineModel;
-		private final BlockModel edgeModel;
-		
-		public WirePartGeometry(BlockModel lineModel, BlockModel edgeModel)
-		{
-			this.lineModel = lineModel;
-			this.edgeModel = edgeModel;
-		}
-
 		@Override
 		public BakedModel bake(TextureSlots textures, ModelBaker baker, ModelState modelState, boolean useAmbientOcclusion, boolean usesBlockLight, ItemTransforms itemTransforms, ContextMap additionalProperties)
 		{

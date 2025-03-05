@@ -4,7 +4,6 @@ import java.util.EnumSet;
 
 import javax.annotation.Nullable;
 
-import net.commoble.morered.CommonTags;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -24,6 +23,7 @@ import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.ticks.TickPriority;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.event.EventHooks;
 
 public abstract class RedstonePlateBlock extends PlateBlock
@@ -76,7 +76,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	
 	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		boolean isPlayerHoldingWrench = stack.is(CommonTags.Items.WRENCHES);
+		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
 		
 		// rotate the block when the player pokes it with a wrench
 		if (isPlayerHoldingWrench && !level.isClientSide)

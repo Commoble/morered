@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "morered:logic_gate",
+    "model": "morered:item/xor_gate"
+  }
+}

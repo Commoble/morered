@@ -2,7 +2,6 @@ package net.commoble.morered.transportation;
 
 import org.jetbrains.annotations.Nullable;
 
-import net.commoble.morered.CommonTags;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -30,6 +29,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class ExtractorBlock extends Block
@@ -159,7 +159,7 @@ public class ExtractorBlock extends Block
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
 	{
-		if (stack.is(CommonTags.Items.WRENCHES))
+		if (stack.is(Tags.Items.TOOLS_WRENCH))
 		{
 			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
 				0.1F + level.random.nextFloat()*0.1F,

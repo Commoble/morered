@@ -1,6 +1,5 @@
 package net.commoble.morered.transportation;
 
-import net.commoble.morered.CommonTags;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +19,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
+import net.neoforged.neoforge.common.Tags;
 
 public abstract class AbstractFilterBlock extends Block
 {
@@ -71,7 +71,7 @@ public abstract class AbstractFilterBlock extends Block
 	@Override
 	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
 	{
-		if (stack.is(CommonTags.Items.WRENCHES))
+		if (stack.is(Tags.Items.TOOLS_WRENCH))
 		{
 			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
 				0.1F + level.random.nextFloat()*0.1F,

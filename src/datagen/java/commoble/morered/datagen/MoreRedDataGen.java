@@ -15,11 +15,12 @@ import commoble.morered.datagen.BlockStateFile.Multipart;
 import commoble.morered.datagen.BlockStateFile.PropertyValue;
 import commoble.morered.datagen.BlockStateFile.Variants;
 import commoble.morered.datagen.BlockStateFile.WhenApply;
-import net.commoble.morered.CommonTags;
 import net.commoble.morered.HexidecrubrometerBlock;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
+import net.commoble.morered.client.ColorHandlers;
+import net.commoble.morered.client.UnbakedLogicGateModel;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe;
@@ -31,6 +32,9 @@ import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
 import net.minecraft.Util;
+import net.minecraft.client.color.item.Constant;
+import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -75,15 +79,6 @@ import net.neoforged.neoforge.registries.DeferredHolder;
 @EventBusSubscriber(modid="morered_datagen", bus=Bus.MOD)
 public class MoreRedDataGen
 {
-	static record DataGenContext(Map<ResourceLocation, BlockStateFile> blockStates,
-		Map<ResourceLocation, SimpleModel> models,
-		Map<ResourceLocation, WirePartModelDefinition> wirePartModels,
-		Map<ResourceLocation, Recipe<?>> recipes,
-		Map<ResourceLocation, LootTable> lootTables,
-		TagProvider<Block> blockTags,
-		TagProvider<Item> itemTags,
-		LanguageProvider lang) {}
-	
 	static final TagKey<Item> SMOOTH_STONE = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "smooth_stone"));
 	static final TagKey<Item> SMOOTH_STONE_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "slabs/smooth_stone"));
 	static final TagKey<Item> SMOOTH_STONE_QUARTER_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "quarter_slabs/smooth_stone"));
@@ -97,6 +92,7 @@ public class MoreRedDataGen
 		PackOutput output = generator.getPackOutput();
 		
 		Map<ResourceLocation, BlockStateFile> blockStates = new HashMap<>();
+		Map<ResourceLocation, ClientItem> clientItems = new HashMap<>();
 		Map<ResourceLocation, SimpleModel> models = new HashMap<>();
 		Map<ResourceLocation, WirePartModelDefinition> wirePartModels = new HashMap<>();
 		Map<ResourceLocation, Recipe<?>> recipes = new HashMap<>();
@@ -109,7 +105,7 @@ public class MoreRedDataGen
 			protected void addTranslations()
 			{} // no
 		};
-		DataGenContext context = new DataGenContext(blockStates, models, wirePartModels, recipes, lootTables, blockTags, itemTags, lang);
+		DataGenContext context = new DataGenContext(blockStates, clientItems, models, wirePartModels, recipes, lootTables, blockTags, itemTags, lang);
 		
 //		Function<String, Block> getBlock = s -> BuiltInRegistries.BLOCK.getValue(MoreRed.getModRL(s));
 //		Function<String, Item> getItem = s -> BuiltInRegistries.ITEM.getValue(MoreRed.getModRL(s));
@@ -131,32 +127,32 @@ public class MoreRedDataGen
 		bitwisePlateBlock(Names.BITWISE_XNOR_GATE, "Bitwise XNOR Gate", "xnor_gate_symbol", context);
 		bitwisePlateBlock(Names.BITWISE_XOR_GATE, "Bitwise XOR Gate", "xor_gate_symbol", context);
 		postBlock(Names.CABLE_RELAY, "Cable Relay", context)
-			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
-			.blockItem()
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.tags(MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
+			.simpleBlockItem()
+			.help(helper -> helper.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					ingredient(MoreRed.Tags.Items.BUNDLED_CABLES),
 					ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					sizedIngredient(MoreRed.Tags.Items.BUNDLED_CABLES,1),
 					sizedIngredient(Tags.Items.INGOTS_IRON,1)))));
 		postBlock(Names.CABLE_JUNCTION, "Cable Junction", context)
-			.tags(blockTags, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
-			.blockItem()
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.tags(MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
+			.simpleBlockItem()
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					" b ",
 					"bFb",
 					"###"), Map.of(
 					'#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 					'b', ingredient(MoreRed.Tags.Items.BUNDLED_CABLES),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 2),
 					sizedIngredient(Tags.Items.INGOTS_IRON, 1),
 					sizedIngredient(MoreRed.Tags.Items.BUNDLED_CABLES, 1)))));
 		wireBlock(Names.BUNDLED_CABLE, "Bundled Cable", context)
-			.blockItem()
-			.tags(itemTags,  MoreRed.Tags.Items.BUNDLED_CABLES)
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 3, CraftingBookCategory.REDSTONE, List.of(
+			.blockItemWithoutItemModel()
+			.tags(MoreRed.Tags.Items.BUNDLED_CABLES)
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 3, CraftingBookCategory.REDSTONE, List.of(
 					"#",
 					"#",
 					"#"), Map.of('#', ingredient(MoreRed.Tags.Items.CABLES)))));
@@ -195,40 +191,40 @@ public class MoreRedDataGen
 			"rir",
 			"###");
 		wireBlock(Names.RED_ALLOY_WIRE, "Red Alloy Wire", context)
-			.blockItem()
-			.tags(itemTags, MoreRed.Tags.Items.RED_ALLOY_WIRES)
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 12, CraftingBookCategory.REDSTONE, List.of("###"), Map.of('#', ingredient(REDSTONE_ALLOY_INGOTS)))));
+			.blockItemWithoutItemModel(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.tags(MoreRed.Tags.Items.RED_ALLOY_WIRES)
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 12, CraftingBookCategory.REDSTONE, List.of("###"), Map.of('#', ingredient(REDSTONE_ALLOY_INGOTS)))));
 		postBlock(Names.REDWIRE_POST, "Redwire Post", context)
-			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
-			.blockItem()
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.tags(MoreRed.Tags.Blocks.REDWIRE_POSTS)
+			.simpleBlockItem(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					"F",
 					"R"), Map.of(
 					'R', ingredient(REDSTONE_ALLOY_INGOTS),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					sizedIngredient(Tags.Items.INGOTS_IRON,1),
 					sizedIngredient(REDSTONE_ALLOY_INGOTS,1)))));
 				
 		postBlock(Names.REDWIRE_RELAY, "Redwire Relay", context)
-			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
-			.blockItem()
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.tags(MoreRed.Tags.Blocks.REDWIRE_POSTS)
+			.simpleBlockItem(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					" F ",
 					" R ",
 					"###"), Map.of(
 					'#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 					'R', ingredient(REDSTONE_ALLOY_INGOTS),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS,1),
 					sizedIngredient(REDSTONE_ALLOY_INGOTS,1),
 					sizedIngredient(Tags.Items.INGOTS_IRON,1)))));
 				
 		postBlock(Names.REDWIRE_JUNCTION, "Redwire Junction", context)
-			.tags(blockTags, MoreRed.Tags.Blocks.REDWIRE_POSTS)
-			.blockItem()
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.tags(MoreRed.Tags.Blocks.REDWIRE_POSTS)
+			.simpleBlockItem(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					" F ",
 					"rRr",
 					"###"), Map.of(
@@ -236,15 +232,15 @@ public class MoreRedDataGen
 					'r', ingredient(Tags.Items.DUSTS_REDSTONE),
 					'R', ingredient(REDSTONE_ALLOY_INGOTS),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(recipes, mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS,1),
 					sizedIngredient(Tags.Items.DUSTS_REDSTONE,1),
 					sizedIngredient(REDSTONE_ALLOY_INGOTS,1),
 					sizedIngredient(Tags.Items.INGOTS_IRON,1)))));
 		simpleBlock(Names.SOLDERING_TABLE, "Soldering Table", context)
-			.tags(context.blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 				"sss",
 				"#b#",
 				"#b#"), Map.of(
@@ -252,15 +248,15 @@ public class MoreRedDataGen
 				's', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 				'b', ingredient(Tags.Items.RODS_BLAZE)))));
 		plateBlock(Names.STONE_PLATE, "Stone Plate", context)
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.blockItem()
-			.tags(itemTags, SMOOTH_STONE_QUARTER_SLABS)
-			.help(helper -> helper.recipe(recipes, RecipeHelpers.shaped(helper.item(), 12, CraftingBookCategory.BUILDING,
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.blockItemWithoutItemModel()
+			.tags(SMOOTH_STONE_QUARTER_SLABS)
+			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 12, CraftingBookCategory.BUILDING,
 					List.of("###"),
 					Map.of('#', ingredient(SMOOTH_STONE_SLABS))))
-				.recipe(recipes, mangle(helper.id(), "%s_from_smooth_stone_slab_stonecutting"),
+				.recipe(mangle(helper.id(), "%s_from_smooth_stone_slab_stonecutting"),
 					new StonecutterRecipe("", ingredient(SMOOTH_STONE_SLABS), new ItemStack(helper.item(), 4)))
-				.recipe(recipes, mangle(helper.id(), "%s_from_smooth_stone_stonecutting"),
+				.recipe(mangle(helper.id(), "%s_from_smooth_stone_stonecutting"),
 					new StonecutterRecipe("", ingredient(SMOOTH_STONE), new ItemStack(helper.item(), 8))));				
 		redstonePlateBlock(Names.XNOR_GATE, "XNOR Gate", context, 4,
 		    "#t#",
@@ -271,42 +267,40 @@ public class MoreRedDataGen
 		    "ttt",
 		    "###");
 		
-		BlockDataHelper.create(MoreRed.get().tubeBlock.get(),
-			blockStates, MoreRedDataGen::tubeBlockState,
-			lootTables, MoreRedDataGen::simpleLoot)
-			.localize(lang, "Tube")
-			.tags(context.blockTags, MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(context.models)
+		BlockDataHelper.create(MoreRed.get().tubeBlock.get(), context, MoreRedDataGen::tubeBlockState, MoreRedDataGen::simpleLoot)
+			.localize("Tube")
+			.tags(MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(context.recipes, mangle(helper.id(), "%s_from_gold"), RecipeHelpers.shaped(helper.item(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
+				.recipe(mangle(helper.id(), "%s_from_gold"), RecipeHelpers.shaped(helper.item(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', ingredient(Tags.Items.INGOTS_GOLD),
 					'G', ingredient(Tags.Items.GLASS_BLOCKS_COLORLESS))))
-				.recipe(context.recipes, mangle(helper.id(), "%s_from_copper"), RecipeHelpers.shaped(helper.item(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
+				.recipe(mangle(helper.id(), "%s_from_copper"), RecipeHelpers.shaped(helper.item(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', ingredient(Tags.Items.INGOTS_COPPER),
 					'G', ingredient(Tags.Items.GLASS_BLOCKS_COLORLESS))))
-				.tags(context.itemTags, MoreRed.Tags.Items.TUBES));
+				.tags(MoreRed.Tags.Items.TUBES));
 		tubeBlock(Names.REDSTONE_TUBE, "Redstone Tube", context, redstoneTubeBlockState(MoreRed.get().redstoneTubeBlock.get()))
-			.model(models, "block/%s_on", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
+			.model("block/%s_on", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
 				.addTexture("all", ResourceLocation.fromNamespaceAndPath(MoreRed.MODID, "block/redstone_tube_on")))
-			.tags(context.blockTags, MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(context.models)
+			.tags(MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of(" r ", "rtr", " r "),
 					Map.of(
 						'r', ingredient(Tags.Items.DUSTS_REDSTONE),
 						't', ingredient(MoreRed.Tags.Items.TUBES)))));
 		simpleBlock(Names.DISTRIBUTOR, "Distributor", context)
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("csc", "sGs", "csc"),
 					Map.of(
 						'c', ingredient(Tags.Items.COBBLESTONES),
 						's', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
 						'G', ingredient(Tags.Items.FENCE_GATES)))));
-		BlockDataHelper.create(MoreRed.get().extractorBlock.get(), blockStates, block -> {
+		BlockDataHelper.create(MoreRed.get().extractorBlock.get(), context, block -> {
 			ResourceLocation blockModel = BlockDataHelper.blockModel(block);
 			ResourceLocation poweredBlockModel = mangle(blockModel, "%s_powered");
 			var builder = Variants.builder();
@@ -332,84 +326,82 @@ public class MoreRedDataGen
 				}
 			}
 			return BlockStateFile.variants(builder);
-		}, lootTables, block -> simpleLoot(block))
-			.localize(lang, "Extractor")
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
+		}, block -> simpleLoot(block))
+			.localize("Extractor")
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("h", "p", "s"),
 					Map.of(
 						'h', Ingredient.of(Items.HOPPER),
 						'p', Ingredient.of(Items.PISTON),
 						's', Ingredient.of(MoreRed.get().shuntBlock.get().asItem())))));
 		sixWayBlock(Names.SHUNT, "Shunt", context)
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of(" t ", "tst", " t "),
 					Map.of(
 						's', ingredient(Tags.Items.COBBLESTONES),
 						't', ingredient(MoreRed.Tags.Items.TUBES)))));
 		sixWayBlock(Names.FILTER, "Filter", context)
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
+				.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
 					Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
 					Ingredient.of(Items.ITEM_FRAME)))));
 		sixWayBlock(Names.MULTIFILTER, "Multifilter", context)
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("ifi", "fCf", "ifi"),
 					Map.of(
 						'i', ingredient(Tags.Items.INGOTS_IRON),
 						'f', Ingredient.of(MoreRed.get().filterBlock.get().asItem()),
 						'C', ingredient(Tags.Items.CHESTS)))));
 		sixWayBlock(Names.LOADER, "Loader", context)
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem(models)
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.simpleBlockItem()
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("sss", "P S", "sss"),
 					Map.of(
 						's', ingredient(Tags.Items.COBBLESTONES),
 						'S', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
 						'P', Ingredient.of(Items.PISTON)))));
-		BlockDataHelper.create(MoreRed.get().osmosisFilterBlock.get(),
-			blockStates, MoreRedDataGen::sixWayBlockState,
-			lootTables, MoreRedDataGen::simpleLoot)
-			.localize(lang, "Osmosis Filter")
-			.tags(blockTags, BlockTags.MINEABLE_WITH_PICKAXE)
-			.blockItem() // model isn't generated
+		BlockDataHelper.create(MoreRed.get().osmosisFilterBlock.get(), context, MoreRedDataGen::sixWayBlockState, MoreRedDataGen::simpleLoot)
+			.localize("Osmosis Filter")
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.blockItemWithoutItemModel() // model isn't generated
 			.help(helper -> helper
-				.recipe(recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("f", "s", "h"),
 					Map.of(
 						'f', Ingredient.of(MoreRed.get().filterBlock.get().asItem()),
 						's', ingredient(Tags.Items.SLIME_BALLS),
 						'h', Ingredient.of(Items.HOPPER)))));
 		
-		BlockDataHelper.create(MoreRed.get().osmosisSlimeBlock.get(), blockStates, sixWayBlockState(MoreRed.get().osmosisSlimeBlock.get()));
+		BlockDataHelper.create(MoreRed.get().osmosisSlimeBlock.get(), context, sixWayBlockState(MoreRed.get().osmosisSlimeBlock.get()));
 			
 		
 		// other items
 		spool(Names.BUNDLED_CABLE_SPOOL, "Bundled Cable Spool", context, MoreRed.Tags.Items.BUNDLED_CABLES);
 		spool(Names.REDWIRE_SPOOL, "Redwire Spool", context, MoreRed.Tags.Items.RED_ALLOY_WIRES);
 		simpleItem(Names.RED_ALLOY_INGOT, "Red Alloy Ingot", context)
-			.tags(itemTags, REDSTONE_ALLOY_INGOTS);
-		Util.make(MoreRed.get().tubingPliers.get(), pliers -> ItemDataHelper.create(pliers, models, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
+			.tags(REDSTONE_ALLOY_INGOTS);
+		Util.make(MoreRed.get().tubingPliers.get(), pliers -> ItemDataHelper.create(pliers, context, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
 			.addTexture("layer0", mangle(MoreRed.id(Names.PLIERS), "item/%s")))
-			.tags(itemTags, CommonTags.Items.WRENCHES)
-			.recipe(recipes, RecipeHelpers.shaped(pliers, 1, CraftingBookCategory.MISC,
+			.tags(Tags.Items.TOOLS_WRENCH)
+			.recipe(RecipeHelpers.shaped(pliers, 1, CraftingBookCategory.MISC,
 				List.of("  I", "It ", " I "),
 				Map.of(
 					'I', ingredient(Tags.Items.INGOTS_IRON),
 					't', ingredient(MoreRed.Tags.Items.TUBES))))
-			.localize(lang, "Pliers"));
+			.localize("Pliers"));
 		
 		// data for vanilla things
 		recipes.put(MoreRed.id("smooth_stone_slab_from_stone_plate"), RecipeHelpers.shaped(Items.SMOOTH_STONE_SLAB, 1, CraftingBookCategory.BUILDING, List.of(
@@ -451,9 +443,9 @@ public class MoreRedDataGen
 			String wireBlockName = WordUtils.capitalize(wireBlockPath.replace("_", " ")); 
 			
 			wireBlock(Names.COLORED_CABLES_BY_COLOR[i], wireBlockName, context)
-				.tags(blockTags, MoreRed.Tags.Blocks.COLORED_CABLES)
-				.blockItem()
-				.tags(itemTags, MoreRed.Tags.Items.COLORED_CABLES, color.getDyedTag());
+				.tags(MoreRed.Tags.Blocks.COLORED_CABLES)
+				.blockItemWithoutItemModel()
+				.tags(MoreRed.Tags.Items.COLORED_CABLES, color.getDyedTag());
 			
 			ResourceLocation wireBlockTexture = mangle(wireBlockId, "block/%s");
 			
@@ -461,7 +453,7 @@ public class MoreRedDataGen
 			// generate the simple models for the block
 			List<String> blockModelTypes = ImmutableList.of("edge","elbow","line","node");
 			blockModelTypes.forEach(modelType->
-				context.models.put(MoreRed.id(String.format("block/%s_%s", wireBlockPath, modelType)),
+				context.models().put(MoreRed.id(String.format("block/%s_%s", wireBlockPath, modelType)),
 					SimpleModel.createWithoutRenderType(MoreRed.id(String.format("block/colored_cable_%s_template", modelType)))
 						.addTexture("wire",wireBlockTexture)));
 
@@ -489,23 +481,24 @@ public class MoreRedDataGen
 			
 			String tubeBlockName = WordUtils.capitalize(tubeBlockPath.replace("_", " "));
 			tubeBlock(Names.COLORED_TUBE_NAMES[i], tubeBlockName, context, tubeBlockState(tubeBlockHolder.get()))
-				.tags(blockTags, MoreRed.Tags.Blocks.COLORED_TUBES)
-				.simpleBlockItem(models)
+				.tags(MoreRed.Tags.Blocks.COLORED_TUBES)
+				.simpleBlockItem()
 				.help(helper -> helper
-					.recipe(recipes, mangle(helper.id(), "%s_from_gold"), RecipeHelpers.shaped(helper.item(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
+					.recipe(mangle(helper.id(), "%s_from_gold"), RecipeHelpers.shaped(helper.item(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 						'i', ingredient(Tags.Items.INGOTS_GOLD),
 						'G', IntersectionIngredient.of(
 							ingredient(Tags.Items.GLASS_BLOCKS),
 							ingredient(color.getDyedTag())))))
-					.recipe(recipes, mangle(helper.id(), "%s_from_copper"), RecipeHelpers.shaped(helper.item(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
+					.recipe(mangle(helper.id(), "%s_from_copper"), RecipeHelpers.shaped(helper.item(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 						'i', ingredient(Tags.Items.INGOTS_COPPER),
 						'G', IntersectionIngredient.of(
 							ingredient(Tags.Items.GLASS_BLOCKS),
 							ingredient(color.getDyedTag())))))
-					.tags(itemTags, MoreRed.Tags.Items.COLORED_TUBES, color.getDyedTag()));
+					.tags(MoreRed.Tags.Items.COLORED_TUBES, color.getDyedTag()));
 		}
 
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockStateFile.CODEC, blockStates));
+		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems));
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
 		generator.addProvider(true, JsonDataProvider.named(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", WirePartModelDefinition.CODEC, wirePartModels, "morered wire models"));
 		generator.addProvider(true, lang);
@@ -552,15 +545,15 @@ public class MoreRedDataGen
 		}
 		BlockStateFile blockState = BlockStateFile.variants(variantBuilder);
 		LootTable lootTable = simpleLoot(block);
-		var blockHelper = BlockDataHelper.create(block, context.blockStates, blockState, context.lootTables, lootTable).localize(context.lang, name);
-		blockHelper.simpleBlockItem(context.models);
+		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
+		blockHelper.simpleBlockItem();
 		return blockHelper;
 	}
 	
 	static BlockDataHelper redstonePlateBlock(String blockPath, String name, DataGenContext context, int redstone, String... recipePattern)
 	{
 		var blockHelper = plateBlock(blockPath, name, context);
-		blockHelper.blockItem().help(helper -> plateRecipes(helper, context, redstone, recipePattern));
+		blockHelper.blockItemWithoutItemModel(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT)).help(helper -> plateRecipes(helper, context, redstone, recipePattern));
 		return blockHelper;
 	}
 	
@@ -573,11 +566,11 @@ public class MoreRedDataGen
 			: MoreRed.id("block/single_input_bitwise_logic_plate_template");
 		ResourceLocation symbolLocation = MoreRed.id("block/" + symbolTexture);
 		
-		context.models.put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
-		context.models.put(mangle(blockId, "block/%s_alt"), SimpleModel.createWithoutRenderType(mangle(parent, "%s_alt")).addTexture("symbol", symbolLocation));
+		context.models().put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
+		context.models().put(mangle(blockId, "block/%s_alt"), SimpleModel.createWithoutRenderType(mangle(parent, "%s_alt")).addTexture("symbol", symbolLocation));
 		BlockDataHelper helper = plateBlock(blockPath, name, context);
-		helper.tags(context.blockTags, MoreRed.Tags.Blocks.BITWISE_GATES);
-		helper.blockItem().help(h -> h.recipe(context.recipes, mangle(h.id(), "%s_from_soldering"), new SolderingRecipe(new ItemStack(h.item()), List.of(
+		helper.tags(MoreRed.Tags.Blocks.BITWISE_GATES);
+		helper.blockItemWithoutItemModel().help(h -> h.recipe(mangle(h.id(), "%s_from_soldering"), new SolderingRecipe(new ItemStack(h.item()), List.of(
 			sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 2),
 			sizedIngredient(Tags.Items.GEMS_QUARTZ, 1),
 			sizedIngredient(Tags.Items.DUSTS_REDSTONE, 1),
@@ -601,10 +594,9 @@ public class MoreRedDataGen
 				Model.create(blockModel, BlockModelRotation.by(x, y)));
 		}
 		BlockStateFile blockState = BlockStateFile.variants(variants);
-		BlockDataHelper blockHelper = BlockDataHelper.create(block, context.blockStates, blockState, context.lootTables, simpleLoot(block))
-			.localize(context.lang, name);
-		blockHelper.tags(context.blockTags, BlockTags.MINEABLE_WITH_PICKAXE);
-		blockHelper.simpleBlockItem(context.models);
+		BlockDataHelper blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
+			.localize(name);
+		blockHelper.tags(BlockTags.MINEABLE_WITH_PICKAXE);
 		return blockHelper;
 	}
 	
@@ -642,7 +634,7 @@ public class MoreRedDataGen
 			ResourceLocation modelId = mangle(blockModel(blockId), "%s_" + String.valueOf(power));
 			SimpleModel simpleModel = SimpleModel.createWithoutRenderType(MoreRed.id("block/hexidecrubrometer_template"))
 				.addTexture("display", modelId);
-			context.models.put(modelId, simpleModel);
+			context.models().put(modelId, simpleModel);
 			for (Direction facing : HexidecrubrometerBlock.ROTATION.getPossibleValues())
 			{
 				int y = switch(facing) {
@@ -668,15 +660,15 @@ public class MoreRedDataGen
 			}
 		}
 		
-		var helper = BlockDataHelper.create(block, context.blockStates, BlockStateFile.variants(variants), context.lootTables, simpleLoot(block));
+		var helper = BlockDataHelper.create(block, context, BlockStateFile.variants(variants), simpleLoot(block));
 
-		helper.tags(context.blockTags, BlockTags.MINEABLE_WITH_PICKAXE);
-		helper.blockItem(context.models, SimpleModel.createWithoutRenderType(mangle(blockId, "block/%s_0")))
-			.recipe(context.recipes, mangle(blockId, "%s_from_soldering"), new SolderingRecipe(new ItemStack(block.asItem()), List.of(
+		helper.tags(BlockTags.MINEABLE_WITH_PICKAXE);
+		helper.blockItem(SimpleModel.createWithoutRenderType(mangle(blockId, "block/%s_0")))
+			.recipe(mangle(blockId, "%s_from_soldering"), new SolderingRecipe(new ItemStack(block.asItem()), List.of(
 				sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 8),
 				sizedIngredient(Tags.Items.DUSTS_REDSTONE, 9),
 				sizedIngredient(Tags.Items.GEMS_QUARTZ, 4))));
-		helper.localize(context.lang, "Hexidecrubrometer");
+		helper.localize("Hexidecrubrometer");
 		
 		return helper;
 	}
@@ -730,9 +722,9 @@ public class MoreRedDataGen
 		}
 		BlockStateFile blockState = BlockStateFile.variants(variantBuilder);
 		
-		var blockHelper = BlockDataHelper.create(block, context.blockStates, blockState, context.lootTables, simpleLoot(block))
-			.localize(context.lang, blockName);
-		blockHelper.simpleBlockItem(context.models).help(helper -> switchedPlateRecipes(helper, context, redstone, recipePattern));
+		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
+			.localize(blockName);
+		blockHelper.simpleBlockItem(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT)).help(helper -> switchedPlateRecipes(helper, context, redstone, recipePattern));
 		return blockHelper;
 	}
 	
@@ -834,41 +826,39 @@ public class MoreRedDataGen
 				.when(ExplosionCondition.survivesExplosion()))
 			.build();
 		
-		BlockDataHelper helper = BlockDataHelper.create(block, context.blockStates, blockState, context.lootTables, lootTable);
+		BlockDataHelper helper = BlockDataHelper.create(block, context, blockState, lootTable);
 				
 		// generate the parts model for the block
-		context.wirePartModels.put(
+		context.wirePartModels().put(
 			MoreRed.id(String.format("block/%s_parts", blockPath)),
 			new WirePartModelDefinition(
 				SimpleModel.createWithoutRenderType(MoreRed.id(String.format("block/%s_line", blockPath))),
 				SimpleModel.createWithoutRenderType(MoreRed.id(String.format("block/%s_edge", blockPath)))));
 		
 		
-		return helper.localize(context.lang, blockName);
+		return helper.localize(blockName);
 	}
 	
 	static BlockDataHelper simpleBlock(String blockPath, String blockName, DataGenContext context)
 	{
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		context.lang.add(block, blockName);
-		return BlockDataHelper.create(block,
-			context.blockStates, BlockStateFile.variants(Variants.always(Model.create(mangle(blockId, "block/%s")))),
-			context.lootTables, simpleLoot(block));
+		context.lang().add(block, blockName);
+		return BlockDataHelper.create(block, context,
+			BlockStateFile.variants(Variants.always(Model.create(mangle(blockId, "block/%s")))),
+			simpleLoot(block));
 	}
 	
 	static BlockDataHelper tubeBlock(String blockPath, String blockName, DataGenContext context, BlockStateFile blockState)
 	{
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		var blockHelper = BlockDataHelper.create(block,
-				context.blockStates, blockState,
-				context.lootTables, simpleLoot(block))
-			.baseModel(context.models, SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
+		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
+			.baseModel(SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
 				.addTexture("all", mangle(blockId, "block/%s")))
-			.model(context.models, "block/%s_extension", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube_extension"))
+			.model("block/%s_extension", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube_extension"))
 				.addTexture("all", mangle(blockId, "block/%s")))
-			.localize(context.lang, blockName);
+			.localize(blockName);
 		
 		return blockHelper;
 	}
@@ -877,10 +867,8 @@ public class MoreRedDataGen
 	{
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		context.lang.add(block, blockName);
-		return BlockDataHelper.create(block,
-			context.blockStates, sixWayBlockState(block),
-			context.lootTables, simpleLoot(block));
+		return BlockDataHelper.create(block, context, sixWayBlockState(block), simpleLoot(block))
+			.localize(blockName);
 	}
 	
 	static ItemDataHelper plateRecipes(ItemDataHelper helper, DataGenContext context, int redstone, String... pattern)
@@ -901,23 +889,23 @@ public class MoreRedDataGen
 				patternKey.put('t', Ingredient.of(Items.REDSTONE_TORCH));
 			}
 		}
-		helper.recipe(context.recipes, mangle(helper.id(), "%s_from_soldering"), 
+		helper.recipe(mangle(helper.id(), "%s_from_soldering"), 
 			new SolderingRecipe(new ItemStack(helper.item()), List.of(
 				new SizedIngredient(ingredient(SMOOTH_STONE_QUARTER_SLABS), 1),
 				new SizedIngredient(ingredient(Tags.Items.DUSTS_REDSTONE), redstone))))
-		.recipe(context.recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(pattern), patternKey));
+		.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(pattern), patternKey));
 		
 		return helper;
 	}
 	
 	static ItemDataHelper switchedPlateRecipes(ItemDataHelper helper, DataGenContext context, int redstone, String... recipePattern)
 	{
-		helper.recipe(context.recipes, mangle(helper.id(), "%s_from_soldering"), 
+		helper.recipe(mangle(helper.id(), "%s_from_soldering"), 
 			new SolderingRecipe(new ItemStack(helper.item()), List.of(
 				sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 1),
 				sizedIngredient(Tags.Items.DUSTS_REDSTONE, redstone),
 				sizedIngredient(Tags.Items.INGOTS_IRON, 1))))
-		.recipe(context.recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(recipePattern), Map.of(
+		.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(recipePattern), Map.of(
 		    '#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 		    'r', ingredient(Tags.Items.DUSTS_REDSTONE),
 		    'i', ingredient(Tags.Items.INGOTS_IRON))));
@@ -929,11 +917,11 @@ public class MoreRedDataGen
 	{
 		ResourceLocation itemId = MoreRed.id(itemPath);
 		Item item = BuiltInRegistries.ITEM.getValue(itemId);
-		context.lang.add(item, name);
-		return ItemDataHelper.create(item, context.models, SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("item/handheld"))
+		return ItemDataHelper.create(item, context, SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("item/handheld"))
 				.addTexture("layer0", ResourceLocation.withDefaultNamespace("item/stick"))
 				.addTexture("layer1", mangle(itemId, "item/%s")))
-		.help(helper -> helper.recipe(context.recipes, RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+		.localize(name)
+		.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 		    "rfs",
 		    "frf",
 		    "sfr"), Map.of(
@@ -946,9 +934,9 @@ public class MoreRedDataGen
 	{
 		ResourceLocation itemId = MoreRed.id(itemPath);
 		Item item = BuiltInRegistries.ITEM.getValue(itemId);
-		context.lang.add(item, name);
-		return ItemDataHelper.create(item, context.models, SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("item/generated"))
-			.addTexture("layer0", mangle(itemId, "item/%s")));
+		return ItemDataHelper.create(item, context, SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("item/generated"))
+			.addTexture("layer0", mangle(itemId, "item/%s")))
+			.localize(name);
 	}
 	
 	private static BlockStateFile tubeBlockState(Block block)

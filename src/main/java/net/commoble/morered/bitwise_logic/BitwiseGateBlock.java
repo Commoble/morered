@@ -3,7 +3,6 @@ package net.commoble.morered.bitwise_logic;
 import java.util.List;
 
 import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
-import net.commoble.morered.CommonTags;
 import net.commoble.morered.plate_blocks.BitwiseLogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -23,6 +22,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.Tags;
 
 public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 {
@@ -78,7 +78,7 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 	@Override
 	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		boolean isPlayerHoldingWrench = stack.is(CommonTags.Items.WRENCHES);
+		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
 		
 		// rotate the block when the player pokes it with a wrench
 		if (isPlayerHoldingWrench && !level.isClientSide)

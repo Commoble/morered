@@ -1,53 +1,50 @@
 package commoble.morered.datagen;
 
-import java.util.Map;
+import java.util.List;
 import java.util.function.Function;
 
+import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
-import net.neoforged.neoforge.common.data.LanguageProvider;
 
-public record BlockDataHelper(Block block)
+public record BlockDataHelper(Block block, DataGenContext context)
 {
-	public static BlockDataHelper create(Block block, Map<ResourceLocation, BlockStateFile> blockstates, BlockStateFile blockstate)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateFile blockstate)
 	{
-		BlockDataHelper helper = new BlockDataHelper(block);
-		blockstates.put(helper.id(), blockstate);
+		BlockDataHelper helper = new BlockDataHelper(block, context);
+		context.blockStates().put(helper.id(), blockstate);
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block,
-		Map<ResourceLocation, BlockStateFile> blockstates, BlockStateFile blockstate,
-		Map<ResourceLocation, LootTable> lootTables, LootTable lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateFile blockstate, LootTable lootTable)
 	{
-		BlockDataHelper helper = new BlockDataHelper(block);
-		blockstates.put(helper.id(), blockstate);
-		lootTables.put(ResourceLocation.fromNamespaceAndPath(helper.id().getNamespace(), String.format("blocks/%s", helper.id().getPath())), lootTable);
+		BlockDataHelper helper = new BlockDataHelper(block, context);
+		context.blockStates().put(helper.id(), blockstate);
+		context.lootTables().put(ResourceLocation.fromNamespaceAndPath(helper.id().getNamespace(), String.format("blocks/%s", helper.id().getPath())), lootTable);
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block,
-		Map<ResourceLocation, BlockStateFile> blockstates, Function<Block, BlockStateFile> blockstate,
-		Map<ResourceLocation, LootTable> lootTables, Function<Block, LootTable> lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockStateFile> blockstate, Function<Block, LootTable> lootTable)
 	{
-		return create(block, blockstates, blockstate.apply(block), lootTables, lootTable.apply(block));
+		return create(block, context, blockstate.apply(block), lootTable.apply(block));
 	}
 	
-	public BlockDataHelper localize(LanguageProvider langProvider, String localizedName)
+	public BlockDataHelper localize(String localizedName)
 	{
-		langProvider.add(this.block, localizedName);
+		context.lang().add(this.block, localizedName);
 		return this;
 	}
 	
 	@SafeVarargs
-	public final BlockDataHelper tags(TagProvider<Block> tagProvider, TagKey<Block>... tags)
+	public final BlockDataHelper tags(TagKey<Block>... tags)
 	{
 		for (TagKey<Block> tag : tags)
 		{
-			tagProvider.tag(tag).add(BuiltInRegistries.BLOCK.getResourceKey(block).get());
+			context.blockTags().tag(tag).add(BuiltInRegistries.BLOCK.getResourceKey(block).get());
 		}
 		return this;
 	}
@@ -58,9 +55,9 @@ public record BlockDataHelper(Block block)
 	 * @param model model
 	 * @return this
 	 */
-	public BlockDataHelper baseModel(Map<ResourceLocation, SimpleModel> models, SimpleModel model)
+	public BlockDataHelper baseModel(SimpleModel model)
 	{
-		models.put(blockModel(this.block), model);
+		context.models().put(blockModel(this.block), model);
 		return this;
 	}
 	
@@ -71,10 +68,10 @@ public record BlockDataHelper(Block block)
 	 * @param model SimpleModel to add
 	 * @return this
 	 */
-	public BlockDataHelper model(Map<ResourceLocation, SimpleModel> models, String formatString, SimpleModel model)
+	public BlockDataHelper model(String formatString, SimpleModel model)
 	{
 		ResourceLocation id = this.id();
-		models.put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(formatString, id.getPath())), model);
+		context.models().put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(formatString, id.getPath())), model);
 		return this;
 	}
 	
@@ -93,18 +90,33 @@ public record BlockDataHelper(Block block)
 		return ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "block/" + location.getPath());
 	}
 	
-	public ItemDataHelper blockItem()
+	public ItemDataHelper blockItemWithoutItemModel()
 	{
-		return ItemDataHelper.create(this.block.asItem());
+		return blockItemWithoutItemModel(id -> new ClientItem(new BlockModelWrapper.Unbaked(ItemDataHelper.itemModel(id()), List.of()), ClientItem.Properties.DEFAULT));
 	}
 	
-	public ItemDataHelper simpleBlockItem(Map<ResourceLocation, SimpleModel> modelMap)
+	public ItemDataHelper blockItemWithoutItemModel(Function<ResourceLocation, ClientItem> modelFactory)
 	{
-		return blockItem(modelMap, SimpleModel.createWithoutRenderType(blockModel(this.id())));
+		return ItemDataHelper.create(this.block.asItem(), context, modelFactory.apply(ItemDataHelper.itemModel(this.id())));
 	}
 	
-	public ItemDataHelper blockItem(Map<ResourceLocation, SimpleModel> modelMap, SimpleModel model)
+	public ItemDataHelper simpleBlockItem()
 	{
-		return ItemDataHelper.create(this.block.asItem(), modelMap, model);
+		return blockItem(SimpleModel.createWithoutRenderType(blockModel(this.id())));
+	}
+	
+	public ItemDataHelper simpleBlockItem(Function<ResourceLocation, ClientItem> modelFactory)
+	{
+		return blockItem(modelFactory, SimpleModel.createWithoutRenderType(blockModel(this.id())));
+	}
+	
+	public ItemDataHelper blockItem(SimpleModel model)
+	{
+		return blockItem(modelId -> new ClientItem(new BlockModelWrapper.Unbaked(modelId, List.of()), ClientItem.Properties.DEFAULT), model);
+	}
+	
+	public ItemDataHelper blockItem(Function<ResourceLocation, ClientItem> modelFactory, SimpleModel model)
+	{
+		return ItemDataHelper.create(this.block.asItem(), context, modelFactory.apply(ItemDataHelper.itemModel(id())), model);
 	}
 }
