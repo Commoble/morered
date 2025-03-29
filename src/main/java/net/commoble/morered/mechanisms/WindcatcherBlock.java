@@ -63,7 +63,4 @@ public class WindcatcherBlock extends Block implements EntityBlock
 		int wind = Mth.lerpInt((float)relerpedPerc, 0, 8);
 		return this.defaultBlockState().setValue(WIND, wind);
 	}
-	
-	
-
 }

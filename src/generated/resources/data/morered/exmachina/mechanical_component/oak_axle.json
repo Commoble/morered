@@ -1,0 +1,48 @@
+{
+  "type": "exmachina:variants",
+  "save": true,
+  "variants": {
+    "axis=x": {
+      "connections": [
+        {
+          "direction": "east",
+          "neighbor_shape": "west"
+        },
+        {
+          "direction": "west",
+          "neighbor_shape": "east"
+        }
+      ],
+      "inertia": 0.02,
+      "shape": "cube"
+    },
+    "axis=y": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 0.02,
+      "shape": "cube"
+    },
+    "axis=z": {
+      "connections": [
+        {
+          "direction": "south",
+          "neighbor_shape": "north"
+        },
+        {
+          "direction": "north",
+          "neighbor_shape": "south"
+        }
+      ],
+      "inertia": 0.02,
+      "shape": "cube"
+    }
+  }
+}

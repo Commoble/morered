@@ -33,6 +33,7 @@ import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.WindCatcherBlockItem;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherColors;
+import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
 import net.commoble.morered.mechanisms.WoodSets;
 import net.commoble.morered.mechanisms.WoodSets.WoodSet;
@@ -256,6 +257,7 @@ public class MoreRed
 	
 	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
 	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherRecipe>> windcatcherRecipeSerializer;
+	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherDyeRecipe>> windcatcherDyeRecipeSerializer;
 
 	public final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> filterMenu;
 	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
@@ -298,6 +300,7 @@ public class MoreRed
 			.networkSynchronized(BlockSide.STREAM_CODEC)
 			.build());
 		this.windcatcherColorsDataComponent = dataComponentTypes.register(Names.WINDCATCHER_COLORS, () -> DataComponentType.<WindcatcherColors>builder()
+			.persistent(WindcatcherColors.CODEC)
 			.networkSynchronized(WindcatcherColors.STREAM_CODEC)
 			.build());
 		
@@ -566,6 +569,8 @@ public class MoreRed
 			() -> new SimpleRecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
 		windcatcherRecipeSerializer = recipeSerializers.register(Names.WINDCATCHER,
 			() -> new SimpleRecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
+		windcatcherDyeRecipeSerializer = recipeSerializers.register(Names.WINDCATCHER_DYE,
+			() -> new SimpleRecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
 		
 		this.loaderMenu = menuTypes.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
 		this.filterMenu = menuTypes.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));

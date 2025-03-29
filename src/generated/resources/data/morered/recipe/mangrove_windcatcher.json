@@ -1,0 +1,18 @@
+{
+  "type": "morered:windcatcher",
+  "category": "building",
+  "key": {
+    "-": "#c:rods/wooden",
+    "W": "#minecraft:wool",
+    "o": "morered:mangrove_axle"
+  },
+  "pattern": [
+    "-W-",
+    "WoW",
+    "-W-"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:mangrove_windcatcher"
+  }
+}

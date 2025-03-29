@@ -1,0 +1,25 @@
+{
+  "model": {
+    "type": "morered:windcatcher",
+    "airfoil": "morered:block/spruce_airfoil",
+    "airfoil_sails": {
+      "black": "morered:block/black_airfoil_sail",
+      "blue": "morered:block/blue_airfoil_sail",
+      "brown": "morered:block/brown_airfoil_sail",
+      "cyan": "morered:block/cyan_airfoil_sail",
+      "gray": "morered:block/gray_airfoil_sail",
+      "green": "morered:block/green_airfoil_sail",
+      "light_blue": "morered:block/light_blue_airfoil_sail",
+      "light_gray": "morered:block/light_gray_airfoil_sail",
+      "lime": "morered:block/lime_airfoil_sail",
+      "magenta": "morered:block/magenta_airfoil_sail",
+      "orange": "morered:block/orange_airfoil_sail",
+      "pink": "morered:block/pink_airfoil_sail",
+      "purple": "morered:block/purple_airfoil_sail",
+      "red": "morered:block/red_airfoil_sail",
+      "white": "morered:block/white_airfoil_sail",
+      "yellow": "morered:block/yellow_airfoil_sail"
+    },
+    "axle": "morered:block/spruce_windcatcher_axle"
+  }
+}

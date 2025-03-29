@@ -121,15 +121,27 @@ public class WindcatcherRecipe extends ShapedRecipe
 		return output;
 	}
 	
-	private static record XY(int x, int y) {
+	public static record XY(int x, int y) {
 		public static final Codec<XY> CODEC = RecordCodecBuilder.create(builder -> builder.group(
 				Codec.intRange(0, Integer.MAX_VALUE).fieldOf("x").forGetter(XY::x),
 				Codec.intRange(0, Integer.MAX_VALUE).fieldOf("y").forGetter(XY::y)
 			).apply(builder, XY::new));
 		
+		public static final XY ZERO = new XY(0,0);
 		public static final XY NORTH = new XY(1,0);
 		public static final XY SOUTH = new XY(1,2);
 		public static final XY WEST = new XY(0,1);
 		public static final XY EAST = new XY(2,1);
+		public static final XY CENTER = new XY(1,1);
+		
+		public XY add(XY that)
+		{
+			return new XY(this.x + that.x, this.y + that.y);
+		}
+		
+		public XY subtract(XY that)
+		{
+			return new XY(this.x - that.x, this.y - that.y);
+		}
 	}
 }

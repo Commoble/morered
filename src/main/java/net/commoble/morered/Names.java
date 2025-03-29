@@ -105,6 +105,7 @@ public class Names
 	
 	// recipe types
 	public static final String SOLDERING_RECIPE = "soldering";
+	public static final String WINDCATCHER_DYE = "windcatcher_dye";
 	
 	// loot functions
 	public static final String WIRE_COUNT = "set_wire_count";

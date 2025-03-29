@@ -1,0 +1,140 @@
+{
+  "type": "exmachina:variants",
+  "save": true,
+  "variants": {
+    "wind=0": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube"
+    },
+    "wind=1": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 3.0
+    },
+    "wind=2": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 12.0
+    },
+    "wind=3": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 27.0
+    },
+    "wind=4": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 48.0
+    },
+    "wind=5": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 75.0
+    },
+    "wind=6": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 108.0
+    },
+    "wind=7": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 147.0
+    },
+    "wind=8": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 25.0,
+      "shape": "cube",
+      "torque": 192.0
+    }
+  }
+}

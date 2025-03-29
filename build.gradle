@@ -37,6 +37,7 @@ neoForge {
 	mods {
 		"${modid}" {
 			sourceSet(sourceSets.main)
+			sourceSet(sourceSets.datagen)
 		}
 	}
 	runs {

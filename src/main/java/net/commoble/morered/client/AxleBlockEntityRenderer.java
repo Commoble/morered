@@ -58,7 +58,7 @@ public record AxleBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 		
 		poseStack.mulPose(Axis.ZP.rotation(radians));
 		this.itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, packedLight, overlay, poseStack, bufferSource, level, 0);
-		poseStack.popPose();;
+		poseStack.popPose();
 	}
 
 }

@@ -6,8 +6,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
+import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
@@ -65,7 +67,9 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 			Direction dir = Direction.from2DDataValue(i);
 			int x = dir.getStepX();
 			int z = dir.getStepZ();
-			ModelState modelState = new SimpleModelState(new Transformation(new Vector3f(x,0,z),null,null,null));
+			int rotations = (i+2)%4; // north = 0, east = 1, etc
+			Quaternionf rotation = Axis.YN.rotationDegrees(90*rotations);
+			ModelState modelState = new SimpleModelState(new Transformation(new Vector3f(x,0,z),rotation,null,null));
 			bakedFoils.add(new BlockModelWrapper(baker.bake(airfoil, modelState), List.of()));
 			airfoilSails.forEach((color,id) ->
 				bakedSails.put(new SailKey(color,dir), new BlockModelWrapper(baker.bake(id, modelState), List.of())));

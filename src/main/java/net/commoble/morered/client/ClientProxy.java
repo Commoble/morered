@@ -156,7 +156,6 @@ public class ClientProxy
 		modBus.addListener(ClientProxy::onRegisterRenderers);
 		modBus.addListener(ClientProxy::onRegisterScreens);
 		modBus.addListener(ClientProxy::onRegisterClientExtensions);
-		modBus.addListener(ClientProxy::onRegisterAdditionalModels);
 		
 		forgeBus.addListener(ClientProxy::onClientLogIn);
 		forgeBus.addListener(ClientProxy::onClientLogOut);
@@ -239,15 +238,8 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.get().redstoneTubeEntity.get(), TubeBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().filterEntity.get(), FilterBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().osmosisFilterEntity.get(), OsmosisFilterBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().axleBlockEntity.get(), AxleBlockEntityRenderer::create);
-	}
-	
-	static void onRegisterAdditionalModels(ModelEvent.RegisterAdditional event)
-	{
-//		for (ResourceLocation id : AIRFOIL_SAIL_DUMMY_MODEL_IDS.values())
-//		{
-//			event.register(id);
-//		}
+		event.registerBlockEntityRenderer(MoreRed.get().axleBlockEntity.get(), AxleBlockEntityRenderer::create);;
+		event.registerBlockEntityRenderer(MoreRed.get().windcatcherBlockEntity.get(), WindcatcherBlockEntityRenderer::create);
 	}
 
 	static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)

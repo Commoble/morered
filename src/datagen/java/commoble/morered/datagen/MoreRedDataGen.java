@@ -31,6 +31,7 @@ import net.commoble.morered.client.UnbakedLogicGateModel;
 import net.commoble.morered.client.UnbakedWindcatcherModel;
 import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
+import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
 import net.commoble.morered.mechanisms.WoodSets;
 import net.commoble.morered.mechanisms.WoodSets.WoodSet;
@@ -567,7 +568,7 @@ public class MoreRedDataGen
 				.localize(WordUtils.capitalize(axleName.replace("_", " ")))
 				.mechanicalComponent(axleMechanicalComponent)
 				.tags(MoreRed.Tags.Blocks.AXLES)
-				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("axle_template"))
+				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/axle_template"))
 					.addTexture("side", strippedLogBlockModel)
 					.addTexture("end", strippedLogTopTexture))
 				.tags(MoreRed.Tags.Items.AXLES)
@@ -596,11 +597,9 @@ public class MoreRedDataGen
 			VariantsMechanicalComponent windcatcherMechanicalComponent = VariantsMechanicalComponent.builder(true);
 			for (int i=0; i<=8; i++)
 			{
-				windcatcherMechanicalComponent.addVariant(WindcatcherBlock.WIND, i, new RawNode(NodeShape.ofCube(), 3*i*i, 0, 0, 25D, i > 0
-					? List.of(
+				windcatcherMechanicalComponent.addVariant(WindcatcherBlock.WIND, i, new RawNode(NodeShape.ofCube(), 3*i*i, 0, 0, 25D, List.of(
 						new RawConnection(Optional.of(Direction.UP), NodeShape.ofSide(Direction.DOWN), Parity.POSITIVE, 0),
-						new RawConnection(Optional.of(Direction.DOWN), NodeShape.ofSide(Direction.UP), Parity.POSITIVE, 0))
-					: List.of()));
+						new RawConnection(Optional.of(Direction.DOWN), NodeShape.ofSide(Direction.UP), Parity.POSITIVE, 0))));
 			}
 			BlockDataHelper.create(MoreRed.get().windcatcherBlocks.get(woodName).get(), context,
 				(id,block) -> BlockStateFile.variants(Variants.always(Model.create(blockModel(id)))),
@@ -632,6 +631,9 @@ public class MoreRedDataGen
 					'-', ingredient(Tags.Items.RODS_WOODEN),
 					'o', Ingredient.of(MoreRed.get().axleBlocks.get(woodName).get())))));			
 		}
+		
+		// special recipes
+		recipes.put(MoreRed.get().windcatcherDyeRecipeSerializer.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.WINDCATCHERS)));
 		
 		// add recipes for unsupported wood types so they can default to oak
 		Ingredient unsupportedStrippedLogsIngredient = new Ingredient(new DifferenceIngredient(

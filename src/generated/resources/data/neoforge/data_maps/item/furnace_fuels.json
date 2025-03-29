@@ -1,0 +1,10 @@
+{
+  "values": {
+    "#morered:axles": {
+      "burn_time": 100
+    },
+    "#morered:windcatchers": {
+      "burn_time": 300
+    }
+  }
+}

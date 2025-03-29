@@ -1,0 +1,7 @@
+{
+  "parent": "morered:block/airfoil_template",
+  "textures": {
+    "end": "minecraft:block/stripped_jungle_log_top",
+    "side": "minecraft:block/stripped_jungle_log"
+  }
+}

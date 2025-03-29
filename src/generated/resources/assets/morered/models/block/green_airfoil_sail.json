@@ -1,0 +1,6 @@
+{
+  "parent": "morered:block/airfoil_sail_template",
+  "textures": {
+    "foil": "minecraft:block/green_wool"
+  }
+}

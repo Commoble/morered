@@ -1,0 +1,7 @@
+{
+  "parent": "morered:item/axle_template",
+  "textures": {
+    "end": "minecraft:block/stripped_crimson_stem_top",
+    "side": "minecraft:block/stripped_crimson_stem"
+  }
+}

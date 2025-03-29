@@ -3,6 +3,7 @@ package net.commoble.morered.mechanisms;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -51,10 +52,19 @@ public class AirFoilBlock extends Block
 	protected BlockState updateShape(BlockState thisState, LevelReader level, ScheduledTickAccess ticks, BlockPos thisPos, Direction directionToNeighbor, BlockPos neighborPos,
 		BlockState neighborState, RandomSource rand)
 	{
-		BlockPos corePos = getCorePos(thisState.getValue(SEGMENT), thisPos);
-		return level.getBlockState(corePos).is(MoreRed.Tags.Blocks.WINDCATCHERS)
-			? thisState
-			: Blocks.AIR.defaultBlockState();
+		ticks.scheduleTick(thisPos, this, 1);
+		return super.updateShape(thisState, level, ticks, thisPos, directionToNeighbor, neighborPos, neighborState, rand);
+	}
+
+	@Override
+	protected void tick(BlockState thisState, ServerLevel level, BlockPos pos, RandomSource rand)
+	{
+		super.tick(thisState, level, pos, rand);
+		BlockPos corePos = getCorePos(thisState.getValue(SEGMENT), pos);
+		if (!level.getBlockState(corePos).is(MoreRed.Tags.Blocks.WINDCATCHERS))
+		{
+			level.setBlock(pos, Blocks.AIR.defaultBlockState(), UPDATE_ALL);
+		}
 	}
 
 	@Override
@@ -64,7 +74,7 @@ public class AirFoilBlock extends Block
 		BlockPos corePos = getCorePos(thisState.getValue(SEGMENT), pos);
 		if (level.getBlockState(corePos).is(MoreRed.Tags.Blocks.WINDCATCHERS))
 		{
-			level.destroyBlock(corePos, isMoving);
+			level.destroyBlock(corePos, true);
 		}
 	}
 

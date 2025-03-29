@@ -1,0 +1,7 @@
+{
+  "parent": "morered:item/axle_template",
+  "textures": {
+    "end": "minecraft:block/stripped_oak_log_top",
+    "side": "minecraft:block/stripped_oak_log"
+  }
+}
