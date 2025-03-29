@@ -1,3 +1,10 @@
+# 1.21.4-8.0.0.0
+* Updated to use exmachina 0.10.0.0-beta
+* Added new blocks:
+  * Axles
+  * Windcatchers
+* Added client config value machineRenderCycleTicks which controls animation length of most machines
+
 # 1.21.3-7.1.0.0
 * Updated to exmachina 0.8.0.2-beta
 * Bitwise logic gates now actually apply bitwise operators instead of applying boolean operators 16 times, which should make them slightly more efficient

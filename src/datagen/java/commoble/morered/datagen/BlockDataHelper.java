@@ -1,8 +1,10 @@
 package commoble.morered.datagen;
 
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import net.commoble.exmachina.api.MechanicalComponent;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -13,6 +15,26 @@ import net.minecraft.world.level.storage.loot.LootTable;
 
 public record BlockDataHelper(Block block, DataGenContext context)
 {
+	public static BlockDataHelper create(Block block, DataGenContext context,
+		BiFunction<ResourceLocation, Block, BlockStateFile> blockstate,
+		BiFunction<ResourceLocation, Block, LootTable> lootTable)
+	{
+		BlockDataHelper helper = new BlockDataHelper(block, context);
+		ResourceLocation id = helper.id();
+		context.blockStates().put(id, blockstate.apply(id,block));
+		context.lootTables().put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "blocks/" + id.getPath()), lootTable.apply(id,block));
+		return helper;
+	}
+	
+	public static BlockDataHelper createWithoutLoot(Block block, DataGenContext context,
+		BiFunction<ResourceLocation, Block, BlockStateFile> blockstate)
+	{
+		BlockDataHelper helper = new BlockDataHelper(block, context);
+		ResourceLocation id = helper.id();
+		context.blockStates().put(id, blockstate.apply(id,block));
+		return helper;
+	}
+	
 	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateFile blockstate)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
@@ -72,6 +94,12 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	{
 		ResourceLocation id = this.id();
 		context.models().put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(formatString, id.getPath())), model);
+		return this;
+	}
+	
+	public BlockDataHelper mechanicalComponent(MechanicalComponent component)
+	{
+		this.context.mechanicalComponents().put(this.id(), component);
 		return this;
 	}
 	

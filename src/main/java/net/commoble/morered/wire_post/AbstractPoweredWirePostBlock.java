@@ -11,9 +11,9 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.exmachina.api.SignalGraphKey;
-import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
@@ -84,7 +84,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public void setPlacedBy(Level world, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(world, pos);
 	}
 
 	@Override

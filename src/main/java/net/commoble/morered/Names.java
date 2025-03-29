@@ -2,8 +2,8 @@ package net.commoble.morered;
 
 import java.util.Arrays;
 
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.Util;
+import net.minecraft.world.item.DyeColor;
 
 public class Names
 {
@@ -66,6 +66,10 @@ public class Names
 	public static final String OSMOSIS_SLIME = "osmosis_slime";
 	public static final String DISTRIBUTOR = "distributor";
 	public static final String[] COLORED_TUBE_NAMES = Arrays.stream(DyeColor.values()).map(color -> color.toString() + "_tube").toArray(String[]::new);
+	
+	public static final String AXLE = "axle";
+	public static final String WINDCATCHER = "windcatcher";
+	public static final String AIRFOIL = "airfoil";
 
 	// raw items
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
@@ -83,6 +87,11 @@ public class Names
 	public static final String REDWIRE_POSTS = "redwire_posts";
 	public static final String COLORED_TUBES = "colored_tubes";
 	public static final String TUBES = "tubes";
+	public static final String AXLES = "axles";
+	public static final String WINDCATCHERS = "windcatchers";
+	public static final String AIRFOILS = "airfoils";
+	
+	public static final String SUPPORTED_STRIPPED_LOGS = "supported_stripped_logs";
 	
 	// capabilities
 	public static final String POSTS_IN_CHUNK = "posts_in_chunk";
@@ -92,6 +101,7 @@ public class Names
 	// data components
 	public static final String SPOOLED_POST = "spooled_post";
 	public static final String PLIERED_TUBE = "pliered_tube";
+	public static final String WINDCATCHER_COLORS = "windcatcher_colors";
 	
 	// recipe types
 	public static final String SOLDERING_RECIPE = "soldering";

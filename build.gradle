@@ -51,7 +51,7 @@ neoForge {
 		}
 		clientData {
 			clientData()
-			programArguments.addAll '--mod', "morered_datagen", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+			programArguments.addAll '--mod', "morered", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
 		}
 		configureEach {
 			

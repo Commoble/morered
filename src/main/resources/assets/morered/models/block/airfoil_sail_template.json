@@ -1,0 +1,20 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"particle": "#foil"
+	},
+	"elements": [
+		{
+			"from": [6, 0, 0],
+			"to": [7, 16, 16],
+			"faces": {
+				"north": {"uv": [5, 0, 6, 16], "texture": "#foil"},
+				"east": {"uv": [0, 0, 16, 16], "texture": "#foil"},
+				"south": {"uv": [9, 0, 10, 16], "texture": "#foil"},
+				"west": {"uv": [0, 0, 16, 16], "texture": "#foil"},
+				"up": {"uv": [9, 0, 10, 16], "texture": "#foil"},
+				"down": {"uv": [9, 0, 10, 16], "texture": "#foil"}
+			}
+		}
+	]
+}

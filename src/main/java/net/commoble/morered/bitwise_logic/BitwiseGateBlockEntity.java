@@ -11,9 +11,9 @@ import java.util.function.Function;
 import java.util.function.ToIntFunction;
 
 import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.exmachina.api.SignalGraphKey;
-import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -81,7 +81,7 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 		if (oldOutput != this.output)
 		{
 			this.setChanged();
-			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, worldPosition);
+			ExMachinaGameEvents.scheduleSignalGraphUpdate(level, worldPosition);
 		}
 	}
 	
@@ -159,7 +159,7 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 		super.setBlockState(state);
 		this.resetOutput();
 		this.resetNodes();
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, worldPosition);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, worldPosition);
 	}
 	
 	@Override
@@ -168,7 +168,7 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 		super.setLevel(level);
 		this.resetOutput();
 		this.resetNodes();
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, worldPosition);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, worldPosition);
 	}
 	
 	public void resetNodes()

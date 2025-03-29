@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.exmachina.api.Channel;
-import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
+import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.EightGroup;
@@ -76,7 +76,7 @@ public abstract class AbstractPostBlock extends Block
 	{
 		this.updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onPlace(state, world, pos, oldState, isMoving);
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(world, pos);
 	}
 
 	@Override
@@ -98,7 +98,7 @@ public abstract class AbstractPostBlock extends Block
 	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving)
 	{
 		super.neighborChanged(state, world, pos, blockIn, orientation, isMoving);
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(world, pos);
 	}
 	
 	public void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)

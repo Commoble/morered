@@ -19,6 +19,7 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 
 import net.commoble.exmachina.api.ExMachinaRegistries;
+import net.commoble.exmachina.api.MechanicalNodeStates;
 import net.commoble.exmachina.api.SignalComponent;
 import net.commoble.morered.bitwise_logic.BitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.BitwiseGateSignalComponent;
@@ -27,6 +28,14 @@ import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
 import net.commoble.morered.client.ClientProxy;
+import net.commoble.morered.mechanisms.AirFoilBlock;
+import net.commoble.morered.mechanisms.AxleBlock;
+import net.commoble.morered.mechanisms.WindCatcherBlockItem;
+import net.commoble.morered.mechanisms.WindcatcherBlock;
+import net.commoble.morered.mechanisms.WindcatcherColors;
+import net.commoble.morered.mechanisms.WindcatcherRecipe;
+import net.commoble.morered.mechanisms.WoodSets;
+import net.commoble.morered.mechanisms.WoodSets.WoodSet;
 import net.commoble.morered.plate_blocks.BitwiseLogicFunction;
 import net.commoble.morered.plate_blocks.BitwiseLogicFunctions;
 import net.commoble.morered.plate_blocks.LatchBlock;
@@ -180,6 +189,14 @@ public class MoreRed
 	public final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
 	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseGateBlock>> bitwiseLogicPlates = new HashMap<>();
 	
+	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> postsInChunkAttachment;
+	public final DeferredHolder<AttachmentType<?>, AttachmentType<Map<BlockPos, VoxelShape>>> voxelCacheAttachment;
+	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> tubesInChunkAttachment;
+	
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> spooledPostComponent;
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> plieredTubeDataComponent;
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<WindcatcherColors>> windcatcherColorsDataComponent;
+	
 	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
 	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
 	public final DeferredHolder<Block, LatchBlock> latchBlock;
@@ -205,6 +222,10 @@ public class MoreRed
 	public final DeferredHolder<Block, RedstoneTubeBlock> redstoneTubeBlock;
 	public final DeferredHolder<Block, ShuntBlock> shuntBlock;
 	public final DeferredHolder<Block, TubeBlock> tubeBlock;
+	
+	public final Map<String, DeferredHolder<Block, AxleBlock>> axleBlocks = new HashMap<>();
+	public final Map<String, DeferredHolder<Block, WindcatcherBlock>> windcatcherBlocks = new HashMap<>();
+	public final DeferredHolder<Block, AirFoilBlock> airFoilBlock;
 
 	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
 	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
@@ -226,26 +247,21 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<RedstoneTubeBlockEntity>> redstoneTubeEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShuntBlockEntity>> shuntEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> tubeEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> axleBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> windcatcherBlockEntity;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
-	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
+	
 	public final DeferredHolder<RecipeType<?>, RecipeType<SolderingRecipe>> solderingRecipeType;
+	
+	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
+	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherRecipe>> windcatcherRecipeSerializer;
 
 	public final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> filterMenu;
 	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
 	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
 	
 	public final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> wireCountLootFunction;
-	
-	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> postsInChunkAttachment;
-	public final DeferredHolder<AttachmentType<?>, AttachmentType<Map<BlockPos, VoxelShape>>> voxelCacheAttachment;
-	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> tubesInChunkAttachment;
-	
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> spooledPostComponent;
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> plieredTubeDataComponent;
-	
-	
-	
 	
 	@SuppressWarnings("unchecked")
 	public MoreRed(IEventBus modBus)
@@ -265,6 +281,25 @@ public class MoreRed
 		DeferredRegister<AttachmentType<?>> attachmentTypes = defreg(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 		DeferredRegister<DataComponentType<?>> dataComponentTypes = defreg(modBus, Registries.DATA_COMPONENT_TYPE);
 		var signalComponentTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
+		
+		postsInChunkAttachment = attachmentTypes.register(Names.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
+			.serialize(BlockPos.CODEC.listOf().xmap(HashSet::new, List::copyOf))
+			.build());
+		voxelCacheAttachment = attachmentTypes.register(Names.VOXEL_CACHE, () -> AttachmentType.<Map<BlockPos,VoxelShape>>builder(() -> new HashMap<>())
+			.build());
+		this.tubesInChunkAttachment = attachmentTypes.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
+			.serialize(TubesInChunk.TUBE_SET_CODEC)
+			.build());
+
+		spooledPostComponent = dataComponentTypes.register(Names.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
+			.networkSynchronized(BlockPos.STREAM_CODEC)
+			.build());
+		this.plieredTubeDataComponent = dataComponentTypes.register(Names.PLIERED_TUBE, () -> DataComponentType.<BlockSide>builder()
+			.networkSynchronized(BlockSide.STREAM_CODEC)
+			.build());
+		this.windcatcherColorsDataComponent = dataComponentTypes.register(Names.WINDCATCHER_COLORS, () -> DataComponentType.<WindcatcherColors>builder()
+			.networkSynchronized(WindcatcherColors.STREAM_CODEC)
+			.build());
 		
 		solderingTableBlock = registerBlockItem(blocks, items, Names.SOLDERING_TABLE,
 			() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion(),
@@ -409,6 +444,38 @@ public class MoreRed
 		}));
 		tubeBlocksWithTubeBlockEntity.add(this.tubeBlock);
 
+		// register mechanisms per wood type
+		for (var entry : WoodSets.LOOKUP.entrySet())
+		{
+			String woodName = entry.getKey();
+			WoodSet woodSet = entry.getValue();
+			
+			this.axleBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.AXLE,
+				() -> Block.Properties.ofFullCopy(woodSet.strippedLog()).noOcclusion(),
+				AxleBlock::new));
+			
+			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
+				() -> Block.Properties.of()
+					.mapColor(woodSet.mapColor())
+					.strength(2F)
+					.sound(woodSet.soundType())
+					.ignitedByLava()
+					.noOcclusion()
+					.isSuffocating(($,$$,$$$) -> false),
+				WindcatcherBlock::new,
+				Item.Properties::new,
+				WindCatcherBlockItem::new
+			));
+		}
+		
+		this.airFoilBlock = registerBlock(blocks, Names.AIRFOIL, () -> Block.Properties.of()
+				.air()
+				.noCollission()
+				.noOcclusion()
+				.noLootTable()
+				.isSuffocating(($,$$,$$$) -> false),
+			AirFoilBlock::new);
+
 		// notblock items
 		redwireSpoolItem = registerItem(items, Names.REDWIRE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.REDWIRE_POSTS));
 		bundledCableSpoolItem = registerItem(items, Names.BUNDLED_CABLE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
@@ -482,31 +549,27 @@ public class MoreRed
 			() -> new BlockEntityType<>(OsmosisFilterBlockEntity::new, osmosisFilterBlock.get()));
 		this.distributorEntity = blockEntityTypes.register(Names.DISTRIBUTOR,
 			() -> new BlockEntityType<>(DistributorBlockEntity::new, distributorBlock.get()));
+		this.axleBlockEntity = GenericBlockEntity.builder()
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values().stream().toArray(DeferredHolder[]::new));
+		this.windcatcherBlockEntity = GenericBlockEntity.builder()
+			.itemData(windcatcherColorsDataComponent)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values().stream().toArray(DeferredHolder[]::new));
 
-		solderingSerializer = recipeSerializers.register(Names.SOLDERING_RECIPE,
-			() -> new SimpleRecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
-		solderingRecipeType = recipeTypes.register(Names.SOLDERING_RECIPE, () -> RecipeType.simple(id(Names.SOLDERING_RECIPE)));
 		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,
 			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
+		
+		solderingRecipeType = recipeTypes.register(Names.SOLDERING_RECIPE, () -> RecipeType.simple(id(Names.SOLDERING_RECIPE)));
+		
+		solderingSerializer = recipeSerializers.register(Names.SOLDERING_RECIPE,
+			() -> new SimpleRecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
+		windcatcherRecipeSerializer = recipeSerializers.register(Names.WINDCATCHER,
+			() -> new SimpleRecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
+		
 		this.loaderMenu = menuTypes.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
 		this.filterMenu = menuTypes.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
 		this.multiFilterMenu = menuTypes.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
-
-		postsInChunkAttachment = attachmentTypes.register(Names.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
-			.serialize(BlockPos.CODEC.listOf().xmap(HashSet::new, List::copyOf))
-			.build());
-		voxelCacheAttachment = attachmentTypes.register(Names.VOXEL_CACHE, () -> AttachmentType.<Map<BlockPos,VoxelShape>>builder(() -> new HashMap<>())
-			.build());
-		this.tubesInChunkAttachment = attachmentTypes.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
-			.serialize(TubesInChunk.TUBE_SET_CODEC)
-			.build());
-
-		spooledPostComponent = dataComponentTypes.register(Names.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
-			.networkSynchronized(BlockPos.STREAM_CODEC)
-			.build());
-		this.plieredTubeDataComponent = dataComponentTypes.register(Names.PLIERED_TUBE, () -> DataComponentType.<BlockSide>builder()
-			.networkSynchronized(BlockSide.STREAM_CODEC)
-			.build());
 		
 		wireCountLootFunction = lootFunctions.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
 
@@ -554,6 +617,10 @@ public class MoreRed
 			
 			public static final TagKey<Block> COLORED_TUBES = tag(Names.COLORED_TUBES);
 			public static final TagKey<Block> TUBES = tag(Names.TUBES);
+			
+			public static final TagKey<Block> AXLES = tag(Names.AXLES);
+			public static final TagKey<Block> WINDCATCHERS = tag(Names.WINDCATCHERS);
+			public static final TagKey<Block> AIRFOILS = tag(Names.AIRFOILS);
 		}
 		
 		public static class Items
@@ -567,6 +634,9 @@ public class MoreRed
 			public static final TagKey<Item> RED_ALLOY_WIRES = tag(Names.RED_ALLOY_WIRES);
 			public static final TagKey<Item> RED_ALLOYABLE_INGOTS = tag(Names.RED_ALLOYABLE_INGOTS);
 			public static final TagKey<Item> TUBES = tag(Names.TUBES);
+			public static final TagKey<Item> AXLES = tag(Names.AXLES);
+			public static final TagKey<Item> WINDCATCHERS = tag(Names.WINDCATCHERS);
+			public static final TagKey<Item> SUPPORTED_STRIPPED_LOGS = tag(Names.SUPPORTED_STRIPPED_LOGS);
 		}
 	}
 	

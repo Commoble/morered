@@ -2,7 +2,7 @@ package net.commoble.morered.bitwise_logic;
 
 import java.util.List;
 
-import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
+import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.morered.plate_blocks.BitwiseLogicFunction;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -64,7 +64,7 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 	protected void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		super.onPlace(newState, level, pos, oldState, isMoving);
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, pos);
 	}
 
 	@Override
@@ -72,7 +72,7 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 	{
 		super.onRemove(oldState, level, pos, newState, isMoving);
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
 	}
 	
 	@Override

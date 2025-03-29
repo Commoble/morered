@@ -16,10 +16,10 @@ import com.google.common.cache.LoadingCache;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.exmachina.api.Channel;
+import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.exmachina.api.SignalComponent;
 import net.commoble.exmachina.api.SignalGraphKey;
-import net.commoble.exmachina.api.SignalGraphUpdateGameEvent;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.StateWirer;
 import net.commoble.exmachina.api.TransmissionNode;
@@ -346,7 +346,7 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		this.updateShapeCache(worldIn, pos);
-		SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
+		ExMachinaGameEvents.scheduleSignalGraphUpdate(worldIn, pos);
 		super.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
@@ -386,7 +386,7 @@ public abstract class AbstractWireBlock extends Block
 		// if the new state is still a wire block and has at least one wire in it, do a power update
 		if (doPowerUpdate)
 		{
-			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
+			ExMachinaGameEvents.scheduleSignalGraphUpdate(worldIn, pos);
 		}
 	}
 
@@ -425,7 +425,7 @@ public abstract class AbstractWireBlock extends Block
 		this.updateShapeCache(worldIn, pos);
 		if (doGraphUpdate)
 		{
-			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(worldIn, pos);
+			ExMachinaGameEvents.scheduleSignalGraphUpdate(worldIn, pos);
 		}
 		// if the changed neighbor has any convex edges through this block, propagate neighbor update along any edges
 //		if (edgeFlags != 0)
@@ -574,7 +574,7 @@ public abstract class AbstractWireBlock extends Block
 		}
 		if (world instanceof ServerLevel)
 		{
-			SignalGraphUpdateGameEvent.scheduleSignalGraphUpdate(world, pos);
+			ExMachinaGameEvents.scheduleSignalGraphUpdate(world, pos);
 		}
 	}
 
