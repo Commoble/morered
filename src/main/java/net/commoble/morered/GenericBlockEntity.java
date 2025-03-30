@@ -138,7 +138,7 @@ public class GenericBlockEntity extends BlockEntity
 			if (codec == null)
 				continue;
 			var serializableValue = this.data.get(type);
-			if (serializableValue != null)
+			if (serializableValue != null && serializableValue.value() != null)
 			{
 				serializableValue.encodeValue(ops)
 					.result()
@@ -182,7 +182,7 @@ public class GenericBlockEntity extends BlockEntity
 		for (DataComponentType<?> type : this.syncedDataComponents)
 		{
 			var holder = this.data.get(type);
-			if (holder != null)
+			if (holder != null && holder.value() != null)
 			{
 				holder.encodeValue(ops)
 					.result()

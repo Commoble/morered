@@ -83,7 +83,7 @@ public class WindcatcherBlock extends Block implements EntityBlock
 			return wind;
 		for (int radius=2; radius<=5; radius++)
 		{
-			int blockedCount = 0;
+			int freebies = radius-1;
 			float increment = Mth.PI/radius;
 			int increments = radius*2;
 			for (int i=0; i<increments; i++)
@@ -94,17 +94,13 @@ public class WindcatcherBlock extends Block implements EntityBlock
 				// subtract a level if we find too many occlusions in a row
 				if (occludingState.isSolid())
 				{
-					blockedCount++;
-					if (blockedCount >= radius)
-					{
+					if (freebies > 0)
+						freebies--;
+					else if (wind > 0)
 						wind--;
-						if (wind <= 0)
-							return 0;
-					}
-				}
-				else
-				{
-					blockedCount = 0;
+					
+					if (wind <= 0)
+						return 0;
 				}
 			}
 		}
