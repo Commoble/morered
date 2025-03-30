@@ -464,6 +464,7 @@ public class MoreRed
 					.sound(woodSet.soundType())
 					.ignitedByLava()
 					.noOcclusion()
+					.randomTicks()
 					.isSuffocating(($,$$,$$$) -> false),
 				WindcatcherBlock::new,
 				Item.Properties::new,
