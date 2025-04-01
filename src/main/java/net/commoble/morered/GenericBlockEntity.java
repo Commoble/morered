@@ -1,6 +1,7 @@
 package net.commoble.morered;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -11,10 +12,13 @@ import java.util.stream.Collectors;
 
 import org.jetbrains.annotations.Nullable;
 
+import com.mojang.datafixers.util.Function3;
 import com.mojang.serialization.Codec;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.HolderLookup.RegistryLookup;
 import net.minecraft.core.component.DataComponentMap.Builder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.TypedDataComponent;
@@ -49,6 +53,7 @@ public class GenericBlockEntity extends BlockEntity
 	private final Set<DataComponentType<?>> syncedDataComponents;
 	private final Set<DataComponentType<?>> itemDataComponents;
 	private final Set<AttachmentSerializer<?>> syncedAttachments;
+	private final Map<DataComponentType<?>, DataTransformer<?>> dataTransformers;
 	
 	private Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 
@@ -56,13 +61,15 @@ public class GenericBlockEntity extends BlockEntity
 		Set<DataComponentType<?>> serverDataComponents,
 		Set<DataComponentType<?>> syncedDataComponents,
 		Set<DataComponentType<?>> itemDataComponents,
-		Set<AttachmentSerializer<?>> syncedAttachments)
+		Set<AttachmentSerializer<?>> syncedAttachments,
+		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers)
 	{
 		super(type,pos,state);
 		this.serverDataComponents = serverDataComponents;
 		this.syncedDataComponents = syncedDataComponents;
 		this.itemDataComponents = itemDataComponents;
 		this.syncedAttachments = syncedAttachments;
+		this.dataTransformers = dataTransformers;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -84,15 +91,41 @@ public class GenericBlockEntity extends BlockEntity
 		{
 			// data is changing, mark for updating
 			this.data.put(type, TypedDataComponent.createUnchecked(type, value));
-			if (this.serverDataComponents.contains(type))
+			if (!this.level.isClientSide)
 			{
-				this.setChanged();
-			}
-			if (this.syncedDataComponents.contains(type))
-			{
-				this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 0);
+				if (this.serverDataComponents.contains(type))
+				{
+					this.setChanged();
+				}
+				if (this.syncedDataComponents.contains(type))
+				{
+					this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 0);
+				}
 			}
 		}
+	}
+	
+	private <T> @Nullable TypedDataComponent<T> getTypedDataForSave(DataComponentType<T> type, BlockState state, RegistryLookup.Provider registries)
+	{
+		@SuppressWarnings("unchecked")
+		TypedDataComponent<T> base = (TypedDataComponent<T>) this.data.get(type);
+		if (base == null)
+			return null;
+		@SuppressWarnings("unchecked")
+		@Nullable DataTransformer<T> transformer = (DataTransformer<T>) this.dataTransformers.get(type);
+		return transformer == null
+			? base
+			: transformer.typedTransformOnSave(state, registries, base);
+	}
+	
+	private <T> @Nullable TypedDataComponent<T> getTypedDataForLoad(TypedDataComponent<T> baseData, BlockState state, RegistryLookup.Provider registries)
+	{
+		DataComponentType<T> type = baseData.type();
+		@SuppressWarnings("unchecked")
+		@Nullable DataTransformer<T> transformer = (DataTransformer<T>) this.dataTransformers.get(type);
+		return transformer == null
+			? baseData
+			: new TypedDataComponent<>(type, transformer.onLoad.apply(state, registries, baseData.value()));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -137,7 +170,7 @@ public class GenericBlockEntity extends BlockEntity
 			// but would be nice to check anyway
 			if (codec == null)
 				continue;
-			var serializableValue = this.data.get(type);
+			var serializableValue = this.getTypedDataForSave(type, getBlockState(), provider);
 			if (serializableValue != null && serializableValue.value() != null)
 			{
 				serializableValue.encodeValue(ops)
@@ -167,7 +200,7 @@ public class GenericBlockEntity extends BlockEntity
 			{
 				codec.parse(ops,valueTag)
 					.result()
-					.ifPresent(value -> this.data.put(type, TypedDataComponent.createUnchecked(type,value)));
+					.ifPresent(value -> this.data.put(type, this.getTypedDataForLoad(TypedDataComponent.createUnchecked(type,value), this.getBlockState(), provider)));
 			}
 		}
 	}
@@ -290,7 +323,8 @@ public class GenericBlockEntity extends BlockEntity
 			new HashSet<>(),
 			new HashSet<>(),
 			new HashSet<>(),
-			new HashSet<>()
+			new HashSet<>(),
+			new HashMap<>()
 		);
 	}
 	
@@ -298,7 +332,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<Supplier<? extends DataComponentType<?>>> serverDataComponents,
 		Set<Supplier<? extends DataComponentType<?>>> syncedDataComponents,
 		Set<Supplier<? extends DataComponentType<?>>> itemDataComponents,
-		Set<AttachmentSerializer<?>> syncedAttachments
+		Set<AttachmentSerializer<?>> syncedAttachments,
+		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers
 	)
 	{
 		/**
@@ -361,6 +396,34 @@ public class GenericBlockEntity extends BlockEntity
 			this.syncedAttachments.add(new AttachmentSerializer<>(type,codec));
 			return this;
 		}
+		
+		/**
+		 * Registers a data transformer used for altering data on save/load.
+		 * Used for e.g. rotating/mirroring data in structures.
+		 * Only applies on serverside save load, does not affect synced data
+		 * @param <T>
+		 * @param type DataComponentType
+		 * @param onSave Function3 to apply to data on save
+		 * @param onLoad Function3 to apply to data on load
+		 * @return this
+		 */
+		public <T> GenericBlockEntityBuilder dataTransformer(
+			Supplier<DataComponentType<T>> type,
+			Function3<BlockState,HolderLookup.Provider,T,T> onSave,
+			Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+		{
+			this.dataTransformers.put(type, new DataTransformer<>(onSave, onLoad));
+			return this;
+		}
+
+		@SuppressWarnings("unchecked")
+		public DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> register(
+			DeferredRegister<BlockEntityType<?>> blockEntities,
+			String name,
+			Collection<? extends Supplier<? extends Block>> blocks)
+		{
+			return this.register(blockEntities, name, blocks.stream().toArray(Supplier[]::new));
+		}
 
 		@SafeVarargs
 		public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> register(
@@ -382,7 +445,10 @@ public class GenericBlockEntity extends BlockEntity
 							serverDataComponents.stream().map(Supplier::get).filter(type -> !type.isTransient() && type.codec() != null).collect(Collectors.toSet()),
 							syncedDataComponents.stream().map(Supplier::get).filter(type -> type.codec() != null).collect(Collectors.toSet()),
 							itemDataComponents.stream().map(Supplier::get).collect(Collectors.toSet()),
-							syncedAttachments),
+							syncedAttachments,
+							dataTransformers.entrySet().stream().collect(Collectors.toMap(
+								entry -> entry.getKey().get(),
+								Map.Entry::getValue))),
 						Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new))
 				);
 			return holder;
@@ -419,6 +485,16 @@ public class GenericBlockEntity extends BlockEntity
 			{
 				holder.removeData(theType);
 			}
+		}
+	}
+	
+	private static record DataTransformer<T>(
+		Function3<BlockState,HolderLookup.Provider,T,T> onSave,
+		Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+	{
+		public TypedDataComponent<T> typedTransformOnSave(BlockState state, HolderLookup.Provider registries, TypedDataComponent<T> typedData)
+		{
+			return new TypedDataComponent<>(typedData.type(), this.onSave.apply(state, registries, typedData.value()));
 		}
 	}
 }

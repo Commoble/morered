@@ -28,7 +28,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 {
 	private static final VoxelShape[] WIRE_NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(1,2);
-	private static final VoxelShape[] WIRE_RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(2);
+	private static final Map<Direction,VoxelShape> WIRE_RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(2);
 	private static final VoxelShape[] WIRE_LINE_SHAPES = WireVoxelHelpers.makeLineShapes(1,2);
 	private static final VoxelShape[] WIRE_SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(WIRE_NODE_SHAPES_DUNSWE, WIRE_LINE_SHAPES);
 	private static final LoadingCache<Long, VoxelShape> WIRE_VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(WIRE_SHAPES_BY_STATE_INDEX, WIRE_LINE_SHAPES);
@@ -39,7 +39,7 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 	}
 	
 	private static final VoxelShape[] CABLE_NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(2, 3);
-	private static final VoxelShape[] CABLE_RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(3);
+	private static final Map<Direction,VoxelShape> CABLE_RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(3);
 	private static final VoxelShape[] CABLE_LINE_SHAPES = WireVoxelHelpers.makeLineShapes(2, 3);
 	private static final VoxelShape[] CABLE_SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(CABLE_NODE_SHAPES_DUNSWE, CABLE_LINE_SHAPES);
 	private static final LoadingCache<Long, VoxelShape> CABLE_VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(CABLE_SHAPES_BY_STATE_INDEX, CABLE_LINE_SHAPES);
@@ -49,7 +49,7 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 		return new PoweredWireBlock(properties, CABLE_SHAPES_BY_STATE_INDEX, CABLE_RAYTRACE_BACKBOARDS, CABLE_VOXEL_CACHE, false, false, ChannelSet.BY_COLOR.get(color));
 	}
 	
-	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower, boolean readAttachedPower, ChannelSet channels)
+	public PoweredWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, Map<Direction,VoxelShape> raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean useIndirectPower, boolean readAttachedPower, ChannelSet channels)
 	{
 		super(properties, shapesByStateIndex, raytraceBackboards, voxelCache, readAttachedPower, true, useIndirectPower, channels);
 	}

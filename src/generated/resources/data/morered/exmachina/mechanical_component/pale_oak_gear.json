@@ -1,0 +1,282 @@
+{
+  "type": "exmachina:variants",
+  "save": true,
+  "variants": {
+    "facing=down": {
+      "connections": [
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        },
+        {
+          "direction": "north",
+          "neighbor_shape": {
+            "face": "down",
+            "side": "south"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "south",
+          "neighbor_shape": {
+            "face": "down",
+            "side": "north"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "west",
+          "neighbor_shape": {
+            "face": "down",
+            "side": "east"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "east",
+          "neighbor_shape": {
+            "face": "down",
+            "side": "west"
+          },
+          "parity": "negative",
+          "teeth": 16
+        }
+      ],
+      "inertia": 2.0,
+      "shape": "down"
+    },
+    "facing=east": {
+      "connections": [
+        {
+          "direction": "east",
+          "neighbor_shape": "west"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": {
+            "face": "east",
+            "side": "up"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "up",
+          "neighbor_shape": {
+            "face": "east",
+            "side": "down"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "north",
+          "neighbor_shape": {
+            "face": "east",
+            "side": "south"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "south",
+          "neighbor_shape": {
+            "face": "east",
+            "side": "north"
+          },
+          "parity": "negative",
+          "teeth": 16
+        }
+      ],
+      "inertia": 2.0,
+      "shape": "east"
+    },
+    "facing=north": {
+      "connections": [
+        {
+          "direction": "north",
+          "neighbor_shape": "south"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": {
+            "face": "north",
+            "side": "up"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "up",
+          "neighbor_shape": {
+            "face": "north",
+            "side": "down"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "west",
+          "neighbor_shape": {
+            "face": "north",
+            "side": "east"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "east",
+          "neighbor_shape": {
+            "face": "north",
+            "side": "west"
+          },
+          "parity": "negative",
+          "teeth": 16
+        }
+      ],
+      "inertia": 2.0,
+      "shape": "north"
+    },
+    "facing=south": {
+      "connections": [
+        {
+          "direction": "south",
+          "neighbor_shape": "north"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": {
+            "face": "south",
+            "side": "up"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "up",
+          "neighbor_shape": {
+            "face": "south",
+            "side": "down"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "west",
+          "neighbor_shape": {
+            "face": "south",
+            "side": "east"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "east",
+          "neighbor_shape": {
+            "face": "south",
+            "side": "west"
+          },
+          "parity": "negative",
+          "teeth": 16
+        }
+      ],
+      "inertia": 2.0,
+      "shape": "south"
+    },
+    "facing=up": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        },
+        {
+          "direction": "north",
+          "neighbor_shape": {
+            "face": "up",
+            "side": "south"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "south",
+          "neighbor_shape": {
+            "face": "up",
+            "side": "north"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "west",
+          "neighbor_shape": {
+            "face": "up",
+            "side": "east"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "east",
+          "neighbor_shape": {
+            "face": "up",
+            "side": "west"
+          },
+          "parity": "negative",
+          "teeth": 16
+        }
+      ],
+      "inertia": 2.0,
+      "shape": "up"
+    },
+    "facing=west": {
+      "connections": [
+        {
+          "direction": "west",
+          "neighbor_shape": "east"
+        },
+        {
+          "direction": "down",
+          "neighbor_shape": {
+            "face": "west",
+            "side": "up"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "up",
+          "neighbor_shape": {
+            "face": "west",
+            "side": "down"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "north",
+          "neighbor_shape": {
+            "face": "west",
+            "side": "south"
+          },
+          "parity": "negative",
+          "teeth": 16
+        },
+        {
+          "direction": "south",
+          "neighbor_shape": {
+            "face": "west",
+            "side": "north"
+          },
+          "parity": "negative",
+          "teeth": 16
+        }
+      ],
+      "inertia": 2.0,
+      "shape": "west"
+    }
+  }
+}

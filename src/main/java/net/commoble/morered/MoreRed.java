@@ -12,10 +12,12 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
 import net.commoble.exmachina.api.ExMachinaRegistries;
@@ -30,6 +32,10 @@ import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.mechanisms.AirFoilBlock;
 import net.commoble.morered.mechanisms.AxleBlock;
+import net.commoble.morered.mechanisms.GearBlock;
+import net.commoble.morered.mechanisms.GearBlockItem;
+import net.commoble.morered.mechanisms.GearsBlock;
+import net.commoble.morered.mechanisms.GearsLootEntry;
 import net.commoble.morered.mechanisms.WindCatcherBlockItem;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherColors;
@@ -108,7 +114,7 @@ import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
+import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -146,6 +152,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -158,7 +165,6 @@ import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
@@ -197,6 +203,7 @@ public class MoreRed
 	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> spooledPostComponent;
 	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> plieredTubeDataComponent;
 	public final DeferredHolder<DataComponentType<?>, DataComponentType<WindcatcherColors>> windcatcherColorsDataComponent;
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<Map<Direction,ItemStack>>> gearsDataComponent;
 	
 	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
 	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
@@ -225,8 +232,10 @@ public class MoreRed
 	public final DeferredHolder<Block, TubeBlock> tubeBlock;
 	
 	public final Map<String, DeferredHolder<Block, AxleBlock>> axleBlocks = new HashMap<>();
+	public final Map<String, DeferredHolder<Block, GearBlock>> gearBlocks = new HashMap<>();
 	public final Map<String, DeferredHolder<Block, WindcatcherBlock>> windcatcherBlocks = new HashMap<>();
 	public final DeferredHolder<Block, AirFoilBlock> airFoilBlock;
+	public final DeferredHolder<Block, GearsBlock> gearsBlock;
 
 	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
 	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
@@ -250,6 +259,8 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> tubeEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> axleBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> windcatcherBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearsBlockEntity;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
 	
@@ -263,6 +274,7 @@ public class MoreRed
 	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
 	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
 	
+	public final DeferredHolder<LootPoolEntryType, LootPoolEntryType> gearsLootEntry;
 	public final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> wireCountLootFunction;
 	
 	@SuppressWarnings("unchecked")
@@ -279,6 +291,7 @@ public class MoreRed
 		DeferredRegister<MenuType<?>> menuTypes = defreg(modBus, Registries.MENU);
 		DeferredRegister<RecipeSerializer<?>> recipeSerializers = defreg(modBus, Registries.RECIPE_SERIALIZER);
 		DeferredRegister<RecipeType<?>> recipeTypes = defreg(modBus, Registries.RECIPE_TYPE);
+		DeferredRegister<LootPoolEntryType> lootEntries = defreg(modBus, Registries.LOOT_POOL_ENTRY_TYPE);
 		DeferredRegister<LootItemFunctionType<?>> lootFunctions = defreg(modBus, Registries.LOOT_FUNCTION_TYPE);
 		DeferredRegister<AttachmentType<?>> attachmentTypes = defreg(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 		DeferredRegister<DataComponentType<?>> dataComponentTypes = defreg(modBus, Registries.DATA_COMPONENT_TYPE);
@@ -302,6 +315,10 @@ public class MoreRed
 		this.windcatcherColorsDataComponent = dataComponentTypes.register(Names.WINDCATCHER_COLORS, () -> DataComponentType.<WindcatcherColors>builder()
 			.persistent(WindcatcherColors.CODEC)
 			.networkSynchronized(WindcatcherColors.STREAM_CODEC)
+			.build());
+		this.gearsDataComponent = dataComponentTypes.register(Names.GEARS, () -> DataComponentType.<Map<Direction,ItemStack>>builder()
+			.persistent(Codec.unboundedMap(Direction.CODEC, ItemStack.OPTIONAL_CODEC))
+			.networkSynchronized(ByteBufCodecs.map(HashMap::new, Direction.STREAM_CODEC, ItemStack.OPTIONAL_STREAM_CODEC))
 			.build());
 		
 		solderingTableBlock = registerBlockItem(blocks, items, Names.SOLDERING_TABLE,
@@ -453,9 +470,27 @@ public class MoreRed
 			String woodName = entry.getKey();
 			WoodSet woodSet = entry.getValue();
 			
+			UnaryOperator<Block.Properties> finagleProps = props -> {
+				if (woodSet.ignitedByLava())
+				{
+					props.ignitedByLava();
+				}
+				return props;
+			};
+			
 			this.axleBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.AXLE,
 				() -> Block.Properties.ofFullCopy(woodSet.strippedLog()).noOcclusion(),
 				AxleBlock::new));
+			
+			this.gearBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.GEAR,
+				() -> finagleProps.apply(Block.Properties.of()
+					.mapColor(woodSet.mapColor())
+					.strength(2F)
+					.sound(woodSet.soundType())
+					.noOcclusion()),
+				GearBlock::new,
+				Item.Properties::new,
+				GearBlockItem::new));
 			
 			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
 				() -> Block.Properties.of()
@@ -471,6 +506,13 @@ public class MoreRed
 				WindCatcherBlockItem::new
 			));
 		}
+		
+		this.gearsBlock = registerBlock(blocks, Names.GEARS, () -> Block.Properties.of()
+			.mapColor(MapColor.WOOD)
+			.strength(2F)
+			.sound(SoundType.WOOD)
+			.noOcclusion(),
+			GearsBlock::new);
 		
 		this.airFoilBlock = registerBlock(blocks, Names.AIRFOIL, () -> Block.Properties.of()
 				.air()
@@ -555,11 +597,19 @@ public class MoreRed
 			() -> new BlockEntityType<>(DistributorBlockEntity::new, distributorBlock.get()));
 		this.axleBlockEntity = GenericBlockEntity.builder()
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values().stream().toArray(DeferredHolder[]::new));
+			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values());
 		this.windcatcherBlockEntity = GenericBlockEntity.builder()
 			.itemData(windcatcherColorsDataComponent)
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values().stream().toArray(DeferredHolder[]::new));
+			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
+		this.gearBlockEntity = GenericBlockEntity.builder()
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.register(blockEntityTypes, Names.GEAR, this.gearBlocks.values());
+		this.gearsBlockEntity = GenericBlockEntity.builder()
+			.syncedData(this.gearsDataComponent)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.dataTransformer(this.gearsDataComponent, GearsBlock::normalizeGears, GearsBlock::denormalizeGears)
+			.register(blockEntityTypes, Names.GEARS, this.gearsBlock);
 
 		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,
 			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
@@ -577,7 +627,8 @@ public class MoreRed
 		this.filterMenu = menuTypes.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
 		this.multiFilterMenu = menuTypes.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
 		
-		wireCountLootFunction = lootFunctions.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
+		this.gearsLootEntry = lootEntries.register(Names.GEARS, () -> new LootPoolEntryType(GearsLootEntry.CODEC));
+		this.wireCountLootFunction = lootFunctions.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
 
 		BiConsumer<ResourceKey<MapCodec<? extends SignalComponent>>, MapCodec<? extends SignalComponent>> registerSignalComponent = (key,codec) -> signalComponentTypes.register(key.location().getPath(), () -> codec);
 
@@ -625,6 +676,7 @@ public class MoreRed
 			public static final TagKey<Block> TUBES = tag(Names.TUBES);
 			
 			public static final TagKey<Block> AXLES = tag(Names.AXLES);
+			public static final TagKey<Block> GEARS = tag(Names.GEARS);
 			public static final TagKey<Block> WINDCATCHERS = tag(Names.WINDCATCHERS);
 			public static final TagKey<Block> AIRFOILS = tag(Names.AIRFOILS);
 		}
@@ -641,6 +693,7 @@ public class MoreRed
 			public static final TagKey<Item> RED_ALLOYABLE_INGOTS = tag(Names.RED_ALLOYABLE_INGOTS);
 			public static final TagKey<Item> TUBES = tag(Names.TUBES);
 			public static final TagKey<Item> AXLES = tag(Names.AXLES);
+			public static final TagKey<Item> GEARS = tag(Names.GEARS);
 			public static final TagKey<Item> WINDCATCHERS = tag(Names.WINDCATCHERS);
 			public static final TagKey<Item> SUPPORTED_STRIPPED_LOGS = tag(Names.SUPPORTED_STRIPPED_LOGS);
 		}
@@ -785,49 +838,18 @@ public class MoreRed
 	
 	private void onLeftClickBlock(LeftClickBlock event)
 	{
-		if (event.getAction() != LeftClickBlock.Action.START)
-			return;
-		
 		Level level = event.getLevel();
-		if (!(level instanceof ServerLevel serverLevel))
-			return;
-		
-		Player player = event.getEntity();
-		if (!(player instanceof ServerPlayer serverPlayer))
-			return;
-		
 		BlockPos pos = event.getPos();
 		BlockState state = level.getBlockState(pos);
 		Block block = state.getBlock();
-		if (!(block instanceof AbstractWireBlock wireBlock))
-			return;
-		
-		// override event from here
-		event.setCanceled(true);
-		
-		// we still have to redo a few of the existing checks
-		if (!serverPlayer.canInteractWithBlock(pos, 1.0)
-			|| (pos.getY() >= serverLevel.getMaxY() || pos.getY() < serverLevel.getMinY())
-			|| !serverLevel.mayInteract(serverPlayer, pos) // checks spawn protection and world border
-			|| CommonHooks.fireBlockBreak(serverLevel, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer, pos, state).isCanceled()
-			|| serverPlayer.blockActionRestricted(serverLevel, pos, serverPlayer.gameMode.getGameModeForPlayer()))
+		if (block instanceof AbstractWireBlock wireBlock)
 		{
-			serverPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, state));
-			return;
+			wireBlock.handleLeftClickBlock(event, level, pos, state);
 		}
-		Direction hitNormal = event.getFace();
-		Direction destroySide = hitNormal.getOpposite();
-		if (serverPlayer.isCreative())
+		else if (block instanceof GearsBlock gearsBlock)
 		{
-			wireBlock.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, false);
-			return;
+			gearsBlock.handleLeftClickBlock(event, level, pos, state);
 		}
-		if (!state.canHarvestBlock(serverLevel, pos, serverPlayer))
-		{
-			serverPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, state));
-			return;
-		}
-		wireBlock.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, true);
 	}
 	
 	// fired on the server just after vanilla chunk data is sent to the client

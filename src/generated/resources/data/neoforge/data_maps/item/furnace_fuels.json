@@ -3,6 +3,9 @@
     "#morered:axles": {
       "burn_time": 100
     },
+    "#morered:gears": {
+      "burn_time": 300
+    },
     "#morered:windcatchers": {
       "burn_time": 300
     }

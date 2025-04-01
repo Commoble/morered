@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 {
 	public static final VoxelShape[] NODE_SHAPES_DUNSWE = WireVoxelHelpers.makeNodeShapes(3, 4);
-	public static final VoxelShape[] RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(4);
+	public static final Map<Direction, VoxelShape> RAYTRACE_BACKBOARDS = WireVoxelHelpers.makeRaytraceBackboards(4);
 	public static final VoxelShape[] LINE_SHAPES = WireVoxelHelpers.makeLineShapes(3, 4);
 	public static final VoxelShape[] SHAPES_BY_STATE_INDEX = AbstractWireBlock.makeVoxelShapes(NODE_SHAPES_DUNSWE, LINE_SHAPES);
 	public static final LoadingCache<Long, VoxelShape> VOXEL_CACHE = AbstractWireBlock.makeVoxelCache(SHAPES_BY_STATE_INDEX, LINE_SHAPES);

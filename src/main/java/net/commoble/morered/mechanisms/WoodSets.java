@@ -1,7 +1,7 @@
 package net.commoble.morered.mechanisms;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 import net.minecraft.Util;
 import net.minecraft.world.level.block.Block;
@@ -13,7 +13,7 @@ public final class WoodSets
 {
 	private WoodSets() {}
 	
-	public static final Map<String, WoodSet> LOOKUP = Util.make(new HashMap<>(), map -> {
+	public static final Map<String, WoodSet> LOOKUP = Util.make(new TreeMap<>(), map -> {
 		map.put("acacia", new WoodSet(Blocks.STRIPPED_ACACIA_LOG, MapColor.COLOR_ORANGE, SoundType.WOOD, true));
 		map.put("birch", new WoodSet(Blocks.STRIPPED_BIRCH_LOG, MapColor.SAND, SoundType.WOOD, true));
 		map.put("cherry", new WoodSet(Blocks.STRIPPED_CHERRY_LOG, MapColor.TERRACOTTA_WHITE, SoundType.WOOD, true));

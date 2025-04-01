@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "/": "#c:rods/wooden",
+    "O": "minecraft:stripped_dark_oak_log"
+  },
+  "pattern": [
+    "///",
+    "/O/",
+    "///"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:dark_oak_gear"
+  }
+}

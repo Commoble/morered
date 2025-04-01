@@ -20,7 +20,13 @@ public interface MultiPlayerGameModeAccess
 	public void setIsDestroying(boolean is);
 	
 	@Accessor
+	public float getDestroyProgress();
+	
+	@Accessor
 	public void setDestroyProgress(float damage);
+	
+	@Accessor
+	public float getDestroyTicks();
 	
 	@Accessor
 	public void setDestroyTicks(float count);

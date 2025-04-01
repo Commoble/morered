@@ -1,15 +1,15 @@
 {
   "values": [
-    "morered:cherry_windcatcher",
-    "morered:pale_oak_windcatcher",
-    "morered:crimson_windcatcher",
-    "morered:birch_windcatcher",
-    "morered:oak_windcatcher",
     "morered:acacia_windcatcher",
-    "morered:warped_windcatcher",
-    "morered:jungle_windcatcher",
+    "morered:birch_windcatcher",
+    "morered:cherry_windcatcher",
+    "morered:crimson_windcatcher",
     "morered:dark_oak_windcatcher",
+    "morered:jungle_windcatcher",
     "morered:mangrove_windcatcher",
-    "morered:spruce_windcatcher"
+    "morered:oak_windcatcher",
+    "morered:pale_oak_windcatcher",
+    "morered:spruce_windcatcher",
+    "morered:warped_windcatcher"
   ]
 }

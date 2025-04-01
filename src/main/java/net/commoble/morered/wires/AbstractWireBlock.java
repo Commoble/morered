@@ -23,12 +23,15 @@ import net.commoble.exmachina.api.SignalGraphKey;
 import net.commoble.exmachina.api.SignalStrength;
 import net.commoble.exmachina.api.StateWirer;
 import net.commoble.exmachina.api.TransmissionNode;
+import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
@@ -48,14 +51,13 @@ import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.redstone.Orientation;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 
-public abstract class AbstractWireBlock extends Block
+public abstract class AbstractWireBlock extends Block implements FaceSegmentBlock
 {
 	
 	public static final BooleanProperty DOWN = PipeBlock.DOWN;
@@ -170,7 +172,7 @@ public abstract class AbstractWireBlock extends Block
 	}
 
 	protected final VoxelShape[] shapesByStateIndex;
-	protected final VoxelShape[] raytraceBackboards;
+	protected final Map<Direction, VoxelShape> raytraceBackboards;
 	protected final LoadingCache<Long, VoxelShape> voxelCache;
 	protected final ChannelSet channels;
 	protected final boolean readAttachedPower;
@@ -185,7 +187,7 @@ public abstract class AbstractWireBlock extends Block
 	 * @param voxelCache The cache to use for this block's voxels given world context
 	 * @param useIndirectPower Whether this block is allowed to send or receive power conducted indirectly through solid cubes
 	 */
-	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, VoxelShape[] raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, boolean useIndirectPower, ChannelSet channels)
+	public AbstractWireBlock(Properties properties, VoxelShape[] shapesByStateIndex, Map<Direction,VoxelShape> raytraceBackboards, LoadingCache<Long, VoxelShape> voxelCache, boolean readAttachedPower, boolean notifyAttachedNeighbors, boolean useIndirectPower, ChannelSet channels)
 	{
 		super(properties);
 		// the "default" state has to be the empty state so we can build it up one face at a time
@@ -528,43 +530,6 @@ public abstract class AbstractWireBlock extends Block
 		return this.getEdgeFlags(world,pos) << 30;
 	}
 	
-	@Nullable
-	public Direction getInteriorFaceToBreak(BlockState state, BlockPos pos, Player player, BlockHitResult raytrace, float partialTicks)
-	{
-		// raytrace against the face voxels, get the one the player is actually pointing at
-		// this is invoked when the player has been holding left-click sufficiently long enough for the block to break
-			// (so it this is an input response, not a performance-critical method)
-		// so we can assume that the player is still looking directly at the block's interaction shape
-		// do one raytrace against the state's interaction voxel itself,
-		// then compare the hit vector to the six face cuboids
-		// and see if any of them contain the hit vector
-		// we'll need the player to not be null though
-		Vec3 lookOffset = player.getViewVector(partialTicks); // unit normal vector in look direction
-		Vec3 hitVec = raytrace.getLocation();
-		Vec3 relativeHitVec = hitVec
-			.add(lookOffset.multiply(0.001D, 0.001D, 0.001D))
-			.subtract(pos.getX(), pos.getY(), pos.getZ()); // we're also wanting this to be relative to the voxel
-		for (int side=0; side<6; side++)
-		{
-			if (state.getValue(INTERIOR_FACES[side]))
-			{
-				// figure out which part of the shape we clicked
-				VoxelShape faceShape = this.raytraceBackboards[side];
-				
-				for (AABB aabb : faceShape.toAabbs())
-				{
-					if (aabb.contains(relativeHitVec))
-					{
-						return Direction.from3DDataValue(side);
-					}
-				}
-			}
-		}
-		
-		// if we failed to removed any particular state, return false so the whole block doesn't get broken
-		return null;
-	}
-	
 	protected void updateShapeCache(Level world, BlockPos pos)
 	{
 		VoxelCache.invalidate(world, pos);
@@ -603,38 +568,7 @@ public abstract class AbstractWireBlock extends Block
 	
 	public void destroyClickedSegment(BlockState state, Level world, BlockPos pos, Player player, Direction interiorFace, boolean dropItems)
 	{
-		int side = interiorFace.ordinal();
-		BooleanProperty sideProperty = INTERIOR_FACES[side];
-		if (state.getValue(sideProperty))
-		{
-			BlockState newState = state.setValue(sideProperty, false);
-			Block newBlock = newState.getBlock();
-			BlockState removedState = newBlock.defaultBlockState().setValue(sideProperty, true);
-			Block removedBlock = removedState.getBlock();
-			if (dropItems)
-			{
-				// add player stats and spawn drops
-				removedBlock.playerDestroy(world, player, pos, removedState, null, player.getMainHandItem().copy());
-			}
-			if (world.isClientSide)
-			{
-				// on the server world, onBlockHarvested will play the break effects for each player except the player given
-				// and also anger piglins at that player, so we do want to give it the player
-				// on the client world, willHarvest is always false, so we need to manually play the effects for that player
-				world.levelEvent(player, 2001, pos, Block.getId(removedState));
-			}
-			else
-			{
-				// plays the break event for every nearby player except the breaking player
-				removedBlock.playerWillDestroy(world, pos, removedState, player);
-			}
-			// default and rerender flags are used when block is broken on client
-			if (world.setBlock(pos, newState, Block.UPDATE_ALL_IMMEDIATE))
-			{
-				removedBlock.destroy(world, pos, removedState);
-			}
-		}
-		
+		FaceSegmentBlock.super.destroyClickedSegment(state, world, pos, player, interiorFace, dropItems);
 		this.updateShapeCache(world, pos);
 	}
 	
@@ -836,5 +770,51 @@ public abstract class AbstractWireBlock extends Block
 			}
 		}
 		return false;
+	}
+	
+	public void handleLeftClickBlock(LeftClickBlock event, Level level, BlockPos pos, BlockState state)
+	{
+		if (event.getAction() != LeftClickBlock.Action.START)
+			return;
+		
+		if (!(level instanceof ServerLevel serverLevel))
+			return;
+		
+		Player player = event.getEntity();
+		if (!(player instanceof ServerPlayer serverPlayer))
+			return;
+		
+		// override event from here
+		event.setCanceled(true);
+		
+		// we still have to redo a few of the existing checks
+		if (!serverPlayer.canInteractWithBlock(pos, 1.0)
+			|| (pos.getY() >= serverLevel.getMaxY() || pos.getY() < serverLevel.getMinY())
+			|| !serverLevel.mayInteract(serverPlayer, pos) // checks spawn protection and world border
+			|| CommonHooks.fireBlockBreak(serverLevel, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer, pos, state).isCanceled()
+			|| serverPlayer.blockActionRestricted(serverLevel, pos, serverPlayer.gameMode.getGameModeForPlayer()))
+		{
+			serverPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, state));
+			return;
+		}
+		Direction hitNormal = event.getFace();
+		Direction destroySide = hitNormal.getOpposite();
+		if (serverPlayer.isCreative())
+		{
+			this.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, false);
+			return;
+		}
+		if (!state.canHarvestBlock(serverLevel, pos, serverPlayer))
+		{
+			serverPlayer.connection.send(new ClientboundBlockUpdatePacket(pos, state));
+			return;
+		}
+		this.destroyClickedSegment(state, serverLevel, pos, serverPlayer, destroySide, true);
+	}
+
+	@Override
+	public Map<Direction, VoxelShape> getRaytraceBackboards()
+	{
+		return this.raytraceBackboards;
 	}
 }

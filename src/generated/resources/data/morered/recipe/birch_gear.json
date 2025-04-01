@@ -1,0 +1,17 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "/": "#c:rods/wooden",
+    "O": "minecraft:stripped_birch_log"
+  },
+  "pattern": [
+    "///",
+    "/O/",
+    "///"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:birch_gear"
+  }
+}

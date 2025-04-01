@@ -1,15 +1,15 @@
 {
   "values": [
-    "morered:cherry_axle",
-    "morered:pale_oak_axle",
-    "morered:crimson_axle",
-    "morered:birch_axle",
-    "morered:oak_axle",
     "morered:acacia_axle",
-    "morered:warped_axle",
-    "morered:jungle_axle",
+    "morered:birch_axle",
+    "morered:cherry_axle",
+    "morered:crimson_axle",
     "morered:dark_oak_axle",
+    "morered:jungle_axle",
     "morered:mangrove_axle",
-    "morered:spruce_axle"
+    "morered:oak_axle",
+    "morered:pale_oak_axle",
+    "morered:spruce_axle",
+    "morered:warped_axle"
   ]
 }

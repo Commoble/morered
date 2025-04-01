@@ -1,5 +1,8 @@
 package net.commoble.morered.util;
 
+import java.util.Map;
+
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
@@ -30,21 +33,20 @@ public class WireVoxelHelpers
 		};
 	}
 
-	public static VoxelShape[] makeRaytraceBackboards(int height)
+	public static Map<Direction,VoxelShape> makeRaytraceBackboards(int height)
 	{
 		int min = 0;
 		int max = 16;
 		int minPlusHeight = min + height;
 		int maxMinusHeight = max - height;
-		return new VoxelShape[]
-		{
-			Block.box(min,min,min,max,minPlusHeight,max),
-			Block.box(min,maxMinusHeight,min,max,max,max),
-			Block.box(min,min,min,max,max,minPlusHeight),
-			Block.box(min,min,maxMinusHeight,max,max,max),
-			Block.box(min,min,min,minPlusHeight,max,max),
-			Block.box(maxMinusHeight,min,min,max,max,max)
-		};
+		return Map.of(
+			Direction.DOWN, Block.box(min,min,min,max,minPlusHeight,max),
+			Direction.UP, Block.box(min,maxMinusHeight,min,max,max,max),
+			Direction.NORTH, Block.box(min,min,min,max,max,minPlusHeight),
+			Direction.SOUTH, Block.box(min,min,maxMinusHeight,max,max,max),
+			Direction.WEST, Block.box(min,min,min,minPlusHeight,max,max),
+			Direction.EAST, Block.box(maxMinusHeight,min,min,max,max,max)
+		);
 	}
 
 	public static VoxelShape[] makeLineShapes(int radius, int height)

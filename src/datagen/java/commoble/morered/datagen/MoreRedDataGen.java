@@ -1,5 +1,6 @@
 package commoble.morered.datagen;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -19,9 +20,12 @@ import commoble.morered.datagen.BlockStateFile.WhenApply;
 import net.commoble.exmachina.api.ExMachinaRegistries;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.exmachina.api.Parity;
+import net.commoble.exmachina.api.content.MultipartMechanicalComponent;
+import net.commoble.exmachina.api.content.MultipartMechanicalComponent.ApplyWhen;
 import net.commoble.exmachina.api.content.RawNode;
 import net.commoble.exmachina.api.content.RawNode.RawConnection;
 import net.commoble.exmachina.api.content.VariantsMechanicalComponent;
+import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.HexidecrubrometerBlock;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
@@ -30,6 +34,8 @@ import net.commoble.morered.client.ColorHandlers;
 import net.commoble.morered.client.UnbakedLogicGateModel;
 import net.commoble.morered.client.UnbakedWindcatcherModel;
 import net.commoble.morered.mechanisms.AxleBlock;
+import net.commoble.morered.mechanisms.GearBlock;
+import net.commoble.morered.mechanisms.GearsLootEntry;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
@@ -129,8 +135,8 @@ public class MoreRedDataGen
 		};
 		DataGenContext context = new DataGenContext(new HashMap<>(), blockStates, clientItems, models, wirePartModels, recipes, lootTables, dataMaps, blockTags, itemTags, lang);
 		
-//		Function<String, Block> getBlock = s -> BuiltInRegistries.BLOCK.getValue(MoreRed.getModRL(s));
-//		Function<String, Item> getItem = s -> BuiltInRegistries.ITEM.getValue(MoreRed.getModRL(s));
+		ResourceLocation blockBlock = ResourceLocation.withDefaultNamespace("block/block");
+		
 		String fromSoldering = "%s_from_soldering";
 		
 		// blocks
@@ -449,6 +455,7 @@ public class MoreRedDataGen
 		blockTags.tag(BlockTags.MINEABLE_WITH_PICKAXE).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
 		blockTags.tag(BlockTags.MINEABLE_WITH_AXE).addTags(
 			MoreRed.Tags.Blocks.AXLES,
+			MoreRed.Tags.Blocks.GEARS,
 			MoreRed.Tags.Blocks.WINDCATCHERS);
 		itemTags.tag(MoreRed.Tags.Items.TUBES).addTag(MoreRed.Tags.Items.COLORED_TUBES);
 		
@@ -552,7 +559,6 @@ public class MoreRedDataGen
 				itemTags.tag(MoreRed.Tags.Items.SUPPORTED_STRIPPED_LOGS).add(ResourceKey.create(Registries.ITEM, strippedLogId));
 			}
 			
-			String axleName = woodName + "_" + Names.AXLE;
 			VariantsMechanicalComponent axleMechanicalComponent = VariantsMechanicalComponent.builder(true);
 			for (Direction.Axis axis : Direction.Axis.values())
 			{
@@ -560,12 +566,13 @@ public class MoreRedDataGen
 					new RawConnection(Optional.of(axis.getPositive()), NodeShape.ofSide(axis.getNegative()), Parity.POSITIVE, 0),
 					new RawConnection(Optional.of(axis.getNegative()), NodeShape.ofSide(axis.getPositive()), Parity.POSITIVE, 0))));
 			}
+			
 			BlockDataHelper.create(MoreRed.get().axleBlocks.get(woodName).get(), context,
 				(id,block) -> BlockStateFile.variants(Variants.always(Model.create(blockModel(id)))),
 				(id,block) -> simpleLoot(block))
-				.baseModel(SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("block/block"))
+				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
 					.addTexture("particle", strippedLogBlockModel))
-				.localize(WordUtils.capitalize(axleName.replace("_", " ")))
+				.localize()
 				.mechanicalComponent(axleMechanicalComponent)
 				.tags(MoreRed.Tags.Blocks.AXLES)
 				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/axle_template"))
@@ -582,6 +589,54 @@ public class MoreRedDataGen
 							Map.of('#', Ingredient.of(strippedLog))));	
 					}
 				});
+
+			VariantsMechanicalComponent gearMechanicalComponent = VariantsMechanicalComponent.builder(true);
+			for (Direction directionToNeighbor : Direction.values())
+			{
+				List<RawConnection> connections = new ArrayList<>();
+				// connect to attached neighbor
+				connections.add(new RawConnection(
+					Optional.of(directionToNeighbor),
+					NodeShape.ofSide(directionToNeighbor.getOpposite()),
+					Parity.POSITIVE,
+					0));
+				// connect to four parallel neighbors
+				for (Direction parallelDirection : Direction.values())
+				{
+					if (parallelDirection.getAxis() == directionToNeighbor.getAxis())
+						continue;
+					connections.add(new RawConnection(
+						Optional.of(parallelDirection),
+						NodeShape.ofSideSide(directionToNeighbor, parallelDirection.getOpposite()),
+						Parity.NEGATIVE,
+						16));
+				}
+				gearMechanicalComponent.addVariant(GearBlock.FACING, directionToNeighbor, new RawNode(NodeShape.ofSide(directionToNeighbor), 0D,0D,0D, 2D, connections));
+			}
+			
+			BlockDataHelper.create(MoreRed.get().gearBlocks.get(woodName).get(), context,
+				(id,block) -> BlockStateFile.variants(Variants.always(Model.create(blockModel(id)))),
+				(id,block) -> simpleLoot(block))
+				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
+					.addTexture("particle", strippedLogTopTexture))
+				.localize()
+				.mechanicalComponent(gearMechanicalComponent)
+				.tags(MoreRed.Tags.Blocks.GEARS)
+				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/gear_template"))
+					.addTexture("side", strippedLogBlockModel)
+					.addTexture("top", strippedLogTopTexture))
+				.tags(MoreRed.Tags.Items.GEARS)
+				.help(helper -> {
+					if (isWoodSupported)
+					{
+						helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
+							"///",
+							"/O/",
+							"///"),
+							Map.of('/', ingredient(Tags.Items.RODS_WOODEN),
+								'O', Ingredient.of(strippedLog))));
+					}
+				});
 			
 			// make some dummy models for the windcatcher
 			ResourceLocation windcatcherAxleDummyModel = blockModel(MoreRed.id(woodName + "_windcatcher_axle"));
@@ -593,13 +648,12 @@ public class MoreRedDataGen
 				.addTexture("side", strippedLogBlockModel)
 				.addTexture("end", strippedLogTopTexture));
 			
-			String windCatcherName = woodName + "_" + Names.WINDCATCHER;
 			VariantsMechanicalComponent windcatcherMechanicalComponent = VariantsMechanicalComponent.builder(true);
 			for (int i=0; i<=8; i++)
 			{
 				windcatcherMechanicalComponent.addVariant(WindcatcherBlock.WIND, i, new RawNode(NodeShape.ofCube(), 3*i*i, 0, 0, 25D, List.of(
-						new RawConnection(Optional.of(Direction.UP), NodeShape.ofSide(Direction.DOWN), Parity.POSITIVE, 0),
-						new RawConnection(Optional.of(Direction.DOWN), NodeShape.ofSide(Direction.UP), Parity.POSITIVE, 0))));
+					new RawConnection(Optional.of(Direction.UP), NodeShape.ofSide(Direction.DOWN), Parity.POSITIVE, 0),
+					new RawConnection(Optional.of(Direction.DOWN), NodeShape.ofSide(Direction.UP), Parity.POSITIVE, 0))));
 			}
 			BlockDataHelper.create(MoreRed.get().windcatcherBlocks.get(woodName).get(), context,
 				(id,block) -> BlockStateFile.variants(Variants.always(Model.create(blockModel(id)))),
@@ -610,9 +664,9 @@ public class MoreRedDataGen
 								.include(MoreRed.get().windcatcherColorsDataComponent.get())))
 						.when(ExplosionCondition.survivesExplosion()))
 					.build())
-				.localize(WordUtils.capitalize(windCatcherName.replace("_"," ")))
+				.localize()
 				.tags(MoreRed.Tags.Blocks.WINDCATCHERS)
-				.baseModel(SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("block/block")).addTexture("particle", mangle(BuiltInRegistries.BLOCK.getKey(strippedLog), "block/%s")))
+				.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", mangle(BuiltInRegistries.BLOCK.getKey(strippedLog), "block/%s")))
 				.mechanicalComponent(windcatcherMechanicalComponent)
 				.blockItemWithoutItemModel(modelId -> new ClientItem(
 					new UnbakedWindcatcherModel(
@@ -632,6 +686,55 @@ public class MoreRedDataGen
 					'o', Ingredient.of(MoreRed.get().axleBlocks.get(woodName).get())))));			
 		}
 		
+		MultipartMechanicalComponent gearsMechanicalComponent = MultipartMechanicalComponent.builder(true);
+		for (Direction directionToNeighbor : Direction.values())
+		{
+			List<RawConnection> connections = new ArrayList<>();
+			
+			// connect to the neighbor block this face is touching
+			connections.add(new RawConnection(
+				Optional.of(directionToNeighbor),
+				NodeShape.ofSide(directionToNeighbor.getOpposite()),
+				Parity.POSITIVE,
+				0));
+			
+			// connect to the four internal nodes sharing an edge with this one
+			for (Direction internalSide : Direction.values())
+			{
+				if (internalSide.getAxis() == directionToNeighbor.getAxis())
+					continue;
+				connections.add(new RawConnection(
+					Optional.empty(),
+					NodeShape.ofSide(internalSide),
+					directionToNeighbor.getAxisDirection() == internalSide.getAxisDirection() ? Parity.NEGATIVE : Parity.POSITIVE,
+					16));
+				// also connect to the four parallel neighbors
+				Direction parallelDirection = internalSide;
+				connections.add(new RawConnection(
+					Optional.of(parallelDirection),
+					NodeShape.ofSideSide(directionToNeighbor, parallelDirection.getOpposite()),
+					Parity.NEGATIVE,
+					16));
+			}
+			
+			gearsMechanicalComponent.addApplyWhen(
+				ApplyWhen.when(
+					MultipartMechanicalComponent.Case.create(FaceSegmentBlock.getProperty(directionToNeighbor),true),
+					new RawNode(NodeShape.ofSide(directionToNeighbor), 0,0,0,2D, connections)));
+		}
+		BlockDataHelper.create(MoreRed.get().gearsBlock.get(), context,
+			(id,block) -> BlockStateFile.variants(Variants.always(Model.create(blockModel(id)))),
+			(id,block) -> LootTable.lootTable()
+				.withPool(LootPool.lootPool()
+					.add(GearsLootEntry.gearsLoot())
+					.when(ExplosionCondition.survivesExplosion()))
+				.build())
+			.localize()
+			.tags(BlockTags.MINEABLE_WITH_AXE)
+			.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", ResourceLocation.withDefaultNamespace("block/stripped_oak_log_top")))
+			.mechanicalComponent(gearsMechanicalComponent);
+			
+		
 		// special recipes
 		recipes.put(MoreRed.get().windcatcherDyeRecipeSerializer.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.WINDCATCHERS)));
 		
@@ -645,10 +748,17 @@ public class MoreRedDataGen
 			"#",
 			"#"),
 			Map.of('#', unsupportedStrippedLogsIngredient)));
+		recipes.put(MoreRed.id("oak_" + Names.GEAR), RecipeHelpers.shaped(MoreRed.get().gearBlocks.get("oak").get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
+			"///",
+			"/O/",
+			"///"),
+			Map.of('/', ingredient(Tags.Items.RODS_WOODEN),
+				'O', unsupportedStrippedLogsIngredient)));
 		
 		// add fuels
 		dataMaps.builder(NeoForgeDataMaps.FURNACE_FUELS)
 			.add(MoreRed.Tags.Items.AXLES, new FurnaceFuel(100), false)
+			.add(MoreRed.Tags.Items.GEARS, new FurnaceFuel(300), false)
 			.add(MoreRed.Tags.Items.WINDCATCHERS, new FurnaceFuel(300), false);
 		
 		// finalize datapack registries (we have to do these all in one go)

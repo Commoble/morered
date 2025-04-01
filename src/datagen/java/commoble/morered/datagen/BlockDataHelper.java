@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.apache.commons.lang3.text.WordUtils;
+
 import net.commoble.exmachina.api.MechanicalComponent;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
@@ -13,6 +15,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
 
+@SuppressWarnings("deprecation")
 public record BlockDataHelper(Block block, DataGenContext context)
 {
 	public static BlockDataHelper create(Block block, DataGenContext context,
@@ -53,6 +56,11 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockStateFile> blockstate, Function<Block, LootTable> lootTable)
 	{
 		return create(block, context, blockstate.apply(block), lootTable.apply(block));
+	}
+	
+	public BlockDataHelper localize()
+	{
+		return localize(WordUtils.capitalize(this.id().getPath().replace("_", " ")));
 	}
 	
 	public BlockDataHelper localize(String localizedName)

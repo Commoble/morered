@@ -11,9 +11,11 @@ import java.util.function.Consumer;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.IsWasSprintPacket;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
+import net.commoble.morered.mechanisms.GearsBlock;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
@@ -37,10 +39,13 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.resources.language.I18n;
+import net.minecraft.client.resources.sounds.SimpleSoundInstance;
+import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -50,6 +55,7 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
@@ -238,7 +244,9 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.get().redstoneTubeEntity.get(), TubeBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().filterEntity.get(), FilterBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().osmosisFilterEntity.get(), OsmosisFilterBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().axleBlockEntity.get(), AxleBlockEntityRenderer::create);;
+		event.registerBlockEntityRenderer(MoreRed.get().axleBlockEntity.get(), AxleBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.get().gearBlockEntity.get(), GearBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.get().gearsBlockEntity.get(), GearsBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().windcatcherBlockEntity.get(), WindcatcherBlockEntityRenderer::create);
 	}
 
@@ -329,21 +337,21 @@ public class ClientProxy
 			BlockPos pos = blockResult.getBlockPos();
 			BlockState state = world.getBlockState(pos);
 			Block block = state.getBlock();
+			MultiPlayerGameMode controller = mc.gameMode;
+			MultiPlayerGameModeAccess controllerAccess = (MultiPlayerGameModeAccess)controller;
 			if (block instanceof AbstractWireBlock)
 			{
 				// we'll be taking over the event from here onward
 				event.setCanceled(true);
 				
 				AbstractWireBlock wireBlock = (AbstractWireBlock)block;
-				MultiPlayerGameMode controller = mc.gameMode;
-				MultiPlayerGameModeAccess controllerAccess = (MultiPlayerGameModeAccess)controller;
 				GameType gameType = controller.getPlayerMode();
 				// now run over all the permissions checking that would normally happen here
 				if (player.blockActionRestricted(world, pos, gameType))
 					return;
 				if (!world.getWorldBorder().isWithinBounds(pos))
 					return;
-				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false));
+				@Nullable Direction faceToBreak = wireBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false), wireBlock.getRaytraceBackboards());
 				if (faceToBreak == null)
 					return;
 				Direction hitNormal = faceToBreak.getOpposite();
@@ -353,7 +361,7 @@ public class ClientProxy
 					// TODO do stuff from onPlayerDestroyBlock here
 					if (!CommonHooks.onLeftClickBlock(player, pos, hitNormal, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK).isCanceled())
 					{
-						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
+						destroyClickedSegment(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
 					}
 					controllerAccess.setDestroyDelay(5);
 				}
@@ -368,8 +376,65 @@ public class ClientProxy
 					Minecraft.getInstance().getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, hitNormal));
 					if (!leftClickBlockEvent.isCanceled() && leftClickBlockEvent.getUseItem() != TriState.FALSE)
 					{
-						destroyClickedWireBlock(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
+						destroyClickedSegment(wireBlock, state, world, pos, player, controllerAccess, faceToBreak);
 					}
+				}
+			}
+			else if (block instanceof GearsBlock faceSegmentBlock)
+			{
+				// known bug: destroy progress isn't reset when aborting destroy. Haven't been able to find what I'm missing.
+				// Leaving alone for now
+				GameType gameType = controller.getPlayerMode();
+				if (gameType.isCreative())
+				{
+					event.setCanceled(true);
+					// now run over all the permissions checking that would normally happen here
+					if (player.blockActionRestricted(world, pos, gameType))
+						return;
+					if (!world.getWorldBorder().isWithinBounds(pos))
+						return;
+					@Nullable Direction faceToBreak = faceSegmentBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false), faceSegmentBlock.getRaytraceBackboards());
+					if (faceToBreak == null)
+						return;
+					Direction hitNormal = faceToBreak.getOpposite();
+					Minecraft.getInstance().getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK, pos, hitNormal));
+					// TODO do stuff from onPlayerDestroyBlock here
+					if (!CommonHooks.onLeftClickBlock(player, pos, hitNormal, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK).isCanceled())
+					{
+						destroyClickedSegment(faceSegmentBlock, state, world, pos, player, controllerAccess, faceToBreak);
+					}
+					controllerAccess.setDestroyDelay(5);
+				}
+				else if (controllerAccess.callSameDestroyTarget(pos))
+				{
+					event.setCanceled(true);
+					@Nullable Direction faceToBreak = faceSegmentBlock.getInteriorFaceToBreak(state, pos, player, blockResult, mc.getDeltaTracker().getGameTimeDeltaPartialTick(false), faceSegmentBlock.getRaytraceBackboards());
+					if (faceToBreak == null)
+						return;
+					Direction hitNormal = faceToBreak.getOpposite();
+					float newDestroyProgress = controllerAccess.getDestroyProgress() + state.getDestroyProgress(player, world, pos);
+					controllerAccess.setDestroyProgress(newDestroyProgress);
+					if (controllerAccess.getDestroyTicks() % 4.0F == 0.0F)
+					{
+						SoundType soundtype = state.getSoundType(world, pos, player);
+						mc.getSoundManager().play(new SimpleSoundInstance(soundtype.getHitSound(), SoundSource.BLOCKS, (soundtype.getVolume() + 1.0F) / 8.0F,
+							soundtype.getPitch() * 0.5F, SoundInstance.createUnseededRandom(), pos));
+					}
+
+					controllerAccess.setDestroyTicks(controllerAccess.getDestroyTicks() + 1F);
+					if (net.neoforged.neoforge.common.CommonHooks.onClientMineHold(player, pos, hitNormal).getUseItem().isFalse())
+						return;
+					if (newDestroyProgress >= 1.0F)
+					{
+						PlayerInteractEvent.LeftClickBlock leftClickBlockEvent = CommonHooks.onLeftClickBlock(player,pos,hitNormal, ServerboundPlayerActionPacket.Action.START_DESTROY_BLOCK);
+						Minecraft.getInstance().getConnection().send(new ServerboundPlayerActionPacket(ServerboundPlayerActionPacket.Action.STOP_DESTROY_BLOCK, pos, hitNormal));
+						if (!leftClickBlockEvent.isCanceled() && leftClickBlockEvent.getUseItem() != TriState.FALSE)
+						{
+							destroyClickedSegment(faceSegmentBlock, state, world, pos, player, controllerAccess, faceToBreak);
+						}
+						controllerAccess.setDestroyDelay(5);
+					}
+	                world.destroyBlockProgress(player.getId(), controllerAccess.getDestroyBlockPos(), controller.getDestroyStage());
 				}
 			}
 		}
@@ -378,7 +443,7 @@ public class ClientProxy
 	// more parity with existing destroy-clicked-block code
 	// these checks are run after the digging packet is sent
 	// the existing code checks some things that are already checked above, so we'll skip those
-	static void destroyClickedWireBlock(AbstractWireBlock block, BlockState state, ClientLevel world, BlockPos pos, LocalPlayer player, MultiPlayerGameModeAccess controllerAccess, Direction interiorSide)
+	static void destroyClickedSegment(FaceSegmentBlock block, BlockState state, ClientLevel world, BlockPos pos, LocalPlayer player, MultiPlayerGameModeAccess controllerAccess, Direction interiorSide)
 	{
 		ItemStack heldItemStack = player.getMainHandItem();
 		if (!heldItemStack.getItem().canAttackBlock(state, world, pos, player))

@@ -1,0 +1,420 @@
+{
+  "type": "exmachina:multipart",
+  "multipart": [
+    {
+      "apply": {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "north",
+            "neighbor_shape": {
+              "face": "down",
+              "side": "south"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "south",
+            "teeth": 16
+          },
+          {
+            "direction": "south",
+            "neighbor_shape": {
+              "face": "down",
+              "side": "north"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "west",
+            "neighbor_shape": {
+              "face": "down",
+              "side": "east"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "east",
+            "teeth": 16
+          },
+          {
+            "direction": "east",
+            "neighbor_shape": {
+              "face": "down",
+              "side": "west"
+            },
+            "parity": "negative",
+            "teeth": 16
+          }
+        ],
+        "inertia": 2.0,
+        "shape": "down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "north",
+            "teeth": 16
+          },
+          {
+            "direction": "north",
+            "neighbor_shape": {
+              "face": "up",
+              "side": "south"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "south",
+            "neighbor_shape": {
+              "face": "up",
+              "side": "north"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "west",
+            "teeth": 16
+          },
+          {
+            "direction": "west",
+            "neighbor_shape": {
+              "face": "up",
+              "side": "east"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "east",
+            "neighbor_shape": {
+              "face": "up",
+              "side": "west"
+            },
+            "parity": "negative",
+            "teeth": 16
+          }
+        ],
+        "inertia": 2.0,
+        "shape": "up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "down",
+            "neighbor_shape": {
+              "face": "north",
+              "side": "up"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "up",
+            "teeth": 16
+          },
+          {
+            "direction": "up",
+            "neighbor_shape": {
+              "face": "north",
+              "side": "down"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "west",
+            "neighbor_shape": {
+              "face": "north",
+              "side": "east"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "east",
+            "teeth": 16
+          },
+          {
+            "direction": "east",
+            "neighbor_shape": {
+              "face": "north",
+              "side": "west"
+            },
+            "parity": "negative",
+            "teeth": 16
+          }
+        ],
+        "inertia": 2.0,
+        "shape": "north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "down",
+            "teeth": 16
+          },
+          {
+            "direction": "down",
+            "neighbor_shape": {
+              "face": "south",
+              "side": "up"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "up",
+            "neighbor_shape": {
+              "face": "south",
+              "side": "down"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "west",
+            "teeth": 16
+          },
+          {
+            "direction": "west",
+            "neighbor_shape": {
+              "face": "south",
+              "side": "east"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "east",
+            "neighbor_shape": {
+              "face": "south",
+              "side": "west"
+            },
+            "parity": "negative",
+            "teeth": 16
+          }
+        ],
+        "inertia": 2.0,
+        "shape": "south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "down",
+            "neighbor_shape": {
+              "face": "west",
+              "side": "up"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "up",
+            "teeth": 16
+          },
+          {
+            "direction": "up",
+            "neighbor_shape": {
+              "face": "west",
+              "side": "down"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "north",
+            "neighbor_shape": {
+              "face": "west",
+              "side": "south"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "south",
+            "teeth": 16
+          },
+          {
+            "direction": "south",
+            "neighbor_shape": {
+              "face": "west",
+              "side": "north"
+            },
+            "parity": "negative",
+            "teeth": 16
+          }
+        ],
+        "inertia": 2.0,
+        "shape": "west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "down",
+            "teeth": 16
+          },
+          {
+            "direction": "down",
+            "neighbor_shape": {
+              "face": "east",
+              "side": "up"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "up",
+            "neighbor_shape": {
+              "face": "east",
+              "side": "down"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "north",
+            "teeth": 16
+          },
+          {
+            "direction": "north",
+            "neighbor_shape": {
+              "face": "east",
+              "side": "south"
+            },
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative",
+            "teeth": 16
+          },
+          {
+            "direction": "south",
+            "neighbor_shape": {
+              "face": "east",
+              "side": "north"
+            },
+            "parity": "negative",
+            "teeth": 16
+          }
+        ],
+        "inertia": 2.0,
+        "shape": "east"
+      },
+      "when": {
+        "east": "true"
+      }
+    }
+  ],
+  "save": true
+}

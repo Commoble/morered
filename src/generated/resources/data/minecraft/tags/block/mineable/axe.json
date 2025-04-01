@@ -1,6 +1,8 @@
 {
   "values": [
     "#morered:axles",
-    "#morered:windcatchers"
+    "#morered:gears",
+    "#morered:windcatchers",
+    "morered:gears"
   ]
 }
