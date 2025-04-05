@@ -36,6 +36,7 @@ import net.commoble.morered.mechanisms.GearBlock;
 import net.commoble.morered.mechanisms.GearBlockItem;
 import net.commoble.morered.mechanisms.GearsBlock;
 import net.commoble.morered.mechanisms.GearsLootEntry;
+import net.commoble.morered.mechanisms.GearshifterBlock;
 import net.commoble.morered.mechanisms.WindCatcherBlockItem;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherColors;
@@ -85,6 +86,7 @@ import net.commoble.morered.transportation.TubeBreakPacket;
 import net.commoble.morered.transportation.TubesInChunk;
 import net.commoble.morered.util.BlockSide;
 import net.commoble.morered.util.ConfigHelper;
+import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.FakeStateLevel;
 import net.commoble.morered.wire_post.CableJunctionBlock;
 import net.commoble.morered.wire_post.CablePostBlockEntity;
@@ -233,6 +235,7 @@ public class MoreRed
 	
 	public final Map<String, DeferredHolder<Block, AxleBlock>> axleBlocks = new HashMap<>();
 	public final Map<String, DeferredHolder<Block, GearBlock>> gearBlocks = new HashMap<>();
+	public final Map<String, DeferredHolder<Block, GearshifterBlock>> gearshifterBlocks = new HashMap<>();
 	public final Map<String, DeferredHolder<Block, WindcatcherBlock>> windcatcherBlocks = new HashMap<>();
 	public final DeferredHolder<Block, AirFoilBlock> airFoilBlock;
 	public final DeferredHolder<Block, GearsBlock> gearsBlock;
@@ -260,6 +263,7 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> axleBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> windcatcherBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearshifterBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearsBlockEntity;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
@@ -492,6 +496,15 @@ public class MoreRed
 				Item.Properties::new,
 				GearBlockItem::new));
 			
+			this.gearshifterBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.GEARSHIFTER,
+				() -> finagleProps.apply(Block.Properties.of()
+					.mapColor(woodSet.mapColor())
+					.strength(2F)
+					.sound(woodSet.soundType())
+					.noOcclusion()
+					.forceSolidOff()),
+				GearshifterBlock::new));
+			
 			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
 				() -> Block.Properties.of()
 					.mapColor(woodSet.mapColor())
@@ -598,18 +611,24 @@ public class MoreRed
 		this.axleBlockEntity = GenericBlockEntity.builder()
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
 			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values());
-		this.windcatcherBlockEntity = GenericBlockEntity.builder()
-			.itemData(windcatcherColorsDataComponent)
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
 		this.gearBlockEntity = GenericBlockEntity.builder()
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEAR, this.gearBlocks.values());
 		this.gearsBlockEntity = GenericBlockEntity.builder()
 			.syncedData(this.gearsDataComponent)
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
 			.dataTransformer(this.gearsDataComponent, GearsBlock::normalizeGears, GearsBlock::denormalizeGears)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEARS, this.gearsBlock);
+		this.gearshifterBlockEntity = GenericBlockEntity.builder()
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
+			.register(blockEntityTypes, Names.GEARSHIFTER, this.gearshifterBlocks.values());
+		this.windcatcherBlockEntity = GenericBlockEntity.builder()
+			.itemData(windcatcherColorsDataComponent)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
 
 		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,
 			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
@@ -677,6 +696,7 @@ public class MoreRed
 			
 			public static final TagKey<Block> AXLES = tag(Names.AXLES);
 			public static final TagKey<Block> GEARS = tag(Names.GEARS);
+			public static final TagKey<Block> GEARSHIFTERS = tag(Names.GEARSHIFTERS);
 			public static final TagKey<Block> WINDCATCHERS = tag(Names.WINDCATCHERS);
 			public static final TagKey<Block> AIRFOILS = tag(Names.AIRFOILS);
 		}
@@ -694,6 +714,7 @@ public class MoreRed
 			public static final TagKey<Item> TUBES = tag(Names.TUBES);
 			public static final TagKey<Item> AXLES = tag(Names.AXLES);
 			public static final TagKey<Item> GEARS = tag(Names.GEARS);
+			public static final TagKey<Item> GEARSHIFTERS = tag(Names.GEARSHIFTERS);
 			public static final TagKey<Item> WINDCATCHERS = tag(Names.WINDCATCHERS);
 			public static final TagKey<Item> SUPPORTED_STRIPPED_LOGS = tag(Names.SUPPORTED_STRIPPED_LOGS);
 		}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "-": "morered:acacia_axle",
+    "G": "morered:acacia_gear"
+  },
+  "pattern": [
+    "-G",
+    "G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:acacia_gearshifter"
+  }
+}

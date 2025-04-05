@@ -1,7 +1,7 @@
 {
   "parent": "morered:block/windcatcher_axle_template",
   "textures": {
-    "end": "minecraft:block/stripped_birch_log_top",
-    "side": "minecraft:block/stripped_birch_log"
+    "side": "minecraft:block/stripped_birch_log",
+    "top": "minecraft:block/stripped_birch_log_top"
   }
 }

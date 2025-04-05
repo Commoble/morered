@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "-": "morered:warped_axle",
+    "G": "morered:warped_gear"
+  },
+  "pattern": [
+    "-G",
+    "G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:warped_gearshifter"
+  }
+}

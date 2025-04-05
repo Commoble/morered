@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "-": "morered:jungle_axle",
+    "G": "morered:jungle_gear"
+  },
+  "pattern": [
+    "-G",
+    "G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:jungle_gearshifter"
+  }
+}

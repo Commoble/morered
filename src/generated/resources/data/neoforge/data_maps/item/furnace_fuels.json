@@ -6,6 +6,9 @@
     "#morered:gears": {
       "burn_time": 300
     },
+    "#morered:gearshifters": {
+      "burn_time": 300
+    },
     "#morered:windcatchers": {
       "burn_time": 300
     }

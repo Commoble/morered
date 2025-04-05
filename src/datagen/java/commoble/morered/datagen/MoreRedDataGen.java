@@ -36,6 +36,7 @@ import net.commoble.morered.client.UnbakedWindcatcherModel;
 import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.GearBlock;
 import net.commoble.morered.mechanisms.GearsLootEntry;
+import net.commoble.morered.mechanisms.GearshifterBlock;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
@@ -48,6 +49,7 @@ import net.commoble.morered.transportation.ColoredTubeBlock;
 import net.commoble.morered.transportation.ExtractorBlock;
 import net.commoble.morered.transportation.RedstoneTubeBlock;
 import net.commoble.morered.transportation.TubeBlock;
+import net.commoble.morered.util.ExtraMachina;
 import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
@@ -55,6 +57,7 @@ import net.minecraft.Util;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
+import net.minecraft.client.renderer.item.CompositeModel;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -79,6 +82,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -456,6 +460,7 @@ public class MoreRedDataGen
 		blockTags.tag(BlockTags.MINEABLE_WITH_AXE).addTags(
 			MoreRed.Tags.Blocks.AXLES,
 			MoreRed.Tags.Blocks.GEARS,
+			MoreRed.Tags.Blocks.GEARSHIFTERS,
 			MoreRed.Tags.Blocks.WINDCATCHERS);
 		itemTags.tag(MoreRed.Tags.Items.TUBES).addTag(MoreRed.Tags.Items.COLORED_TUBES);
 		
@@ -577,7 +582,7 @@ public class MoreRedDataGen
 				.tags(MoreRed.Tags.Blocks.AXLES)
 				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/axle_template"))
 					.addTexture("side", strippedLogBlockModel)
-					.addTexture("end", strippedLogTopTexture))
+					.addTexture("top", strippedLogTopTexture))
 				.tags(MoreRed.Tags.Items.AXLES)
 				.help(helper -> {
 					if (isWoodSupported)
@@ -638,15 +643,77 @@ public class MoreRedDataGen
 					}
 				});
 			
+			VariantsMechanicalComponent gearshifterMechanicalComponent = VariantsMechanicalComponent.builder(true);
+			BlockState defaultGearshifterState = MoreRed.get().gearshifterBlocks.get(woodName).get().defaultBlockState();
+			for (Direction bigDir : Direction.values())
+			{
+				for (int i=0; i<4; i++)
+				{
+					final int rotation = i;
+					BlockState state = defaultGearshifterState
+						.setValue(GearshifterBlock.ATTACHMENT_DIRECTION, bigDir)
+						.setValue(GearshifterBlock.ROTATION, rotation);
+					Direction smallDir = PlateBlockStateProperties.getOutputDirection(state);
+					Direction axleDir = smallDir.getOpposite();
+					gearshifterMechanicalComponent.addMultiPropertyVariant(builder -> builder
+						.add(GearshifterBlock.ATTACHMENT_DIRECTION, bigDir)
+						.add(GearshifterBlock.ROTATION, rotation),
+						new RawNode(NodeShape.ofSide(bigDir), 0D,0D,0D, 2D, List.of(
+							new RawConnection(Optional.of(bigDir), NodeShape.ofSide(bigDir.getOpposite()), Parity.POSITIVE, 0),
+							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), ExtraMachina.swapParity(bigDir, smallDir), 16))),
+						new RawNode(NodeShape.ofSide(smallDir), 0D,0D,0D, 0.5D, List.of(
+							new RawConnection(Optional.of(smallDir), NodeShape.ofSide(smallDir.getOpposite()), Parity.POSITIVE,0),
+							new RawConnection(Optional.empty(), NodeShape.ofSide(bigDir), ExtraMachina.swapParity(bigDir, smallDir), 8),
+							new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.POSITIVE, 0))),
+						new RawNode(NodeShape.ofSide(axleDir), 0D,0D,0D, 0.02D, List.of(
+							new RawConnection(Optional.of(axleDir), NodeShape.ofSide(axleDir.getOpposite()), Parity.POSITIVE,0),
+							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.POSITIVE, 0))));
+				}
+			}
+			BlockDataHelper.create(MoreRed.get().gearshifterBlocks.get(woodName).get(), context,
+				(id,block) -> BlockStateFile.variants(Variants.always(Model.create(blockModel(id)))),
+				(id,block) -> simpleLoot(block))
+				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
+					.addTexture("particle", strippedLogTopTexture))
+				.localize()
+				.mechanicalComponent(gearshifterMechanicalComponent)
+				.tags(MoreRed.Tags.Blocks.GEARSHIFTERS)
+				.blockItemWithoutItemModel(itemModelId -> new ClientItem(
+					new CompositeModel.Unbaked(List.of(
+						new BlockModelWrapper.Unbaked(mangle(itemModelId, "%s_gear"), List.of()),
+						new BlockModelWrapper.Unbaked(mangle(itemModelId, "%s_axle"), List.of()))),
+					ClientItem.Properties.DEFAULT))
+				.tags(MoreRed.Tags.Items.GEARSHIFTERS)
+				.help(helper -> {
+					ResourceLocation gearId = mangle(helper.id(), "%s_gear");
+					ResourceLocation axleId = mangle(helper.id(), "%s_axle");
+					ResourceLocation gearItemModelId = mangle(itemModel(helper.id()), "%s_gear");
+					ResourceLocation axleItemModelId = mangle(itemModel(helper.id()), "%s_axle");
+					models.put(gearItemModelId, SimpleModel.createWithoutRenderType(MoreRed.id("item/gearshifter_gear_template"))
+						.addTexture("side", strippedLogBlockModel)
+						.addTexture("top", strippedLogTopTexture));
+					models.put(axleItemModelId, SimpleModel.createWithoutRenderType(MoreRed.id("item/gearshifter_axle_template"))
+						.addTexture("side", strippedLogBlockModel)
+						.addTexture("top", strippedLogTopTexture));
+					clientItems.put(gearId, new ClientItem(new BlockModelWrapper.Unbaked(gearItemModelId, List.of()), ClientItem.Properties.DEFAULT));
+					clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleItemModelId, List.of()), ClientItem.Properties.DEFAULT));
+
+					helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
+						"-G",
+						"G "), Map.of(
+						'-', Ingredient.of(MoreRed.get().axleBlocks.get(woodName).get()),
+						'G', Ingredient.of(MoreRed.get().gearBlocks.get(woodName).get()))));
+				});
+			
 			// make some dummy models for the windcatcher
 			ResourceLocation windcatcherAxleDummyModel = blockModel(MoreRed.id(woodName + "_windcatcher_axle"));
 			ResourceLocation airfoilDummyModel = blockModel(MoreRed.id(woodName + "_" + Names.AIRFOIL));
 			models.put(windcatcherAxleDummyModel, SimpleModel.createWithoutRenderType(MoreRed.id("block/windcatcher_axle_template"))
 				.addTexture("side", strippedLogBlockModel)
-				.addTexture("end", strippedLogTopTexture));
+				.addTexture("top", strippedLogTopTexture));
 			models.put(airfoilDummyModel, SimpleModel.createWithoutRenderType(MoreRed.id("block/airfoil_template"))
 				.addTexture("side", strippedLogBlockModel)
-				.addTexture("end", strippedLogTopTexture));
+				.addTexture("top", strippedLogTopTexture));
 			
 			VariantsMechanicalComponent windcatcherMechanicalComponent = VariantsMechanicalComponent.builder(true);
 			for (int i=0; i<=8; i++)
@@ -706,7 +773,7 @@ public class MoreRedDataGen
 				connections.add(new RawConnection(
 					Optional.empty(),
 					NodeShape.ofSide(internalSide),
-					directionToNeighbor.getAxisDirection() == internalSide.getAxisDirection() ? Parity.NEGATIVE : Parity.POSITIVE,
+					ExtraMachina.swapParity(directionToNeighbor, internalSide),
 					16));
 				// also connect to the four parallel neighbors
 				Direction parallelDirection = internalSide;
@@ -759,6 +826,7 @@ public class MoreRedDataGen
 		dataMaps.builder(NeoForgeDataMaps.FURNACE_FUELS)
 			.add(MoreRed.Tags.Items.AXLES, new FurnaceFuel(100), false)
 			.add(MoreRed.Tags.Items.GEARS, new FurnaceFuel(300), false)
+			.add(MoreRed.Tags.Items.GEARSHIFTERS, new FurnaceFuel(300), false)
 			.add(MoreRed.Tags.Items.WINDCATCHERS, new FurnaceFuel(300), false);
 		
 		// finalize datapack registries (we have to do these all in one go)
@@ -896,6 +964,11 @@ public class MoreRedDataGen
 	static ResourceLocation blockModel(ResourceLocation blockId)
 	{
 		return mangle(blockId, "block/%s");
+	}
+	
+	static ResourceLocation itemModel(ResourceLocation itemId)
+	{
+		return mangle(itemId, "item/%s");
 	}
 	
 	static BlockDataHelper hexidecrubrometerBlock(DataGenContext context)

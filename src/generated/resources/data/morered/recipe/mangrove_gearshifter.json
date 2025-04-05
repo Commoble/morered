@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "-": "morered:mangrove_axle",
+    "G": "morered:mangrove_gear"
+  },
+  "pattern": [
+    "-G",
+    "G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:mangrove_gearshifter"
+  }
+}

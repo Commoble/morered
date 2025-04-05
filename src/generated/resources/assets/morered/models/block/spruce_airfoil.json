@@ -1,7 +1,7 @@
 {
   "parent": "morered:block/airfoil_template",
   "textures": {
-    "end": "minecraft:block/stripped_spruce_log_top",
-    "side": "minecraft:block/stripped_spruce_log"
+    "side": "minecraft:block/stripped_spruce_log",
+    "top": "minecraft:block/stripped_spruce_log_top"
   }
 }

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "-": "morered:oak_axle",
+    "G": "morered:oak_gear"
+  },
+  "pattern": [
+    "-G",
+    "G "
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:oak_gearshifter"
+  }
+}

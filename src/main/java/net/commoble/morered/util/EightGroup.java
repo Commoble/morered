@@ -1,9 +1,15 @@
 package net.commoble.morered.util;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.mojang.math.OctahedralGroup;
 
+import net.commoble.exmachina.api.MechanicalState;
+import net.commoble.exmachina.api.NodeShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -76,5 +82,53 @@ public class EightGroup
 			newPos = newPos.relative(newDirZ, Math.abs(z));
 		}
 		return newPos;
+	}
+	
+	// this is theoretically useful for any blocks using exmachina's generic mechanical component
+	// we should push EightGroup upstream at some point
+	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> denormalizedData)
+	{
+		if (!state.hasProperty(TRANSFORM))
+			return denormalizedData;
+		
+		Map<NodeShape,MechanicalState> results = new HashMap<>();
+		OctahedralGroup normalizer = state.getValue(TRANSFORM).inverse();
+		
+		for (var entry : denormalizedData.entrySet())
+		{
+			NodeShape denormalNode = entry.getKey();
+			NodeShape normalNode = switch(denormalNode)
+			{
+				case NodeShape.Cube cube -> cube;
+				case NodeShape.Side side -> NodeShape.ofSide(normalizer.rotate(side.face()));
+				case NodeShape.SideSide sideSide -> NodeShape.ofSideSide(normalizer.rotate(sideSide.face()), normalizer.rotate(sideSide.side()));
+			};
+			results.put(normalNode, entry.getValue());
+		}
+		
+		return results;
+	}
+	
+	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> normalizedData)
+	{
+		if (!state.hasProperty(TRANSFORM))
+			return normalizedData;
+		
+		Map<NodeShape,MechanicalState> results = new HashMap<>();
+		OctahedralGroup denormalizer = state.getValue(TRANSFORM);
+		
+		for (var entry : normalizedData.entrySet())
+		{
+			NodeShape denormalNode = entry.getKey();
+			NodeShape normalNode = switch(denormalNode)
+			{
+				case NodeShape.Cube cube -> cube;
+				case NodeShape.Side side -> NodeShape.ofSide(denormalizer.rotate(side.face()));
+				case NodeShape.SideSide sideSide -> NodeShape.ofSideSide(denormalizer.rotate(sideSide.face()), denormalizer.rotate(sideSide.side()));
+			};
+			results.put(normalNode, entry.getValue());
+		}
+		
+		return results;
 	}
 }

@@ -1,0 +1,7 @@
+{
+  "parent": "morered:item/gearshifter_axle_template",
+  "textures": {
+    "side": "minecraft:block/stripped_crimson_stem",
+    "top": "minecraft:block/stripped_crimson_stem_top"
+  }
+}

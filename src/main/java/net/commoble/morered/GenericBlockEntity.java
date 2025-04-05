@@ -1,11 +1,14 @@
 package net.commoble.morered;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -54,6 +57,7 @@ public class GenericBlockEntity extends BlockEntity
 	private final Set<DataComponentType<?>> itemDataComponents;
 	private final Set<AttachmentSerializer<?>> syncedAttachments;
 	private final Map<DataComponentType<?>, DataTransformer<?>> dataTransformers;
+	private final List<AttachmentTransformer<?>> attachmentTransformers;
 	
 	private Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 
@@ -62,7 +66,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<DataComponentType<?>> syncedDataComponents,
 		Set<DataComponentType<?>> itemDataComponents,
 		Set<AttachmentSerializer<?>> syncedAttachments,
-		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers)
+		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers,
+		List<AttachmentTransformer<?>> attachmentTransformers)
 	{
 		super(type,pos,state);
 		this.serverDataComponents = serverDataComponents;
@@ -70,6 +75,7 @@ public class GenericBlockEntity extends BlockEntity
 		this.itemDataComponents = itemDataComponents;
 		this.syncedAttachments = syncedAttachments;
 		this.dataTransformers = dataTransformers;
+		this.attachmentTransformers = attachmentTransformers;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -160,9 +166,32 @@ public class GenericBlockEntity extends BlockEntity
 	@Override
 	protected void saveAdditional(CompoundTag tag, Provider provider)
 	{
-		super.saveAdditional(tag, provider);
-		CompoundTag dataTag = new CompoundTag();
 		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
+		if (this.attachmentTransformers.isEmpty())
+		{
+			super.saveAdditional(tag, provider);
+		}
+		else // override the superbehavior so we can transform attachment data
+		{
+			var customPersistentData = this.getPersistentData();
+			if (!customPersistentData.isEmpty())
+			{
+				tag.put("NeoForgeData", customPersistentData.copy());
+			}
+			// attachment internals are super locked down, so we have to serialize everything first
+			// then we can reserialize any transformed attachments
+			var attachmentsTag = serializeAttachments(provider);
+			if (attachmentsTag != null)
+			{
+				for (var transformer : this.attachmentTransformers)
+				{
+					transformer.serialize(this, attachmentsTag, provider, ops);
+				}
+
+				tag.put(ATTACHMENTS_NBT_KEY, attachmentsTag);
+			}
+		}
+		CompoundTag dataTag = new CompoundTag();
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -184,9 +213,19 @@ public class GenericBlockEntity extends BlockEntity
 	@Override
 	protected void loadAdditional(CompoundTag tag, Provider provider)
 	{
+		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
+		CompoundTag attachmentsTag = tag.getCompound(ATTACHMENTS_NBT_KEY);
+		for (var transformer : this.attachmentTransformers)
+		{
+			// attachment internals are locked down super hard and I don't feel like adding more accessor mixins
+			// so, for each transformable attachment we have,
+			// we have to read it, transform it, write it back to the tag
+			// then let super.loadAdditional run over the tag again
+			transformer.denormalize(getBlockState(), attachmentsTag, provider, ops);
+		}
+		tag.put(ATTACHMENTS_NBT_KEY, attachmentsTag);
 		super.loadAdditional(tag, provider);
 		CompoundTag dataTag = tag.getCompound(DATA);
-		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -324,7 +363,8 @@ public class GenericBlockEntity extends BlockEntity
 			new HashSet<>(),
 			new HashSet<>(),
 			new HashSet<>(),
-			new HashMap<>()
+			new HashMap<>(),
+			new ArrayList<>()
 		);
 	}
 	
@@ -333,7 +373,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<Supplier<? extends DataComponentType<?>>> syncedDataComponents,
 		Set<Supplier<? extends DataComponentType<?>>> itemDataComponents,
 		Set<AttachmentSerializer<?>> syncedAttachments,
-		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers
+		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers,
+		List<AttachmentTransformer<?>> attachmentTransformers
 	)
 	{
 		/**
@@ -415,6 +456,16 @@ public class GenericBlockEntity extends BlockEntity
 			this.dataTransformers.put(type, new DataTransformer<>(onSave, onLoad));
 			return this;
 		}
+		
+		public <T> GenericBlockEntityBuilder transformAttachment(
+			Supplier<AttachmentType<T>> type,
+			Codec<T> codec,
+			Function3<BlockState,HolderLookup.Provider,T,T> onSave,
+			Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+		{
+			this.attachmentTransformers.add(new AttachmentTransformer<>(new AttachmentSerializer<>(type,codec),onSave,onLoad));
+			return this;
+		}
 
 		@SuppressWarnings("unchecked")
 		public DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> register(
@@ -448,7 +499,8 @@ public class GenericBlockEntity extends BlockEntity
 							syncedAttachments,
 							dataTransformers.entrySet().stream().collect(Collectors.toMap(
 								entry -> entry.getKey().get(),
-								Map.Entry::getValue))),
+								Map.Entry::getValue)),
+							attachmentTransformers),
 						Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new))
 				);
 			return holder;
@@ -460,8 +512,14 @@ public class GenericBlockEntity extends BlockEntity
 		public void write(CompoundTag tag, IAttachmentHolder holder, RegistryOps<Tag> ops)
 		{
 			AttachmentType<T> theType = this.type.get();
-			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
 			@Nullable T data = holder.getData(theType);
+			write(tag,data,ops);
+		}
+		
+		public void write(CompoundTag tag, T data, RegistryOps<Tag> ops)
+		{
+			AttachmentType<T> theType = this.type.get();
+			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
 			if (data != null)
 			{
 				this.codec.encodeStart(ops, data)
@@ -486,6 +544,21 @@ public class GenericBlockEntity extends BlockEntity
 				holder.removeData(theType);
 			}
 		}
+		
+		public Optional<T> read(CompoundTag attachmentsTag, RegistryOps<Tag> ops)
+		{
+			AttachmentType<T> theType = this.type.get();
+			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
+			if (attachmentsTag.contains(key))
+			{
+				Tag dataTag = attachmentsTag.get(key);
+				return this.codec.parse(ops, dataTag).result();
+			}
+			else
+			{
+				return Optional.empty();
+			}
+		}
 	}
 	
 	private static record DataTransformer<T>(
@@ -495,6 +568,27 @@ public class GenericBlockEntity extends BlockEntity
 		public TypedDataComponent<T> typedTransformOnSave(BlockState state, HolderLookup.Provider registries, TypedDataComponent<T> typedData)
 		{
 			return new TypedDataComponent<>(typedData.type(), this.onSave.apply(state, registries, typedData.value()));
+		}
+	}
+	
+	private static record AttachmentTransformer<T>(
+		AttachmentSerializer<T> serializer,
+		Function3<BlockState,HolderLookup.Provider,T,T> onSave,
+		Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+	{
+		public void serialize(GenericBlockEntity be, CompoundTag attachmentsTag, HolderLookup.Provider provider, RegistryOps<Tag> ops)
+		{
+			T denormalizedData = be.getData(this.serializer.type.get());
+			T normalizedData = this.onSave.apply(be.getBlockState(), provider, denormalizedData);
+			this.serializer.write(attachmentsTag, normalizedData, ops);
+		}
+		
+		public void denormalize(BlockState state, CompoundTag attachmentsTag, HolderLookup.Provider provider, RegistryOps<Tag> ops)
+		{
+			this.serializer.read(attachmentsTag, ops).ifPresent(normalizedData -> {
+				T denormalizedData = this.onLoad.apply(state, provider, normalizedData);
+				this.serializer.write(attachmentsTag, denormalizedData, ops);
+			});
 		}
 	}
 }

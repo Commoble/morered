@@ -68,9 +68,10 @@ public class Names
 	public static final String[] COLORED_TUBE_NAMES = Arrays.stream(DyeColor.values()).map(color -> color.toString() + "_tube").toArray(String[]::new);
 	
 	public static final String AXLE = "axle";
+	public static final String GEAR = "gear";
+	public static final String GEARSHIFTER = "gearshifter";
 	public static final String WINDCATCHER = "windcatcher";
 	public static final String AIRFOIL = "airfoil";
-	public static final String GEAR = "gear";
 
 	// raw items
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";
@@ -89,9 +90,10 @@ public class Names
 	public static final String COLORED_TUBES = "colored_tubes";
 	public static final String TUBES = "tubes";
 	public static final String AXLES = "axles";
+	public static final String GEARS = "gears";
+	public static final String GEARSHIFTERS = "gearshifters";
 	public static final String WINDCATCHERS = "windcatchers";
 	public static final String AIRFOILS = "airfoils";
-	public static final String GEARS = "gears";
 	
 	public static final String SUPPORTED_STRIPPED_LOGS = "supported_stripped_logs";
 	
