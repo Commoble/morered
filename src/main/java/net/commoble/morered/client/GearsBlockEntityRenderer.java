@@ -22,6 +22,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public record GearsBlockEntityRenderer(ItemRenderer itemRenderer) implements BlockEntityRenderer<GenericBlockEntity>
 {
@@ -32,7 +33,7 @@ public record GearsBlockEntityRenderer(ItemRenderer itemRenderer) implements Blo
 	}
 
 	@Override
-	public void render(GenericBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay)
+	public void render(GenericBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay, Vec3 Camera)
 	{
 		var items = be.get(MoreRed.get().gearsDataComponent.get());
 		if (items == null || items.isEmpty())

@@ -63,7 +63,6 @@ public abstract class AbstractPostBlock extends Block
 	}
 
 	@Override
-	@Deprecated
 	public VoxelShape getCollisionShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
 	{
 		// we override this to ensure the correct context is used instead of the dummy context
@@ -71,26 +70,22 @@ public abstract class AbstractPostBlock extends Block
 	}
 
 	@Override
-	@Deprecated
 	public void onPlace(BlockState state, Level world, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		this.updatePostSet(world, pos, Set<BlockPos>::add);
+		updatePostSet(world, pos, Set<BlockPos>::add);
 		super.onPlace(state, world, pos, oldState, isMoving);
 		ExMachinaGameEvents.scheduleSignalGraphUpdate(world, pos);
 	}
+	
+	
 
 	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	protected void affectNeighborsAfterRemoval(BlockState oldState, ServerLevel level, BlockPos pos, boolean isMoving)
 	{
-		if (state.hasBlockEntity() && (!state.is(newState.getBlock()) || !newState.hasBlockEntity()))
+		super.affectNeighborsAfterRemoval(oldState, level, pos, isMoving);
+		if (!(level.getBlockState(pos).getBlock() instanceof AbstractPostBlock))
 		{
-			if (level.getBlockEntity(pos) instanceof WirePostBlockEntity be)
-			{
-				be.clearRemoteConnections();
-			}
-			this.updatePostSet(level, pos, Set<BlockPos>::remove);
-			level.removeBlockEntity(pos);
-//			level.gameEvent(ExperimentalModEvents.WIRE_UPDATE, pos, Context.of(state));
+			updatePostSet(level, pos, Set<BlockPos>::remove);
 		}
 	}
 
@@ -101,7 +96,7 @@ public abstract class AbstractPostBlock extends Block
 		ExMachinaGameEvents.scheduleSignalGraphUpdate(world, pos);
 	}
 	
-	public void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)
+	public static void updatePostSet(Level world, BlockPos pos, BiPredicate<Set<BlockPos>, BlockPos> setFunction)
 	{
 		LevelChunk chunk = world.getChunkAt(pos);
 		if (chunk != null)

@@ -55,10 +55,10 @@ public record WindcatcherColors(
 	public static WindcatcherColors fromTag(CompoundTag tag)
 	{
 		return new WindcatcherColors(
-			DyeColor.byName(tag.getString("north"), DyeColor.WHITE),
-			DyeColor.byName(tag.getString("south"), DyeColor.WHITE),
-			DyeColor.byName(tag.getString("west"), DyeColor.WHITE),
-			DyeColor.byName(tag.getString("east"), DyeColor.WHITE)
+			DyeColor.byName(tag.getStringOr("north", ""), DyeColor.WHITE),
+			DyeColor.byName(tag.getStringOr("south", ""), DyeColor.WHITE),
+			DyeColor.byName(tag.getStringOr("west", ""), DyeColor.WHITE),
+			DyeColor.byName(tag.getStringOr("east", ""), DyeColor.WHITE)
 		);
 	}
 }

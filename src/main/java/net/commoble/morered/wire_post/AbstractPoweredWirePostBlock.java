@@ -88,7 +88,6 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	}
 
 	@Override
-	@Deprecated
 	public void neighborChanged(BlockState state, Level world, BlockPos pos, Block blockIn, Orientation orientation, boolean isMoving)
 	{
 		// direct-connection posts need to update nodes if neighbor cube updates
@@ -99,16 +98,16 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 		}
 		super.neighborChanged(state, world, pos, blockIn, orientation, isMoving);
 	}
-
+	
 	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
+		super.onPlace(newState, level, pos, oldState, isMoving);
 		// if state is replacing without changing the block, clear node cache
-		if (newState.is(this) && newState != state && level.getBlockEntity(pos) instanceof WirePostBlockEntity post)
+		if (oldState.is(this) && oldState != newState && level.getBlockEntity(pos) instanceof WirePostBlockEntity post)
 		{
 			post.clearTransmissionNodes();
 		}
-		super.onRemove(state, level, pos, newState, isMoving);
 	}
 
 	/**

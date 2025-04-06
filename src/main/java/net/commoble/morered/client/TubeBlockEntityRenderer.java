@@ -48,7 +48,7 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 	}
 
 	@Override
-	public void render(TubeBlockEntity tube, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
+	public void render(TubeBlockEntity tube, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int combinedLight, int combinedOverlay, Vec3 camera)
 	{
 		// render tick happens independently of regular ticks and often more frequently
 		if (!tube.inventory.isEmpty())

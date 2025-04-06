@@ -7,6 +7,7 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap.Builder;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtOps;
@@ -53,7 +54,7 @@ public class WindcatcherBlockEntity extends BlockEntity
 	protected void loadAdditional(CompoundTag tag, Provider provider)
 	{
 		super.loadAdditional(tag, provider);
-		this.colors = WindcatcherColors.fromTag(tag.getCompound(Names.WINDCATCHER_COLORS));
+		this.colors = WindcatcherColors.fromTag(tag.getCompoundOrEmpty(Names.WINDCATCHER_COLORS));
 	}
 
 	@Override
@@ -98,7 +99,7 @@ public class WindcatcherBlockEntity extends BlockEntity
 	}
 
 	@Override
-	protected void applyImplicitComponents(DataComponentInput input)
+	protected void applyImplicitComponents(DataComponentGetter input)
 	{
 		super.applyImplicitComponents(input);
 		this.colors = Objects.requireNonNullElse(input.get(MoreRed.get().windcatcherColorsDataComponent.get()), WindcatcherColors.DEFAULT);

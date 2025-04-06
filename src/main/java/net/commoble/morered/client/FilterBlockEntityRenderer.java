@@ -15,6 +15,7 @@ import net.minecraft.core.Direction.Axis;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec3;
 
 public class FilterBlockEntityRenderer implements BlockEntityRenderer<FilterBlockEntity>
 {
@@ -23,7 +24,7 @@ public class FilterBlockEntityRenderer implements BlockEntityRenderer<FilterBloc
 	}
 
 	@Override
-	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB)
+	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB, Vec3 camera)
 	{
 		if (filter.filterStack.getCount() > 0)
 		{

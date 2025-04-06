@@ -37,17 +37,6 @@ public abstract class AbstractFilterBlock extends Block
 		super.createBlockStateDefinition(builder);
 		builder.add(FACING);
 	}
-	
-	@Override
-	@Deprecated
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
-	{
-		if (!level.isClientSide() && !state.is(newState.getBlock()) && level.getBlockEntity(pos) instanceof AbstractFilterBlockEntity filter)
-		{
-			filter.dropItems();
-		}
-		super.onRemove(state, level, pos, newState, isMoving);
-	}
 
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context)

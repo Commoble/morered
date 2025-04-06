@@ -1,22 +1,25 @@
 package net.commoble.morered.client;
 
+import java.util.List;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.block.ModelBlockRenderer;
 import net.minecraft.client.renderer.block.model.BakedQuad;
+import net.minecraft.client.renderer.block.model.BlockModelPart;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
+import net.minecraft.util.ARGB;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.client.model.data.ModelData;
 
 /**
  * Wrapper class around the vanilla block renderer so we don't have to copy five
@@ -55,49 +58,58 @@ public class BlockPreviewRenderer extends ModelBlockRenderer
 	
 		BlockRenderDispatcher blockDispatcher = Minecraft.getInstance().getBlockRenderer();
 		ModelBlockRenderer renderer = getInstance(blockDispatcher.getModelRenderer());
+		List<BlockModelPart> parts = blockDispatcher
+			.getBlockModel(state)
+			.collectParts(level, pos, state, RandomSource.create(state.getSeed(pos)));
 		renderer.tesselateBlock(
 			level,
-			blockDispatcher.getBlockModel(state),
+			parts,
 			state,
 			pos,
 			matrix,
-			renderTypeBuffer.getBuffer(Sheets.translucentItemSheet()),
+			renderType -> renderTypeBuffer.getBuffer(Sheets.translucentItemSheet()),
 			false,
-			level.random,
-			state.getSeed(pos),
-			OverlayTexture.NO_OVERLAY,
-			ModelData.EMPTY,
-			RenderType.translucent());
+			OverlayTexture.NO_OVERLAY);
 	
 		matrix.popPose();
 	}
 
 	// vanilla ModelBlockRenderer hardcodes 1F for the alpha
 	@Override
-	public void putQuadData(BlockAndTintGetter level, BlockState state, BlockPos pos, VertexConsumer buffer, PoseStack.Pose matrixEntry, BakedQuad quadIn,
-		float tintA, float tintB, float tintC, float tintD, int brightness0, int brightness1, int brightness2, int brightness3, int combinedOverlayIn)
+	public void putQuadData(
+        BlockAndTintGetter level,
+        BlockState state,
+        BlockPos pos,
+        VertexConsumer buffer,
+        PoseStack.Pose matrixEntry,
+        BakedQuad quad,
+        ModelBlockRenderer.CommonRenderStorage renderStorage,
+        int jellybiscuits)
 	{
+		int tintIndex = quad.tintIndex();
 		float r=1F;
 		float g=1F;
 		float b=1F;
-		if (quadIn.isTinted())
+		if (tintIndex != -1)
 		{
-			int i = this.blockColors.getColor(state, level, pos, quadIn.getTintIndex());
-			r = (i >> 16 & 255) / 255.0F;
-			g = (i >> 8 & 255) / 255.0F;
-			b = (i & 255) / 255.0F;
-		}
-		if (quadIn.isShade()) // better name: shouldApplyDiffuseLighting
-		{
-			float shade = level.getShade(quadIn.getDirection(), true);
-			r *= shade;
-			g *= shade;
-			b *= shade;
-		}
+			int tintValue;
+			if (renderStorage.tintCacheIndex == tintIndex)
+			{
+				tintValue = renderStorage.tintCacheValue;
+			}
+			else
+			{
+				tintValue = this.blockColors.getColor(state, level, pos, tintIndex);
+				renderStorage.tintCacheIndex = tintIndex;
+				renderStorage.tintCacheValue = tintValue;
+			}
 
+			r = ARGB.redFloat(tintValue);
+			g = ARGB.greenFloat(tintValue);
+			b = ARGB.blueFloat(tintValue);
+		}
+		
 		float alpha = ClientProxy.CLIENTCONFIG.previewPlacementOpacity().get().floatValue();
-
-		buffer.putBulkData(matrixEntry, quadIn, new float[] { tintA, tintB, tintC, tintD }, r, g, b, alpha, new int[] { brightness0, brightness1, brightness2, brightness3 },
-			combinedOverlayIn, true);
+		buffer.putBulkData(matrixEntry, quad, renderStorage.brightness, r, g, b, alpha, renderStorage.lightmap, jellybiscuits, true);
 	}
 }

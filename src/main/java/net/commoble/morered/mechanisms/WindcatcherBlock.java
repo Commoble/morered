@@ -7,6 +7,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
@@ -16,6 +17,9 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+import net.minecraft.world.phys.shapes.CollisionContext;
+import net.minecraft.world.phys.shapes.Shapes;
+import net.minecraft.world.phys.shapes.VoxelShape;
 
 public class WindcatcherBlock extends Block implements EntityBlock
 {
@@ -131,5 +135,23 @@ public class WindcatcherBlock extends Block implements EntityBlock
 		}
 		double relerpedPerc = Mth.inverseLerp(yDepthPerc, minDepthPerc, maxDepthPerc);
 		return Mth.lerpInt((float)relerpedPerc, 0, 8); 
+	}
+
+	@Override
+	protected VoxelShape getVisualShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
+	{
+		return Shapes.empty();
+	}
+
+	@Override
+	protected float getShadeBrightness(BlockState state, BlockGetter level, BlockPos pos)
+	{
+		return 1.0F;
+	}
+
+	@Override
+	protected boolean propagatesSkylightDown(BlockState state)
+	{
+		return true;
 	}
 }

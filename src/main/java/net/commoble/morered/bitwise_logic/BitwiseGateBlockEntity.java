@@ -111,7 +111,7 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		this.output = compound.getInt(OUTPUT);
+		this.output = compound.getIntOr(OUTPUT,0);
 	}
 
 	public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel)

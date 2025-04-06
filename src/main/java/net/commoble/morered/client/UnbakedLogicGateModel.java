@@ -9,12 +9,12 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.commoble.morered.plate_blocks.LogicFunctions;
+import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModel.BakingContext;
 import net.minecraft.client.renderer.item.ItemModel.Unbaked;
-import net.minecraft.client.resources.model.BakedModel;
+import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.resources.ResourceLocation;
 
 public record UnbakedLogicGateModel(ResourceLocation model) implements ItemModel.Unbaked
@@ -28,17 +28,17 @@ public record UnbakedLogicGateModel(ResourceLocation model) implements ItemModel
 		int maxIndex = LogicFunctions.maxIndex();
 		for (int i=0; i<= maxIndex; i++)
 		{
-			tints.add(new net.minecraft.client.color.item.Constant(ColorHandlers.getLogicFunctionTint(i, false, false, false)));
+			tints.add(new Constant(ColorHandlers.getLogicFunctionTint(i, false, false, false)));
 		}
-		tints.set(LogicFunctions.SET_LATCH, new net.minecraft.client.color.item.Constant(ColorHandlers.UNLIT));
-		tints.set(LogicFunctions.UNSET_LATCH, new net.minecraft.client.color.item.Constant(ColorHandlers.LIT));
+		tints.set(LogicFunctions.SET_LATCH, new Constant(ColorHandlers.UNLIT));
+		tints.set(LogicFunctions.UNSET_LATCH, new Constant(ColorHandlers.LIT));
 		return tints;
 	});
 
 	@Override
 	public void resolveDependencies(Resolver resolver)
 	{
-		resolver.resolve(model);
+		resolver.markDependency(model);
 	}
 
 	@Override
@@ -50,8 +50,7 @@ public record UnbakedLogicGateModel(ResourceLocation model) implements ItemModel
 	@Override
 	public ItemModel bake(BakingContext context)
 	{
-        BakedModel bakedmodel = context.bake(this.model);
-        return new BlockModelWrapper(bakedmodel, TINTS.get());
+		return ModelUtil.wrapBlockModel(context, model, BlockModelRotation.X0_Y0, TINTS.get());
 	}
 
 }

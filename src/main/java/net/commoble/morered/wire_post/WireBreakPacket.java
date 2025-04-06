@@ -40,13 +40,13 @@ public record WireBreakPacket(Vec3 start, Vec3 end) implements CustomPacketPaylo
 		else
 		{
 			Vec3 start = new Vec3(
-				nbt.getDouble("startX"),
-				nbt.getDouble("startY"),
-				nbt.getDouble("startZ"));
+				nbt.getDoubleOr("startX",0D),
+				nbt.getDoubleOr("startY",0D),
+				nbt.getDoubleOr("startZ",0D));
 			Vec3 end = new Vec3(
-				nbt.getDouble("endX"),
-				nbt.getDouble("endY"),
-				nbt.getDouble("endZ"));
+				nbt.getDoubleOr("endX",0D),
+				nbt.getDoubleOr("endY",0D),
+				nbt.getDoubleOr("endZ",0D));
 			
 			return new WireBreakPacket(start, end);
 		}

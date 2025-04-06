@@ -7,7 +7,6 @@ import net.commoble.morered.util.PosHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -84,9 +83,11 @@ public class RemoteConnection
 		 */
 		public static Storage fromNBT(CompoundTag nbt, OctahedralGroup group)
 		{
-			Direction toSide = group.rotate(Direction.byName(nbt.getString("toSide")));
-			BlockPos toPos = PosHelper.transform(NbtUtils.readBlockPos(nbt, "toPos").orElse(BlockPos.ZERO), group);
-			boolean isPrimary = nbt.getBoolean("isPrimary");
+			Direction toSide = group.rotate(Direction.byName(nbt.getStringOr("toSide", "")));
+			if (toSide == null)
+				toSide = Direction.NORTH;
+			BlockPos toPos = PosHelper.transform(nbt.read("toPos", BlockPos.CODEC).orElse(BlockPos.ZERO), group);
+			boolean isPrimary = nbt.getBooleanOr("isPrimary", false);
 			return new Storage(toSide, toPos, isPrimary);
 		}
 		
@@ -101,7 +102,7 @@ public class RemoteConnection
 			OctahedralGroup normalizer = group.inverse();
 			CompoundTag nbt = new CompoundTag();
 			nbt.putString("toSide", normalizer.rotate(this.toSide).getName());
-			nbt.put("toPos", NbtUtils.writeBlockPos(PosHelper.transform(this.toPos, normalizer)));
+			nbt.store("toPos", BlockPos.CODEC, PosHelper.transform(this.toPos, normalizer));
 			nbt.putBoolean("isPrimary", this.isPrimary);
 			return nbt;
 		}

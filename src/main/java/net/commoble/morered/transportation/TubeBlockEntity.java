@@ -452,15 +452,20 @@ public class TubeBlockEntity extends BlockEntity
 		}
 	}
 
-	public void dropItems()
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState newState)
 	{
-		this.mergeBuffer();
-		for (ItemInTubeWrapper wrapper : this.inventory)
+		super.preRemoveSideEffects(pos, newState);
+		if (this.level instanceof ServerLevel serverLevel)
 		{
-			Containers.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), wrapper.stack);
+			TubesInChunk.updateTubeSet(serverLevel, pos, Set<BlockPos>::remove);
+			this.mergeBuffer();
+			for (ItemInTubeWrapper wrapper : this.inventory)
+			{
+				Containers.dropItemStack(this.level, this.worldPosition.getX(), this.worldPosition.getY(), this.worldPosition.getZ(), wrapper.stack);
+			}
+			this.clearRemoteConnections();
 		}
-
-		this.inventory = new LinkedList<ItemInTubeWrapper>();	// clear it in case this is being called without destroying the TE
 	}
 
 	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
@@ -547,21 +552,21 @@ public class TubeBlockEntity extends BlockEntity
 			OctahedralGroup group = state.getValue(TubeBlock.GROUP);
 			if (compound.contains(INV_NBT_KEY_RESET))	// only update inventory if the compound has an inv. key
 			{									// this lets the client receive packets without the inventory being cleared
-				ListTag invList = compound.getList(INV_NBT_KEY_RESET, 10);
+				ListTag invList = compound.getListOrEmpty(INV_NBT_KEY_RESET);
 				Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
 				for (int i = 0; i < invList.size(); i++)
 				{
-					CompoundTag itemTag = invList.getCompound(i);
+					CompoundTag itemTag = invList.getCompoundOrEmpty(i);
 					inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group, registries));
 				}
 				this.inventory = inventory;
 			}
 			else if (compound.contains(INV_NBT_KEY_ADD))	// add newly inserted items to this tube
 			{
-				ListTag invList = compound.getList(INV_NBT_KEY_ADD, 10);
+				ListTag invList = compound.getListOrEmpty(INV_NBT_KEY_ADD);
 				for (int i=0; i<invList.size(); i++)
 				{
-					CompoundTag itemTag = invList.getCompound(i);
+					CompoundTag itemTag = invList.getCompoundOrEmpty(i);
 					this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group, registries));
 				}
 			}
@@ -569,7 +574,7 @@ public class TubeBlockEntity extends BlockEntity
 
 			if (compound.contains(CONNECTIONS))
 			{
-				CompoundTag connectionsTag = compound.getCompound(CONNECTIONS);
+				CompoundTag connectionsTag = compound.getCompoundOrEmpty(CONNECTIONS);
 				Map<Direction, RemoteConnection> newMap = new HashMap<>();
 				Direction[] dirs = Direction.values();
 				for (int i=0; i<6; i++)
@@ -578,7 +583,7 @@ public class TubeBlockEntity extends BlockEntity
 					String dirName = dir.getName();
 					if (connectionsTag.contains(dirName))
 					{
-						CompoundTag connectionTag = connectionsTag.getCompound(dirName);
+						CompoundTag connectionTag = connectionsTag.getCompoundOrEmpty(dirName);
 						RemoteConnection.Storage storage = RemoteConnection.Storage.fromNBT(connectionTag, group);
 						RemoteConnection connection = RemoteConnection.fromStorage(storage, dir, this.worldPosition);
 						newMap.put(group.rotate(dir), connection);

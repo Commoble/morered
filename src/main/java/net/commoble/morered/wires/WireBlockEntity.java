@@ -11,7 +11,6 @@ import com.mojang.math.OctahedralGroup;
 import net.commoble.exmachina.api.Channel;
 import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.client.WirePartModelLoader.WireModelData;
 import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -26,7 +25,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.neoforged.neoforge.model.data.ModelData;
 
 public class WireBlockEntity extends BlockEntity
 {
@@ -80,7 +79,7 @@ public class WireBlockEntity extends BlockEntity
 	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		long normalizedConnections = compound.getLong(CONNECTIONS);
+		long normalizedConnections = compound.getLongOr(CONNECTIONS,0L);
 		long newConnections = 0L;
 		if (normalizedConnections != 0L)
 		{

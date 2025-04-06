@@ -3,9 +3,6 @@ package net.commoble.morered.client;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.Tesselator;
-
 import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
@@ -221,7 +218,6 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		            int arrowHeight = 9;
 		            int arrowU = 15;
 		            int arrowV = 171;
-		    		RenderSystem.setShaderTexture(0, TRADING_SCREEN);
 		            graphics.blit(RenderType::guiTextured, TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
@@ -307,7 +303,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		}
 
 		@Override
-		protected void drawPanel(GuiGraphics graphics, int entryRight, int relativeY, Tesselator tess, int mouseX, int mouseY)
+		protected void drawPanel(GuiGraphics graphics, int entryRight, int relativeY, int mouseX, int mouseY)
 		{
 	    	this.tooltipItem = ItemStack.EMPTY;
 			for (RecipeButton button : this.buttons)
@@ -320,7 +316,6 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 				}
 			}
 		}
-
 
 		@Override
 		public boolean mouseClicked(double mouseX, double mouseY, int button)

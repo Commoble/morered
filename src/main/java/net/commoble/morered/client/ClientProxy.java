@@ -46,6 +46,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -69,6 +70,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
@@ -76,7 +78,6 @@ import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.CommonHooks;
-import net.neoforged.neoforge.common.util.TriState;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.network.PacketDistributor;
 
@@ -157,6 +158,7 @@ public class ClientProxy
 	{
 		modBus.addListener(ClientProxy::onClientSetup);
 		modBus.addListener(ClientProxy::onRegisterModelLoaders);
+		modBus.addListener(ClientProxy::onRegisterBlockStateModels);
 		modBus.addListener(ClientProxy::onRegisterBlockColors);
 		modBus.addListener(ClientProxy::onRegisterItemModels);
 		modBus.addListener(ClientProxy::onRegisterRenderers);
@@ -221,8 +223,12 @@ public class ClientProxy
 
 	public static void onRegisterModelLoaders(ModelEvent.RegisterLoaders event)
 	{
-		event.register(MoreRed.id(Names.WIRE_PARTS), WirePartModelLoader.INSTANCE);
 		event.register(MoreRed.id(Names.ROTATE_TINTS), TintRotatingModelLoader.INSTANCE);
+	}
+	
+	public static void onRegisterBlockStateModels(RegisterBlockStateModels event)
+	{
+		event.registerModel(MoreRed.id(Names.WIRE_PARTS), UnbakedWirePartBlockStateModel.CODEC);
 	}
 
 	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
@@ -447,7 +453,7 @@ public class ClientProxy
 	static void destroyClickedSegment(FaceSegmentBlock block, BlockState state, ClientLevel world, BlockPos pos, LocalPlayer player, MultiPlayerGameModeAccess controllerAccess, Direction interiorSide)
 	{
 		ItemStack heldItemStack = player.getMainHandItem();
-		if (!heldItemStack.getItem().canAttackBlock(state, world, pos, player))
+		if (!heldItemStack.canDestroyBlock(state, world, pos, player))
 	        return;
 		controllerAccess.setIsDestroying(false);
 		block.destroyClickedSegment(state, world, pos, player, interiorSide, false);

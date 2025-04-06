@@ -1,6 +1,6 @@
 package net.commoble.morered.client;
 
-import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.wires.Edge;
@@ -30,7 +30,7 @@ public class EdgeRotation
 		BlockModelRotation.X90_Y270
 	};
 	
-	public static Edge getRotatedEdge(Edge oldEdge, Matrix4f rotation)
+	public static Edge getRotatedEdge(Edge oldEdge, Matrix4fc rotation)
 	{
 		Direction sideA = oldEdge.sideA;
 		Direction sideB = oldEdge.sideB;

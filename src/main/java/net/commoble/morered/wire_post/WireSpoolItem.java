@@ -115,9 +115,9 @@ public class WireSpoolItem extends Item
 	}
 
 	@Override
-	public void inventoryTick(ItemStack stack, Level worldIn, Entity entityIn, int itemSlot, boolean isSelected)
+	public void inventoryTick(ItemStack stack, ServerLevel worldIn, Entity entityIn, EquipmentSlot slot)
 	{
-		super.inventoryTick(stack, worldIn, entityIn, itemSlot, isSelected);
+		super.inventoryTick(stack, worldIn, entityIn, slot);
 		if (entityIn instanceof ServerPlayer serverPlayer)
 		{
 			var spooledPost = MoreRed.get().spooledPostComponent.get();

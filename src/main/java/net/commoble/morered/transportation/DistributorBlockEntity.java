@@ -53,12 +53,13 @@ public class DistributorBlockEntity extends BlockEntity
 	@Override
 	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries)
 	{
-		int[] directionIndices = nbt.getIntArray(NEXT_DIRECTIONS);
-		int maxSize = Math.min(this.handlers.length, directionIndices.length);
-		for (int i=0; i<maxSize; i++)
-		{
-			this.handlers[i].setNextDirectionIndex(directionIndices[i]);
-		}
+		nbt.getIntArray(NEXT_DIRECTIONS).ifPresent(directionIndices -> {
+			int maxSize = Math.min(this.handlers.length, directionIndices.length);
+			for (int i=0; i<maxSize; i++)
+			{
+				this.handlers[i].setNextDirectionIndex(directionIndices[i]);
+			}
+		});
 		super.loadAdditional(nbt, registries);
 	}
 }

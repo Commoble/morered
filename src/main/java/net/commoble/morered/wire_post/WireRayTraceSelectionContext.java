@@ -15,7 +15,7 @@ public class WireRayTraceSelectionContext extends EntityCollisionContext
 	
 	public WireRayTraceSelectionContext(BlockPos start, BlockPos end)
 	{
-		super(false, -Double.MAX_VALUE, ItemStack.EMPTY, fluid -> false, null); // same as EntityCollisionContext.EMPTY
+		super(false, false, -Double.MAX_VALUE, ItemStack.EMPTY, fluid -> false, null); // same as EntityCollisionContext.EMPTY
 		this.ignoreSet = ImmutableSet.of(start.immutable(), end.immutable());
 	}
 	

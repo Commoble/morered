@@ -1,25 +1,22 @@
 package net.commoble.morered.client;
 
-import org.joml.Matrix4f;
+import org.joml.Matrix4fc;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 
-import net.commoble.morered.client.TintRotatingModelLoader.TintRotatingModelGeometry;
 import net.commoble.morered.wires.Edge;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.ItemTransforms;
 import net.minecraft.client.renderer.block.model.TextureSlots;
-import net.minecraft.client.renderer.block.model.TextureSlots.Data;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.client.resources.model.ModelBaker;
+import net.minecraft.client.resources.model.ModelDebugName;
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.SimpleBakedModel;
-import net.minecraft.client.resources.model.UnbakedModel;
+import net.minecraft.client.resources.model.QuadCollection;
+import net.minecraft.client.resources.model.UnbakedGeometry;
 import net.minecraft.core.Direction;
 import net.minecraft.util.context.ContextMap;
-import net.neoforged.neoforge.client.model.ExtendedUnbakedModel;
+import net.neoforged.neoforge.client.model.ExtendedUnbakedGeometry;
 import net.neoforged.neoforge.client.model.UnbakedModelLoader;
 
 /**
@@ -42,76 +39,57 @@ import net.neoforged.neoforge.client.model.UnbakedModelLoader;
  we will then sneakily replace the quads when we bake them, updating the tintindexes
  based on the model transform to more appropriate values
  */
-public class TintRotatingModelLoader implements UnbakedModelLoader<TintRotatingModelGeometry>
+public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 {
 	public static final TintRotatingModelLoader INSTANCE = new TintRotatingModelLoader();
 
 	@Override
-	public TintRotatingModelGeometry read(JsonObject modelContents, JsonDeserializationContext context)
+	public BlockModel read(JsonObject modelContents, JsonDeserializationContext context)
 	{
 		// we use the vanilla model loader to parse everything
-//		ElementsModel proxy = ElementsModel.Loader.INSTANCE.read(modelContents, context);
         BlockModel proxy = context.deserialize(modelContents.get("model"), BlockModel.class);
-		
-        return new TintRotatingModelGeometry(proxy);
+        TintRotatingModelGeometry geometry = new TintRotatingModelGeometry(proxy.geometry());
+        return ModelUtil.blockModelWithGeometry(proxy, geometry);
 	}
 	
-	public static class TintRotatingModelGeometry implements ExtendedUnbakedModel
+	public static class TintRotatingModelGeometry implements ExtendedUnbakedGeometry
 	{
-		private final BlockModel blockModel;
+		private final UnbakedGeometry baseGeometry;
 		
-		public TintRotatingModelGeometry(BlockModel proxy)
+		public TintRotatingModelGeometry(UnbakedGeometry baseGeometry)
 		{
-			this.blockModel = proxy;
+			this.baseGeometry = baseGeometry;
 		}
 			
-		@SuppressWarnings("deprecation")
 		@Override
-		public BakedModel bake(TextureSlots textures, ModelBaker baker, ModelState modelState, boolean useAmbientOcclusion, boolean usesBlockLight, ItemTransforms itemTransforms, ContextMap additionalProperties)
+		public QuadCollection bake(TextureSlots textures, ModelBaker baker, ModelState modelState, ModelDebugName modelDebugName, ContextMap additionalProperties)
 		{
-			BakedModel baseModel = UnbakedModel.bakeWithTopModelValues(blockModel, baker, modelState);
-			SimpleBakedModel.Builder builder = new SimpleBakedModel.Builder(
-				baseModel.useAmbientOcclusion(),
-				baseModel.usesBlockLight(),
-				baseModel.isGui3d(),
-				baseModel.getTransforms())
-				.particle(baseModel.getParticleIcon());
+			QuadCollection baseQuads = this.baseGeometry.bake(textures,baker,modelState,modelDebugName, additionalProperties);
+	        QuadCollection.Builder builder = new QuadCollection.Builder();
 
-			Matrix4f rotation = modelState.getRotation().getMatrix();
+			Matrix4fc rotation = modelState.transformation().getMatrix();
 			for (Direction dir : Direction.values())
 			{
 				// don't worry about deprecated getQuads, the basemodel doesn't use modeldata and we don't have modeldata in context anyway 
-				for (BakedQuad quad : baseModel.getQuads(null, dir, null))
+				for (BakedQuad quad : baseQuads.getQuads(dir))
 				{
 					builder.addCulledFace(dir, getTintRotatedQuad(quad, rotation));
 				}
 			}
-			for (BakedQuad quad : baseModel.getQuads(null, null, null))
+			for (BakedQuad quad : baseQuads.getQuads(null))
 			{
 				builder.addUnculledFace(getTintRotatedQuad(quad, rotation));
 			}
 			return builder.build();
 		}
 
-		@Override
-		public void resolveDependencies(Resolver resolver)
+		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad, Matrix4fc rotation)
 		{
-			this.blockModel.resolveDependencies(resolver);
+			int newTint = this.rotateTint(baseQuad.tintIndex(), rotation);
+			return new BakedQuad(baseQuad.vertices(), newTint, baseQuad.direction(), baseQuad.sprite(), baseQuad.shade(), baseQuad.lightEmission(), baseQuad.hasAmbientOcclusion());
 		}
 		
-		@Override
-		public Data getTextureSlots()
-		{
-			return blockModel.getTextureSlots();
-		}
-
-		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad, Matrix4f rotation)
-		{
-			int newTint = this.rotateTint(baseQuad.getTintIndex(), rotation);
-			return new BakedQuad(baseQuad.getVertices(), newTint, baseQuad.getDirection(), baseQuad.getSprite(), baseQuad.isShade(), baseQuad.getLightEmission(), baseQuad.hasAmbientOcclusion());
-		}
-		
-		protected int rotateTint(int baseTint, Matrix4f rotation)
+		protected int rotateTint(int baseTint, Matrix4fc rotation)
 		{
 			return baseTint < 1 ? baseTint
 				: baseTint < 7 ? this.rotateSide(baseTint, rotation)
@@ -119,7 +97,7 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<TintRotatingM
 				: baseTint;
 		}
 		
-		protected int rotateSide(int baseTint, Matrix4f rotation)
+		protected int rotateSide(int baseTint, Matrix4fc rotation)
 		{
 			int ordinal = baseTint - 1;
 			Direction baseDir = Direction.from3DDataValue(ordinal);
@@ -127,7 +105,7 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<TintRotatingM
 			return newDir.ordinal() + 1;
 		}
 		
-		protected int rotateEdge(int baseTint, Matrix4f rotation)
+		protected int rotateEdge(int baseTint, Matrix4fc rotation)
 		{
 			int ordinal = baseTint - 7;
 			

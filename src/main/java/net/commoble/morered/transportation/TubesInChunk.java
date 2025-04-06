@@ -35,7 +35,7 @@ public class TubesInChunk
 			var set = chunk.getData(MoreRed.get().tubesInChunkAttachment.get());
 			consumer.accept(set, pos);
 			chunk.setData(MoreRed.get().tubesInChunkAttachment.get(), set);
-			PacketDistributor.sendToPlayersTrackingChunk(level, chunk.getPos(), new SyncTubesInChunkPacket(chunk.getPos(), set));
+			PacketDistributor.sendToPlayersTrackingChunk(level, chunk.getPos(), new SyncTubesInChunkPacket(chunk.getPos(), Set.copyOf(set)));
 		}
 	}
 	

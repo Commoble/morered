@@ -72,7 +72,7 @@ public class FaceRotation implements ModelState
 	}
 
 	@Override
-	public Transformation getRotation()
+	public Transformation transformation()
 	{
 		return this.transformation;
 	}

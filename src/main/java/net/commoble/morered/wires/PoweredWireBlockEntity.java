@@ -115,19 +115,20 @@ public class PoweredWireBlockEntity extends WireBlockEntity
 	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		int[] normalizedPower = compound.getIntArray(POWER); // returns 0-length array if field not present
-		if (normalizedPower.length == 6)
-		{
-			// denormalize power array based on structure transform
-			int[] denormalizedPower = new int[6];
-			OctahedralGroup denormalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM);
-			for (int i=0; i<6; i++)
+		compound.getIntArray(POWER).ifPresent(normalizedPower -> {
+			if (normalizedPower.length == 6)
 			{
-				int sidedPower = normalizedPower[i];
-				int denormalizedIndex = denormalizer.rotate(Direction.from3DDataValue(i)).ordinal();
-				denormalizedPower[denormalizedIndex] = sidedPower;
+				// denormalize power array based on structure transform
+				int[] denormalizedPower = new int[6];
+				OctahedralGroup denormalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM);
+				for (int i=0; i<6; i++)
+				{
+					int sidedPower = normalizedPower[i];
+					int denormalizedIndex = denormalizer.rotate(Direction.from3DDataValue(i)).ordinal();
+					denormalizedPower[denormalizedIndex] = sidedPower;
+				}
+				this.power = denormalizedPower;
 			}
-			this.power = denormalizedPower;
-		}
+		});
 	}
 }

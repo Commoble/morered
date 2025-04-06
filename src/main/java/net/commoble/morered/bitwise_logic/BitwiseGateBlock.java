@@ -8,6 +8,7 @@ import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -67,11 +68,12 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, pos);
 	}
 
+
 	@Override
-	protected void onRemove(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	protected void affectNeighborsAfterRemoval(BlockState oldState, ServerLevel level, BlockPos pos, boolean isMoving)
 	{
-		super.onRemove(oldState, level, pos, newState, isMoving);
-		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(newState);
+		super.affectNeighborsAfterRemoval(oldState, level, pos, isMoving);
+		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(oldState);
 		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
 	}
 	

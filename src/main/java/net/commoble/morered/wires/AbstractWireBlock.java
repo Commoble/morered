@@ -315,15 +315,35 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 	// only called on server
 	// called after previous block and TE are removed, but before this block's TE is added
 	@Override
-	@Deprecated
-	public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
+	public void onPlace(BlockState newState, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
-		{
-			wire.setConnectionsWithServerUpdate(getExpandedShapeIndex(state, worldIn, pos));
-		}
+		super.onPlace(newState, worldIn, pos, oldState, isMoving);
 		this.updateShapeCache(worldIn, pos);
-		super.onPlace(state, worldIn, pos, oldState, isMoving);
+		// if this is an empty wire block, remove it if no edges are valid anymore
+		boolean doPowerUpdate = true;
+		if (this.isEmptyWireBlock(newState)) // wire block has no attached faces and consists only of fake wire edges
+		{
+			long edgeFlags = this.getEdgeFlags(worldIn,pos);
+			if (edgeFlags == 0)	// if we don't need to be rendering any edges, set wire block to air
+			{
+				// removing the block will call onReplaced again, but using the newBlock != this condition
+				worldIn.removeBlock(pos, false);
+			}
+			else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
+			{
+				wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
+			}
+			doPowerUpdate = false;
+		}
+		else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
+		{
+			wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
+		}
+		// if the new state is still a wire block and has at least one wire in it, do a power update
+		if (doPowerUpdate)
+		{
+			ExMachinaGameEvents.scheduleSignalGraphUpdate(worldIn, pos);
+		}
 	}
 
 	// called when a player places this block or adds a wire to a wire block
@@ -352,46 +372,13 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 		super.setPlacedBy(worldIn, pos, state, placer, stack);
 	}
 
-	// called when the blockstate at the given pos changes
-	// only called on servers
-	// oldState is a state of this block, newState may or may not be
 	@Override
-	public void onRemove(BlockState oldState, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	protected void affectNeighborsAfterRemoval(BlockState oldState, ServerLevel level, BlockPos pos, boolean isMoving)
 	{
-		this.updateShapeCache(worldIn, pos);
-		// if this is an empty wire block, remove it if no edges are valid anymore
-		boolean doPowerUpdate = true;
-		if (newState.getBlock() != this) // wire block was completely destroyed
-		{
-//			this.notifyNeighbors(worldIn, pos, newState, EnumSet.allOf(Direction.class), this.useIndirectPower);
-			doPowerUpdate = false;
-		}
-		else if (this.isEmptyWireBlock(newState)) // wire block has no attached faces and consists only of fake wire edges
-		{
-			long edgeFlags = this.getEdgeFlags(worldIn,pos);
-			if (edgeFlags == 0)	// if we don't need to be rendering any edges, set wire block to air
-			{
-				// removing the block will call onReplaced again, but using the newBlock != this condition
-				worldIn.removeBlock(pos, false);
-			}
-			else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
-			{
-				wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
-			}
-			doPowerUpdate = false;
-		}
-		else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
-		{
-			wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
-		}
-		super.onRemove(oldState, worldIn, pos, newState, isMoving);
-		// if the new state is still a wire block and has at least one wire in it, do a power update
-		if (doPowerUpdate)
-		{
-			ExMachinaGameEvents.scheduleSignalGraphUpdate(worldIn, pos);
-		}
+		super.affectNeighborsAfterRemoval(oldState, level, pos, isMoving);
+		this.updateShapeCache(level, pos);
 	}
-
+	
 	// called when a neighboring blockstate changes, not called on the client
 	@Override
 	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighborBlock, Orientation orientation, boolean isMoving)

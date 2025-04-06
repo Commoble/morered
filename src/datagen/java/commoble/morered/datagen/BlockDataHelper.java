@@ -7,6 +7,7 @@ import java.util.function.Function;
 import org.apache.commons.lang3.text.WordUtils;
 
 import net.commoble.exmachina.api.MechanicalComponent;
+import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public record BlockDataHelper(Block block, DataGenContext context)
 {
 	public static BlockDataHelper create(Block block, DataGenContext context,
-		BiFunction<ResourceLocation, Block, BlockStateFile> blockstate,
+		BiFunction<ResourceLocation, Block, BlockModelDefinition> blockstate,
 		BiFunction<ResourceLocation, Block, LootTable> lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
@@ -30,7 +31,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	}
 	
 	public static BlockDataHelper createWithoutLoot(Block block, DataGenContext context,
-		BiFunction<ResourceLocation, Block, BlockStateFile> blockstate)
+		BiFunction<ResourceLocation, Block, BlockModelDefinition> blockstate)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		ResourceLocation id = helper.id();
@@ -38,14 +39,14 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateFile blockstate)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockModelDefinition blockstate)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		context.blockStates().put(helper.id(), blockstate);
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateFile blockstate, LootTable lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockModelDefinition blockstate, LootTable lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		context.blockStates().put(helper.id(), blockstate);
@@ -53,7 +54,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockStateFile> blockstate, Function<Block, LootTable> lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockModelDefinition> blockstate, Function<Block, LootTable> lootTable)
 	{
 		return create(block, context, blockstate.apply(block), lootTable.apply(block));
 	}

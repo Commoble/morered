@@ -111,23 +111,6 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 
-	@Override
-	public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean isMoving)
-	{
-		boolean changedBlock = !state.is(newState.getBlock());
-		if (level instanceof ServerLevel serverLevel && changedBlock)
-		{
-			TubesInChunk.updateTubeSet(serverLevel, pos, Set<BlockPos>::remove);
-		}
-		BlockEntity te = level.getBlockEntity(pos);
-		if (te instanceof TubeBlockEntity tube && changedBlock)
-		{
-			tube.dropItems();
-			tube.clearRemoteConnections();
-		}
-		super.onRemove(state, level, pos, newState, isMoving);
-	}
-
 	/**
 	 * Called when a neighboring block was changed and marks that this state should perform any checks during a neighbor change. Cases may include when redstone power is updated,
 	 * cactus blocks popping off due to a neighboring solid block, etc.

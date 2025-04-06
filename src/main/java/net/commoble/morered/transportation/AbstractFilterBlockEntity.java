@@ -14,6 +14,17 @@ public abstract class AbstractFilterBlockEntity extends BlockEntity
 	{
 		super(type, pos, state);
 	}
+	
+	
+
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState newState)
+	{
+		super.preRemoveSideEffects(pos, newState);
+		this.dropItems();
+	}
+
+
 
 	public abstract boolean canItemPassThroughFilter(ItemStack stack);
 	public abstract void dropItems();

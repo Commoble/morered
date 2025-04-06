@@ -35,13 +35,24 @@ import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
+import com.mojang.math.Quadrant;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
+import net.minecraft.client.renderer.block.model.BlockModelDefinition;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.model.SingleVariant;
+import net.minecraft.client.renderer.block.model.multipart.CombinedCondition;
+import net.minecraft.client.renderer.block.model.multipart.Condition;
+import net.minecraft.client.renderer.block.model.multipart.KeyValueCondition;
+import net.minecraft.client.renderer.block.model.multipart.Selector;
 import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.resources.model.WeightedVariants;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.random.Weighted;
+import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.neoforged.neoforge.common.data.JsonCodecProvider;
@@ -49,22 +60,18 @@ import net.neoforged.neoforge.common.data.JsonCodecProvider;
 /**
  * Alternative datageneration for blockstate jsons. Usable with {@link JsonCodecProvider}.
  */
-public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> multipart)
+public final class BlockStateFile
 {
-	/** codec **/
-	public static final Codec<BlockStateFile> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-			Variants.CODEC.optionalFieldOf("variants").forGetter(BlockStateFile::variants),
-			Multipart.CODEC.optionalFieldOf("multipart").forGetter(BlockStateFile::multipart)
-		).apply(builder, BlockStateFile::new));
-
+	private BlockStateFile() {}
+	
 	/**
 	 * Specifies a blockstate file with a variants definition. See {@link Variants#builder}.
 	 * @param variants Variants mapping sets of blockstates to individual models.
 	 * @return BlockStateDefinition for datageneration.
 	 */
-	public static BlockStateFile variants(Variants variants)
+	public static BlockModelDefinition variants(Variants variants)
 	{
-		return new BlockStateFile(Optional.of(variants), Optional.empty());
+		return new BlockModelDefinition(Optional.of(variants.toVanilla()), Optional.empty());
 	}
 	
 	/**
@@ -72,9 +79,9 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 	 * @param multipart Multipart definition assigning (possibly multiple) models to states.
 	 * @return BlockStateDefinition for datageneration.
 	 */
-	public static BlockStateFile multipart(Multipart multipart)
+	public static BlockModelDefinition multipart(Multipart multipart)
 	{
-		return new BlockStateFile(Optional.empty(), Optional.of(multipart));
+		return new BlockModelDefinition(Optional.empty(), Optional.of(multipart.toVanilla()));
 	}
 	
 	/**
@@ -83,9 +90,48 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 	 * @param multipart Multipart definition assigning (possibly multiple) models to states.
 	 * @return BlockStateDefinition for datageneration
 	 */
-	public static BlockStateFile variantsAndMultipart(Variants variants, Multipart multipart)
+	public static BlockModelDefinition variantsAndMultipart(Variants variants, Multipart multipart)
 	{
-		return new BlockStateFile(Optional.of(variants), Optional.of(multipart));
+		return new BlockModelDefinition(Optional.of(variants.toVanilla()), Optional.of(multipart.toVanilla()));
+	}
+	
+	private static BlockStateModel.Unbaked vanillifyModels(List<Model> models)
+	{
+		if (models.size() == 1)
+		{
+			Model model = models.get(0);
+			return new SingleVariant.Unbaked(new net.minecraft.client.renderer.block.model.Variant(
+				model.model,
+				new net.minecraft.client.renderer.block.model.Variant.SimpleModelState(model.x, model.y, model.uvLock)));
+		}
+		else
+		{
+			return new WeightedVariants.Unbaked(WeightedList.of(models.stream().map(model -> new Weighted<BlockStateModel.Unbaked>(
+				new SingleVariant.Unbaked(new net.minecraft.client.renderer.block.model.Variant(
+					model.model,
+					new net.minecraft.client.renderer.block.model.Variant.SimpleModelState(model.x, model.y, model.uvLock))),
+				model.weight))
+				.toList()));
+		}
+	}
+	
+	private static Condition vanillifyCondition(Either<OrCase, Case> when)
+	{
+		return when.<Condition>map(
+			orCase -> new CombinedCondition(
+				CombinedCondition.Operation.OR,
+				orCase.cases.stream().map(either -> vanillifyCondition(either)).toList()),
+			oneCase -> {
+				Map<String, KeyValueCondition.Terms> tests = new HashMap<>();
+				
+				oneCase.conditions.forEach((key,value) -> KeyValueCondition.Terms.parse(value)
+					.resultOrPartial(e -> {
+						throw new RuntimeException(e);
+					})
+					.ifPresent(result -> tests.put(key,result)));
+				
+				return new KeyValueCondition(tests);
+			});
 	}
 
 	/**
@@ -149,6 +195,17 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 		{
 			this.variants.put(values, Arrays.asList(models));
 			return this;
+		}
+		
+		public BlockModelDefinition.SimpleModelSelectors toVanilla()
+		{
+			Map<String, BlockStateModel.Unbaked> selectors = new HashMap<>();
+			variants.forEach((propertyValues,models) -> {
+				selectors.put(
+					String.join(",", propertyValues.stream().map(PropertyValue::toString).toList()),
+					vanillifyModels(models));
+			});
+			return new BlockModelDefinition.SimpleModelSelectors(selectors);
 		}
 	}
 	
@@ -223,6 +280,20 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 		{
 			this.cases.add(whenApply);
 			return this;
+		}
+		
+		public BlockModelDefinition.MultiPartDefinition toVanilla()
+		{
+			List<Selector> selectors = new ArrayList<>();
+			
+			for (var whenApply : cases)
+			{
+				selectors.add(new Selector(
+					whenApply.when.map(when -> vanillifyCondition(when)),
+					vanillifyModels(whenApply.apply)));
+			}
+			
+			return new BlockModelDefinition.MultiPartDefinition(selectors);
 		}
 	}
 	
@@ -405,13 +476,13 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 	 * @param uvLock Whether to lock UVs when rotating model.
 	 * @param weight Weight of model part when used in a list of model parts. Must be positive.
 	 */
-	public static record Model(ResourceLocation model, int x, int y, boolean uvLock, int weight)
+	public static record Model(ResourceLocation model, Quadrant x, Quadrant y, boolean uvLock, int weight)
 	{
 		/** codec **/
 		public static final Codec<Model> CODEC = RecordCodecBuilder.<Model>create(instance -> instance.group(
 				ResourceLocation.CODEC.fieldOf("model").forGetter(Model::model),
-				Codec.INT.optionalFieldOf("x",0).forGetter(Model::x),
-				Codec.INT.optionalFieldOf("y",0).forGetter(Model::y),
+				Quadrant.CODEC.optionalFieldOf("x",Quadrant.R0).forGetter(Model::x),
+				Quadrant.CODEC.optionalFieldOf("y",Quadrant.R0).forGetter(Model::y),
 				Codec.BOOL.optionalFieldOf("uvlock",false).forGetter(Model::uvLock),
 				Codec.INT.optionalFieldOf("weight",1).forGetter(Model::weight)
 			).apply(instance, Model::new));
@@ -472,10 +543,7 @@ public record BlockStateFile(Optional<Variants> variants, Optional<Multipart> mu
 		 */
 		public static Model create(ResourceLocation model, BlockModelRotation rotation, boolean uvLock, int weight)
 		{
-			int ordinal = rotation.ordinal();
-			int x = (ordinal / 4) * 90;
-			int y = (ordinal % 4) * 90;
-			return new Model(model, x, y, uvLock, weight);
+			return new Model(model, rotation.xRotation, rotation.yRotation, uvLock, weight);
 		}
 	}
 }

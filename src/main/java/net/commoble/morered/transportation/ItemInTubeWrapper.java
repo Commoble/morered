@@ -1,11 +1,11 @@
 package net.commoble.morered.transportation;
 
-import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.Queue;
 
 import com.mojang.math.OctahedralGroup;
 
+import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
@@ -59,11 +59,11 @@ public class ItemInTubeWrapper
 	
 	public static ItemInTubeWrapper readFromNBT(CompoundTag compound, OctahedralGroup group, HolderLookup.Provider registries)
 	{
-		ItemStack stack = ItemStack.parseOptional(registries, compound.getCompound(ITEM));
-		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG);
-		int ticksElapsed = compound.getInt(TICKS_REMAINING_TAG);
-		int maxDuration = compound.getInt(TICKS_DURATION_TAG);
-		boolean isFreshlyInserted = compound.getBoolean(IS_FRESHLY_INSERTED);
+		ItemStack stack = ItemStack.parse(registries, compound.getCompoundOrEmpty(ITEM)).orElse(ItemStack.EMPTY);
+		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG).orElse(new int[0]);
+		int ticksElapsed = compound.getIntOr(TICKS_REMAINING_TAG, 0);
+		int maxDuration = compound.getIntOr(TICKS_DURATION_TAG, 10);
+		boolean isFreshlyInserted = compound.getBooleanOr(IS_FRESHLY_INSERTED, false);
 
 		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(stack, decompressMoveList(moveBuffer, group), maxDuration);
 		wrapper.ticksElapsed = ticksElapsed;
@@ -94,7 +94,7 @@ public class ItemInTubeWrapper
 		
 		OctahedralGroup normalizer = group.inverse();
 		int moveIndex = 0;
-		ArrayList<Integer> buffer = new ArrayList<Integer>();
+		IntArrayList buffer = new IntArrayList();
 		Direction currentMove = moves.peek();
 		buffer.add(normalizer.rotate(currentMove).ordinal());
 		buffer.add(0);
@@ -110,11 +110,11 @@ public class ItemInTubeWrapper
 			}
 			else
 			{
-				buffer.set(moveIndex+1, buffer.get(moveIndex+1)+1);
+				buffer.set(moveIndex+1, buffer.getInt(moveIndex+1)+1);
 			}
 		}
 		
-		IntArrayTag nbt = new IntArrayTag(buffer);
+		IntArrayTag nbt = new IntArrayTag(buffer.toIntArray());
 
 		return nbt;
 	}

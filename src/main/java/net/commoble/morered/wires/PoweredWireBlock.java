@@ -14,6 +14,7 @@ import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.util.WireVoxelHelpers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -174,9 +175,9 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 	}
 
 	@Override
-	public void onRemove(BlockState oldState, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	public void onPlace(BlockState newState, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		super.onRemove(oldState, worldIn, pos, newState, isMoving);
+		super.onPlace(newState, worldIn, pos, oldState, isMoving);
 		if (this.notifyAttachedNeighbors && this.useIndirectPower)
 		{
 			// after doing graph updates, we may need to proc additional diagonal updates on remove
@@ -184,7 +185,23 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 			{
 				BlockPos neighborPos = pos.relative(directionToNeighbor);
 				Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(worldIn, directionToNeighbor, null);
-				worldIn.updateNeighborsAtExceptFromFacing(neighborPos, newState.getBlock(), directionToNeighbor.getOpposite(), orientation);
+				worldIn.updateNeighborsAtExceptFromFacing(neighborPos, this, directionToNeighbor.getOpposite(), orientation);
+			}
+		}
+	}
+
+	@Override
+	protected void affectNeighborsAfterRemoval(BlockState oldState, ServerLevel level, BlockPos pos, boolean isMoving)
+	{
+		super.affectNeighborsAfterRemoval(oldState, level, pos, isMoving);
+		if (this.notifyAttachedNeighbors && this.useIndirectPower)
+		{
+			// after doing graph updates, we may need to proc additional diagonal updates on remove
+			for (Direction directionToNeighbor : Direction.values())
+			{
+				BlockPos neighborPos = pos.relative(directionToNeighbor);
+				Orientation orientation = ExperimentalRedstoneUtils.initialOrientation(level, directionToNeighbor, null);
+				level.updateNeighborsAtExceptFromFacing(neighborPos, this, directionToNeighbor.getOpposite(), orientation);
 			}
 		}
 	}

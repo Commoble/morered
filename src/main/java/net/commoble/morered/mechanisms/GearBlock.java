@@ -1,6 +1,6 @@
 package net.commoble.morered.mechanisms;
 
-import java.util.EnumMap;
+import java.util.Map;
 
 import javax.annotation.Nullable;
 
@@ -32,7 +32,7 @@ public class GearBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 	public static final EnumProperty<Direction> FACING = BlockStateProperties.FACING;
 	public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
     
-	public static final EnumMap<Direction,VoxelShape> SHAPES = Util.makeEnumMap(Direction.class, dir -> {
+	public static final Map<Direction,VoxelShape> SHAPES = Util.makeEnumMap(Direction.class, dir -> {
 		double minX = dir == Direction.EAST ? 14D : 0D;
 		double maxX = dir == Direction.WEST ? 2D : 16D;
 		double minY = dir == Direction.UP ? 14D : 0D;

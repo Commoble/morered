@@ -117,8 +117,8 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	public void loadAdditional(CompoundTag compound, Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		this.clockwiseInput = compound.getInt(CLOCKWISE_INPUT);
-		this.counterClockwiseInput = compound.getInt(COUNTERCLOCKWISE_INPUT);
+		this.clockwiseInput = compound.getIntOr(CLOCKWISE_INPUT,0);
+		this.counterClockwiseInput = compound.getIntOr(COUNTERCLOCKWISE_INPUT,0);
 	}
 
 	@Override

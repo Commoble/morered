@@ -1,7 +1,10 @@
-# 1.21.4-8.0.0.0
-* Updated to use exmachina 0.10.0.0-beta
+# 1.21.5-8.0.0.0
+* Updated to 1.21.5
+* Updated to use exmachina 0.11.0.0-beta
 * Added new blocks:
   * Axles
+  * Gears
+  * Gearshifters
   * Windcatchers
 * Added client config value machineRenderCycleTicks which controls animation length of most machines
 

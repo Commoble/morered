@@ -282,11 +282,12 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 		}
 		super.setPlacedBy(level, pos, state, entity, stack);
 	}
+	
+	
 
 	@Override
-	protected void onRemove(BlockState oldState, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	protected void onPlace(BlockState newState, Level level, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
-		// TODO refactor this in 1.21.5, there should be a new method for dropping inventory
 		if (level.getBlockEntity(pos) instanceof GenericBlockEntity be)
 		{
 			var items = be.get(MoreRed.get().gearsDataComponent.get());
@@ -310,9 +311,8 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 					be.set(MoreRed.get().gearsDataComponent.get(), newDataComponent);
 				}
 			}
-			
 		}
-		super.onRemove(oldState, level, pos, newState, isMoving);
+		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 	
 	public static Map<Direction, ItemStack> normalizeGears(BlockState state, RegistryLookup.Provider provider, Map<Direction,ItemStack> oldValues)

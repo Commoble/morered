@@ -21,6 +21,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
 
 public record AxleBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, ItemStack> stackCache) implements BlockEntityRenderer<GenericBlockEntity>
 {
@@ -31,7 +32,7 @@ public record AxleBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 	}
 
 	@Override
-	public void render(GenericBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay)
+	public void render(GenericBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay, Vec3 camera)
 	{
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		MechanicalState mechanicalState = states.getOrDefault(NodeShape.ofCube(), MechanicalState.ZERO);

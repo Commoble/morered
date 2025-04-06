@@ -13,6 +13,7 @@ import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
 import com.mojang.datafixers.util.Function3;
@@ -22,6 +23,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.core.HolderLookup.RegistryLookup;
+import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap.Builder;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.TypedDataComponent;
@@ -58,6 +60,7 @@ public class GenericBlockEntity extends BlockEntity
 	private final Set<AttachmentSerializer<?>> syncedAttachments;
 	private final Map<DataComponentType<?>, DataTransformer<?>> dataTransformers;
 	private final List<AttachmentTransformer<?>> attachmentTransformers;
+	private final PreRemoveSideEffects preRemoveSideEffects;
 	
 	private Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 
@@ -67,7 +70,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<DataComponentType<?>> itemDataComponents,
 		Set<AttachmentSerializer<?>> syncedAttachments,
 		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers,
-		List<AttachmentTransformer<?>> attachmentTransformers)
+		List<AttachmentTransformer<?>> attachmentTransformers,
+		PreRemoveSideEffects preRemoveSideEffects)
 	{
 		super(type,pos,state);
 		this.serverDataComponents = serverDataComponents;
@@ -76,6 +80,7 @@ public class GenericBlockEntity extends BlockEntity
 		this.syncedAttachments = syncedAttachments;
 		this.dataTransformers = dataTransformers;
 		this.attachmentTransformers = attachmentTransformers;
+		this.preRemoveSideEffects = preRemoveSideEffects;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -214,7 +219,7 @@ public class GenericBlockEntity extends BlockEntity
 	protected void loadAdditional(CompoundTag tag, Provider provider)
 	{
 		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
-		CompoundTag attachmentsTag = tag.getCompound(ATTACHMENTS_NBT_KEY);
+		CompoundTag attachmentsTag = tag.getCompoundOrEmpty(ATTACHMENTS_NBT_KEY);
 		for (var transformer : this.attachmentTransformers)
 		{
 			// attachment internals are locked down super hard and I don't feel like adding more accessor mixins
@@ -225,7 +230,7 @@ public class GenericBlockEntity extends BlockEntity
 		}
 		tag.put(ATTACHMENTS_NBT_KEY, attachmentsTag);
 		super.loadAdditional(tag, provider);
-		CompoundTag dataTag = tag.getCompound(DATA);
+		CompoundTag dataTag = tag.getCompoundOrEmpty(DATA);
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -278,7 +283,7 @@ public class GenericBlockEntity extends BlockEntity
 	{
 		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
 		
-		CompoundTag dataTag = tag.getCompound(DATA);
+		CompoundTag dataTag = tag.getCompoundOrEmpty(DATA);
 		Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 		for (DataComponentType<?> type : this.syncedDataComponents)
 		{
@@ -293,7 +298,7 @@ public class GenericBlockEntity extends BlockEntity
 		}
 		this.data = data;
 		
-		CompoundTag attachmentTag = tag.getCompound(ATTACHMENTS);
+		CompoundTag attachmentTag = tag.getCompoundOrEmpty(ATTACHMENTS);
 		for (var serializer : this.syncedAttachments)
 		{
 			serializer.read(attachmentTag, this, ops);
@@ -314,7 +319,7 @@ public class GenericBlockEntity extends BlockEntity
 	}
 
 	@Override
-	protected void applyImplicitComponents(DataComponentInput input)
+	protected void applyImplicitComponents(DataComponentGetter input)
 	{
 		super.applyImplicitComponents(input);
 		for (var type : this.itemDataComponents)
@@ -347,7 +352,7 @@ public class GenericBlockEntity extends BlockEntity
 		super.removeComponentsFromTag(tag);
 		if (tag.contains(DATA))
 		{
-			CompoundTag dataTag = tag.getCompound(DATA);
+			CompoundTag dataTag = tag.getCompoundOrEmpty(DATA);
 			for (var type : this.itemDataComponents)
 			{
 				String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
@@ -356,6 +361,14 @@ public class GenericBlockEntity extends BlockEntity
 		}
 	}
 	
+	
+	
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState state)
+	{
+		this.preRemoveSideEffects.apply(pos, state, this);
+	}
+
 	public static GenericBlockEntityBuilder builder()
 	{
 		return new GenericBlockEntityBuilder(
@@ -364,7 +377,8 @@ public class GenericBlockEntity extends BlockEntity
 			new HashSet<>(),
 			new HashSet<>(),
 			new HashMap<>(),
-			new ArrayList<>()
+			new ArrayList<>(),
+			new MutableObject<>(PreRemoveSideEffects.NONE)
 		);
 	}
 	
@@ -374,7 +388,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<Supplier<? extends DataComponentType<?>>> itemDataComponents,
 		Set<AttachmentSerializer<?>> syncedAttachments,
 		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers,
-		List<AttachmentTransformer<?>> attachmentTransformers
+		List<AttachmentTransformer<?>> attachmentTransformers,
+		MutableObject<PreRemoveSideEffects> preRemoveSideEffects
 	)
 	{
 		/**
@@ -466,6 +481,12 @@ public class GenericBlockEntity extends BlockEntity
 			this.attachmentTransformers.add(new AttachmentTransformer<>(new AttachmentSerializer<>(type,codec),onSave,onLoad));
 			return this;
 		}
+		
+		public GenericBlockEntityBuilder preRemoveSideEffects(PreRemoveSideEffects effects)
+		{
+			this.preRemoveSideEffects.setValue(effects);
+			return this;
+		}
 
 		@SuppressWarnings("unchecked")
 		public DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> register(
@@ -500,7 +521,8 @@ public class GenericBlockEntity extends BlockEntity
 							dataTransformers.entrySet().stream().collect(Collectors.toMap(
 								entry -> entry.getKey().get(),
 								Map.Entry::getValue)),
-							attachmentTransformers),
+							attachmentTransformers,
+							this.preRemoveSideEffects.getValue()),
 						Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new))
 				);
 			return holder;
@@ -590,5 +612,12 @@ public class GenericBlockEntity extends BlockEntity
 				this.serializer.write(attachmentsTag, denormalizedData, ops);
 			});
 		}
+	}
+	
+	@FunctionalInterface
+	public static interface PreRemoveSideEffects
+	{
+		public static final PreRemoveSideEffects NONE = (pos,newState,be) -> {};
+		public abstract void apply(BlockPos pos, BlockState newState, GenericBlockEntity be);
 	}
 }

@@ -71,7 +71,7 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 	public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(tag, registries);
-		this.inventory.deserializeNBT(registries, tag.getCompound(INV_KEY));
+		this.inventory.deserializeNBT(registries, tag.getCompoundOrEmpty(INV_KEY));
 	}
 
 	@Override

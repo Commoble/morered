@@ -78,7 +78,7 @@ public class SingleInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	public void loadAdditional(CompoundTag compound, Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		this.input = compound.getInt(INPUT);
+		this.input = compound.getIntOr(INPUT,0);
 	}
 
 	@Override

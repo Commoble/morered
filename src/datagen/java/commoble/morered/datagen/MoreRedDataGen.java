@@ -10,6 +10,7 @@ import java.util.concurrent.CompletableFuture;
 import org.apache.commons.lang3.text.WordUtils;
 
 import com.google.common.collect.ImmutableList;
+import com.mojang.math.Quadrant;
 
 import commoble.morered.datagen.BlockStateFile.Case;
 import commoble.morered.datagen.BlockStateFile.Model;
@@ -55,6 +56,7 @@ import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
 import net.minecraft.Util;
 import net.minecraft.client.color.item.Constant;
+import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CompositeModel;
@@ -122,7 +124,7 @@ public class MoreRedDataGen
 		PackOutput output = generator.getPackOutput();
 		
 		RegistrySetBuilder registrySetBuilder = new RegistrySetBuilder();
-		Map<ResourceLocation, BlockStateFile> blockStates = new HashMap<>();
+		Map<ResourceLocation, BlockModelDefinition> blockStates = new HashMap<>();
 		Map<ResourceLocation, ClientItem> clientItems = new HashMap<>();
 		Map<ResourceLocation, SimpleModel> models = new HashMap<>();
 		Map<ResourceLocation, WirePartModelDefinition> wirePartModels = new HashMap<>();
@@ -836,7 +838,7 @@ public class MoreRedDataGen
 					ResourceKey.create(ExMachinaRegistries.MECHANICAL_COMPONENT, id),
 					component)));
 		
-		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockStateFile.CODEC, blockStates));
+		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockModelDefinition.CODEC, blockStates));
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems));
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
 		generator.addProvider(true, JsonDataProvider.named(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", WirePartModelDefinition.CODEC, wirePartModels, "morered wire models"));
@@ -879,13 +881,15 @@ public class MoreRedDataGen
 					case WEST -> new int[] {270,180,90,180}[rotationIndex];
 					case EAST -> new int[] {90,0,270,0}[rotationIndex];
 				};
+				Quadrant qx = Quadrant.parseJson(x);
+				Quadrant qy = Quadrant.parseJson(y);
 				variantBuilder.addVariant(List.of(
 						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
 						PropertyValue.create(PlateBlock.ROTATION, rotationIndex)),
-					Model.create(stateModel, BlockModelRotation.by(x, y)));
+					Model.create(stateModel, BlockModelRotation.by(qx, qy)));
 			}
 		}
-		BlockStateFile blockState = BlockStateFile.variants(variantBuilder);
+		BlockModelDefinition blockState = BlockStateFile.variants(variantBuilder);
 		LootTable lootTable = simpleLoot(block);
 		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
 		blockHelper.simpleBlockItem();
@@ -932,10 +936,12 @@ public class MoreRedDataGen
 		{
 			int x = xs[dir.ordinal()];
 			int y = ys[dir.ordinal()];
+			Quadrant qx = Quadrant.parseJson(x);
+			Quadrant qy = Quadrant.parseJson(y);
 			variants.addVariant(PropertyValue.create(BlockStateProperties.FACING, dir),
-				Model.create(blockModel, BlockModelRotation.by(x, y)));
+				Model.create(blockModel, BlockModelRotation.by(qx, qy)));
 		}
-		BlockStateFile blockState = BlockStateFile.variants(variants);
+		BlockModelDefinition blockState = BlockStateFile.variants(variants);
 		BlockDataHelper blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.localize(name);
 		blockHelper.tags(BlockTags.MINEABLE_WITH_PICKAXE);
@@ -990,6 +996,7 @@ public class MoreRedDataGen
 					case WEST -> 270;
 					default -> 0;
 				};
+				Quadrant qy = Quadrant.parseJson(y);
 				for (AttachFace face : AttachFace.values())
 				{
 					int x = switch(face) {
@@ -997,12 +1004,13 @@ public class MoreRedDataGen
 						case FLOOR -> 270;
 						case WALL -> 0;
 					};
+					Quadrant qx = Quadrant.parseJson(x);
 					
 					variants.addVariant(List.of(
 						PropertyValue.create(HexidecrubrometerBlock.READING_FACE, face),
 						PropertyValue.create(HexidecrubrometerBlock.ROTATION, facing),
 						PropertyValue.create(HexidecrubrometerBlock.POWER, power)),
-						Model.create(modelId, BlockModelRotation.by(x, y)));
+						Model.create(modelId, BlockModelRotation.by(qx, qy)));
 				}
 			}
 		}
@@ -1055,19 +1063,21 @@ public class MoreRedDataGen
 					case WEST -> new int[] {270,180,90,180}[rotationIndex];
 					case EAST -> new int[] {90,0,270,0}[rotationIndex];
 				};
+				Quadrant qx = Quadrant.parseJson(x);
+				Quadrant qy = Quadrant.parseJson(y);
 				variantBuilder.addVariant(List.of(
 						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
 						PropertyValue.create(PlateBlock.ROTATION, rotationIndex),
 						PropertyValue.create(PlateBlockStateProperties.INPUT_B, false)),
-					Model.create(stateModel, BlockModelRotation.by(x, y)));
+					Model.create(stateModel, BlockModelRotation.by(qx, qy)));
 				variantBuilder.addVariant(List.of(
 					PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
 					PropertyValue.create(PlateBlock.ROTATION, rotationIndex),
 					PropertyValue.create(PlateBlockStateProperties.INPUT_B, true)),
-				Model.create(stateModelSwitched, BlockModelRotation.by(x, y)));
+				Model.create(stateModelSwitched, BlockModelRotation.by(qx, qy)));
 			}
 		}
-		BlockStateFile blockState = BlockStateFile.variants(variantBuilder);
+		BlockModelDefinition blockState = BlockStateFile.variants(variantBuilder);
 		
 		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.localize(blockName);
@@ -1085,7 +1095,7 @@ public class MoreRedDataGen
 		ResourceLocation partsModel = mangle(blockId, "block/%s_parts");
 		ResourceLocation nodeModel = mangle(blockId, "block/%s_node");
 		ResourceLocation elbowModel = mangle(blockId, "block/%s_elbow");
-		BlockStateFile blockState = BlockStateFile.multipart(Multipart.builder()
+		BlockModelDefinition blockState = BlockStateFile.multipart(Multipart.builder()
 			.addWhenApply(WhenApply.always(Model.create(partsModel)))
 			.addWhenApply(WhenApply.when(
 				Case.create(AbstractWireBlock.DOWN, true),
@@ -1196,7 +1206,7 @@ public class MoreRedDataGen
 			simpleLoot(block));
 	}
 	
-	static BlockDataHelper tubeBlock(String blockPath, String blockName, DataGenContext context, BlockStateFile blockState)
+	static BlockDataHelper tubeBlock(String blockPath, String blockName, DataGenContext context, BlockModelDefinition blockState)
 	{
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
@@ -1286,7 +1296,7 @@ public class MoreRedDataGen
 			.localize(name);
 	}
 	
-	private static BlockStateFile tubeBlockState(Block block)
+	private static BlockModelDefinition tubeBlockState(Block block)
 	{
 		ResourceLocation blockModel = BlockDataHelper.blockModel(block);
 		ResourceLocation extension = mangle(blockModel, "%s_extension");
@@ -1314,7 +1324,7 @@ public class MoreRedDataGen
 			);
 	}
 	
-	private static BlockStateFile redstoneTubeBlockState(Block block)
+	private static BlockModelDefinition redstoneTubeBlockState(Block block)
 	{
 		ResourceLocation blockModel = BlockDataHelper.blockModel(block);
 		ResourceLocation offModel = blockModel;
@@ -1348,7 +1358,7 @@ public class MoreRedDataGen
 			);
 	}
 	
-	private static BlockStateFile sixWayBlockState(Block block)
+	private static BlockModelDefinition sixWayBlockState(Block block)
 	{
 		var builder = Variants.builder();
 		ResourceLocation model = BlockDataHelper.blockModel(block);

@@ -306,4 +306,11 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		this.transmissionNodes = null;
 	}
+
+	@Override
+	public void preRemoveSideEffects(BlockPos pos, BlockState oldState)
+	{
+		this.clearRemoteConnections();
+		AbstractPostBlock.updatePostSet(this.level, pos, Set<BlockPos>::remove);
+	}
 }

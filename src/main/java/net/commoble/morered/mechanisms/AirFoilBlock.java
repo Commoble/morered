@@ -6,7 +6,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
@@ -68,9 +67,9 @@ public class AirFoilBlock extends Block
 	}
 
 	@Override
-	protected void onRemove(BlockState thisState, Level level, BlockPos pos, BlockState newState, boolean isMoving)
+	protected void affectNeighborsAfterRemoval(BlockState thisState, ServerLevel level, BlockPos pos, boolean moveByPiston)
 	{
-		super.onRemove(thisState, level, pos, newState, isMoving);
+		super.affectNeighborsAfterRemoval(thisState,level,pos,moveByPiston);
 		BlockPos corePos = getCorePos(thisState.getValue(SEGMENT), pos);
 		if (level.getBlockState(corePos).is(MoreRed.Tags.Blocks.WINDCATCHERS))
 		{

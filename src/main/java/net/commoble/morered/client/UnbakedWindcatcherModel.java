@@ -18,12 +18,12 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.mechanisms.WindcatcherColors;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModel.BakingContext;
 import net.minecraft.client.renderer.item.ItemModel.Unbaked;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -32,7 +32,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.client.model.SimpleModelState;
 
 public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation airfoil, Map<DyeColor,ResourceLocation> airfoilSails) implements ItemModel.Unbaked
 {
@@ -45,9 +44,9 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 	@Override
 	public void resolveDependencies(Resolver resolver)
 	{
-		resolver.resolve(this.axle);
-		resolver.resolve(this.airfoil);
-		this.airfoilSails.values().forEach(resolver::resolve);
+		resolver.markDependency(this.axle);
+		resolver.markDependency(this.airfoil);
+		this.airfoilSails.values().forEach(resolver::markDependency);
 	}
 
 	@Override
@@ -59,7 +58,6 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 	@Override
 	public ItemModel bake(BakingContext context)
 	{
-		var baker = context.blockModelBaker();
 		Map<SailKey,ItemModel> bakedSails = new HashMap<>();
 		List<ItemModel> bakedFoils = new ArrayList<>();
 		for (int i=0; i<4; i++)
@@ -69,13 +67,14 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 			int z = dir.getStepZ();
 			int rotations = (i+2)%4; // north = 0, east = 1, etc
 			Quaternionf rotation = Axis.YN.rotationDegrees(90*rotations);
-			ModelState modelState = new SimpleModelState(new Transformation(new Vector3f(x,0,z),rotation,null,null));
-			bakedFoils.add(new BlockModelWrapper(baker.bake(airfoil, modelState), List.of()));
+			ModelState modelState = new TransformationModelState(new Transformation(new Vector3f(x,0,z),rotation,null,null));
+			bakedFoils.add(ModelUtil.wrapBlockModel(context, airfoil, modelState, List.of()));
 			airfoilSails.forEach((color,id) ->
-				bakedSails.put(new SailKey(color,dir), new BlockModelWrapper(baker.bake(id, modelState), List.of())));
+				bakedSails.put(new SailKey(color,dir),
+					ModelUtil.wrapBlockModel(context, id, modelState, List.of())));
 		}
 		return new WindcatcherModel(
-			new BlockModelWrapper(context.bake(this.axle), List.of()),
+			ModelUtil.wrapBlockModel(context, this.axle, BlockModelRotation.X0_Y0, List.of()),
 			bakedFoils,
 			bakedSails);
 	}

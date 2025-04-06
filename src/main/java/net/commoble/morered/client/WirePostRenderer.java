@@ -59,7 +59,7 @@ public class WirePostRenderer implements BlockEntityRenderer<WirePostBlockEntity
 
 	// heavily based on fishing rod line renderer
 	@Override
-	public void render(WirePostBlockEntity post, float partialTicks, PoseStack matrices, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn)
+	public void render(WirePostBlockEntity post, float partialTicks, PoseStack matrices, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn, Vec3 camera)
 	{
 		BlockPos postPos = post.getBlockPos();
 		Vec3 postVector = Vec3.atCenterOf(postPos);

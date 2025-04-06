@@ -95,8 +95,8 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
 	{
 		super.loadAdditional(compound, registries);
-		CompoundTag inventory = compound.getCompound(INV_KEY);
-		this.filterStack = ItemStack.parseOptional(registries, inventory);
+		CompoundTag inventory = compound.getCompoundOrEmpty(INV_KEY);
+		this.filterStack = ItemStack.parse(registries, inventory).orElse(ItemStack.EMPTY);
 	}
 	
 	@Override

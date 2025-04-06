@@ -145,6 +145,7 @@ import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -502,7 +503,10 @@ public class MoreRed
 					.strength(2F)
 					.sound(woodSet.soundType())
 					.noOcclusion()
-					.forceSolidOff()),
+		            .isValidSpawn(Blocks::never)
+		            .isRedstoneConductor(($,$$,$$$)->false)
+		            .isSuffocating(($,$$,$$$)->false)
+		            .isViewBlocking(($,$$,$$$)->false)),
 				GearshifterBlock::new));
 			
 			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
@@ -513,7 +517,10 @@ public class MoreRed
 					.ignitedByLava()
 					.noOcclusion()
 					.randomTicks()
-					.isSuffocating(($,$$,$$$) -> false),
+		            .isValidSpawn(Blocks::never)
+		            .isRedstoneConductor(($,$$,$$$)->false)
+		            .isSuffocating(($,$$,$$$)->false)
+		            .isViewBlocking(($,$$,$$$)->false),
 				WindcatcherBlock::new,
 				Item.Properties::new,
 				WindCatcherBlockItem::new
@@ -884,7 +891,7 @@ public class MoreRed
 		{
 			PacketDistributor.sendToPlayer(player, new SyncPostsInChunkPacket(pos, postsInChunk));
 		}
-		PacketDistributor.sendToPlayer(player, new SyncTubesInChunkPacket(pos, TubesInChunk.getTubesInChunk(chunk)));
+		PacketDistributor.sendToPlayer(player, new SyncTubesInChunkPacket(pos, Set.copyOf(TubesInChunk.getTubesInChunk(chunk))));
 	}
 	
 	private void onDataPackSyncEvent(OnDatapackSyncEvent event)

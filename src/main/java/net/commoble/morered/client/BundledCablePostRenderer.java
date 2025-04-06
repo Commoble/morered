@@ -50,7 +50,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 
 	// heavily based on fishing rod line renderer
 	@Override
-	public void render(WirePostBlockEntity post, float partialTicks, PoseStack matrices, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn)
+	public void render(WirePostBlockEntity post, float partialTicks, PoseStack matrices, MultiBufferSource buffer, int combinedLightIn, int combinedOverlayIn, Vec3 camera)
 	{
 		TextureAtlasSprite sprite = MATERIAL.sprite();
 		float totalMinU = sprite.getU0();

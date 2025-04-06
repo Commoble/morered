@@ -8,16 +8,11 @@ import net.commoble.morered.transportation.OsmosisFilterBlock;
 import net.commoble.morered.transportation.OsmosisSlimeBlock;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.client.model.data.ModelData;
+import net.minecraft.world.phys.Vec3;
 
 public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
 {	
@@ -27,13 +22,13 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
 	}
 
 	@Override
-	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB)
+	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB, Vec3 camera)
 	{
-		super.render(filter, partialTicks, matrix, buffer, intA, intB);
-		this.renderSlime(filter, partialTicks, matrix, buffer, intA, intB);
+		super.render(filter, partialTicks, matrix, buffer, intA, intB, camera);
+		this.renderSlime(filter, partialTicks, matrix, buffer, intA, intB, camera);
 	}
 
-	private void renderSlime(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB)
+	private void renderSlime(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB, Vec3 camera)
 	{
 		BlockPos blockpos = filter.getBlockPos();
 		BlockState filterState = filter.getBlockState();
@@ -80,22 +75,7 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
 		
 		Minecraft mc = Minecraft.getInstance();
 		var blockRenderer = mc.getBlockRenderer();
-		RenderType bufferType = Sheets.translucentItemSheet();
-		RenderType renderType = RenderType.translucent();
-		BakedModel blockModel = blockRenderer.getBlockModel(renderState);
-		blockRenderer.getModelRenderer().tesselateWithAO(
-			filter.getLevel(),
-			blockModel,
-			renderState,
-			blockpos,
-			matrix,
-			Minecraft.getInstance().renderBuffers().bufferSource().getBuffer(bufferType),
-			false,
-			RandomSource.create(),
-			blockpos.asLong(),
-			OverlayTexture.NO_OVERLAY,
-			ModelData.EMPTY,
-			renderType);
+		blockRenderer.renderSingleBlock(renderState,matrix,buffer,intA,intB,filter.getLevel(),blockpos);
 		matrix.popPose();
 	}
 }

@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -126,7 +127,6 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	}
 
 	// Get the redstone power output that can be conducted indirectly through solid cubes
-	@Deprecated
 	@Override
 	public int getDirectSignal(BlockState blockState, BlockGetter blockAccess, BlockPos pos, Direction side)
 	{
@@ -134,7 +134,6 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	}
 	
 	@Override
-	@Deprecated
 	public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving)
 	{
 		super.onPlace(state, worldIn, pos, oldState, isMoving);
@@ -142,18 +141,13 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	}
 	
 	@Override
-	@Deprecated
-	public void onRemove(BlockState state, Level worldIn, BlockPos pos, BlockState newState, boolean isMoving)
+	public void affectNeighborsAfterRemoval(BlockState thisState, ServerLevel worldIn, BlockPos pos, boolean isMoving)
 	{
-		if (!isMoving && state.getBlock() != newState.getBlock())
-		{
-			super.onRemove(state, worldIn, pos, newState, isMoving);
-			this.notifyNeighbors(worldIn, pos, state);
-		}
+		super.affectNeighborsAfterRemoval(thisState, worldIn, pos, isMoving);
+		this.notifyNeighbors(worldIn, pos, thisState);
 	}
 
 	@Override
-	@Deprecated
 	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block blockIn, @Nullable Orientation orientation, boolean isMoving)
 	{
 		super.neighborChanged(state, worldIn, pos, blockIn, orientation, isMoving);
