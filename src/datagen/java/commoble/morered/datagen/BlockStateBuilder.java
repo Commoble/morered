@@ -26,28 +26,23 @@ SOFTWARE.
 package commoble.morered.datagen;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Quadrant;
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.block.model.SingleVariant;
+import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.client.renderer.block.model.multipart.CombinedCondition;
 import net.minecraft.client.renderer.block.model.multipart.Condition;
 import net.minecraft.client.renderer.block.model.multipart.KeyValueCondition;
 import net.minecraft.client.renderer.block.model.multipart.Selector;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.WeightedVariants;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -60,9 +55,9 @@ import net.neoforged.neoforge.common.data.JsonCodecProvider;
 /**
  * Alternative datageneration for blockstate jsons. Usable with {@link JsonCodecProvider}.
  */
-public final class BlockStateFile
+public final class BlockStateBuilder
 {
-	private BlockStateFile() {}
+	private BlockStateBuilder() {}
 	
 	/**
 	 * Specifies a blockstate file with a variants definition. See {@link Variants#builder}.
@@ -95,24 +90,39 @@ public final class BlockStateFile
 		return new BlockModelDefinition(Optional.of(variants.toVanilla()), Optional.of(multipart.toVanilla()));
 	}
 	
-	private static BlockStateModel.Unbaked vanillifyModels(List<Model> models)
+	/**
+	 * {@return new Unbaked BlockStateModel with no rotation, no uvlock}
+	 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
+	 */
+	public static BlockStateModel.Unbaked model(ResourceLocation model)
 	{
-		if (models.size() == 1)
-		{
-			Model model = models.get(0);
-			return new SingleVariant.Unbaked(new net.minecraft.client.renderer.block.model.Variant(
-				model.model,
-				new net.minecraft.client.renderer.block.model.Variant.SimpleModelState(model.x, model.y, model.uvLock)));
-		}
-		else
-		{
-			return new WeightedVariants.Unbaked(WeightedList.of(models.stream().map(model -> new Weighted<BlockStateModel.Unbaked>(
-				new SingleVariant.Unbaked(new net.minecraft.client.renderer.block.model.Variant(
-					model.model,
-					new net.minecraft.client.renderer.block.model.Variant.SimpleModelState(model.x, model.y, model.uvLock))),
-				model.weight))
-				.toList()));
-		}
+		return model(model, Quadrant.R0, Quadrant.R0);
+	}
+	
+	/**
+	 * {@return new Unbaked BlockStateModel with specified rotation and no uvlock}
+	 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
+	 * @param x x-rotation to apply to the model
+	 * @param y y-rotation to apply to the model
+	 */
+	public static BlockStateModel.Unbaked model(ResourceLocation model, Quadrant x, Quadrant y)
+	{
+		return model(model, x, y, false);
+	}
+	
+	/**
+	 * {@return new Unbaked BlockStateModel with specified rotation and uvlock}
+	 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
+	 * @param x x-rotation to apply to the model
+	 * @param y y-rotation to apply to the model
+	 * @param uvLock whether to lock UVs
+	 */
+	public static BlockStateModel.Unbaked model(ResourceLocation model, Quadrant x, Quadrant y, boolean uvLock)
+	{
+		return new SingleVariant.Unbaked(new Variant(model)
+			.withXRot(x)
+			.withYRot(y)
+			.withUvLock(uvLock));
 	}
 	
 	private static Condition vanillifyCondition(Either<OrCase, Case> when)
@@ -138,16 +148,8 @@ public final class BlockStateFile
 	 * Represents a "variants" block in a blockstate json.
 	 * @param variants Map of blockstate property predicates to models
 	 */
-	public static record Variants(Map<List<PropertyValue<?>>, List<Model>> variants)
+	public static record Variants(Map<List<PropertyValue<?>>, BlockStateModel.Unbaked> variants)
 	{
-		/** codec **/
-		public static final Codec<Variants> CODEC = Codec.unboundedMap(
-				PropertyValue.LIST_CODEC,
-				Codec.either(Model.CODEC, Model.CODEC.listOf()).xmap(
-					either -> either.map(List::of, Function.identity()),
-					list -> list.size() == 1 ? Either.left(list.get(0)) : Either.right(list)))
-			.xmap(Variants::new, Variants::variants);
-		
 		/**
 		 * Creates and returns a mutable VariantBlockStateDefinition for whom variants can be defined.
 		 * Once variants are added to the definition, giving this to a JsonDataProvider
@@ -163,47 +165,45 @@ public final class BlockStateFile
 		
 		/**
 		 * Convenience method for a variants blockstate file without blockstate predication
-		 * @param models Model definitions to use. More than one indicates a list of random models.
-		 * @return new Variants
+		 * @param model Unbaked BlockStateModel to use
+		 * @return new Variants which applies the given model to all blockstates
 		 */
-		public static Variants always(Model... models)
+		public static Variants always(BlockStateModel.Unbaked model)
 		{
-			return Variants.builder().addVariant(List.of(), models);
+			return Variants.builder().addVariant(List.of(), model);
 		}
-
+		
 		/**
 		 * Adds a variant for your blockstate json
 		 * @param value e.g. "facing=east"
-		 * @param models Model definition, e.g. { "model": "minecraft:block/acacia_stairs_inner" }. Providing more than one
-		 * indicates a list of random models (e.g. stone's models).
+		 * @param model BlockStateModel.Unbaked, e.g. { "model": "minecraft:block/acacia_stairs_inner" } 
 		 * @return this
 		 */
-		public Variants addVariant(PropertyValue<?> value, Model... models)
+		public Variants addVariant(PropertyValue<?> value, BlockStateModel.Unbaked model)
 		{
-			this.addVariant(List.of(value), models);
+			this.addVariant(List.of(value), model);
 			return this;
 		}
 		
 		/**
 		 * Adds a variant for your blockstate json
 		 * @param values e.g. "facing=east,powered=false"
-		 * @param models Model definition, e.g. { "model": "minecraft:block/acacia_stairs_inner" }. Providing more than one
-		 * indicates a list of random models (e.g. stone's models).
+		 * @param model Model definition, e.g. { "model": "minecraft:block/acacia_stairs_inner" }.
 		 * @return this
 		 */
-		public Variants addVariant(List<PropertyValue<?>> values, Model... models)
+		public Variants addVariant(List<PropertyValue<?>> values, BlockStateModel.Unbaked model)
 		{
-			this.variants.put(values, Arrays.asList(models));
+			this.variants.put(values, model);
 			return this;
 		}
 		
 		public BlockModelDefinition.SimpleModelSelectors toVanilla()
 		{
 			Map<String, BlockStateModel.Unbaked> selectors = new HashMap<>();
-			variants.forEach((propertyValues,models) -> {
+			variants.forEach((propertyValues,model) -> {
 				selectors.put(
 					String.join(",", propertyValues.stream().map(PropertyValue::toString).toList()),
-					vanillifyModels(models));
+					model);
 			});
 			return new BlockModelDefinition.SimpleModelSelectors(selectors);
 		}
@@ -216,17 +216,7 @@ public final class BlockStateFile
 	 * @param value value of a blockstate Property.
 	 */
 	public static record PropertyValue<T extends Comparable<T>>(Property<T> property, T value)
-	{
-		/** codec **/
-		public static final Codec<PropertyValue<?>> CODEC = Codec.STRING.comapFlatMap(
-			s -> DataResult.error(() -> "PropertyValue not deserializable"),
-			PropertyValue::toString);
-		
-		/** list codec **/
-		public static final Codec<List<PropertyValue<?>>> LIST_CODEC = Codec.STRING.comapFlatMap(
-			s -> DataResult.error(() -> "PropertyValue List not deserializable"),
-			values -> String.join(",", values.stream().map(PropertyValue::toString).toArray(String[]::new)));
-		
+	{		
 		/**
 		 * Creates a property value from a property and a value
 		 * @param <T> value type
@@ -255,9 +245,6 @@ public final class BlockStateFile
 	 */
 	public static record Multipart(List<WhenApply> cases)
 	{
-		/** codec **/
-		public static final Codec<Multipart> CODEC = WhenApply.CODEC.listOf().xmap(Multipart::new, Multipart::cases);
-
 		/**
 		 * Creates and returns a MultipartBlockStateDefinition for whom cases can be defined.
 		 * Once cases are added to the definition, giving this to a JsonDataProvider
@@ -290,10 +277,64 @@ public final class BlockStateFile
 			{
 				selectors.add(new Selector(
 					whenApply.when.map(when -> vanillifyCondition(when)),
-					vanillifyModels(whenApply.apply)));
+					whenApply.apply));
 			}
 			
 			return new BlockModelDefinition.MultiPartDefinition(selectors);
+		}
+	}
+	
+	/**
+	 * Half-built builder for a WhenApply, specifying the blockstate conditions but not the model(s)
+	 * @param when Case, OrCase, or always-case if empty
+	 */
+	public static record When(Optional<Either<OrCase,Case>> when)
+	{
+		/**
+		 * {@return When builder for a Case}
+		 * @param when Case determining which blockstates to apply model parts to
+		 */
+		public static When when(Case when)
+		{
+			return new When(Optional.of(Either.right(when)));
+		}
+		
+		/**
+		 * {@return When builder for an OrCase}
+		 * @param when OrCase determining which blockstates to apply model parts to
+		 */
+		public static When or(OrCase when)
+		{
+			return new When(Optional.of(Either.left(when)));
+		}
+		
+		/**
+		 * {@return When builder which will apply model to all blockstates}
+		 */
+		public static When always()
+		{
+			return new When(Optional.empty());
+		}
+		
+		/**
+		 * {@return WhenApply applying a single model to the specified blockstates}
+		 * @param apply Unbaked BlockStateModel to apply to the specified blockstates
+		 */
+		public WhenApply apply(BlockStateModel.Unbaked apply)
+		{
+			return new WhenApply(this.when, apply);
+		}
+		
+		/**
+		 * {@return WhenApply with random weighted models
+		 * @param firstModel Weighted Unbaked BlockStateModel
+		 * @param secondModel Weighted Unbaked BlockStateModel
+		 * @param additionalModels additional models as needed
+		 */
+		@SafeVarargs
+		public final WhenApply applyRandomModels(Weighted<BlockStateModel.Unbaked> firstModel, Weighted<BlockStateModel.Unbaked> secondModel, Weighted<BlockStateModel.Unbaked>... additionalModels)
+		{
+			return new WhenApply(this.when, new WeightedVariants.Unbaked(WeightedList.of(Lists.asList(firstModel, secondModel, additionalModels))));
 		}
 	}
 	
@@ -305,55 +346,10 @@ public final class BlockStateFile
 	 * If a Case is provided, the model list will be used for blockstates that match that case.
 	 * If an OrCase is provided, the model list will be used for blockstates that match any of the sub-cases.
 	 * If no case is provided, the model list will be used for all blockstates. 
-	 * @param apply List of models to randomly apply to a blockstate at a position if the 'when' case
-	 * applies to that blockstate. Must contain at least one model. If the list contains more than
-	 * one model, one model will randomly be applied at each position containing the relevant blockstates.
+	 * @param apply Unbaked BlockStateModel to apply for the given blockstate(s)
 	 */
-	public static record WhenApply(Optional<Either<OrCase, Case>> when, List<Model> apply)
+	public static record WhenApply(Optional<Either<OrCase, Case>> when, BlockStateModel.Unbaked apply)
 	{
-		/** codec **/
-		public static final Codec<WhenApply> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-				Codec.either(OrCase.CODEC, Case.CODEC).optionalFieldOf("when").forGetter(WhenApply::when),
-				Codec.either(Model.CODEC.listOf(), Model.CODEC).xmap(
-						either -> either.map(Function.identity(), List::of), // map list/singleton to list
-						list -> list.size() == 1 ? Either.right(list.get(0)) : Either.left(list)) // map list to list/singleton
-					.fieldOf("apply").forGetter(WhenApply::apply)
-			).apply(builder, WhenApply::new));
-		
-		/**
-		 * Builder-like factory for datageneration, using a single-case when.
-		 * @param when CaseDefinition, all of whose cases must be true to apply the model part.
-		 * @param apply Model to apply when the 'when' is true for a given blockstate.
-		 * @param additionalRandomModels optional additional Model(s) to include. One model from all models will be randomly chosen per block position.
-		 * @return ModelSet builder
-		 */
-		public static WhenApply when(Case when, Model apply, Model... additionalRandomModels)
-		{
-			return new WhenApply(Optional.of(Either.right(when)), Lists.asList(apply, additionalRandomModels));
-		}
-		
-		/**
-		 * Builder-like factory for datageneration, using an OR-case when.
-		 * @param when OrCase, any of whose cases must be true to apply the model part.
-		 * @param apply Model to apply when the 'when' is true for a given blockstate.
-		 * @param additionalRandomModels optional additional Model(s) to include. One model from all models will be randomly chosen per block position.
-		 * @return WhenApply builder
-		 */
-		public static WhenApply or(OrCase when, Model apply, Model... additionalRandomModels)
-		{
-			return new WhenApply(Optional.of(Either.left(when)), Lists.asList(apply, additionalRandomModels));
-		}
-		
-		/**
-		 * Builder-like factory for datageneration, applying a Part to all blockstates.
-		 * @param apply Model to apply to all blockstates.
-		 * @param additionalRandomModels optional additional Model(s) to include. One model from all models will be randomly chosen per block position.
-		 * @return WhenAPply builder
-		 */
-		public static WhenApply always(Model apply, Model... additionalRandomModels)
-		{
-			return new WhenApply(Optional.empty(), Lists.asList(apply, additionalRandomModels));
-		}
 	}
 	
 	/**
@@ -366,11 +362,7 @@ public final class BlockStateFile
 	 * @param conditions Map of property-value conditions.
 	 */
 	public static record Case(Map<String,String> conditions)
-	{
-		/** codec **/
-		public static final Codec<Case> CODEC = Codec.unboundedMap(Codec.STRING, Codec.STRING)
-			.xmap(Case::new, Case::conditions);
-		
+	{		
 		/**
 		 * Convenience method returning a single-property case
 		 * @param <T> The property's value type, e.g. facing properties use {@link Direction}
@@ -428,13 +420,7 @@ public final class BlockStateFile
 	 * @param cases List of Cases and/or OrCases to predicate blockstates with
 	 */
 	public static record OrCase(List<Either<OrCase, Case>> cases)
-	{
-		/** codec **/
-		public static final Codec<OrCase> CODEC =
-			Codec.either(Codec.lazyInitialized(() -> OrCase.CODEC), Case.CODEC)
-				.listOf().fieldOf("OR").codec()
-				.xmap(OrCase::new, OrCase::cases);
-		
+	{		
 		/**
 		 * Builder-like helper for datageneration
 		 * @return OrCase with mutable list of conditions
@@ -464,86 +450,6 @@ public final class BlockStateFile
 		{
 			this.cases.add(Either.left(orCase));
 			return this;
-		}
-	}
-	
-	/**
-	 * Component representing a rotated model object in variant and multipart definitions.
-	 * 
-	 * @param model Model id, e.g. minecraft:block/dirt
-	 * @param x Model x-rotation. Must be 0, 90, 180, or 270.
-	 * @param y Model y-rotation. Must be 0, 90, 180, or 270.
-	 * @param uvLock Whether to lock UVs when rotating model.
-	 * @param weight Weight of model part when used in a list of model parts. Must be positive.
-	 */
-	public static record Model(ResourceLocation model, Quadrant x, Quadrant y, boolean uvLock, int weight)
-	{
-		/** codec **/
-		public static final Codec<Model> CODEC = RecordCodecBuilder.<Model>create(instance -> instance.group(
-				ResourceLocation.CODEC.fieldOf("model").forGetter(Model::model),
-				Quadrant.CODEC.optionalFieldOf("x",Quadrant.R0).forGetter(Model::x),
-				Quadrant.CODEC.optionalFieldOf("y",Quadrant.R0).forGetter(Model::y),
-				Codec.BOOL.optionalFieldOf("uvlock",false).forGetter(Model::uvLock),
-				Codec.INT.optionalFieldOf("weight",1).forGetter(Model::weight)
-			).apply(instance, Model::new));
-		
-		/**
-		 * Component representing a rotated model object in variant and multipart definitions.
-		 * 
-		 * @param model Model id, e.g. minecraft:block/dirt
-		 * @param x Model x-rotation. Must be 0, 90, 180, or 270.
-		 * @param y Model y-rotation. Must be 0, 90, 180, or 270.
-		 * @param uvLock Whether to lock UVs when rotating model.
-		 * @param weight Weight of model part when used in a list of model parts. Must be positive.
-		 */
-		public Model
-		{
-			if (BlockModelRotation.by(x, y) == null)
-				throw new IllegalArgumentException(String.format("Invalid blockstate model part rotation: x=%s, y=%s (must be 0, 90, 180, or 270)", x, y));
-			if (weight < 1)
-				throw new IllegalArgumentException(String.format("Invalid blockstate model part weight %s: weight must be positive", weight));
-		}
-		
-		/**
-		 * {@return new Model with no rotation, no uvlock, and weight 1}
-		 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
-		 */
-		public static Model create(ResourceLocation model)
-		{
-			return create(model, BlockModelRotation.X0_Y0);
-		}
-		
-		/**
-		 * {@return new Model with no uvlock and weight 1}
-		 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
-		 * @param rotation x-y rotation to apply to the model
-		 */
-		public static Model create(ResourceLocation model, BlockModelRotation rotation)
-		{
-			return create(model, rotation, false);
-		}
-		
-		/**
-		 * {@return Model with weight 1}
-		 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
-		 * @param rotation x-y rotation to apply to the model
-		 * @param uvLock whether to lock UVs
-		 */
-		public static Model create(ResourceLocation model, BlockModelRotation rotation, boolean uvLock)
-		{
-			return create(model, rotation, uvLock, 1);
-		}
-		
-		/**
-		 * {@return new Model}
-		 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
-		 * @param rotation x-y rotation to apply to the model
-		 * @param uvLock whether to lock UVs
-		 * @param weight weighting of positional-random Models, only used when multiple models are used in a variant/case
-		 */
-		public static Model create(ResourceLocation model, BlockModelRotation rotation, boolean uvLock, int weight)
-		{
-			return new Model(model, rotation.xRotation, rotation.yRotation, uvLock, weight);
 		}
 	}
 }

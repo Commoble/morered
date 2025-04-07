@@ -17,7 +17,6 @@ public record DataGenContext(
 	Map<ResourceLocation, BlockModelDefinition> blockStates,
 	Map<ResourceLocation, ClientItem> clientItems,
 	Map<ResourceLocation, SimpleModel> models,
-	Map<ResourceLocation, WirePartModelDefinition> wirePartModels,
 	Map<ResourceLocation, Recipe<?>> recipes,
 	Map<ResourceLocation, LootTable> lootTables,
 	DataMapsProvider dataMaps,

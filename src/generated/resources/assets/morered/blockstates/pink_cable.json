@@ -2,7 +2,9 @@
   "multipart": [
     {
       "apply": {
-        "model": "morered:block/pink_cable_parts"
+        "type": "morered:wire_parts",
+        "edge": "morered:block/pink_cable_edge",
+        "line": "morered:block/pink_cable_line"
       }
     },
     {

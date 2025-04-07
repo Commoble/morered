@@ -20,20 +20,20 @@
       "apply": {
         "model": "morered:block/tube_extension",
         "uvlock": true,
-        "x": 270
+        "x": 90
       },
       "when": {
-        "up": "true"
+        "down": "true"
       }
     },
     {
       "apply": {
         "model": "morered:block/tube_extension",
         "uvlock": true,
-        "x": 90
+        "x": 270
       },
       "when": {
-        "down": "true"
+        "up": "true"
       }
     },
     {
