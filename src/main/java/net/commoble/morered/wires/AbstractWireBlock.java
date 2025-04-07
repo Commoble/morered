@@ -323,16 +323,8 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 		boolean doPowerUpdate = true;
 		if (this.isEmptyWireBlock(newState)) // wire block has no attached faces and consists only of fake wire edges
 		{
-			long edgeFlags = this.getEdgeFlags(worldIn,pos);
-			if (edgeFlags == 0)	// if we don't need to be rendering any edges, set wire block to air
-			{
-				// removing the block will call onReplaced again, but using the newBlock != this condition
-				worldIn.removeBlock(pos, false);
-			}
-			else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
-			{
-				wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(newState, worldIn, pos));
-			}
+			// delay until next tick, because we can't destroy the block in onPlace (confuses the setBlock code)
+			worldIn.scheduleTick(pos, this, 1);
 			doPowerUpdate = false;
 		}
 		else if (worldIn.getBlockEntity(pos) instanceof WireBlockEntity wire)
@@ -343,6 +335,23 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 		if (doPowerUpdate)
 		{
 			ExMachinaGameEvents.scheduleSignalGraphUpdate(worldIn, pos);
+		}
+	}
+	
+	
+	@Override
+	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource rand)
+	{
+		super.tick(state, level, pos, rand);
+		long edgeFlags = this.getEdgeFlags(level,pos);
+		if (edgeFlags == 0)	// if we don't need to be rendering any edges, set wire block to air
+		{
+			// removing the block will call onReplaced again, but using the newBlock != this condition
+			level.removeBlock(pos, false);
+		}
+		else if (level.getBlockEntity(pos) instanceof WireBlockEntity wire)
+		{
+			wire.setConnectionsWithServerUpdate(this.getExpandedShapeIndex(state, level, pos));
 		}
 	}
 
@@ -383,16 +392,12 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 	@Override
 	public void neighborChanged(BlockState state, Level worldIn, BlockPos pos, Block neighborBlock, Orientation orientation, boolean isMoving)
 	{
-		long edgeFlags = this.getEdgeFlags(worldIn,pos);
 		boolean doGraphUpdate = true;
 		// if this is an empty wire block, remove it if no edges are valid anymore
 		if (this.isEmptyWireBlock(state))
 		{
-			if (edgeFlags == 0)
-			{
-				worldIn.removeBlock(pos, false);
-				doGraphUpdate = false;
-			}
+			worldIn.scheduleTick(pos, this, 1);
+			doGraphUpdate = false;
 		}
 		// if this is a non-empty wire block and the changed state is an air block
 		else
