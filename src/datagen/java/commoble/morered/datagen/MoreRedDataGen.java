@@ -50,7 +50,6 @@ import net.commoble.morered.transportation.ColoredTubeBlock;
 import net.commoble.morered.transportation.ExtractorBlock;
 import net.commoble.morered.transportation.RedstoneTubeBlock;
 import net.commoble.morered.transportation.TubeBlock;
-import net.commoble.morered.util.ExtraMachina;
 import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
@@ -662,10 +661,10 @@ public class MoreRedDataGen
 						.add(GearshifterBlock.ROTATION, rotation),
 						new RawNode(NodeShape.ofSide(bigDir), 0D,0D,0D, 2D, List.of(
 							new RawConnection(Optional.of(bigDir), NodeShape.ofSide(bigDir.getOpposite()), Parity.POSITIVE, 0),
-							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), ExtraMachina.swapParity(bigDir, smallDir), 16))),
+							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.inversion(bigDir, smallDir), 16))),
 						new RawNode(NodeShape.ofSide(smallDir), 0D,0D,0D, 0.5D, List.of(
 							new RawConnection(Optional.of(smallDir), NodeShape.ofSide(smallDir.getOpposite()), Parity.POSITIVE,0),
-							new RawConnection(Optional.empty(), NodeShape.ofSide(bigDir), ExtraMachina.swapParity(bigDir, smallDir), 8),
+							new RawConnection(Optional.empty(), NodeShape.ofSide(bigDir), Parity.inversion(bigDir, smallDir), 8),
 							new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.POSITIVE, 0))),
 						new RawNode(NodeShape.ofSide(axleDir), 0D,0D,0D, 0.02D, List.of(
 							new RawConnection(Optional.of(axleDir), NodeShape.ofSide(axleDir.getOpposite()), Parity.POSITIVE,0),
@@ -775,7 +774,7 @@ public class MoreRedDataGen
 				connections.add(new RawConnection(
 					Optional.empty(),
 					NodeShape.ofSide(internalSide),
-					ExtraMachina.swapParity(directionToNeighbor, internalSide),
+					Parity.inversion(directionToNeighbor, internalSide),
 					16));
 				// also connect to the four parallel neighbors
 				Direction parallelDirection = internalSide;
