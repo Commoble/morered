@@ -8,14 +8,22 @@ import javax.annotation.Nullable;
 import net.commoble.exmachina.api.MechanicalState;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.PlayerData;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
@@ -32,9 +40,11 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.neoforged.neoforge.common.Tags;
 
 public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterloggedBlock
 {
@@ -192,4 +202,43 @@ public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterl
 		return true;
 	}
 	
+	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
+	{
+		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
+		
+		// rotate the block when the player pokes it with a wrench
+		if (isPlayerHoldingWrench && !level.isClientSide)
+		{
+			BlockState newState;
+			level.playSound(null, pos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS,
+				0.9F + level.random.nextFloat()*0.1F,
+				0.95F + level.random.nextFloat()*0.1F);
+			if (PlayerData.getSprinting(player.getUUID()))
+			{
+				// rotate around small gear... weird math here
+				// firstly, figure out which way small gear is facing
+				Direction bigDir = state.getValue(ATTACHMENT_DIRECTION);
+				int rotation = state.getValue(ROTATION);
+				Direction smallDir = BlockStateUtil.getOutputDirection(bigDir, rotation);
+				// now we'd like to rotate bigDir around the smalldir axis
+				// use our rotation indexer using smallDir as the primary axis
+				int bigRotationIndex = BlockStateUtil.getRotationIndexForDirection(smallDir, bigDir);
+				int nextBigRotationIndex = (bigRotationIndex+1) % 4;
+				Direction newBigDir = BlockStateUtil.getOutputDirection(smallDir, nextBigRotationIndex);
+				// now we just need to find the rotation index that preserves smalldir
+				int newSmallRotation = BlockStateUtil.getRotationIndexForDirection(newBigDir, smallDir);
+				newState = state.setValue(ATTACHMENT_DIRECTION, newBigDir)
+					.setValue(ROTATION, newSmallRotation);
+			}
+			else
+			{
+				// rotate around big gear
+				int newRotation = (state.getValue(ROTATION) + 1) % 4;
+				newState = state.setValue(ROTATION, newRotation);
+			}
+			level.setBlockAndUpdate(pos, newState);
+		}
+		
+		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+	}
 }
