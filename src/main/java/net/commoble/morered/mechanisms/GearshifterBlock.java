@@ -9,6 +9,7 @@ import net.commoble.exmachina.api.MechanicalState;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.PlayerData;
+import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
@@ -28,8 +29,6 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -46,7 +45,7 @@ import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.Tags;
 
-public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterloggedBlock
+public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, SimpleWaterloggedBlock
 {
 	// direction of big gear attachment
 	public static final EnumProperty<Direction> ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
@@ -63,8 +62,6 @@ public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterl
 	{
 		super(props);
 		this.registerDefaultState(this.defaultBlockState()
-			.setValue(ATTACHMENT_DIRECTION, DEFAULT_BIG_DIR)
-			.setValue(ROTATION, 0)
 			.setValue(WATERLOGGED, false));
 	}
 
@@ -72,7 +69,7 @@ public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterl
 	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
-		builder.add(ATTACHMENT_DIRECTION, ROTATION, WATERLOGGED);
+		builder.add(WATERLOGGED);
 	}
 
 	@Override
@@ -85,8 +82,10 @@ public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterl
 	@Override
 	public BlockState getStateForPlacement(BlockPlaceContext context)
 	{
-		// we should probably rename this since it's not exactly just plate blocks anymore, it's 24-orientation blocks
-		return PlateBlockStateProperties.getStateForPlacedGatePlate(this.defaultBlockState(), context);
+		return super.getStateForPlacement(context)
+			.setValue(
+				WATERLOGGED,
+				context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
 	}
 	
 	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> runtimeData)
@@ -145,44 +144,6 @@ public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterl
 	{
 		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
-	
-	@Override
-	public BlockState rotate(BlockState state, Rotation rotation)
-	{
-		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
-		{
-			Direction attachmentDirection = state.getValue(ATTACHMENT_DIRECTION);
-			int rotationIndex = state.getValue(ROTATION);
-
-			Direction newAttachmentDirection = rotation.rotate(attachmentDirection);
-			int newRotationIndex = BlockStateUtil.getRotatedRotation(attachmentDirection, rotationIndex, rotation);
-
-			return state.setValue(ATTACHMENT_DIRECTION, newAttachmentDirection).setValue(ROTATION, newRotationIndex);
-		}
-		else
-		{
-			return state;
-		}
-	}
-
-	@Override
-	public BlockState mirror(BlockState state, Mirror mirror)
-	{
-		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
-		{
-			Direction attachmentDirection = state.getValue(ATTACHMENT_DIRECTION);
-			int rotationIndex = state.getValue(ROTATION);
-
-			Direction newAttachmentDirection = mirror.mirror(attachmentDirection);
-			int newRotationIndex = BlockStateUtil.getMirroredRotation(attachmentDirection, rotationIndex, mirror);
-
-			return state.setValue(ATTACHMENT_DIRECTION, newAttachmentDirection).setValue(ROTATION, newRotationIndex);
-		}
-		else
-		{
-			return state;
-		}
-	}
 
 	@Override
 	protected VoxelShape getVisualShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
@@ -240,5 +201,11 @@ public class GearshifterBlock extends Block implements EntityBlock, SimpleWaterl
 		}
 		
 		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+	}
+
+	@Override
+	public boolean hasBlockStateModelsForPlacementPreview(BlockState state)
+	{
+		return false;
 	}
 }

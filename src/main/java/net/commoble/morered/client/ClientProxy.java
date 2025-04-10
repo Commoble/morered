@@ -15,10 +15,9 @@ import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.IsWasSprintPacket;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
+import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.mechanisms.GearsBlock;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
-import net.commoble.morered.plate_blocks.PlateBlock;
-import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.transportation.FilterMenu;
 import net.commoble.morered.transportation.RaytraceHelper;
@@ -48,9 +47,11 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -117,6 +118,19 @@ public class ClientProxy
 	public static Set<BlockPos> getPostsInChunk(ChunkPos pos)
 	{
 		return clientPostsInChunk.getOrDefault(pos, Set.of());
+	}
+	
+	@SuppressWarnings("resource")
+	public static boolean getSprintingIfClientPlayer(Player player)
+	{
+		if (player == Minecraft.getInstance().player)
+		{
+			return getWasSprinting();
+		}
+		else
+		{
+			return false;
+		}
 	}
 	
 	public static boolean getWasSprinting()
@@ -278,11 +292,13 @@ public class ClientProxy
 			if (player != null && player.level() != null)
 			{
 				InteractionHand hand = player.getUsedItemHand();
-				Item item = player.getItemInHand(hand == null ? InteractionHand.MAIN_HAND : hand).getItem();
+				hand = hand == null ? InteractionHand.MAIN_HAND : hand;
+				ItemStack stack = player.getItemInHand(hand);
+				Item item = stack.getItem();
 				if (item instanceof BlockItem blockItem)
 				{
 					Block block = blockItem.getBlock();
-					if (block instanceof PlateBlock)
+					if (block instanceof TwentyFourBlock twentyFourBlock)
 					{
 						Level world = player.level();
 						BlockHitResult rayTrace = event.getTarget();
@@ -300,9 +316,16 @@ public class ClientProxy
 							
 							Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentDirection);
 							BlockStateUtil.getRotationIndexForDirection(attachmentDirection, outputDirection);
-							BlockState state = PlateBlockStateProperties.getStateForPlacedGatePlate(block.defaultBlockState(), placePos, attachmentDirection, relativeHitVec);
+							BlockState state = twentyFourBlock.getStateForPlacement(new BlockPlaceContext(player, hand, stack, rayTrace));
 							
-							BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getCamera().getPosition(), event.getPoseStack(), event.getMultiBufferSource());
+							if (twentyFourBlock.hasBlockStateModelsForPlacementPreview(state))
+							{
+								BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getCamera().getPosition(), event.getPoseStack(), event.getMultiBufferSource());							
+							}
+							else
+							{
+								BlockPreviewRenderer.renderHeldItemAsBlockPreview(placePos, stack, state, world, event.getCamera().getPosition(), event.getPoseStack(), event.getMultiBufferSource());
+							}
 							
 						}
 					}

@@ -1,5 +1,6 @@
 package net.commoble.morered.plate_blocks;
 
+import net.commoble.morered.PlayerData;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -63,22 +64,28 @@ public class PlateBlockStateProperties
 		// option B: the orientation depends on which part of the face was clicked, not the player's facing
 		// this gives more control to the player but might be confusing
 		// we may want to render a preview of the placement somehow
-
+		if (!state.hasProperty(ATTACHMENT_DIRECTION) || !state.hasProperty(ROTATION))
+			return state;
+		
 		BlockPos placePos = context.getClickedPos();
 		Direction faceOfAdjacentBlock = context.getClickedFace();
 		Direction directionTowardAdjacentBlock = faceOfAdjacentBlock.getOpposite();
 		Vec3 relativeHitVec = context.getClickLocation().subtract(Vec3.atLowerCornerOf(placePos));
-		return getStateForPlacedGatePlate(state, placePos, directionTowardAdjacentBlock, relativeHitVec); 
-	}
-	
-	public static BlockState getStateForPlacedGatePlate(BlockState state, BlockPos placePos, Direction directionTowardAdjacentBlock, Vec3 relativeHitVec)
-	{
 		Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, directionTowardAdjacentBlock);
 		int rotationIndex = BlockStateUtil.getRotationIndexForDirection(directionTowardAdjacentBlock, outputDirection);
-		
-		if (state.hasProperty(ATTACHMENT_DIRECTION) && state.hasProperty(ROTATION))
+		state = state.setValue(ATTACHMENT_DIRECTION, directionTowardAdjacentBlock).setValue(ROTATION, rotationIndex);
+		// normally, place with the attachment facing the clicked face
+		// if holding ctrl/sprint, place with output direction facing the clicked face
+		if (PlayerData.getCommonInteractionSprinting(context.getPlayer()))
 		{
-			return state.setValue(ATTACHMENT_DIRECTION, directionTowardAdjacentBlock).setValue(ROTATION, rotationIndex);
+			Direction oldAttachDir = state.getValue(ATTACHMENT_DIRECTION);
+			Direction oldOutputDir = PlateBlockStateProperties.getOutputDirection(state);
+			Direction newAttachDir = oldOutputDir;
+			Direction newOutputDir = oldAttachDir;
+			int newRotation = BlockStateUtil.getRotationIndexForDirection(newAttachDir, newOutputDir);
+			return state
+				.setValue(ATTACHMENT_DIRECTION, newAttachDir)
+				.setValue(ROTATION, newRotation);
 		}
 		else
 		{

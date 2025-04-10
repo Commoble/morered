@@ -54,33 +54,7 @@ public record GearshifterBlockEntityRenderer(ItemRenderer itemRenderer, Map<Bloc
 		float smallRadians = smallRadiansPerSecond * seconds;
 		poseStack.pushPose();
 		poseStack.translate(0.5D,0.5D,0.5D); // item renderer renders the center of the item model at 0,0,0 in the cube
-		
-		// rotate the whole model based on the state
-		// first, apply rotation for axis direction
-		switch(bigDir)
-		{
-			// down = default for gearshifter, ignore
-			case UP:
-				poseStack.mulPose(Axis.XP.rotationDegrees(180));
-				poseStack.mulPose(Axis.YN.rotationDegrees(180)); // finaglement: secondary direction is always NORTH or UP by default
-				break;
-			case NORTH: poseStack.mulPose(Axis.XP.rotationDegrees(90));break;
-			case SOUTH:
-				poseStack.mulPose(Axis.XP.rotationDegrees(270));
-				poseStack.mulPose(Axis.YN.rotationDegrees(180));
-				break;
-			case WEST:
-				poseStack.mulPose(Axis.ZN.rotationDegrees(90));
-				poseStack.mulPose(Axis.YN.rotationDegrees(270));
-				break;
-			case EAST:
-				poseStack.mulPose(Axis.ZP.rotationDegrees(90));
-				poseStack.mulPose(Axis.YN.rotationDegrees(90));
-				break;
-			default:
-		}
-		// apply secondary rotation
-		poseStack.mulPose(Axis.YN.rotationDegrees(90 * faceRotations));
+		RenderHelper.rotateTwentyFourBlockPoseStack(poseStack, bigDir, faceRotations);
 		// render the big gear
 		// for whatever reason, if we point in a positive direction, we have to spin backward
 		Axis bigAxis = bigDir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.YN : Axis.YP;
