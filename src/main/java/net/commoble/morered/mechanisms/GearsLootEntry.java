@@ -37,6 +37,8 @@ public class GearsLootEntry extends LootPoolSingletonContainer
 			&& context.getParameter(LootContextParams.BLOCK_ENTITY) instanceof GenericBlockEntity be)
 		{
 			var items = be.get(MoreRed.get().gearsDataComponent.get());
+			if (items == null)
+				return;
 			for (Direction dir : Direction.values())
 			{
 				if (state.getValue(FaceSegmentBlock.getProperty(dir)))
