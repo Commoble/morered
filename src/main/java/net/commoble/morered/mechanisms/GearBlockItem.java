@@ -7,11 +7,13 @@ import javax.annotation.Nullable;
 import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -23,6 +25,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.Vec3;
 
 public class GearBlockItem extends BlockItem
 {
@@ -48,7 +52,7 @@ public class GearBlockItem extends BlockItem
 		BlockPos placePos = blockItemContext.getClickedPos();
 		// UseOnContext#getClickedPos, however, is the block we actually clicked
 		BlockPos activatedPos = context.getClickedPos();
-		Level world = context.getLevel();
+		Level level = context.getLevel();
 		Direction activatedFace = context.getClickedFace();
 		// if the block would be replaceable, just replace it (use default behavior)
 		// otherwise, see if we're adding the block to an existing gearblock
@@ -56,91 +60,165 @@ public class GearBlockItem extends BlockItem
 		// so check if they're *not* equal
 		if (!placePos.equals(activatedPos))
 		{
-			BlockState existingPlacePosState = world.getBlockState(placePos);
+			BlockState existingPlacePosState = level.getBlockState(placePos);
 			Direction attachmentSide = activatedFace.getOpposite();
 			BooleanProperty sideProperty = FaceSegmentBlock.getProperty(attachmentSide);
-			Block targetBlock = existingPlacePosState.getBlock();
+			Block placePosBlock = existingPlacePosState.getBlock();
+			
+			// firstly: if we used this on a gear/gears block, we might want to add the new gear inside that block
+			BlockState activatedState = level.getBlockState(activatedPos);
+			if (activatedState.getBlock() == MoreRed.get().gearsBlock.get()
+				&& activatedState.getValue(sideProperty))
+			{
+				// use a finagled context to make sure the block is placed at the activation pos
+				Vec3 relativeHitVec = context.getClickLocation().subtract(Vec3.atLowerCornerOf(activatedPos));
+				Direction newSideToAdd = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentSide);
+				BooleanProperty newSideProperty = FaceSegmentBlock.getProperty(newSideToAdd);
+				if (!activatedState.getValue(newSideProperty))
+				{
+					return upgradeGears(level, activatedPos, activatedState, newSideProperty, GearUpgradeContext.at(blockItemContext, activatedPos, activatedFace));	
+				}
+			}
+			if (activatedState.getBlock() instanceof GearBlock)
+			{
+				// if we clicked the inside of a gear block, add a new gear to that block
+				Direction existingSide = activatedState.getValue(GearBlock.FACING);
+				if (attachmentSide == existingSide)
+				{
+					// use a finagled context to make sure the block is placed at the activation pos
+					Vec3 relativeHitVec = context.getClickLocation().subtract(Vec3.atLowerCornerOf(activatedPos));
+					Direction newSideToAdd = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentSide);
+					return upgradeGear(level, activatedPos, activatedState, existingSide, newSideToAdd, GearUpgradeContext.at(blockItemContext, activatedPos, activatedFace));	
+				}
+			}
 			// if the position of placement contains a gear assembly
 			// but we don't have a gear on the given face,
-			if (targetBlock == MoreRed.get().gearsBlock.get()
+			if (placePosBlock == MoreRed.get().gearsBlock.get()
 				&& !existingPlacePosState.getValue(sideProperty))
 			{
-				// then add the gear to the block and decrement the itemstack and return
-				// (an EntityPlaceBlockEvent is fired by existing forge hooks)
-				BlockState newState = existingPlacePosState.setValue(sideProperty, true);
-				// attempt to set the block in the world with standard flags
-				if (!this.placeBlock(blockItemContext, newState))
-				{
-					return InteractionResult.FAIL;
-				}
-				// we should have parity with some of the standard blockitem stuff
-				// but we can skip the bits that deal with NBT and tile entities
-				ItemStack stack = context.getItemInHand();
-				@Nullable Player player = context.getPlayer();
-                newState.getBlock().setPlacedBy(world, placePos, newState, player, stack);
-				if (player instanceof ServerPlayer)
-				{
-					CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer) player, placePos, stack);
-				}
-
-				SoundType soundtype = newState.getSoundType(world, placePos, player);
-				world.playSound(player, placePos, this.getPlaceSound(newState, world, placePos, player), SoundSource.BLOCKS,
-					(soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-				if (player == null || !player.getAbilities().instabuild)
-				{
-					stack.shrink(1);
-				}
-
-				return InteractionResult.SUCCESS;
+				return upgradeGears(level, placePos, existingPlacePosState, sideProperty, blockItemContext);
 			}
 			// otherwise, check if we can upgrade a single gear to a gear assembly
-			else if (targetBlock instanceof GearBlock)
+			if (placePosBlock instanceof GearBlock)
 			{
 				Direction existingGearSide = existingPlacePosState.getValue(GearBlock.FACING);
 				if (existingGearSide != attachmentSide)
 				{
-					// set a new gear assembly using existing gear side + the new side we're placing
-					BlockState newState = MoreRed.get().gearsBlock.get().defaultBlockState()
-						.setValue(FaceSegmentBlock.getProperty(existingGearSide), true)
-						.setValue(sideProperty, true);
-						
-					// attempt to set the block in the world with standard flags
-					if (!this.placeBlock(blockItemContext, newState))
-					{
-						return InteractionResult.FAIL;
-					}
-					// we should have parity with some of the standard blockitem stuff
-					// but we can skip the bits that deal with NBT and tile entities
-					ItemStack stack = context.getItemInHand();
-					@Nullable Player player = context.getPlayer();
-					// don't do setPlacedBy, we need to finagle the existing gear into the data
-	                if (world.getBlockEntity(placePos) instanceof GenericBlockEntity be)
-	                {
-	                	Map<Direction,ItemStack> items = Map.of(
-	                		existingGearSide, new ItemStack(existingPlacePosState.getBlock()),
-	                		attachmentSide, stack.copyWithCount(1));
-	                	be.set(MoreRed.get().gearsDataComponent.get(), items);
-	                }
-					if (player instanceof ServerPlayer)
-					{
-						CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer) player, placePos, stack);
-					}
-
-					SoundType soundtype = newState.getSoundType(world, placePos, player);
-					world.playSound(player, placePos, this.getPlaceSound(newState, world, placePos, player), SoundSource.BLOCKS,
-						(soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
-					if (player == null || !player.getAbilities().instabuild)
-					{
-						stack.shrink(1);
-					}
-
-					// return SUCCESS for client thread worlds, CONSUME for server thread worlds (same as regular blockitem)
-					return InteractionResult.SUCCESS;
+					return upgradeGear(level, placePos, existingPlacePosState, existingGearSide, attachmentSide, blockItemContext);
 				}
 			}
 		}
 		
 		// otherwise, use it like a regular blockitem
 		return super.useOn(context);
+	}
+	
+	private InteractionResult upgradeGears(Level level, BlockPos pos, BlockState existingGearsState, BooleanProperty newSideProperty, BlockPlaceContext blockPlaceContext)
+	{
+		// then add the gear to the block and decrement the itemstack and return
+		// (an EntityPlaceBlockEvent is fired by existing forge hooks)
+		BlockState newState = existingGearsState.setValue(newSideProperty, true);
+		// attempt to set the block in the world with standard flags
+		if (!this.placeBlock(blockPlaceContext, newState))
+		{
+			return InteractionResult.FAIL;
+		}
+		// we should have parity with some of the standard blockitem stuff
+		// but we can skip the bits that deal with NBT and tile entities
+		ItemStack stack = blockPlaceContext.getItemInHand();
+		@Nullable Player player = blockPlaceContext.getPlayer();
+        newState.getBlock().setPlacedBy(level, pos, newState, player, stack);
+		if (player instanceof ServerPlayer)
+		{
+			CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer) player, pos, stack);
+		}
+
+		SoundType soundtype = newState.getSoundType(level, pos, player);
+		level.playSound(player, pos, this.getPlaceSound(newState, level, pos, player), SoundSource.BLOCKS,
+			(soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+		if (player == null || !player.getAbilities().instabuild)
+		{
+			stack.shrink(1);
+		}
+
+		return InteractionResult.SUCCESS;
+	}
+	
+	private InteractionResult upgradeGear(Level level, BlockPos pos, BlockState existingState, Direction existingGearSide, Direction newAttachmentSide, BlockPlaceContext blockPlaceContext)
+	{
+		BooleanProperty newSideProperty = FaceSegmentBlock.getProperty(newAttachmentSide);
+		// set a new gear assembly using existing gear side + the new side we're placing
+		BlockState newState = MoreRed.get().gearsBlock.get().defaultBlockState()
+			.setValue(FaceSegmentBlock.getProperty(existingGearSide), true)
+			.setValue(newSideProperty, true);
+			
+		// attempt to set the block in the world with standard flags
+		if (!this.placeBlock(blockPlaceContext, newState))
+		{
+			return InteractionResult.FAIL;
+		}
+		// we should have parity with some of the standard blockitem stuff
+		// but we can skip the bits that deal with NBT and tile entities
+		ItemStack stack = blockPlaceContext.getItemInHand();
+		@Nullable Player player = blockPlaceContext.getPlayer();
+		// don't do setPlacedBy, we need to finagle the existing gear into the data
+        if (level.getBlockEntity(pos) instanceof GenericBlockEntity be)
+        {
+        	Map<Direction,ItemStack> items = Map.of(
+        		existingGearSide, new ItemStack(existingState.getBlock()),
+        		newAttachmentSide, stack.copyWithCount(1));
+        	be.set(MoreRed.get().gearsDataComponent.get(), items);
+        }
+		if (player instanceof ServerPlayer)
+		{
+			CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer) player, pos, stack);
+		}
+
+		SoundType soundtype = newState.getSoundType(level, pos, player);
+		level.playSound(player, pos, this.getPlaceSound(newState, level, pos, player), SoundSource.BLOCKS,
+			(soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
+		if (player == null || !player.getAbilities().instabuild)
+		{
+			stack.shrink(1);
+		}
+
+		// return SUCCESS for client thread worlds, CONSUME for server thread worlds (same as regular blockitem)
+		return InteractionResult.SUCCESS;
+	}
+	
+	private static class GearUpgradeContext extends BlockPlaceContext
+	{
+		private final BlockPos actualPlacePos;
+		public GearUpgradeContext(Player player, InteractionHand hand, ItemStack stack, BlockHitResult result, BlockPos activatedPos)
+		{
+			super(player, hand, stack, result);
+			this.actualPlacePos = activatedPos;
+		}
+		
+		public static GearUpgradeContext at(BlockPlaceContext delegate, BlockPos activatedPos, Direction clickFace)
+		{
+			return new GearUpgradeContext(
+				delegate.getPlayer(),
+				delegate.getHand(),
+				delegate.getItemInHand(),
+				new BlockHitResult(
+					new Vec3(
+						activatedPos.getX() + 0.5 + clickFace.getStepX() * 0.5,
+						activatedPos.getY() + 0.5 + clickFace.getStepY() * 0.5,
+						activatedPos.getZ() + 0.5 + clickFace.getStepZ() * 0.5
+					),
+					clickFace,
+					activatedPos,
+					false
+				),
+				activatedPos);
+		}
+		
+		@Override
+		public BlockPos getClickedPos()
+		{
+			return this.actualPlacePos;
+		}
+		
 	}
 }
