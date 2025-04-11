@@ -336,7 +336,9 @@ public class GenericBlockEntity extends BlockEntity
 		for (var type : this.itemDataComponents)
 		{
 			var holder = this.data.get(type);
-			setImplicitComponent(builder, holder);
+			if (holder != null) {
+				setImplicitComponent(builder, holder);
+			}
 		}
 	}
 	
