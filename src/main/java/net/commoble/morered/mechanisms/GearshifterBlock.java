@@ -3,8 +3,10 @@ package net.commoble.morered.mechanisms;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
+import org.jetbrains.annotations.Nullable;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.commoble.exmachina.api.MechanicalState;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.MoreRed;
@@ -12,6 +14,7 @@ import net.commoble.morered.PlayerData;
 import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -32,7 +35,7 @@ import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition.Builder;
+import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
@@ -57,6 +60,43 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 	public static final Direction DEFAULT_BIG_DIR = Direction.DOWN;
 	public static final Direction DEFAULT_SMALL_DIR = Direction.NORTH;
 	public static final Direction DEFAULT_AXLE_DIR = DEFAULT_SMALL_DIR.getOpposite();
+	
+	// how do we want to do the voxelshapes...
+	// let's try to keep this simple
+	// one cuboid for the axle, one for the big gear
+	// we can reuse AxleBlock's shapes, they're the same size
+	// maybe one more cuboid for the big gear's axle
+	public static int getShapeKey(Direction attachDir, int rotation)
+	{
+		return (attachDir.ordinal() << 2) + rotation;
+	}
+	private static final Int2ObjectMap<VoxelShape> SHAPE_LOOKUP = Util.make(new Int2ObjectOpenHashMap<>(), map -> {
+		// define the big gear voxel
+		// we have shiny new voxel rotaters now
+		// we have to start with the "north"-facing one
+		Map<Direction,VoxelShape> gearShapes = Shapes.rotateAll(Block.box(0D,0D,4D,16D,16D,6D));
+		Map<Direction,VoxelShape> gearAxleShapes = Shapes.rotateAll(Block.box(7D,7D,0D,9D,9D,4D));
+		for (Direction attachDir : Direction.values())
+		{
+			for (Direction.Axis axis : Direction.Axis.values())
+			{
+				// both secondary directions along a given axis, and for a given primary direction, have the same voxelshape
+				// make one shape object and use it for both
+				VoxelShape axleShape = switch(axis)
+				{
+					case X -> AxleBlock.SHAPE_X;
+					case Y -> AxleBlock.SHAPE_Y;
+					case Z -> AxleBlock.SHAPE_Z;
+				};
+				VoxelShape joinedShape = Shapes.or(gearShapes.get(attachDir), gearAxleShapes.get(attachDir), axleShape);
+				for (Direction axleDir : axis.getDirections())
+				{
+					int rotation = BlockStateUtil.getRotationIndexForDirection(attachDir, axleDir);
+					map.put(getShapeKey(attachDir, rotation), joinedShape);
+				}
+			}
+		}
+	});
 
 	public GearshifterBlock(Properties props)
 	{
@@ -66,7 +106,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 	}
 
 	@Override
-	protected void createBlockStateDefinition(Builder<Block, BlockState> builder)
+	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		super.createBlockStateDefinition(builder);
 		builder.add(WATERLOGGED);
@@ -143,6 +183,19 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 	protected FluidState getFluidState(BlockState state)
 	{
 		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+	}
+	
+	@Override
+	protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context)
+	{
+		return SHAPE_LOOKUP.get(getShapeKey(state.getValue(ATTACHMENT_DIRECTION), state.getValue(ROTATION)));
+	}
+	
+	// trying to click the tiny face of an axle block is clunky, override the hit normal shape
+	@Override
+	protected VoxelShape getInteractionShape(BlockState state, BlockGetter level, BlockPos pos)
+	{
+		return Shapes.block();
 	}
 
 	@Override
