@@ -76,23 +76,4 @@ public abstract class BitwiseGateBlock extends PlateBlock implements EntityBlock
 		Direction primaryOutputDirection = PlateBlockStateProperties.getOutputDirection(oldState);
 		ExMachinaGameEvents.scheduleSignalGraphUpdate(level, pos.relative(primaryOutputDirection));
 	}
-	
-	@Override
-	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
-	{
-		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
-		
-		// rotate the block when the player pokes it with a wrench
-		if (isPlayerHoldingWrench && !level.isClientSide)
-		{
-			level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-				0.1F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
-			int newRotation = (state.getValue(ROTATION) + 1) % 4;
-			BlockState newState = state.setValue(ROTATION, newRotation);
-			level.setBlockAndUpdate(pos, newState);
-		}
-		
-		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
-	}	
 }

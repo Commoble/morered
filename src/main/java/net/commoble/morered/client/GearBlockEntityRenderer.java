@@ -42,8 +42,7 @@ public record GearBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 		float radiansPerSecond = (float)mechanicalState.angularVelocity();
 		ItemStack stack = this.stackCache.computeIfAbsent(be.getBlockState().getBlock(), ItemStack::new);
 		Level level = be.getLevel();
-		// reduce rounding errors at high game times
-		long gameTimeTicks = level.getGameTime() % ClientProxy.CLIENTCONFIG.machineRenderCycleTicks().get();
+		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;
 		BlockPos pos = be.getBlockPos();

@@ -41,9 +41,7 @@ public record GearsBlockEntityRenderer(ItemRenderer itemRenderer) implements Blo
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		BlockState state = be.getBlockState();
 		Level level = be.getLevel();
-		// reduce rounding errors at high game times, but we'll get a visual artifact every five minutes. Configurable?
-		// this magic number because (6030+1F) / 20F / (2pi) is very close to a whole number
-		long gameTimeTicks = level.getGameTime() % ClientProxy.CLIENTCONFIG.machineRenderCycleTicks().get();
+		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		BlockPos pos = be.getBlockPos();
 		int manhattanOffset = (int)((long)pos.getX() + (long)pos.getY() + (long)pos.getZ() % 6L);

@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "redstone",
+  "key": {
+    "#": "#c:quarter_slabs/smooth_stone",
+    "o": "#morered:axles",
+    "t": "minecraft:redstone_torch"
+  },
+  "pattern": [
+    "#t#",
+    "tot",
+    "#t#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:oscillator"
+  }
+}

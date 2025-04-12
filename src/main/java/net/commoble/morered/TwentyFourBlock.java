@@ -1,10 +1,16 @@
 package net.commoble.morered;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.annotation.Nullable;
 
+import net.commoble.exmachina.api.MechanicalState;
+import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -26,13 +32,14 @@ public class TwentyFourBlock extends Block
 {
 	public static final EnumProperty<Direction> ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
 	public static final IntegerProperty ROTATION = PlateBlockStateProperties.ROTATION;
+	public static final Direction DEFAULT_ATTACH_DIR = Direction.DOWN;
 
 	public TwentyFourBlock(Properties props)
 	{
 		super(props);
 		
 		this.registerDefaultState(this.defaultBlockState()
-			.setValue(ATTACHMENT_DIRECTION, Direction.DOWN)
+			.setValue(ATTACHMENT_DIRECTION, DEFAULT_ATTACH_DIR)
 			.setValue(ROTATION, 0));
 	}
 
@@ -101,5 +108,23 @@ public class TwentyFourBlock extends Block
 	{
 		return this.getRenderShape(state) == RenderShape.MODEL;
 	}
-
+	
+	public static Map<NodeShape,MechanicalState> normalizeMachineWithAttachmentNode(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> runtimeData)
+	{
+		Map<NodeShape,MechanicalState> result = new HashMap<>();
+	
+		Direction attachDir = state.getValue(ATTACHMENT_DIRECTION);
+		MechanicalState attachState = runtimeData.getOrDefault(NodeShape.ofSide(attachDir), MechanicalState.ZERO);
+		result.put(NodeShape.ofSide(DEFAULT_ATTACH_DIR), attachState);
+		return result;
+	}
+	
+	public static Map<NodeShape,MechanicalState> denormalizeMachineWithAttachmentNode(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> diskData)
+	{
+		Map<NodeShape,MechanicalState> result = new HashMap<>();
+		MechanicalState attachState = diskData.getOrDefault(NodeShape.ofSide(DEFAULT_ATTACH_DIR), MechanicalState.ZERO);
+		Direction attachDir = state.getValue(ATTACHMENT_DIRECTION);
+		result.put(NodeShape.ofSide(attachDir), attachState);
+		return result;
+	}
 }

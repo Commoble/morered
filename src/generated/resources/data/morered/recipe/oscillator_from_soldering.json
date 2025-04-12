@@ -1,0 +1,21 @@
+{
+  "type": "morered:soldering",
+  "ingredients": [
+    {
+      "count": 1,
+      "ingredient": "#c:quarter_slabs/smooth_stone"
+    },
+    {
+      "count": 5,
+      "ingredient": "#c:dusts/redstone"
+    },
+    {
+      "count": 1,
+      "ingredient": "#morered:axles"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:oscillator"
+  }
+}

@@ -47,8 +47,7 @@ public record GearshifterBlockEntityRenderer(ItemRenderer itemRenderer, Map<Bloc
 		float smallRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(smallDir), MechanicalState.ZERO).angularVelocity();
 		GearshifterModels models = this.modelCache.computeIfAbsent(state.getBlock(), GearshifterModels::of);
 		Level level = be.getLevel();
-		// reduce rounding errors at high game times
-		long gameTimeTicks = level.getGameTime() % ClientProxy.CLIENTCONFIG.machineRenderCycleTicks().get();
+		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float bigRadians = bigRadiansPerSecond * seconds;
 		float smallRadians = smallRadiansPerSecond * seconds;

@@ -1,0 +1,66 @@
+{
+  "type": "exmachina:variants",
+  "save": true,
+  "variants": {
+    "facing=down": {
+      "connections": [
+        {
+          "direction": "down",
+          "neighbor_shape": "up"
+        }
+      ],
+      "inertia": 0.01,
+      "shape": "down"
+    },
+    "facing=east": {
+      "connections": [
+        {
+          "direction": "east",
+          "neighbor_shape": "west"
+        }
+      ],
+      "inertia": 0.01,
+      "shape": "east"
+    },
+    "facing=north": {
+      "connections": [
+        {
+          "direction": "north",
+          "neighbor_shape": "south"
+        }
+      ],
+      "inertia": 0.01,
+      "shape": "north"
+    },
+    "facing=south": {
+      "connections": [
+        {
+          "direction": "south",
+          "neighbor_shape": "north"
+        }
+      ],
+      "inertia": 0.01,
+      "shape": "south"
+    },
+    "facing=up": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        }
+      ],
+      "inertia": 0.01,
+      "shape": "up"
+    },
+    "facing=west": {
+      "connections": [
+        {
+          "direction": "west",
+          "neighbor_shape": "east"
+        }
+      ],
+      "inertia": 0.01,
+      "shape": "west"
+    }
+  }
+}

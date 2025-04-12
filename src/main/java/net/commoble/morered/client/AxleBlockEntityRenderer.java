@@ -39,11 +39,9 @@ public record AxleBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 		float radiansPerSecond = (float)mechanicalState.angularVelocity();
 		ItemStack stack = this.stackCache.computeIfAbsent(be.getBlockState().getBlock(), ItemStack::new);
 		Level level = be.getLevel();
-		// reduce rounding errors at high game times, but we'll get a visual artifact every five minutes. Configurable?
-		// this magic number because (6030+1F) / 20F / (2pi) is very close to a whole number
-		long gameTimeTicks = level.getGameTime() % ClientProxy.CLIENTCONFIG.machineRenderCycleTicks().get();
+		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
-		float radians = radiansPerSecond * seconds;
+		float radians = radiansPerSecond * seconds;		
 		poseStack.pushPose();
 		poseStack.translate(0.5D,0.5D,0.5D); // item renderer renders the center of the item model at 0,0,0 in the cube
 		BlockState state = be.getBlockState();

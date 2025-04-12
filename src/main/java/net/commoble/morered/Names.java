@@ -22,6 +22,7 @@ public class Names
 
 	public static final String LATCH = "latch";
 	public static final String PULSE_GATE = "pulse_gate";
+	public static final String OSCILLATOR = "oscillator";
 	
 	public static final String STONE_PLATE = "stone_plate";
 	

@@ -47,10 +47,9 @@ public record WindcatcherBlockEntityRenderer(ItemRenderer itemRenderer, Map<Wind
 			return newStack;
 		});
 		Level level = be.getLevel();
-		// reduce rounding errors at high game times
-		long gameTimeTicks = level.getGameTime() % ClientProxy.CLIENTCONFIG.machineRenderCycleTicks().get();
+		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
-		float radians = radiansPerSecond * seconds;
+		float radians = radiansPerSecond * seconds;		
 		poseStack.pushPose();
 		poseStack.translate(0.5D,0.5D,0.5D); // item renderer renders the center of the item model at 0,0,0 in the cube		
 		poseStack.mulPose(Axis.YP.rotation(radians));
