@@ -74,16 +74,14 @@ public class OscillatorBlock extends PlateBlock implements EntityBlock
 		double seconds = gameTimeTicks * 0.05D;
 		double radians = radiansPerSecond * seconds;
 		double simpleRadians = radians % (Math.TAU); // gives a value in the range (-2PI, 2PI)
+		if (simpleRadians < 0D)
+			simpleRadians += Math.TAU;;
 		// if simpleRadians > 0, we're spinning around positive axis (counterclockwise looking toward attachdir)
 		int axleRotations = simpleRadians > AXLE_0_THRESHOLD ? 0	// 7/4 pi - 8/4 pi
 			: simpleRadians > AXLE_3_THRESHOLD ? 3	// 5/4 pi - 7/4 pi
 			: simpleRadians > AXLE_2_THRESHOLD ? 2	// 3/4 pi - 5/4 pi
 			: simpleRadians > AXLE_1_THRESHOLD ? 1	// 1/4 pi - 3/4 pi
-			: simpleRadians > -AXLE_1_THRESHOLD ? 0	// -1/4 pi - 1/4 pi
-			: simpleRadians > -AXLE_2_THRESHOLD ? 3	// -3/4 pi - -1/4 pi
-			: simpleRadians > -AXLE_3_THRESHOLD ? 2	// -5/4 pi - -3/4 pi
-			: simpleRadians > -AXLE_0_THRESHOLD ? 1 // -7/4 pi - -5/4 pi
-			: 0;	// -8/4 pi - -7/4 pi
+			: 0;
 		if (axleRotations != existingAxleRotations)
 		{
 			level.setBlockAndUpdate(pos, state.setValue(AXLE_ROTATION, axleRotations));
