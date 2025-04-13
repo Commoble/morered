@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "morered:warped_gear",
+    "minecraft:piston"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:warped_clutch"
+  }
+}

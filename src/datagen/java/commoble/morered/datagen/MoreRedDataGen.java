@@ -37,6 +37,7 @@ import net.commoble.morered.client.UnbakedLogicGateModel;
 import net.commoble.morered.client.UnbakedWindcatcherModel;
 import net.commoble.morered.client.UnbakedWirePartBlockStateModel;
 import net.commoble.morered.mechanisms.AxleBlock;
+import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
 import net.commoble.morered.mechanisms.GearsLootEntry;
 import net.commoble.morered.mechanisms.GearshifterBlock;
@@ -753,6 +754,76 @@ public class MoreRedDataGen
 						'-', Ingredient.of(MoreRed.get().axleBlocks.get(woodName).get()),
 						'G', Ingredient.of(MoreRed.get().gearBlocks.get(woodName).get()))));
 				});
+			
+			VariantsMechanicalComponent clutchMachine = VariantsMechanicalComponent.builder(true);
+			for (Direction facing : Direction.values())
+			{
+				List<RawConnection> connections = new ArrayList<>();
+				// connect to attached neighbor
+				connections.add(new RawConnection(
+					Optional.of(facing),
+					NodeShape.ofSide(facing.getOpposite()),
+					Parity.POSITIVE,
+					0));
+				// connect to four parallel neighbors
+				for (Direction parallelDirection : Direction.values())
+				{
+					if (parallelDirection.getAxis() == facing.getAxis())
+						continue;
+					connections.add(new RawConnection(
+						Optional.of(parallelDirection),
+						NodeShape.ofSideSide(facing, parallelDirection.getOpposite()),
+						Parity.NEGATIVE,
+						16));
+				}
+				clutchMachine.addMultiPropertyVariant(builder -> {
+					builder.add(ClutchBlock.FACING, facing);
+					builder.add(ClutchBlock.EXTENDED, true);
+				}, new RawNode(NodeShape.ofSide(facing), 0D,0D,0D, 2D, connections));
+				clutchMachine.addMultiPropertyVariant(builder -> {
+					builder.add(ClutchBlock.FACING, facing);
+					builder.add(ClutchBlock.EXTENDED, false);
+				}, new RawNode(NodeShape.ofSide(facing), 0D,0D,0D, 2D, List.of()));
+			}
+			
+			var clutchVariants = Variants.builder();
+			ResourceLocation clutchBlockModel = MoreRed.id("block/clutch");
+			ResourceLocation clutchBlockModelExtended = MoreRed.id("block/clutch_extended");
+			for (Direction facing : Direction.values())
+			{
+				Quadrant x = switch(facing) {
+					case DOWN -> Quadrant.R90;
+					case UP -> Quadrant.R270;
+					default -> Quadrant.R0;
+				};
+				Quadrant y = switch(facing) {
+					case EAST -> Quadrant.R90;
+					case SOUTH -> Quadrant.R180;
+					case WEST -> Quadrant.R270;
+					default -> Quadrant.R0;
+				};
+				clutchVariants.addVariant(List.of(
+					PropertyValue.create(ClutchBlock.FACING, facing),
+					PropertyValue.create(ClutchBlock.EXTENDED, false)),
+					BlockStateBuilder.model(clutchBlockModel, x, y));
+				clutchVariants.addVariant(List.of(
+					PropertyValue.create(ClutchBlock.FACING, facing),
+					PropertyValue.create(ClutchBlock.EXTENDED, true)),
+					BlockStateBuilder.model(clutchBlockModelExtended, x, y));
+			}
+			BlockDataHelper.create(MoreRed.get().clutchBlocks.get(woodName).get(), context,
+				(id,block) -> BlockStateBuilder.variants(clutchVariants),
+				(id,block) -> simpleLoot(block))
+				.localize()
+				.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+				.mechanicalComponent(clutchMachine)
+				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/clutch_template"))
+					.addTexture("side", strippedLogBlockModel)
+					.addTexture("top", strippedLogTopTexture))
+				.help(helper -> helper.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+					Ingredient.of(MoreRed.get().gearBlocks.get(woodName).get().asItem()),
+					Ingredient.of(Items.PISTON)))));
+			
 			
 			// make some dummy models for the windcatcher
 			ResourceLocation windcatcherAxleDummyModel = blockModel(MoreRed.id(woodName + "_windcatcher_axle"));

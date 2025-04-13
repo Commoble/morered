@@ -1,0 +1,12 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "redstone",
+  "ingredients": [
+    "morered:dark_oak_gear",
+    "minecraft:piston"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:dark_oak_clutch"
+  }
+}

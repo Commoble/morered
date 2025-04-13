@@ -271,6 +271,7 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.get().gearBlockEntity.get(), GearBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().gearsBlockEntity.get(), GearsBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().gearshifterBlockEntity.get(), GearshifterBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.get().clutchBlockEntity.get(), ClutchBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().windcatcherBlockEntity.get(), WindcatcherBlockEntityRenderer::create);
 	}
 

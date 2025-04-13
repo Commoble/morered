@@ -15,6 +15,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.ScheduledTickAccess;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
@@ -95,5 +97,18 @@ public class GearBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 	protected FluidState getFluidState(BlockState state)
 	{
 		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
+	}
+	
+	@Override
+	protected BlockState rotate(BlockState state, Rotation rotation)
+	{
+		return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
+	}
+
+	@Override
+	@Deprecated
+	protected BlockState mirror(BlockState state, Mirror rotation)
+	{
+		return state.rotate(rotation.getRotation(state.getValue(FACING)));
 	}
 }

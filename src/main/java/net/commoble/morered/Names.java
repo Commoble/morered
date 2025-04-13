@@ -71,6 +71,7 @@ public class Names
 	public static final String AXLE = "axle";
 	public static final String GEAR = "gear";
 	public static final String GEARSHIFTER = "gearshifter";
+	public static final String CLUTCH = "clutch";
 	public static final String WINDCATCHER = "windcatcher";
 	public static final String AIRFOIL = "airfoil";
 

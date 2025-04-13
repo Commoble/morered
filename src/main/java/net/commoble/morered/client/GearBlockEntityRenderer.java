@@ -46,6 +46,12 @@ public record GearBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;
 		BlockPos pos = be.getBlockPos();
+		renderGear(this.itemRenderer, level, pos, stack, facing, radians, poseStack, bufferSource, packedLight, overlay);
+	}
+
+	public static void renderGear(ItemRenderer itemRenderer, Level level, BlockPos pos, ItemStack stack, Direction facing, float radians, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay)
+	{
+
 		int manhattanOffset = (int)((long)pos.getX() + (long)pos.getY() + (long)pos.getZ() % 6L);
 		if (manhattanOffset < 0)
 			manhattanOffset = manhattanOffset + 6;
@@ -69,8 +75,7 @@ public record GearBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 		// invert the rotation if needed
 		float parityFix = facing.ordinal() % 2 == 0 ? 1F : -1F;
 		poseStack.mulPose(Axis.ZP.rotation(radians * parityFix));
-		this.itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, packedLight, overlay, poseStack, bufferSource, level, 0);
+		itemRenderer.renderStatic(stack, ItemDisplayContext.NONE, packedLight, overlay, poseStack, bufferSource, level, 0);
 		poseStack.popPose();
 	}
-
 }

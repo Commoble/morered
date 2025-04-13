@@ -1,0 +1,50 @@
+{
+  "variants": {
+    "facing=down,extended=false": {
+      "model": "morered:block/clutch",
+      "x": 90
+    },
+    "facing=down,extended=true": {
+      "model": "morered:block/clutch_extended",
+      "x": 90
+    },
+    "facing=east,extended=false": {
+      "model": "morered:block/clutch",
+      "y": 90
+    },
+    "facing=east,extended=true": {
+      "model": "morered:block/clutch_extended",
+      "y": 90
+    },
+    "facing=north,extended=false": {
+      "model": "morered:block/clutch"
+    },
+    "facing=north,extended=true": {
+      "model": "morered:block/clutch_extended"
+    },
+    "facing=south,extended=false": {
+      "model": "morered:block/clutch",
+      "y": 180
+    },
+    "facing=south,extended=true": {
+      "model": "morered:block/clutch_extended",
+      "y": 180
+    },
+    "facing=up,extended=false": {
+      "model": "morered:block/clutch",
+      "x": 270
+    },
+    "facing=up,extended=true": {
+      "model": "morered:block/clutch_extended",
+      "x": 270
+    },
+    "facing=west,extended=false": {
+      "model": "morered:block/clutch",
+      "y": 270
+    },
+    "facing=west,extended=true": {
+      "model": "morered:block/clutch_extended",
+      "y": 270
+    }
+  }
+}

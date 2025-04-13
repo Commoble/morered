@@ -1,0 +1,38 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"particle": "block/piston_bottom",
+		"bottom": "block/piston_bottom",
+		"inner": "block/piston_inner",
+		"side": "block/piston_side"
+	},
+	"elements": [
+		{
+			"name": "base",
+			"from": [0, 0, 8],
+			"to": [16, 16, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [0, 0, 14]},
+			"faces": {
+				"north": {"uv": [0, 0, 16, 16], "texture": "#inner"},
+				"east": {"uv": [0, 0, 16, 8], "rotation": 90, "texture": "#bottom", "cullface": "east"},
+				"south": {"uv": [0, 0, 16, 16], "texture": "#bottom", "cullface": "south"},
+				"west": {"uv": [0, 0, 16, 8], "rotation": 270, "texture": "#bottom", "cullface": "west"},
+				"up": {"uv": [0, 0, 16, 8], "texture": "#bottom", "cullface": "up"},
+				"down": {"uv": [0, 0, 16, 8], "rotation": 180, "texture": "#bottom", "cullface": "down"}
+			}
+		},
+		{
+			"name": "arm",
+			"from": [6, 6, 3],
+			"to": [10, 10, 8],
+			"rotation": {"angle": 0, "axis": "y", "origin": [6, 6, 3]},
+			"faces": {
+				"north": {"uv": [6, 6, 10, 10], "texture": "#inner"},
+				"east": {"uv": [11, 0, 16, 4], "texture": "#side"},
+				"west": {"uv": [16, 0, 11, 4], "texture": "#side"},
+				"up": {"uv": [11, 0, 16, 4], "rotation": 270, "texture": "#side"},
+				"down": {"uv": [11, 0, 16, 4], "rotation": 90, "texture": "#side"}
+			}
+		}
+	]
+}

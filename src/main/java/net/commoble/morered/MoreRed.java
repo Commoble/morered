@@ -15,6 +15,7 @@ import java.util.function.ToIntFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
@@ -32,6 +33,7 @@ import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.mechanisms.AirFoilBlock;
 import net.commoble.morered.mechanisms.AxleBlock;
+import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
 import net.commoble.morered.mechanisms.GearBlockItem;
 import net.commoble.morered.mechanisms.GearsBlock;
@@ -239,6 +241,7 @@ public class MoreRed
 	public final Map<String, DeferredHolder<Block, AxleBlock>> axleBlocks = new HashMap<>();
 	public final Map<String, DeferredHolder<Block, GearBlock>> gearBlocks = new HashMap<>();
 	public final Map<String, DeferredHolder<Block, GearshifterBlock>> gearshifterBlocks = new HashMap<>();
+	public final Map<String, DeferredHolder<Block, ClutchBlock>> clutchBlocks = new HashMap<>();
 	public final Map<String, DeferredHolder<Block, WindcatcherBlock>> windcatcherBlocks = new HashMap<>();
 	public final DeferredHolder<Block, AirFoilBlock> airFoilBlock;
 	public final DeferredHolder<Block, GearsBlock> gearsBlock;
@@ -269,6 +272,7 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearshifterBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearsBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> clutchBlockEntity;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
 	
@@ -520,6 +524,16 @@ public class MoreRed
 		            .isViewBlocking(($,$$,$$$)->false)),
 				GearshifterBlock::new));
 			
+			this.clutchBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.CLUTCH,
+				() -> Block.Properties.of()
+					.mapColor(MapColor.STONE)
+					.strength(1.5F)
+					.noOcclusion()
+		            .isRedstoneConductor(($,$$,$$$)->false)
+		            .isSuffocating(($,$$,$$$)->false)
+		            .isViewBlocking(($,$$,$$$)->false),
+				props -> new ClutchBlock(props, Suppliers.memoize(() -> new ItemStack(this.gearBlocks.get(woodName).get())))));
+			
 			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
 				() -> Block.Properties.of()
 					.mapColor(woodSet.mapColor())
@@ -647,6 +661,10 @@ public class MoreRed
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEARSHIFTER, this.gearshifterBlocks.values());
+		this.clutchBlockEntity = GenericBlockEntity.builder()
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+			.register(blockEntityTypes, Names.CLUTCH, this.clutchBlocks.values());
 		this.windcatcherBlockEntity = GenericBlockEntity.builder()
 			.itemData(windcatcherColorsDataComponent)
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
