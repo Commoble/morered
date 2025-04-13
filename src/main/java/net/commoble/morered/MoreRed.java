@@ -635,7 +635,7 @@ public class MoreRed
 			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values());
 		this.gearBlockEntity = GenericBlockEntity.builder()
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.GEAR, this.gearBlocks.values());
 		this.gearsBlockEntity = GenericBlockEntity.builder()
 			.syncedData(this.gearsDataComponent)
