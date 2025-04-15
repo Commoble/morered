@@ -1,0 +1,22 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"particle": "block/barrel_side",
+		"barrel_side": "block/barrel_side"
+	},
+	"elements": [
+		{
+			"name": "axle_north",
+			"from": [7, 7, 0],
+			"to": [9, 9, 4],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [7, 7, 9, 9], "texture": "#barrel_side"},
+				"east": {"uv": [7, 4, 9, 8], "rotation": 90, "texture": "#barrel_side"},
+				"west": {"uv": [7, 4, 9, 8], "rotation": 270, "texture": "#barrel_side"},
+				"up": {"uv": [7, 4, 9, 8], "texture": "#barrel_side"},
+				"down": {"uv": [7, 4, 9, 8], "rotation": 180, "texture": "#barrel_side"}
+			}
+		}
+	]
+}
