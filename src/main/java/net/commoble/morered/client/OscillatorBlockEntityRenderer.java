@@ -51,6 +51,7 @@ public record OscillatorBlockEntityRenderer(ItemRenderer itemRenderer, ItemStack
 		// for whatever reason, if we point in a positive direction, we have to spin backward
 		Axis axis = attachDir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.YN : Axis.YP;
 		poseStack.mulPose(axis.rotation(radians));
+		poseStack.scale(1.001F, 1.001F, 1.001F); // fix a z-fighting between the axle and the static model
 		this.itemRenderer.renderStatic(axleModel, ItemDisplayContext.NONE, packedLight, overlay, poseStack, bufferSource, level, 0);
 		
 		poseStack.popPose();
