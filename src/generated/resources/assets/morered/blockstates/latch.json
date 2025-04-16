@@ -21,8 +21,10 @@
       "y": 90
     },
     "facing=east,rotation=1": {
-      "model": "morered:block/latch_alt",
-      "x": 180
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "y": 180,
+      "z": 270
     },
     "facing=east,rotation=2": {
       "model": "morered:block/latch",
@@ -30,16 +32,19 @@
       "y": 270
     },
     "facing=east,rotation=3": {
-      "model": "morered:block/latch_alt"
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "z": 270
     },
     "facing=north,rotation=0": {
       "model": "morered:block/latch",
       "x": 270
     },
     "facing=north,rotation=1": {
-      "model": "morered:block/latch_alt",
-      "x": 180,
-      "y": 270
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "x": 270,
+      "z": 90
     },
     "facing=north,rotation=2": {
       "model": "morered:block/latch",
@@ -47,8 +52,10 @@
       "y": 180
     },
     "facing=north,rotation=3": {
-      "model": "morered:block/latch_alt",
-      "y": 270
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "x": 270,
+      "z": 270
     },
     "facing=south,rotation=0": {
       "model": "morered:block/latch",
@@ -56,17 +63,20 @@
       "y": 180
     },
     "facing=south,rotation=1": {
-      "model": "morered:block/latch_alt",
-      "x": 180,
-      "y": 90
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "x": 90,
+      "z": 90
     },
     "facing=south,rotation=2": {
       "model": "morered:block/latch",
       "x": 90
     },
     "facing=south,rotation=3": {
-      "model": "morered:block/latch_alt",
-      "y": 90
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "x": 90,
+      "z": 270
     },
     "facing=up,rotation=0": {
       "model": "morered:block/latch",
@@ -93,9 +103,11 @@
       "y": 270
     },
     "facing=west,rotation=1": {
-      "model": "morered:block/latch_alt",
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
       "x": 180,
-      "y": 180
+      "y": 180,
+      "z": 270
     },
     "facing=west,rotation=2": {
       "model": "morered:block/latch",
@@ -103,8 +115,10 @@
       "y": 90
     },
     "facing=west,rotation=3": {
-      "model": "morered:block/latch_alt",
-      "y": 180
+      "type": "morered:xyz",
+      "model": "morered:block/latch",
+      "y": 180,
+      "z": 90
     }
   }
 }

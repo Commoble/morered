@@ -41,12 +41,16 @@
       "y": 90
     },
     "facing=east,rotation=1,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
-      "x": 180
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "y": 180,
+      "z": 270
     },
     "facing=east,rotation=1,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
-      "x": 180
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "y": 180,
+      "z": 270
     },
     "facing=east,rotation=2,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -59,10 +63,14 @@
       "y": 270
     },
     "facing=east,rotation=3,input_b=false": {
-      "model": "morered:block/multiplexer_alt"
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "z": 270
     },
     "facing=east,rotation=3,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt"
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "z": 270
     },
     "facing=north,rotation=0,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -73,14 +81,16 @@
       "x": 270
     },
     "facing=north,rotation=1,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
-      "x": 180,
-      "y": 270
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "x": 270,
+      "z": 90
     },
     "facing=north,rotation=1,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
-      "x": 180,
-      "y": 270
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "x": 270,
+      "z": 90
     },
     "facing=north,rotation=2,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -93,12 +103,16 @@
       "y": 180
     },
     "facing=north,rotation=3,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
-      "y": 270
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "x": 270,
+      "z": 270
     },
     "facing=north,rotation=3,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
-      "y": 270
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "x": 270,
+      "z": 270
     },
     "facing=south,rotation=0,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -111,14 +125,16 @@
       "y": 180
     },
     "facing=south,rotation=1,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
-      "x": 180,
-      "y": 90
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "x": 90,
+      "z": 90
     },
     "facing=south,rotation=1,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
-      "x": 180,
-      "y": 90
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "x": 90,
+      "z": 90
     },
     "facing=south,rotation=2,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -129,12 +145,16 @@
       "x": 90
     },
     "facing=south,rotation=3,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
-      "y": 90
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "x": 90,
+      "z": 270
     },
     "facing=south,rotation=3,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
-      "y": 90
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "x": 90,
+      "z": 270
     },
     "facing=up,rotation=0,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -185,14 +205,18 @@
       "y": 270
     },
     "facing=west,rotation=1,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
       "x": 180,
-      "y": 180
+      "y": 180,
+      "z": 270
     },
     "facing=west,rotation=1,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
       "x": 180,
-      "y": 180
+      "y": 180,
+      "z": 270
     },
     "facing=west,rotation=2,input_b=false": {
       "model": "morered:block/multiplexer",
@@ -205,12 +229,16 @@
       "y": 90
     },
     "facing=west,rotation=3,input_b=false": {
-      "model": "morered:block/multiplexer_alt",
-      "y": 180
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer",
+      "y": 180,
+      "z": 90
     },
     "facing=west,rotation=3,input_b=true": {
-      "model": "morered:block/multiplexer_switched_alt",
-      "y": 180
+      "type": "morered:xyz",
+      "model": "morered:block/multiplexer_switched",
+      "y": 180,
+      "z": 90
     }
   }
 }

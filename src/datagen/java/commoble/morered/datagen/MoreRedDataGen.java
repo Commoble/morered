@@ -36,6 +36,7 @@ import net.commoble.morered.client.ColorHandlers;
 import net.commoble.morered.client.UnbakedLogicGateModel;
 import net.commoble.morered.client.UnbakedWindcatcherModel;
 import net.commoble.morered.client.UnbakedWirePartBlockStateModel;
+import net.commoble.morered.client.UnbakedXyzBlockStateModel;
 import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
@@ -59,6 +60,7 @@ import net.commoble.morered.wires.WireCountLootFunction;
 import net.minecraft.Util;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.renderer.block.model.BlockModelDefinition;
+import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CompositeModel;
@@ -975,35 +977,52 @@ public class MoreRedDataGen
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		ResourceLocation model = mangle(blockId, "block/%s");
-		ResourceLocation modelAlt = mangle(blockId, "block/%s_alt");
 		
 		var variantBuilder = Variants.builder();
 		for (Direction dir : Direction.values())
 		{
 			for (int rotationIndex = 0; rotationIndex < 4; rotationIndex++)
 			{
-				ResourceLocation stateModel =
-					dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0
-					? model
-					: modelAlt;
-				int x = dir == Direction.DOWN ? 0
-					: dir == Direction.UP ? 180
-					: 270 - 90*rotationIndex;
-				// don't look too closely at the magic numbers
-				int y = switch(dir) {
-					case DOWN -> 90 * rotationIndex;
-					case UP -> new int[] {180,90,0,270}[rotationIndex];
-					case NORTH -> new int[] {0,270,180,270}[rotationIndex];
-					case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
-					case WEST -> new int[] {270,180,90,180}[rotationIndex];
-					case EAST -> new int[] {90,0,270,0}[rotationIndex];
-				};
-				Quadrant qx = Quadrant.parseJson(x);
-				Quadrant qy = Quadrant.parseJson(y);
-				variantBuilder.addVariant(List.of(
+				if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+				{
+					int x = dir == Direction.DOWN ? 0
+						: dir == Direction.UP ? 180
+						: 270 - 90*rotationIndex;
+					// don't look too closely at the magic numbers
+					int y = switch(dir) {
+						case DOWN -> 90 * rotationIndex;
+						case UP -> new int[] {180,90,0,270}[rotationIndex];
+						case NORTH -> new int[] {0,270,180,270}[rotationIndex];
+						case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
+						case WEST -> new int[] {270,180,90,180}[rotationIndex];
+						case EAST -> new int[] {90,0,270,0}[rotationIndex];
+					};
+					Quadrant qx = Quadrant.parseJson(x);
+					Quadrant qy = Quadrant.parseJson(y);
+					variantBuilder.addVariant(List.of(
+							PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
+							PropertyValue.create(PlateBlock.ROTATION, rotationIndex)),
+							BlockStateBuilder.model(model, qx, qy)
+						);
+				}
+				else // need a z-rotation
+				{
+					Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
+						: dir == Direction.SOUTH ? Quadrant.R90
+						: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
+						: Quadrant.R0;
+					Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
+						? Quadrant.R180 : Quadrant.R0;
+					Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
+						|| (dir == Direction.SOUTH && rotationIndex == 1)
+						|| (dir == Direction.WEST && rotationIndex == 3)
+						? Quadrant.R90 : Quadrant.R270;
+					variantBuilder.addVariant(List.of(
 						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
 						PropertyValue.create(PlateBlock.ROTATION, rotationIndex)),
-					BlockStateBuilder.model(stateModel, qx, qy));
+						new UnbakedXyzBlockStateModel(model, qx, qy, qz)
+					);
+				}
 			}
 		}
 		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder);
@@ -1031,7 +1050,6 @@ public class MoreRedDataGen
 		ResourceLocation symbolLocation = MoreRed.id("block/" + symbolTexture);
 		
 		context.models().put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
-		context.models().put(mangle(blockId, "block/%s_alt"), SimpleModel.createWithoutRenderType(mangle(parent, "%s_alt")).addTexture("symbol", symbolLocation));
 		BlockDataHelper helper = plateBlock(blockPath, name, context);
 		helper.tags(MoreRed.Tags.Blocks.BITWISE_GATES);
 		helper.simpleBlockItem().help(h -> h.recipe(mangle(h.id(), "%s_from_soldering"), new SolderingRecipe(new ItemStack(h.item()), List.of(
@@ -1151,48 +1169,61 @@ public class MoreRedDataGen
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		ResourceLocation model = mangle(blockId, "block/%s");
-		ResourceLocation modelAlt = mangle(blockId, "block/%s_alt");
 		ResourceLocation switchedModel = mangle(blockId, "block/%s_switched");
-		ResourceLocation switchedModelAlt = mangle(blockId, "block/%s_switched_alt");
 		
 		var variantBuilder = Variants.builder();
 		for (Direction dir : Direction.values())
 		{
 			for (int rotationIndex = 0; rotationIndex < 4; rotationIndex++)
 			{
-				ResourceLocation stateModel =
-					dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0
-					? model
-					: modelAlt;
-				ResourceLocation stateModelSwitched = 
-					dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0
-					? switchedModel
-					: switchedModelAlt;
+				BlockStateModel.Unbaked unbakedModel;
+				BlockStateModel.Unbaked unbakedSwitchedModel;
+				if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+				{
+					int x = dir == Direction.DOWN ? 0
+						: dir == Direction.UP ? 180
+						: 270 - 90*rotationIndex;
+					// don't look too closely at the magic numbers
+					int y = switch(dir) {
+						case DOWN -> 90 * rotationIndex;
+						case UP -> new int[] {180,90,0,270}[rotationIndex];
+						case NORTH -> new int[] {0,270,180,270}[rotationIndex];
+						case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
+						case WEST -> new int[] {270,180,90,180}[rotationIndex];
+						case EAST -> new int[] {90,0,270,0}[rotationIndex];
+					};
+					Quadrant qx = Quadrant.parseJson(x);
+					Quadrant qy = Quadrant.parseJson(y);
+					unbakedModel = BlockStateBuilder.model(model, qx, qy);
+					unbakedSwitchedModel = BlockStateBuilder.model(switchedModel, qx, qy);
+				}
+				else // need a z-rotation
+				{
+					Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
+						: dir == Direction.SOUTH ? Quadrant.R90
+						: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
+						: Quadrant.R0;
+					Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
+						? Quadrant.R180 : Quadrant.R0;
+					Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
+						|| (dir == Direction.SOUTH && rotationIndex == 1)
+						|| (dir == Direction.WEST && rotationIndex == 3)
+						? Quadrant.R90 : Quadrant.R270;
+					unbakedModel = new UnbakedXyzBlockStateModel(model, qx, qy, qz);
+					unbakedSwitchedModel = new UnbakedXyzBlockStateModel(switchedModel, qx, qy, qz);
+				}
 				
-				int x = dir == Direction.DOWN ? 0
-					: dir == Direction.UP ? 180
-					: 270 - 90*rotationIndex;
-				// don't look too closely at the magic numbers
-				int y = switch(dir) {
-					case DOWN -> 90 * rotationIndex;
-					case UP -> new int[] {180,90,0,270}[rotationIndex];
-					case NORTH -> new int[] {0,270,180,270}[rotationIndex];
-					case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
-					case WEST -> new int[] {270,180,90,180}[rotationIndex];
-					case EAST -> new int[] {90,0,270,0}[rotationIndex];
-				};
-				Quadrant qx = Quadrant.parseJson(x);
-				Quadrant qy = Quadrant.parseJson(y);
 				variantBuilder.addVariant(List.of(
 						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
 						PropertyValue.create(PlateBlock.ROTATION, rotationIndex),
 						PropertyValue.create(PlateBlockStateProperties.INPUT_B, false)),
-					BlockStateBuilder.model(stateModel, qx, qy));
+						unbakedModel
+					);
 				variantBuilder.addVariant(List.of(
 						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
 						PropertyValue.create(PlateBlock.ROTATION, rotationIndex),
 						PropertyValue.create(PlateBlockStateProperties.INPUT_B, true)),
-					BlockStateBuilder.model(stateModelSwitched, qx, qy));
+					unbakedSwitchedModel);
 			}
 		}
 		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder);

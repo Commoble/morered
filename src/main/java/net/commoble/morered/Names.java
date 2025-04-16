@@ -118,6 +118,7 @@ public class Names
 	
 	// model loaders
 	public static final String WIRE_PARTS = "wire_parts";
+	public static final String XYZ = "xyz";
 	public static final String ROTATE_TINTS = "rotate_tints";
 	public static final String LOGIC_GATE = "logic_gate";
 }

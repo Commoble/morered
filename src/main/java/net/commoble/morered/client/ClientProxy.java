@@ -244,6 +244,7 @@ public class ClientProxy
 	public static void onRegisterBlockStateModels(RegisterBlockStateModels event)
 	{
 		event.registerModel(MoreRed.id(Names.WIRE_PARTS), UnbakedWirePartBlockStateModel.CODEC);
+		event.registerModel(MoreRed.id(Names.XYZ), UnbakedXyzBlockStateModel.CODEC);
 	}
 
 	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
