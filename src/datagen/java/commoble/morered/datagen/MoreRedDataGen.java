@@ -12,11 +12,6 @@ import org.apache.commons.lang3.text.WordUtils;
 import com.google.common.collect.ImmutableList;
 import com.mojang.math.Quadrant;
 
-import commoble.morered.datagen.BlockStateBuilder.Case;
-import commoble.morered.datagen.BlockStateBuilder.Multipart;
-import commoble.morered.datagen.BlockStateBuilder.PropertyValue;
-import commoble.morered.datagen.BlockStateBuilder.Variants;
-import commoble.morered.datagen.BlockStateBuilder.When;
 import net.commoble.exmachina.api.ExMachinaRegistries;
 import net.commoble.exmachina.api.ExMachinaTags;
 import net.commoble.exmachina.api.NodeShape;
@@ -385,31 +380,30 @@ public class MoreRedDataGen
 		BlockDataHelper.create(MoreRed.get().extractorBlock.get(), context, block -> {
 			ResourceLocation blockModel = BlockDataHelper.blockModel(block);
 			ResourceLocation poweredBlockModel = mangle(blockModel, "%s_powered");
-			var builder = Variants.builder();
-			for (boolean powered : new boolean[]{false, true})
-			{
-				for (Direction direction : Direction.values())
+			return BlockStateBuilder.variants(builder -> {
+				for (boolean powered : new boolean[]{false, true})
 				{
-					ResourceLocation model = powered ? poweredBlockModel : blockModel;
-					Quadrant y = switch(direction) {
-						case WEST -> Quadrant.R90;
-						case EAST -> Quadrant.R270;
-						default -> Quadrant.R0;
-					};
-					Quadrant x = switch(direction) {
-						case DOWN -> Quadrant.R0;
-						case UP -> Quadrant.R180;
-						case NORTH -> Quadrant.R270;
-						default -> Quadrant.R90;
-					};
-					builder.addVariant(
-						List.of(
-							PropertyValue.create(ExtractorBlock.FACING, direction),
-							PropertyValue.create(ExtractorBlock.POWERED, powered)),
-						BlockStateBuilder.model(model, x, y, true));
+					for (Direction direction : Direction.values())
+					{
+						ResourceLocation model = powered ? poweredBlockModel : blockModel;
+						Quadrant y = switch(direction) {
+							case WEST -> Quadrant.R90;
+							case EAST -> Quadrant.R270;
+							default -> Quadrant.R0;
+						};
+						Quadrant x = switch(direction) {
+							case DOWN -> Quadrant.R0;
+							case UP -> Quadrant.R180;
+							case NORTH -> Quadrant.R270;
+							default -> Quadrant.R90;
+						};
+						builder.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(ExtractorBlock.FACING, direction)
+							.addPropertyValue(ExtractorBlock.POWERED, powered),
+							BlockStateBuilder.model(model, x, y, true));
+					}
 				}
-			}
-			return BlockStateBuilder.variants(builder);
+			});
 		}, block -> simpleLoot(block))
 			.localize("Extractor")
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -472,7 +466,7 @@ public class MoreRedDataGen
 		BlockDataHelper.create(MoreRed.get().osmosisSlimeBlock.get(), context, sixWayBlockState(MoreRed.get().osmosisSlimeBlock.get()));
 		
 		BlockDataHelper.createWithoutLoot(MoreRed.get().airFoilBlock.get(), context,
-			(id,block) -> BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(blockModel(blockId(Blocks.AIR))))))
+			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(blockId(Blocks.AIR)))))
 			.tags(MoreRed.Tags.Blocks.AIRFOILS);
 			
 		
@@ -625,7 +619,7 @@ public class MoreRedDataGen
 			}
 			
 			BlockDataHelper.create(MoreRed.get().axleBlocks.get(woodName).get(), context,
-				(id,block) -> BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(blockModel(id)))),
+				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
 					.addTexture("particle", strippedLogBlockModel))
@@ -672,7 +666,7 @@ public class MoreRedDataGen
 			}
 			
 			BlockDataHelper.create(MoreRed.get().gearBlocks.get(woodName).get(), context,
-				(id,block) -> BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(blockModel(id)))),
+				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
 					.addTexture("particle", strippedLogTopTexture))
@@ -723,7 +717,7 @@ public class MoreRedDataGen
 				}
 			}
 			BlockDataHelper.create(MoreRed.get().gearshifterBlocks.get(woodName).get(), context,
-				(id,block) -> BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(blockModel(id)))),
+				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
 					.addTexture("particle", strippedLogTopTexture))
@@ -788,33 +782,33 @@ public class MoreRedDataGen
 				}, new RawNode(NodeShape.ofSide(facing), 0D,0D,0D, 2D, List.of()));
 			}
 			
-			var clutchVariants = Variants.builder();
 			ResourceLocation clutchBlockModel = MoreRed.id("block/clutch");
 			ResourceLocation clutchBlockModelExtended = MoreRed.id("block/clutch_extended");
-			for (Direction facing : Direction.values())
-			{
-				Quadrant x = switch(facing) {
-					case DOWN -> Quadrant.R90;
-					case UP -> Quadrant.R270;
-					default -> Quadrant.R0;
-				};
-				Quadrant y = switch(facing) {
-					case EAST -> Quadrant.R90;
-					case SOUTH -> Quadrant.R180;
-					case WEST -> Quadrant.R270;
-					default -> Quadrant.R0;
-				};
-				clutchVariants.addVariant(List.of(
-					PropertyValue.create(ClutchBlock.FACING, facing),
-					PropertyValue.create(ClutchBlock.EXTENDED, false)),
-					BlockStateBuilder.model(clutchBlockModel, x, y));
-				clutchVariants.addVariant(List.of(
-					PropertyValue.create(ClutchBlock.FACING, facing),
-					PropertyValue.create(ClutchBlock.EXTENDED, true)),
-					BlockStateBuilder.model(clutchBlockModelExtended, x, y));
-			}
 			BlockDataHelper.create(MoreRed.get().clutchBlocks.get(woodName).get(), context,
-				(id,block) -> BlockStateBuilder.variants(clutchVariants),
+				(id,block) -> BlockStateBuilder.variants(clutchVariants -> {
+					for (Direction facing : Direction.values())
+					{
+						Quadrant x = switch(facing) {
+							case DOWN -> Quadrant.R90;
+							case UP -> Quadrant.R270;
+							default -> Quadrant.R0;
+						};
+						Quadrant y = switch(facing) {
+							case EAST -> Quadrant.R90;
+							case SOUTH -> Quadrant.R180;
+							case WEST -> Quadrant.R270;
+							default -> Quadrant.R0;
+						};
+						clutchVariants.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(ClutchBlock.FACING, facing)
+							.addPropertyValue(ClutchBlock.EXTENDED, false),
+							BlockStateBuilder.model(clutchBlockModel, x, y));
+						clutchVariants.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(ClutchBlock.FACING, facing)
+							.addPropertyValue(ClutchBlock.EXTENDED, true),
+							BlockStateBuilder.model(clutchBlockModelExtended, x, y));
+					}					
+				}),
 				(id,block) -> simpleLoot(block))
 				.localize()
 				.tags(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -845,7 +839,7 @@ public class MoreRedDataGen
 					new RawConnection(Optional.of(Direction.DOWN), NodeShape.ofSide(Direction.UP), Parity.POSITIVE, 0))));
 			}
 			BlockDataHelper.create(MoreRed.get().windcatcherBlocks.get(woodName).get(), context,
-				(id,block) -> BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(blockModel(id)))),
+				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> LootTable.lootTable()
 					.withPool(LootPool.lootPool()
 						.add(LootItem.lootTableItem(block)
@@ -912,7 +906,7 @@ public class MoreRedDataGen
 					new RawNode(NodeShape.ofSide(directionToNeighbor), 0,0,0,2D, connections)));
 		}
 		BlockDataHelper.create(MoreRed.get().gearsBlock.get(), context,
-			(id,block) -> BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(blockModel(id)))),
+			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 			(id,block) -> LootTable.lootTable()
 				.withPool(LootPool.lootPool()
 					.add(GearsLootEntry.gearsLoot())
@@ -958,7 +952,7 @@ public class MoreRedDataGen
 					ResourceKey.create(ExMachinaRegistries.MECHANICAL_COMPONENT, id),
 					component)));
 		
-		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockModelDefinition.CODEC, blockStates));
+		BlockStateBuilder.addDataProvider(event, blockStates);
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems));
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
 		generator.addProvider(true, lang);
@@ -978,54 +972,55 @@ public class MoreRedDataGen
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		ResourceLocation model = mangle(blockId, "block/%s");
 		
-		var variantBuilder = Variants.builder();
-		for (Direction dir : Direction.values())
-		{
-			for (int rotationIndex = 0; rotationIndex < 4; rotationIndex++)
+		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
+			for (Direction dir : Direction.values())
 			{
-				if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+				for (int i = 0; i < 4; i++)
 				{
-					int x = dir == Direction.DOWN ? 0
-						: dir == Direction.UP ? 180
-						: 270 - 90*rotationIndex;
-					// don't look too closely at the magic numbers
-					int y = switch(dir) {
-						case DOWN -> 90 * rotationIndex;
-						case UP -> new int[] {180,90,0,270}[rotationIndex];
-						case NORTH -> new int[] {0,270,180,270}[rotationIndex];
-						case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
-						case WEST -> new int[] {270,180,90,180}[rotationIndex];
-						case EAST -> new int[] {90,0,270,0}[rotationIndex];
-					};
-					Quadrant qx = Quadrant.parseJson(x);
-					Quadrant qy = Quadrant.parseJson(y);
-					variantBuilder.addVariant(List.of(
-							PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
-							PropertyValue.create(PlateBlock.ROTATION, rotationIndex)),
-							BlockStateBuilder.model(model, qx, qy)
+					final int rotationIndex = i;
+					if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+					{
+						int x = dir == Direction.DOWN ? 0
+							: dir == Direction.UP ? 180
+							: 270 - 90*rotationIndex;
+						// don't look too closely at the magic numbers
+						int y = switch(dir) {
+							case DOWN -> 90 * rotationIndex;
+							case UP -> new int[] {180,90,0,270}[rotationIndex];
+							case NORTH -> new int[] {0,270,180,270}[rotationIndex];
+							case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
+							case WEST -> new int[] {270,180,90,180}[rotationIndex];
+							case EAST -> new int[] {90,0,270,0}[rotationIndex];
+						};
+						Quadrant qx = Quadrant.parseJson(x);
+						Quadrant qy = Quadrant.parseJson(y);
+						variantBuilder.addMultiPropertyVariant(variant -> variant
+								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+								.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
+								BlockStateBuilder.model(model, qx, qy)
+							);
+					}
+					else // need a z-rotation
+					{
+						Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
+							: dir == Direction.SOUTH ? Quadrant.R90
+							: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
+							: Quadrant.R0;
+						Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
+							? Quadrant.R180 : Quadrant.R0;
+						Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
+							|| (dir == Direction.SOUTH && rotationIndex == 1)
+							|| (dir == Direction.WEST && rotationIndex == 3)
+							? Quadrant.R90 : Quadrant.R270;
+						variantBuilder.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+							.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
+							new UnbakedXyzBlockStateModel(model, qx, qy, qz)
 						);
+					}
 				}
-				else // need a z-rotation
-				{
-					Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
-						: dir == Direction.SOUTH ? Quadrant.R90
-						: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
-						: Quadrant.R0;
-					Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
-						? Quadrant.R180 : Quadrant.R0;
-					Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
-						|| (dir == Direction.SOUTH && rotationIndex == 1)
-						|| (dir == Direction.WEST && rotationIndex == 3)
-						? Quadrant.R90 : Quadrant.R270;
-					variantBuilder.addVariant(List.of(
-						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
-						PropertyValue.create(PlateBlock.ROTATION, rotationIndex)),
-						new UnbakedXyzBlockStateModel(model, qx, qy, qz)
-					);
-				}
-			}
-		}
-		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder);
+			}	
+		});
 		LootTable lootTable = simpleLoot(block);
 		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
 		return blockHelper;
@@ -1065,19 +1060,19 @@ public class MoreRedDataGen
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		ResourceLocation blockModel = blockModel(blockId);
-		var variants = Variants.builder();
-		int[] xs = {0,180,270,90,90,90};
-		int[] ys = {0,0,0,0,90,270};
-		for (Direction dir : Direction.values())
-		{
-			int x = xs[dir.ordinal()];
-			int y = ys[dir.ordinal()];
-			Quadrant qx = Quadrant.parseJson(x);
-			Quadrant qy = Quadrant.parseJson(y);
-			variants.addVariant(PropertyValue.create(BlockStateProperties.FACING, dir),
-				BlockStateBuilder.model(blockModel, qx, qy));
-		}
-		BlockModelDefinition blockState = BlockStateBuilder.variants(variants);
+		BlockModelDefinition blockState = BlockStateBuilder.variants(variants -> {
+			int[] xs = {0,180,270,90,90,90};
+			int[] ys = {0,0,0,0,90,270};
+			for (Direction dir : Direction.values())
+			{
+				int x = xs[dir.ordinal()];
+				int y = ys[dir.ordinal()];
+				Quadrant qx = Quadrant.parseJson(x);
+				Quadrant qy = Quadrant.parseJson(y);
+				variants.addVariant(BlockStateProperties.FACING, dir,
+					BlockStateBuilder.model(blockModel, qx, qy));
+			}
+		});
 		BlockDataHelper blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.localize(name);
 		blockHelper.tags(BlockTags.MINEABLE_WITH_PICKAXE);
@@ -1117,41 +1112,42 @@ public class MoreRedDataGen
 	{
 		Block block = MoreRed.get().hexidecrubrometerBlock.get();
 		ResourceLocation blockId = MoreRed.get().hexidecrubrometerBlock.getId();
-		var variants = Variants.builder();
-		for (int power=0; power<16; power++)
-		{
-			ResourceLocation modelId = mangle(blockModel(blockId), "%s_" + String.valueOf(power));
-			SimpleModel simpleModel = SimpleModel.createWithoutRenderType(MoreRed.id("block/hexidecrubrometer_template"))
-				.addTexture("display", modelId);
-			context.models().put(modelId, simpleModel);
-			for (Direction facing : HexidecrubrometerBlock.ROTATION.getPossibleValues())
+		
+		var helper = BlockDataHelper.create(block, context, BlockStateBuilder.variants(variants -> {
+			for (int i=0; i<16; i++)
 			{
-				int y = switch(facing) {
-					case EAST -> 90;
-					case SOUTH -> 180;
-					case WEST -> 270;
-					default -> 0;
-				};
-				Quadrant qy = Quadrant.parseJson(y);
-				for (AttachFace face : AttachFace.values())
+				final int power = i; // lambdas!
+				ResourceLocation modelId = mangle(blockModel(blockId), "%s_" + String.valueOf(power));
+				SimpleModel simpleModel = SimpleModel.createWithoutRenderType(MoreRed.id("block/hexidecrubrometer_template"))
+					.addTexture("display", modelId);
+				context.models().put(modelId, simpleModel);
+				for (Direction facing : HexidecrubrometerBlock.ROTATION.getPossibleValues())
 				{
-					int x = switch(face) {
-						case CEILING -> 90;
-						case FLOOR -> 270;
-						case WALL -> 0;
+					int y = switch(facing) {
+						case EAST -> 90;
+						case SOUTH -> 180;
+						case WEST -> 270;
+						default -> 0;
 					};
-					Quadrant qx = Quadrant.parseJson(x);
-					
-					variants.addVariant(List.of(
-						PropertyValue.create(HexidecrubrometerBlock.READING_FACE, face),
-						PropertyValue.create(HexidecrubrometerBlock.ROTATION, facing),
-						PropertyValue.create(HexidecrubrometerBlock.POWER, power)),
-						BlockStateBuilder.model(modelId, qx, qy));
+					Quadrant qy = Quadrant.parseJson(y);
+					for (AttachFace face : AttachFace.values())
+					{
+						int x = switch(face) {
+							case CEILING -> 90;
+							case FLOOR -> 270;
+							case WALL -> 0;
+						};
+						Quadrant qx = Quadrant.parseJson(x);
+						
+						variants.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(HexidecrubrometerBlock.READING_FACE, face)
+							.addPropertyValue(HexidecrubrometerBlock.ROTATION, facing)
+							.addPropertyValue(HexidecrubrometerBlock.POWER, power),
+							BlockStateBuilder.model(modelId, qx, qy));
+					}
 				}
 			}
-		}
-		
-		var helper = BlockDataHelper.create(block, context, BlockStateBuilder.variants(variants), simpleLoot(block));
+		}), simpleLoot(block));
 
 		helper.tags(BlockTags.MINEABLE_WITH_PICKAXE);
 		helper.blockItem(SimpleModel.createWithoutRenderType(mangle(blockId, "block/%s_0")))
@@ -1171,62 +1167,63 @@ public class MoreRedDataGen
 		ResourceLocation model = mangle(blockId, "block/%s");
 		ResourceLocation switchedModel = mangle(blockId, "block/%s_switched");
 		
-		var variantBuilder = Variants.builder();
-		for (Direction dir : Direction.values())
-		{
-			for (int rotationIndex = 0; rotationIndex < 4; rotationIndex++)
+		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
+			for (Direction dir : Direction.values())
 			{
-				BlockStateModel.Unbaked unbakedModel;
-				BlockStateModel.Unbaked unbakedSwitchedModel;
-				if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+				for (int i = 0; i < 4; i++)
 				{
-					int x = dir == Direction.DOWN ? 0
-						: dir == Direction.UP ? 180
-						: 270 - 90*rotationIndex;
-					// don't look too closely at the magic numbers
-					int y = switch(dir) {
-						case DOWN -> 90 * rotationIndex;
-						case UP -> new int[] {180,90,0,270}[rotationIndex];
-						case NORTH -> new int[] {0,270,180,270}[rotationIndex];
-						case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
-						case WEST -> new int[] {270,180,90,180}[rotationIndex];
-						case EAST -> new int[] {90,0,270,0}[rotationIndex];
-					};
-					Quadrant qx = Quadrant.parseJson(x);
-					Quadrant qy = Quadrant.parseJson(y);
-					unbakedModel = BlockStateBuilder.model(model, qx, qy);
-					unbakedSwitchedModel = BlockStateBuilder.model(switchedModel, qx, qy);
+					final int rotationIndex = i; // lambdas!
+					BlockStateModel.Unbaked unbakedModel;
+					BlockStateModel.Unbaked unbakedSwitchedModel;
+					if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+					{
+						int x = dir == Direction.DOWN ? 0
+							: dir == Direction.UP ? 180
+							: 270 - 90*rotationIndex;
+						// don't look too closely at the magic numbers
+						int y = switch(dir) {
+							case DOWN -> 90 * rotationIndex;
+							case UP -> new int[] {180,90,0,270}[rotationIndex];
+							case NORTH -> new int[] {0,270,180,270}[rotationIndex];
+							case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
+							case WEST -> new int[] {270,180,90,180}[rotationIndex];
+							case EAST -> new int[] {90,0,270,0}[rotationIndex];
+						};
+						Quadrant qx = Quadrant.parseJson(x);
+						Quadrant qy = Quadrant.parseJson(y);
+						unbakedModel = BlockStateBuilder.model(model, qx, qy);
+						unbakedSwitchedModel = BlockStateBuilder.model(switchedModel, qx, qy);
+					}
+					else // need a z-rotation
+					{
+						Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
+							: dir == Direction.SOUTH ? Quadrant.R90
+							: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
+							: Quadrant.R0;
+						Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
+							? Quadrant.R180 : Quadrant.R0;
+						Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
+							|| (dir == Direction.SOUTH && rotationIndex == 1)
+							|| (dir == Direction.WEST && rotationIndex == 3)
+							? Quadrant.R90 : Quadrant.R270;
+						unbakedModel = new UnbakedXyzBlockStateModel(model, qx, qy, qz);
+						unbakedSwitchedModel = new UnbakedXyzBlockStateModel(switchedModel, qx, qy, qz);
+					}
+					
+					variantBuilder.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+							.addPropertyValue(PlateBlock.ROTATION, rotationIndex)
+							.addPropertyValue(PlateBlockStateProperties.INPUT_B, false),
+							unbakedModel
+						);
+					variantBuilder.addMultiPropertyVariant(variant -> variant
+							.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+							.addPropertyValue(PlateBlock.ROTATION, rotationIndex)
+							.addPropertyValue(PlateBlockStateProperties.INPUT_B, true),
+						unbakedSwitchedModel);
 				}
-				else // need a z-rotation
-				{
-					Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
-						: dir == Direction.SOUTH ? Quadrant.R90
-						: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
-						: Quadrant.R0;
-					Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
-						? Quadrant.R180 : Quadrant.R0;
-					Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
-						|| (dir == Direction.SOUTH && rotationIndex == 1)
-						|| (dir == Direction.WEST && rotationIndex == 3)
-						? Quadrant.R90 : Quadrant.R270;
-					unbakedModel = new UnbakedXyzBlockStateModel(model, qx, qy, qz);
-					unbakedSwitchedModel = new UnbakedXyzBlockStateModel(switchedModel, qx, qy, qz);
-				}
-				
-				variantBuilder.addVariant(List.of(
-						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
-						PropertyValue.create(PlateBlock.ROTATION, rotationIndex),
-						PropertyValue.create(PlateBlockStateProperties.INPUT_B, false)),
-						unbakedModel
-					);
-				variantBuilder.addVariant(List.of(
-						PropertyValue.create(PlateBlock.ATTACHMENT_DIRECTION, dir),
-						PropertyValue.create(PlateBlock.ROTATION, rotationIndex),
-						PropertyValue.create(PlateBlockStateProperties.INPUT_B, true)),
-					unbakedSwitchedModel);
-			}
-		}
-		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder);
+			}			
+		});
 		
 		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.localize(blockName);
@@ -1249,79 +1246,50 @@ public class MoreRedDataGen
 		ResourceLocation elbowModel = mangle(blockId, "block/%s_elbow");
 		ResourceLocation lineModel = mangle(blockId, "block/%s_line");
 		ResourceLocation edgeModel = mangle(blockId, "block/%s_edge");
-		BlockModelDefinition blockState = BlockStateBuilder.multipart(Multipart.builder()
-			.addWhenApply(When.always().apply(new UnbakedWirePartBlockStateModel(lineModel, edgeModel)))
-			.addWhenApply(When.when(Case.create(AbstractWireBlock.DOWN, true))
-				.apply(BlockStateBuilder.model(nodeModel)))
-			.addWhenApply(When.when(Case.create(AbstractWireBlock.UP, true))
-				.apply(BlockStateBuilder.model(nodeModel, r180, r0)))
-			.addWhenApply(When.when(Case.create(AbstractWireBlock.SOUTH, true))
-				.apply(BlockStateBuilder.model(nodeModel, r90, r0)))
-			.addWhenApply(When.when(Case.create(AbstractWireBlock.WEST, true))
-				.apply(BlockStateBuilder.model(nodeModel, r90, r90)))
-			.addWhenApply(When.when(Case.create(AbstractWireBlock.NORTH, true))
-				.apply(BlockStateBuilder.model(nodeModel, r90, r180)))
-			.addWhenApply(When.when(Case.create(AbstractWireBlock.EAST, true))
-				.apply(BlockStateBuilder.model(nodeModel, r90, r270)))
-			.addWhenApply(When.when(Case.builder()
-					.addCondition(AbstractWireBlock.DOWN, true)
-					.addCondition(AbstractWireBlock.WEST, true))
-				.apply(BlockStateBuilder.model(elbowModel)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.DOWN, true)
-					.addCondition(AbstractWireBlock.NORTH, true))
-				.apply(BlockStateBuilder.model(elbowModel, r0, r90)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.DOWN, true)
-					.addCondition(AbstractWireBlock.EAST, true))
-				.apply(BlockStateBuilder.model(elbowModel, r0, r180)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.DOWN, true)
-					.addCondition(AbstractWireBlock.SOUTH, true))
-				.apply(BlockStateBuilder.model(elbowModel, r0, r270)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.SOUTH, true)
-					.addCondition(AbstractWireBlock.WEST, true))
-				.apply(BlockStateBuilder.model(elbowModel, r90, r0)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.WEST, true)
-					.addCondition(AbstractWireBlock.NORTH, true))
-				.apply(BlockStateBuilder.model(elbowModel, r90, r90)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.NORTH, true)
-					.addCondition(AbstractWireBlock.EAST, true))
-				.apply(BlockStateBuilder.model(elbowModel, r90, r180)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.EAST, true)
-					.addCondition(AbstractWireBlock.SOUTH, true))
-				.apply(BlockStateBuilder.model(elbowModel, r90, r270)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.UP, true)
-					.addCondition(AbstractWireBlock.WEST, true))
-				.apply(BlockStateBuilder.model(elbowModel, r180, r0)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.UP, true)
-					.addCondition(AbstractWireBlock.NORTH, true))
-				.apply(BlockStateBuilder.model(elbowModel, r180, r90)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.UP, true)
-					.addCondition(AbstractWireBlock.EAST, true))
-				.apply(BlockStateBuilder.model(elbowModel, r180, r180)))
-			.addWhenApply(When.when(
-				Case.builder()
-					.addCondition(AbstractWireBlock.UP, true)
-					.addCondition(AbstractWireBlock.SOUTH, true))
-				.apply(BlockStateBuilder.model(elbowModel, r180, r270))));
+		BlockModelDefinition blockState = BlockStateBuilder.multipart(multipart -> multipart
+			.apply(new UnbakedWirePartBlockStateModel(lineModel, edgeModel))
+			.applyWhen(BlockStateBuilder.model(nodeModel), AbstractWireBlock.DOWN, true)
+			.applyWhen(BlockStateBuilder.model(nodeModel, r180, r0), AbstractWireBlock.UP, true)
+			.applyWhen(BlockStateBuilder.model(nodeModel, r90, r0), AbstractWireBlock.SOUTH, true)
+			.applyWhen(BlockStateBuilder.model(nodeModel, r90, r90), AbstractWireBlock.WEST, true)
+			.applyWhen(BlockStateBuilder.model(nodeModel, r90, r180), AbstractWireBlock.NORTH, true)
+			.applyWhen(BlockStateBuilder.model(nodeModel, r90, r270), AbstractWireBlock.EAST, true)
+			.applyWhenAll(BlockStateBuilder.model(elbowModel), when -> when
+				.addCondition(AbstractWireBlock.DOWN, true)
+				.addCondition(AbstractWireBlock.WEST, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r0, r90), when -> when
+				.addCondition(AbstractWireBlock.DOWN, true)
+				.addCondition(AbstractWireBlock.NORTH, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r0, r180), when -> when
+				.addCondition(AbstractWireBlock.DOWN, true)
+				.addCondition(AbstractWireBlock.EAST, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r0, r270), when -> when
+				.addCondition(AbstractWireBlock.DOWN, true)
+				.addCondition(AbstractWireBlock.SOUTH, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r90, r0), when -> when
+				.addCondition(AbstractWireBlock.SOUTH, true)
+				.addCondition(AbstractWireBlock.WEST, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r90, r90), when -> when
+				.addCondition(AbstractWireBlock.WEST, true)
+				.addCondition(AbstractWireBlock.NORTH, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r90, r180), when -> when
+				.addCondition(AbstractWireBlock.NORTH, true)
+				.addCondition(AbstractWireBlock.EAST, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r90, r270), when -> when
+				.addCondition(AbstractWireBlock.EAST, true)
+				.addCondition(AbstractWireBlock.SOUTH, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r180, r0), when -> when
+				.addCondition(AbstractWireBlock.UP, true)
+				.addCondition(AbstractWireBlock.WEST, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r180, r90), when -> when
+				.addCondition(AbstractWireBlock.UP, true)
+				.addCondition(AbstractWireBlock.NORTH, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r180, r180), when -> when
+				.addCondition(AbstractWireBlock.UP, true)
+				.addCondition(AbstractWireBlock.EAST, true))
+			.applyWhenAll(BlockStateBuilder.model(elbowModel, r180, r270), when -> when
+				.addCondition(AbstractWireBlock.UP, true)
+				.addCondition(AbstractWireBlock.SOUTH, true)));
 		
 		LootTable lootTable = LootTable.lootTable()
 			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1))
@@ -1341,7 +1309,7 @@ public class MoreRedDataGen
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		context.lang().add(block, blockName);
 		return BlockDataHelper.create(block, context,
-			BlockStateBuilder.variants(Variants.always(BlockStateBuilder.model(mangle(blockId, "block/%s")))),
+			BlockStateBuilder.singleVariant(BlockStateBuilder.model(mangle(blockId, "block/%s"))),
 			simpleLoot(block));
 	}
 	
@@ -1439,21 +1407,14 @@ public class MoreRedDataGen
 	{
 		ResourceLocation blockModel = BlockDataHelper.blockModel(block);
 		ResourceLocation extension = mangle(blockModel, "%s_extension");
-		return BlockStateBuilder.multipart(Multipart.builder()
-			.addWhenApply(When.always().apply(BlockStateBuilder.model(blockModel)))
-			.addWhenApply(When.when(Case.create(TubeBlock.DOWN, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R90, Quadrant.R0, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.UP, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R270, Quadrant.R0, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.NORTH, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R0, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.EAST, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R90, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.SOUTH, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R180, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.WEST, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R270, true)))
-			);
+		return BlockStateBuilder.multipart(multipart -> multipart
+			.apply(BlockStateBuilder.model(blockModel))
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R90, Quadrant.R0, true), TubeBlock.DOWN, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R270, Quadrant.R0, true), TubeBlock.UP, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R0, true), TubeBlock.NORTH, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R90, true), TubeBlock.EAST, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R180, true), TubeBlock.SOUTH, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R270, true), TubeBlock.WEST, true));
 	}
 	
 	private static BlockModelDefinition redstoneTubeBlockState(Block block)
@@ -1462,48 +1423,37 @@ public class MoreRedDataGen
 		ResourceLocation offModel = blockModel;
 		ResourceLocation onModel = mangle(blockModel, "%s_on");
 		ResourceLocation extension = MoreRed.id("block/tube_extension");
-		return BlockStateBuilder.multipart(Multipart.builder()
-			.addWhenApply(When.when(Case.create(RedstoneTubeBlock.POWERED, false))
-				.apply(BlockStateBuilder.model(offModel)))
-			.addWhenApply(When.when(Case.create(RedstoneTubeBlock.POWERED, true))
-				.apply(BlockStateBuilder.model(onModel)))
-			.addWhenApply(When.when(Case.create(TubeBlock.DOWN, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R90, Quadrant.R0, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.UP, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R270, Quadrant.R0, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.NORTH, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R0, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.EAST, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R90, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.SOUTH, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R180, true)))
-			.addWhenApply(When.when(Case.create(TubeBlock.WEST, true))
-				.apply(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R270, true)))
-			);
+		return BlockStateBuilder.multipart(multipart -> multipart
+			.applyWhen(BlockStateBuilder.model(offModel), RedstoneTubeBlock.POWERED, false)
+			.applyWhen(BlockStateBuilder.model(onModel), RedstoneTubeBlock.POWERED, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R90, Quadrant.R0, true), TubeBlock.DOWN, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R270, Quadrant.R0, true), TubeBlock.UP, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R0, true), TubeBlock.NORTH, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R90, true), TubeBlock.EAST, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R180, true), TubeBlock.SOUTH, true)
+			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R270, true), TubeBlock.WEST, true));
 	}
 	
 	private static BlockModelDefinition sixWayBlockState(Block block)
 	{
-		var builder = Variants.builder();
-		ResourceLocation model = BlockDataHelper.blockModel(block);
-		for (Direction facing : Direction.values())
-		{
-			Quadrant x = switch(facing) {
-				case DOWN -> Quadrant.R90;
-				case UP -> Quadrant.R270;
-				default -> Quadrant.R0;
-			};
-			Quadrant y = switch(facing) {
-				case EAST -> Quadrant.R90;
-				case SOUTH -> Quadrant.R180;
-				case WEST -> Quadrant.R270;
-				default -> Quadrant.R0;
-			};
-			builder.addVariant(
-				PropertyValue.create(BlockStateProperties.FACING, facing),
-				BlockStateBuilder.model(model, x, y, true));
-		}
-		return BlockStateBuilder.variants(builder);
+		return BlockStateBuilder.variants(builder -> {
+			ResourceLocation model = BlockDataHelper.blockModel(block);
+			for (Direction facing : Direction.values())
+			{
+				Quadrant x = switch(facing) {
+					case DOWN -> Quadrant.R90;
+					case UP -> Quadrant.R270;
+					default -> Quadrant.R0;
+				};
+				Quadrant y = switch(facing) {
+					case EAST -> Quadrant.R90;
+					case SOUTH -> Quadrant.R180;
+					case WEST -> Quadrant.R270;
+					default -> Quadrant.R0;
+				};
+				builder.addVariant(BlockStateProperties.FACING, facing,	BlockStateBuilder.model(model, x, y, true));
+			}
+		});
 	}
 	
 	private static Ingredient ingredient(TagKey<Item> tagKey)
