@@ -1,4 +1,4 @@
-package commoble.morered.datagen;
+package net.commoble.morered.datagen;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;

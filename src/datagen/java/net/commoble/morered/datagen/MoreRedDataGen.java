@@ -1,4 +1,4 @@
-package commoble.morered.datagen;
+package net.commoble.morered.datagen;
 
 import java.util.ArrayList;
 import java.util.HashMap;
