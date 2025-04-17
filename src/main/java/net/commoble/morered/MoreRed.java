@@ -53,7 +53,7 @@ import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 import net.commoble.morered.plate_blocks.LogicFunctions;
-import net.commoble.morered.plate_blocks.OscillatorBlock;
+import net.commoble.morered.plate_blocks.AlternatorBlock;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PulseGateBlock;
 import net.commoble.morered.soldering.SolderingMenu;
@@ -215,7 +215,7 @@ public class MoreRed
 	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
 	public final DeferredHolder<Block, LatchBlock> latchBlock;
 	public final DeferredHolder<Block, PulseGateBlock> pulseGateBlock;
-	public final DeferredHolder<Block, OscillatorBlock> oscillatorBlock;
+	public final DeferredHolder<Block, AlternatorBlock> alternatorBlock;
 	public final DeferredHolder<Block, WirePostBlock> redwirePostBlock;
 	public final DeferredHolder<Block, WirePostPlateBlock> redwireRelayBlock;
 	public final DeferredHolder<Block, WirePostPlateBlock> redwireJunctionBlock;
@@ -253,7 +253,7 @@ public class MoreRed
 	
 	public final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
 
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> oscillatorBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> alternatorBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> wirePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<CablePostBlockEntity>> cablePostBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
@@ -345,14 +345,14 @@ public class MoreRed
 		pulseGateBlock = registerBlockItem(blocks, items, Names.PULSE_GATE,
 			() ->BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD),
 			PulseGateBlock::new);
-		oscillatorBlock = registerBlockItem(blocks, items, Names.OSCILLATOR,
+		alternatorBlock = registerBlockItem(blocks, items, Names.ALTERNATOR,
 			() -> BlockBehaviour.Properties.of()
 				.mapColor(MapColor.STONE)
 				.instrument(NoteBlockInstrument.BASEDRUM)
 				.strength(0)
 				.sound(SoundType.WOOD)
 				.noOcclusion(),
-			OscillatorBlock::new);
+			AlternatorBlock::new);
 		redwirePostBlock = registerBlockItem(blocks, items, Names.REDWIRE_POST,
 			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
 			WirePostBlock::new);
@@ -581,10 +581,10 @@ public class MoreRed
 			.build()
 			);
 		
-		oscillatorBlockEntity = GenericBlockEntity.builder()
+		alternatorBlockEntity = GenericBlockEntity.builder()
 			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
-			.register(blockEntityTypes, Names.OSCILLATOR, this.oscillatorBlock);
+			.register(blockEntityTypes, Names.ALTERNATOR, this.alternatorBlock);
 		wirePostBeType = blockEntityTypes.register(Names.WIRE_POST,
 			() -> new BlockEntityType<>(WirePostBlockEntity::new,
 				redwirePostBlock.get(),

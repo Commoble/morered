@@ -27,7 +27,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
-public class OscillatorBlock extends PlateBlock implements EntityBlock
+public class AlternatorBlock extends PlateBlock implements EntityBlock
 {
 	public static final IntegerProperty AXLE_ROTATION = IntegerProperty.create("axle_rotation", 0, 3);
 	public static final double AXLE_1_THRESHOLD = Math.PI / 4D;	// less than this is 0, more is 1
@@ -35,7 +35,7 @@ public class OscillatorBlock extends PlateBlock implements EntityBlock
 	public static final double AXLE_3_THRESHOLD = 5D*AXLE_1_THRESHOLD; // less is 2, more is 3
 	public static final double AXLE_0_THRESHOLD = 7D*AXLE_1_THRESHOLD; // less is 3, more is 0
 
-	public OscillatorBlock(Properties properties)
+	public AlternatorBlock(Properties properties)
 	{
 		super(properties);
 		this.registerDefaultState(this.defaultBlockState().setValue(AXLE_ROTATION, 0));
@@ -91,15 +91,15 @@ public class OscillatorBlock extends PlateBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().oscillatorBlockEntity.get().create(pos, state);
+		return MoreRed.get().alternatorBlockEntity.get().create(pos, state);
 	}
 
-	private static final BlockEntityTicker<GenericBlockEntity> TICKER = OscillatorBlock::serverTick;
+	private static final BlockEntityTicker<GenericBlockEntity> TICKER = AlternatorBlock::serverTick;
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return (!level.isClientSide) && type == MoreRed.get().oscillatorBlockEntity.get()
+		return (!level.isClientSide) && type == MoreRed.get().alternatorBlockEntity.get()
 			? (BlockEntityTicker<T>)TICKER
 			: null;
 	}

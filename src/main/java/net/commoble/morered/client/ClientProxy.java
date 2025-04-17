@@ -193,7 +193,7 @@ public class ClientProxy
 		MoreRed.get().logicPlates.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
 		MoreRed.get().bitwiseLogicPlates.values()
 			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().oscillatorBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().alternatorBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().latchBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), RenderType.cutout());
@@ -252,7 +252,7 @@ public class ClientProxy
 		MoreRed.get().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockTint, rob.get()));
 		event.register(ColorHandlers::getLatchBlockTint, MoreRed.get().latchBlock.get());
 		event.register(ColorHandlers::getPulseGateBlockTint, MoreRed.get().pulseGateBlock.get());
-		event.register(ColorHandlers::getOscillatorBlockTint, MoreRed.get().oscillatorBlock.get());
+		event.register(ColorHandlers::getAlternatorBlockTint, MoreRed.get().alternatorBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireRelayBlock.get());
 		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireJunctionBlock.get());
@@ -261,7 +261,7 @@ public class ClientProxy
 
 	static void onRegisterRenderers(RegisterRenderers event)
 	{
-		event.registerBlockEntityRenderer(MoreRed.get().oscillatorBlockEntity.get(), OscillatorBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.get().alternatorBlockEntity.get(), AlternatorBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().wirePostBeType.get(), WirePostRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().cablePostBeType.get(), BundledCablePostRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().tubeEntity.get(), TubeBlockEntityRenderer::new);

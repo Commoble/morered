@@ -24,13 +24,13 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public record OscillatorBlockEntityRenderer(ItemRenderer itemRenderer, ItemStack axleModel) implements BlockEntityRenderer<GenericBlockEntity>
+public record AlternatorBlockEntityRenderer(ItemRenderer itemRenderer, ItemStack axleModel) implements BlockEntityRenderer<GenericBlockEntity>
 {
-	public static OscillatorBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
+	public static AlternatorBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
 		ItemStack stack = new ItemStack(Items.STICK);
-		stack.set(DataComponents.ITEM_MODEL, MoreRed.id("oscillator_axle"));
-		return new OscillatorBlockEntityRenderer(context.getItemRenderer(), stack);
+		stack.set(DataComponents.ITEM_MODEL, MoreRed.id("alternator_axle"));
+		return new AlternatorBlockEntityRenderer(context.getItemRenderer(), stack);
 	}
 
 	@Override

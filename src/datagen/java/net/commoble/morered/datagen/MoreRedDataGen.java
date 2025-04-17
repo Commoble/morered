@@ -221,10 +221,10 @@ public class MoreRedDataGen
 		switchedPlateBlock(Names.PULSE_GATE, "Pulse Gate", context, 1,
 			"rir",
 			"###");
-		VariantsMechanicalComponent oscillatorMachine = VariantsMechanicalComponent.builder(true);
+		VariantsMechanicalComponent alternatorMachine = VariantsMechanicalComponent.builder(true);
 		for (Direction attachDir : Direction.values())
 		{
-			oscillatorMachine.addVariant(
+			alternatorMachine.addVariant(
 				TwentyFourBlock.ATTACHMENT_DIRECTION,
 				attachDir,
 				new RawNode(
@@ -237,9 +237,9 @@ public class MoreRedDataGen
 							0))));
 				
 		}
-		plateBlock(Names.OSCILLATOR, "Oscillator", context)
+		plateBlock(Names.ALTERNATOR, "Alternator", context)
 			.tags(ExMachinaTags.Blocks.NO_AUTOMATIC_MECHANICAL_UPDATES)
-			.mechanicalComponent(oscillatorMachine)
+			.mechanicalComponent(alternatorMachine)
 			.blockItemWithoutItemModel(id -> new ClientItem(
 				new BlockModelWrapper.Unbaked(
 					id,
@@ -262,9 +262,9 @@ public class MoreRedDataGen
 					new SizedIngredient(ingredient(Tags.Items.DUSTS_REDSTONE), 5),
 					new SizedIngredient(ingredient(MoreRed.Tags.Items.AXLES), 1))));
 				// dummy item asset for the BER
-				ResourceLocation oscillatorAxleId = mangle(helper.id(), "%s_axle");
-				ResourceLocation oscillatorAxleModelId = itemModel(oscillatorAxleId);
-				clientItems.put(oscillatorAxleId, new ClientItem(new BlockModelWrapper.Unbaked(oscillatorAxleModelId, List.of()), ClientItem.Properties.DEFAULT)); 
+				ResourceLocation alternatorAxleId = mangle(helper.id(), "%s_axle");
+				ResourceLocation alternatorAxleModelId = itemModel(alternatorAxleId);
+				clientItems.put(alternatorAxleId, new ClientItem(new BlockModelWrapper.Unbaked(alternatorAxleModelId, List.of()), ClientItem.Properties.DEFAULT)); 
 			});
 			
 		wireBlock(Names.RED_ALLOY_WIRE, "Red Alloy Wire", context)

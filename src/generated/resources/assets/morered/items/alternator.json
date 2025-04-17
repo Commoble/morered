@@ -1,7 +1,7 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "morered:item/oscillator",
+    "model": "morered:item/alternator",
     "tints": [
       {
         "type": "minecraft:constant",

@@ -5,7 +5,7 @@ import net.commoble.morered.plate_blocks.InputState;
 import net.commoble.morered.plate_blocks.LatchBlock;
 import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctions;
-import net.commoble.morered.plate_blocks.OscillatorBlock;
+import net.commoble.morered.plate_blocks.AlternatorBlock;
 import net.commoble.morered.plate_blocks.PulseGateBlock;
 import net.commoble.morered.wire_post.AbstractPoweredWirePostBlock;
 import net.commoble.morered.wires.Edge;
@@ -123,11 +123,11 @@ public class ColorHandlers
 		}
 	}
 	
-	public static int getOscillatorBlockTint(BlockState state, BlockAndTintGetter level, BlockPos pos, int tintIndex)
+	public static int getAlternatorBlockTint(BlockState state, BlockAndTintGetter level, BlockPos pos, int tintIndex)
 	{
 		// tint index is 0,1,2,3
 		// we compare this to the rotation of the block's redstone axle
-		int litSide = state.getValue(OscillatorBlock.AXLE_ROTATION) % 4;
+		int litSide = state.getValue(AlternatorBlock.AXLE_ROTATION) % 4;
 		return litSide == tintIndex ? LIT : UNLIT;
 	}
 	

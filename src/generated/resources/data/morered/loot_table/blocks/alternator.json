@@ -10,7 +10,7 @@
       "entries": [
         {
           "type": "minecraft:item",
-          "name": "morered:oscillator"
+          "name": "morered:alternator"
         }
       ],
       "rolls": 1.0
