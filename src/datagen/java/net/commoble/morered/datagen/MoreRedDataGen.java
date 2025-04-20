@@ -46,7 +46,6 @@ import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.transportation.ColoredTubeBlock;
-import net.commoble.morered.transportation.ExtractorBlock;
 import net.commoble.morered.transportation.RedstoneTubeBlock;
 import net.commoble.morered.transportation.TubeBlock;
 import net.commoble.morered.wires.AbstractWireBlock;
@@ -377,44 +376,59 @@ public class MoreRedDataGen
 						'c', ingredient(Tags.Items.COBBLESTONES),
 						's', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
 						'G', ingredient(Tags.Items.FENCE_GATES)))));
-		BlockDataHelper.create(MoreRed.get().extractorBlock.get(), context, block -> {
-			ResourceLocation blockModel = BlockDataHelper.blockModel(block);
-			ResourceLocation poweredBlockModel = mangle(blockModel, "%s_powered");
-			return BlockStateBuilder.variants(builder -> {
-				for (boolean powered : new boolean[]{false, true})
-				{
-					for (Direction direction : Direction.values())
-					{
-						ResourceLocation model = powered ? poweredBlockModel : blockModel;
-						Quadrant y = switch(direction) {
-							case WEST -> Quadrant.R90;
-							case EAST -> Quadrant.R270;
-							default -> Quadrant.R0;
-						};
-						Quadrant x = switch(direction) {
-							case DOWN -> Quadrant.R0;
-							case UP -> Quadrant.R180;
-							case NORTH -> Quadrant.R270;
-							default -> Quadrant.R90;
-						};
-						builder.addMultiPropertyVariant(variant -> variant
-							.addPropertyValue(ExtractorBlock.FACING, direction)
-							.addPropertyValue(ExtractorBlock.POWERED, powered),
-							BlockStateBuilder.model(model, x, y, true));
-					}
-				}
-			});
-		}, block -> simpleLoot(block))
-			.localize("Extractor")
-			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
-			.simpleBlockItem()
-			.help(helper -> helper
-				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
-					List.of("h", "p", "s"),
+		VariantsMechanicalComponent extractorMachine = VariantsMechanicalComponent.builder(true);
+		for (Direction attachDir : Direction.values())
+		{
+			for (int i=0; i<4; i++)
+			{
+				final int rotation = i;
+				BlockState state = MoreRed.get().extractorBlock.get().defaultBlockState()
+					.setValue(GearshifterBlock.ATTACHMENT_DIRECTION, attachDir)
+					.setValue(GearshifterBlock.ROTATION, rotation);
+				Direction screwDir = attachDir.getOpposite();
+				Direction axleDir = PlateBlockStateProperties.getOutputDirection(state);
+				Direction reverseAxleDir = axleDir.getOpposite();
+				// if axis of rotation is aligned with screw axis, we want to allow rotation, but have some small load torque
+				// if axis of rotation is misaligned with screw axis, we want to disallow rotation with a large load torque
+				// if axis of rotation is positive, positive countertorque should be small, else large
+				double positiveCounterTorque = screwDir.getAxisDirection().getStep() > 0 ? 10D : 1000D;
+				double negativeCounterTorque = screwDir.getAxisDirection().getStep() > 0 ? 1000D : 10D;
+				extractorMachine.addMultiPropertyVariant(builder -> builder
+					.add(GearshifterBlock.ATTACHMENT_DIRECTION, attachDir)
+					.add(GearshifterBlock.ROTATION, rotation),
+					new RawNode(NodeShape.ofSide(screwDir), 0D,positiveCounterTorque,negativeCounterTorque, 100D, List.of(
+						new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.inversion(screwDir,axleDir), 0),
+						new RawConnection(Optional.empty(), NodeShape.ofSide(reverseAxleDir), Parity.inversion(screwDir, reverseAxleDir), 0))),
+					new RawNode(NodeShape.ofSide(axleDir), 0D,0D,0D, 0.01D, List.of(
+						new RawConnection(Optional.of(axleDir), NodeShape.ofSide(axleDir.getOpposite()), Parity.POSITIVE,0),
+						new RawConnection(Optional.empty(), NodeShape.ofSide(screwDir), Parity.inversion(screwDir, axleDir), 0))),
+					new RawNode(NodeShape.ofSide(reverseAxleDir), 0D,0D,0D, 0.01D, List.of(
+						new RawConnection(Optional.of(reverseAxleDir), NodeShape.ofSide(reverseAxleDir.getOpposite()), Parity.POSITIVE,0),
+						new RawConnection(Optional.empty(), NodeShape.ofSide(screwDir), Parity.inversion(screwDir, reverseAxleDir), 0))));
+			}
+		}
+		plateBlock(Names.EXTRACTOR, "Extractor", context)
+			.mechanicalComponent(extractorMachine)
+			.tags(BlockTags.MINEABLE_WITH_AXE, BlockTags.MINEABLE_WITH_PICKAXE)
+			.blockItemWithoutItemModel()
+			.help(helper -> {
+				helper .recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+					List.of(" H ", "-G-", "pSp"),
 					Map.of(
-						'h', Ingredient.of(Items.HOPPER),
-						'p', Ingredient.of(Items.PISTON),
-						's', Ingredient.of(MoreRed.get().shuntBlock.get().asItem())))));
+						'H', Ingredient.of(Items.HOPPER),
+						'p', ingredient(ItemTags.PLANKS),
+						'-', ingredient(MoreRed.Tags.Items.AXLES),
+						'G', ingredient(MoreRed.Tags.Items.GEARS),
+						'S', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()))));
+				ResourceLocation screwId = mangle(helper.id(), "%s_screw");
+				ResourceLocation screwBlockModel = blockModel(screwId);
+				ResourceLocation axleId = mangle(helper.id(), "%s_axle");
+				ResourceLocation axleBlockModel = blockModel(axleId);
+				clientItems.put(screwId, new ClientItem(new BlockModelWrapper.Unbaked(screwBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+			});
+			
+
 		sixWayBlock(Names.SHUNT, "Shunt", context)
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
 			.simpleBlockItem()

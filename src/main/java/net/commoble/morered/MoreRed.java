@@ -46,6 +46,7 @@ import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
 import net.commoble.morered.mechanisms.WoodSets;
 import net.commoble.morered.mechanisms.WoodSets.WoodSet;
+import net.commoble.morered.plate_blocks.AlternatorBlock;
 import net.commoble.morered.plate_blocks.BitwiseLogicFunction;
 import net.commoble.morered.plate_blocks.BitwiseLogicFunctions;
 import net.commoble.morered.plate_blocks.LatchBlock;
@@ -53,7 +54,6 @@ import net.commoble.morered.plate_blocks.LogicFunction;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock;
 import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPlateBlockFactory;
 import net.commoble.morered.plate_blocks.LogicFunctions;
-import net.commoble.morered.plate_blocks.AlternatorBlock;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PulseGateBlock;
 import net.commoble.morered.soldering.SolderingMenu;
@@ -261,6 +261,7 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<SingleInputBitwiseGateBlockEntity>> singleInputBitwiseGateBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TwoInputBitwiseGateBlockEntity>> twoInputBitwiseGateBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<DistributorBlockEntity>> distributorEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> extractorEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilterBlockEntity>> filterEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiFilterBlockEntity>> multiFilterEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<OsmosisFilterBlockEntity>> osmosisFilterEntity;
@@ -308,6 +309,7 @@ public class MoreRed
 		DeferredRegister<AttachmentType<?>> attachmentTypes = defreg(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 		DeferredRegister<DataComponentType<?>> dataComponentTypes = defreg(modBus, Registries.DATA_COMPONENT_TYPE);
 		var signalComponentTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
+		BlockBehaviour.StatePredicate neverStatePredicate = ($,$$,$$$) -> false;
 		
 		postsInChunkAttachment = attachmentTypes.register(Names.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
 			.serialize(BlockPos.CODEC.listOf().xmap(HashSet::new, List::copyOf))
@@ -440,9 +442,13 @@ public class MoreRed
 				properties -> new RedstoneTubeBlock(id("block/tube"), properties));
 		this.extractorBlock = registerBlockItem(blocks, items, Names.EXTRACTOR,
 			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.TERRACOTTA_YELLOW)
+				.mapColor(MapColor.WOOD)
 				.strength(2F, 6F)
-				.sound(SoundType.METAL),
+				.noOcclusion()
+	            .isRedstoneConductor(neverStatePredicate)
+	            .isSuffocating(neverStatePredicate)
+	            .isViewBlocking(neverStatePredicate)
+				.sound(SoundType.WOOD),
 				ExtractorBlock::new);
 		this.filterBlock = registerBlockItem(blocks, items, Names.FILTER,
 			() -> BlockBehaviour.Properties.of()
@@ -519,9 +525,9 @@ public class MoreRed
 					.sound(woodSet.soundType())
 					.noOcclusion()
 		            .isValidSpawn(Blocks::never)
-		            .isRedstoneConductor(($,$$,$$$)->false)
-		            .isSuffocating(($,$$,$$$)->false)
-		            .isViewBlocking(($,$$,$$$)->false)),
+		            .isRedstoneConductor(neverStatePredicate)
+		            .isSuffocating(neverStatePredicate)
+		            .isViewBlocking(neverStatePredicate)),
 				GearshifterBlock::new));
 			
 			this.clutchBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.CLUTCH,
@@ -529,9 +535,9 @@ public class MoreRed
 					.mapColor(MapColor.STONE)
 					.strength(1.5F)
 					.noOcclusion()
-		            .isRedstoneConductor(($,$$,$$$)->false)
-		            .isSuffocating(($,$$,$$$)->false)
-		            .isViewBlocking(($,$$,$$$)->false),
+		            .isRedstoneConductor(neverStatePredicate)
+		            .isSuffocating(neverStatePredicate)
+		            .isViewBlocking(neverStatePredicate),
 				props -> new ClutchBlock(props, Suppliers.memoize(() -> new ItemStack(this.gearBlocks.get(woodName).get())))));
 			
 			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
@@ -543,9 +549,9 @@ public class MoreRed
 					.noOcclusion()
 					.randomTicks()
 		            .isValidSpawn(Blocks::never)
-		            .isRedstoneConductor(($,$$,$$$)->false)
-		            .isSuffocating(($,$$,$$$)->false)
-		            .isViewBlocking(($,$$,$$$)->false),
+		            .isRedstoneConductor(neverStatePredicate)
+		            .isSuffocating(neverStatePredicate)
+		            .isViewBlocking(neverStatePredicate),
 				WindcatcherBlock::new,
 				Item.Properties::new,
 				WindCatcherBlockItem::new
@@ -564,7 +570,7 @@ public class MoreRed
 				.noCollission()
 				.noOcclusion()
 				.noLootTable()
-				.isSuffocating(($,$$,$$$) -> false),
+				.isSuffocating(neverStatePredicate),
 			AirFoilBlock::new);
 
 		// notblock items
@@ -636,6 +642,10 @@ public class MoreRed
 			() -> new BlockEntityType<>(ShuntBlockEntity::new, shuntBlock.get()));
 		this.redstoneTubeEntity = blockEntityTypes.register(Names.REDSTONE_TUBE,
 			() -> new BlockEntityType<>(RedstoneTubeBlockEntity::new, redstoneTubeBlock.get()));
+		this.extractorEntity = GenericBlockEntity.builder()
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, ExtractorBlock::normalizeMachine, ExtractorBlock::denormalizeMachine)
+			.register(blockEntityTypes, Names.EXTRACTOR, this.extractorBlock);
 		this.filterEntity = blockEntityTypes.register(Names.FILTER,
 			() -> new BlockEntityType<>(FilterBlockEntity::new, filterBlock.get()));
 		this.multiFilterEntity = blockEntityTypes.register(Names.MULTIFILTER,

@@ -2,14 +2,16 @@
   "type": "minecraft:crafting_shaped",
   "category": "building",
   "key": {
-    "h": "minecraft:hopper",
-    "p": "minecraft:piston",
-    "s": "morered:shunt"
+    "-": "#morered:axles",
+    "G": "#morered:gears",
+    "H": "minecraft:hopper",
+    "S": "morered:shunt",
+    "p": "#minecraft:planks"
   },
   "pattern": [
-    "h",
-    "p",
-    "s"
+    " H ",
+    "-G-",
+    "pSp"
   ],
   "result": {
     "count": 1,

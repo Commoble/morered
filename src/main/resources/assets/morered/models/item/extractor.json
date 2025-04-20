@@ -4,11 +4,11 @@
 		"iron_block": "block/iron_block",
 		"hopper_inside": "block/hopper_inside",
 		"hopper_outside": "block/hopper_outside",
-		"hopper_top": "block/hopper_top",
 		"output": "morered:block/loader_output",
 		"particle": "block/barrel_side",
 		"barrel_side": "block/barrel_side",
-		"barrel_bottom": "block/barrel_bottom"
+		"barrel_bottom": "block/barrel_bottom",
+		"barrel_overlay": "morered:block/extractor_overlay"
 	},
 	"elements": [
 		{
@@ -82,40 +82,40 @@
 			}
 		},
 		{
-			"name": "blade_east",
-			"from": [9, 16, 3],
-			"to": [11, 16, 9],
-			"rotation": {"angle": -45, "axis": "x", "origin": [9, 16, 9]},
+			"name": "blade_west",
+			"from": [5, 16, 3],
+			"to": [7, 16, 9],
+			"rotation": {"angle": -45, "axis": "x", "origin": [5, 16, 9]},
 			"faces": {
 				"up": {"uv": [5, 6, 11, 8], "rotation": 90, "texture": "#iron_block"},
 				"down": {"uv": [6, 6, 12, 8], "rotation": 90, "texture": "#iron_block"}
 			}
 		},
 		{
-			"name": "blade_south",
-			"from": [7, 10, 9],
-			"to": [7, 16, 11],
-			"rotation": {"angle": 45, "axis": "z", "origin": [7, 16, 9]},
+			"name": "blade_north",
+			"from": [7, 10, 5],
+			"to": [7, 16, 7],
+			"rotation": {"angle": 45, "axis": "z", "origin": [7, 16, 5]},
 			"faces": {
 				"east": {"uv": [5, 6, 11, 8], "rotation": 270, "texture": "#iron_block"},
 				"west": {"uv": [6, 6, 12, 8], "rotation": 90, "texture": "#iron_block"}
 			}
 		},
 		{
-			"name": "blade_west",
-			"from": [5, 16, 7],
-			"to": [7, 16, 13],
-			"rotation": {"angle": 45, "axis": "x", "origin": [6, 16, 7]},
+			"name": "blade_east",
+			"from": [9, 16, 7],
+			"to": [11, 16, 13],
+			"rotation": {"angle": 45, "axis": "x", "origin": [10, 16, 7]},
 			"faces": {
 				"up": {"uv": [5, 6, 11, 8], "rotation": 270, "texture": "#iron_block"},
 				"down": {"uv": [6, 6, 12, 8], "rotation": 270, "texture": "#iron_block"}
 			}
 		},
 		{
-			"name": "blade_north",
-			"from": [3, 16, 5],
-			"to": [9, 16, 7],
-			"rotation": {"angle": 45, "axis": "z", "origin": [9, 16, 7]},
+			"name": "blade_south",
+			"from": [3, 16, 9],
+			"to": [9, 16, 11],
+			"rotation": {"angle": 45, "axis": "z", "origin": [9, 16, 11]},
 			"faces": {
 				"up": {"uv": [5, 6, 11, 8], "texture": "#iron_block"},
 				"down": {"uv": [6, 6, 12, 8], "rotation": 180, "texture": "#iron_block"}
@@ -136,54 +136,6 @@
 			}
 		},
 		{
-			"name": "hopper_west",
-			"from": [0, 11, 0],
-			"to": [2, 16, 16],
-			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
-			"faces": {
-				"north": {"uv": [14, 0, 16, 5], "texture": "#hopper_outside", "cullface": "north"},
-				"east": {"uv": [0, 0, 16, 5], "texture": "#hopper_outside"},
-				"south": {"uv": [0, 0, 2, 5], "texture": "#hopper_outside", "cullface": "south"},
-				"west": {"uv": [0, 0, 16, 5], "texture": "#hopper_outside", "cullface": "west"},
-				"up": {"uv": [0, 0, 2, 16], "texture": "#hopper_top", "cullface": "up"}
-			}
-		},
-		{
-			"name": "hopper_east",
-			"from": [14, 11, 0],
-			"to": [16, 16, 16],
-			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
-			"faces": {
-				"north": {"uv": [0, 0, 2, 5], "texture": "#hopper_outside", "cullface": "north"},
-				"east": {"uv": [0, 0, 16, 5], "texture": "#hopper_outside", "cullface": "east"},
-				"south": {"uv": [14, 0, 16, 5], "texture": "#hopper_outside", "cullface": "south"},
-				"west": {"uv": [0, 0, 16, 5], "texture": "#hopper_outside"},
-				"up": {"uv": [14, 0, 16, 16], "texture": "#hopper_top", "cullface": "up"}
-			}
-		},
-		{
-			"name": "hopper_north",
-			"from": [2, 11, 0],
-			"to": [14, 16, 2],
-			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
-			"faces": {
-				"north": {"uv": [2, 0, 14, 5], "texture": "#hopper_outside", "cullface": "north"},
-				"south": {"uv": [2, 0, 14, 5], "texture": "#hopper_outside", "cullface": "up"},
-				"up": {"uv": [2, 0, 14, 2], "texture": "#hopper_top", "cullface": "up"}
-			}
-		},
-		{
-			"name": "hopper_down",
-			"from": [2, 11, 14],
-			"to": [14, 16, 16],
-			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
-			"faces": {
-				"north": {"uv": [2, 0, 14, 5], "texture": "#hopper_outside", "cullface": "up"},
-				"south": {"uv": [2, 0, 14, 5], "texture": "#hopper_outside", "cullface": "south"},
-				"up": {"uv": [2, 14, 14, 16], "texture": "#hopper_top", "cullface": "up"}
-			}
-		},
-		{
 			"name": "barrel",
 			"from": [4, 0, 4],
 			"to": [12, 10, 12],
@@ -195,16 +147,25 @@
 			}
 		},
 		{
+			"name": "barrel_overlay",
+			"from": [4, 0, 4],
+			"to": [12, 10, 12],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [4, 6, 12, 16], "texture": "#barrel_overlay"},
+				"south": {"uv": [4, 6, 12, 16], "texture": "#barrel_overlay"}
+			}
+		},
+		{
 			"name": "barrel_west",
 			"from": [0, 0, 0],
 			"to": [4, 10, 16],
 			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
 			"faces": {
-				"north": {"uv": [12, 3, 16, 13], "rotation": 180, "texture": "#barrel_side", "cullface": "down"},
+				"north": {"uv": [12, 3, 16, 13], "rotation": 180, "texture": "#barrel_side"},
 				"east": {"uv": [0, 3, 16, 13], "texture": "#barrel_side"},
-				"south": {"uv": [0, 3, 4, 13], "texture": "#barrel_side", "cullface": "up"},
-				"west": {"uv": [0, 3, 16, 13], "rotation": 180, "texture": "#barrel_side", "cullface": "west"},
-				"up": {"uv": [12, 0, 16, 16], "rotation": 180, "texture": "#missing"},
+				"south": {"uv": [0, 3, 4, 13], "texture": "#barrel_side"},
+				"west": {"uv": [0, 3, 16, 13], "rotation": 180, "texture": "#barrel_side"},
 				"down": {"uv": [0, 0, 4, 16], "texture": "#barrel_bottom"}
 			}
 		},
@@ -214,11 +175,10 @@
 			"to": [16, 10, 16],
 			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
 			"faces": {
-				"north": {"uv": [0, 3, 4, 13], "texture": "#barrel_side", "cullface": "down"},
-				"east": {"uv": [0, 3, 16, 13], "rotation": 180, "texture": "#barrel_side", "cullface": "east"},
-				"south": {"uv": [12, 3, 16, 13], "rotation": 180, "texture": "#barrel_side", "cullface": "up"},
+				"north": {"uv": [0, 3, 4, 13], "texture": "#barrel_side"},
+				"east": {"uv": [0, 3, 16, 13], "rotation": 180, "texture": "#barrel_side"},
+				"south": {"uv": [12, 3, 16, 13], "rotation": 180, "texture": "#barrel_side"},
 				"west": {"uv": [0, 3, 16, 13], "texture": "#barrel_side"},
-				"up": {"uv": [12, 0, 16, 16], "texture": "#missing"},
 				"down": {"uv": [0, 0, 16, 4], "rotation": 90, "texture": "#barrel_bottom"}
 			}
 		},

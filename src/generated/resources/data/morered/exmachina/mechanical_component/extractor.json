@@ -1,0 +1,1062 @@
+{
+  "type": "exmachina:variants",
+  "save": true,
+  "variants": {
+    "facing=down,rotation=0": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "up"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      }
+    ],
+    "facing=down,rotation=1": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "west"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "up"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      }
+    ],
+    "facing=down,rotation=2": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "north"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "up"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      }
+    ],
+    "facing=down,rotation=3": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "up"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      }
+    ],
+    "facing=east,rotation=0": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "west"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      }
+    ],
+    "facing=east,rotation=1": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "west"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      }
+    ],
+    "facing=east,rotation=2": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "up"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "west"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      }
+    ],
+    "facing=east,rotation=3": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "south"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "west"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      }
+    ],
+    "facing=north,rotation=0": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "down"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "south"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      }
+    ],
+    "facing=north,rotation=1": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "west"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "south"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      }
+    ],
+    "facing=north,rotation=2": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "south"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      }
+    ],
+    "facing=north,rotation=3": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "south"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      }
+    ],
+    "facing=south,rotation=0": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "north"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      }
+    ],
+    "facing=south,rotation=1": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "east"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "north"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      }
+    ],
+    "facing=south,rotation=2": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "up"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "north"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      }
+    ],
+    "facing=south,rotation=3": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "north"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      }
+    ],
+    "facing=up,rotation=0": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "south"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "down"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      }
+    ],
+    "facing=up,rotation=1": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "east"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "down"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      }
+    ],
+    "facing=up,rotation=2": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "north",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "down"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      }
+    ],
+    "facing=up,rotation=3": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "west",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 10.0,
+        "positive_counter_torque": 1000.0,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "east",
+            "neighbor_shape": "west"
+          },
+          {
+            "neighbor_shape": "down"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "west",
+            "neighbor_shape": "east"
+          },
+          {
+            "neighbor_shape": "down",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "west"
+      }
+    ],
+    "facing=west,rotation=0": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "down"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "east"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      }
+    ],
+    "facing=west,rotation=1": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "east"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      }
+    ],
+    "facing=west,rotation=2": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "up",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "down",
+            "neighbor_shape": "up"
+          },
+          {
+            "neighbor_shape": "east"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "down"
+      },
+      {
+        "connections": [
+          {
+            "direction": "up",
+            "neighbor_shape": "down"
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "up"
+      }
+    ],
+    "facing=west,rotation=3": [
+      {
+        "connections": [
+          {
+            "neighbor_shape": "south",
+            "parity": "negative"
+          },
+          {
+            "neighbor_shape": "north"
+          }
+        ],
+        "inertia": 100.0,
+        "negative_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
+        "shape": "east"
+      },
+      {
+        "connections": [
+          {
+            "direction": "south",
+            "neighbor_shape": "north"
+          },
+          {
+            "neighbor_shape": "east",
+            "parity": "negative"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "south"
+      },
+      {
+        "connections": [
+          {
+            "direction": "north",
+            "neighbor_shape": "south"
+          },
+          {
+            "neighbor_shape": "east"
+          }
+        ],
+        "inertia": 0.01,
+        "shape": "north"
+      }
+    ]
+  }
+}

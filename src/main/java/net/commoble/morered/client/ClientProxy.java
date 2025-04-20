@@ -199,6 +199,7 @@ public class ClientProxy
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), RenderType.cutout());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), RenderType.translucent());
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
@@ -266,6 +267,7 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.get().cablePostBeType.get(), BundledCablePostRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().tubeEntity.get(), TubeBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().redstoneTubeEntity.get(), TubeBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.get().extractorEntity.get(), ExtractorBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().filterEntity.get(), FilterBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().osmosisFilterEntity.get(), OsmosisFilterBlockEntityRenderer::new);
 		event.registerBlockEntityRenderer(MoreRed.get().axleBlockEntity.get(), AxleBlockEntityRenderer::create);

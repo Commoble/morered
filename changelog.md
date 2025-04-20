@@ -1,12 +1,18 @@
 # 1.21.5-8.0.0.0
 * Updated to 1.21.5
 * Updated to use exmachina 0.11.0.0-beta
-* Added new blocks:
-  * Axles
-  * Gears
-  * Gearshifters
-  * Windcatchers
+* Added new mechanical blocks:
+  * Axles transfer mechanical power
+  * Clutches transfer mechanical power but only while powered by redstone. Pliers can be used to rotate them after placing.
+  * Gears transfer mechanical power, multiple gears can exist in the same block space
+  * Gearshifters can either double rotation speed (but make things twice as hard to turn) or halve rotation speed (but make things half as hard to turn). Pliers can be used to rotate them after placing (hold sprint to change which way they rotate)
+  * Windcatchers generate power when placed in high open spaces
+* Added blocks which make use of mechanical power:
+  * Alternators are plate blocks which emit redstone power in one of four output directions, rotating between them when rotated by machines
+  * Extractors have been reworked. They now require mechanical power, and extract an entire itemstack from their input side whenever they make a full rotation. Pliers can be used to rotate them after placing (hold sprint to change which way they rotate)
+* When placing logic plates or gearshifters, sprint can now be held to change which side of the block-being-placed faces the aimed-at face
 * Added client config value machineRenderCycleTicks which controls animation length of most machines
+
 
 # 1.21.3-7.1.0.0
 * Updated to exmachina 0.8.0.2-beta

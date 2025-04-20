@@ -1,66 +1,124 @@
 {
   "variants": {
-    "facing=down,powered=false": {
-      "model": "morered:block/extractor",
-      "uvlock": true
+    "facing=down,rotation=0": {
+      "model": "morered:block/extractor"
     },
-    "facing=down,powered=true": {
-      "model": "morered:block/extractor_powered",
-      "uvlock": true
-    },
-    "facing=east,powered=false": {
+    "facing=down,rotation=1": {
       "model": "morered:block/extractor",
-      "uvlock": true,
+      "y": 90
+    },
+    "facing=down,rotation=2": {
+      "model": "morered:block/extractor",
+      "y": 180
+    },
+    "facing=down,rotation=3": {
+      "model": "morered:block/extractor",
+      "y": 270
+    },
+    "facing=east,rotation=0": {
+      "model": "morered:block/extractor",
+      "x": 270,
+      "y": 90
+    },
+    "facing=east,rotation=1": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "y": 180,
+      "z": 270
+    },
+    "facing=east,rotation=2": {
+      "model": "morered:block/extractor",
       "x": 90,
       "y": 270
     },
-    "facing=east,powered=true": {
-      "model": "morered:block/extractor_powered",
-      "uvlock": true,
+    "facing=east,rotation=3": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "z": 270
+    },
+    "facing=north,rotation=0": {
+      "model": "morered:block/extractor",
+      "x": 270
+    },
+    "facing=north,rotation=1": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "x": 270,
+      "z": 90
+    },
+    "facing=north,rotation=2": {
+      "model": "morered:block/extractor",
       "x": 90,
+      "y": 180
+    },
+    "facing=north,rotation=3": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "x": 270,
+      "z": 270
+    },
+    "facing=south,rotation=0": {
+      "model": "morered:block/extractor",
+      "x": 270,
+      "y": 180
+    },
+    "facing=south,rotation=1": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "x": 90,
+      "z": 90
+    },
+    "facing=south,rotation=2": {
+      "model": "morered:block/extractor",
+      "x": 90
+    },
+    "facing=south,rotation=3": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "x": 90,
+      "z": 270
+    },
+    "facing=up,rotation=0": {
+      "model": "morered:block/extractor",
+      "x": 180,
+      "y": 180
+    },
+    "facing=up,rotation=1": {
+      "model": "morered:block/extractor",
+      "x": 180,
+      "y": 90
+    },
+    "facing=up,rotation=2": {
+      "model": "morered:block/extractor",
+      "x": 180
+    },
+    "facing=up,rotation=3": {
+      "model": "morered:block/extractor",
+      "x": 180,
       "y": 270
     },
-    "facing=north,powered=false": {
+    "facing=west,rotation=0": {
       "model": "morered:block/extractor",
-      "uvlock": true,
-      "x": 270
+      "x": 270,
+      "y": 270
     },
-    "facing=north,powered=true": {
-      "model": "morered:block/extractor_powered",
-      "uvlock": true,
-      "x": 270
-    },
-    "facing=south,powered=false": {
+    "facing=west,rotation=1": {
+      "type": "morered:xyz",
       "model": "morered:block/extractor",
-      "uvlock": true,
-      "x": 90
+      "x": 180,
+      "y": 180,
+      "z": 270
     },
-    "facing=south,powered=true": {
-      "model": "morered:block/extractor_powered",
-      "uvlock": true,
-      "x": 90
-    },
-    "facing=up,powered=false": {
+    "facing=west,rotation=2": {
       "model": "morered:block/extractor",
-      "uvlock": true,
-      "x": 180
-    },
-    "facing=up,powered=true": {
-      "model": "morered:block/extractor_powered",
-      "uvlock": true,
-      "x": 180
-    },
-    "facing=west,powered=false": {
-      "model": "morered:block/extractor",
-      "uvlock": true,
       "x": 90,
       "y": 90
     },
-    "facing=west,powered=true": {
-      "model": "morered:block/extractor_powered",
-      "uvlock": true,
-      "x": 90,
-      "y": 90
+    "facing=west,rotation=3": {
+      "type": "morered:xyz",
+      "model": "morered:block/extractor",
+      "y": 180,
+      "z": 90
     }
   }
 }

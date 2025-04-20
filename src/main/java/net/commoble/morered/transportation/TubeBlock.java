@@ -167,7 +167,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		if (newBlock instanceof LoaderBlock && state.getValue(LoaderBlock.FACING).equals(face.getOpposite()))
 			return true; // todo make this configurable for arbitrary blocks instead of hardcoded
 
-		if (newBlock instanceof ExtractorBlock && state.getValue(ExtractorBlock.FACING).equals(face.getOpposite()))
+		if (newBlock instanceof ExtractorBlock && state.getValue(ExtractorBlock.ATTACHMENT_DIRECTION).equals(face.getOpposite()))
 			return true;
 
 		if (newBlock instanceof AbstractFilterBlock && state.getValue(AbstractFilterBlock.FACING).equals(face.getOpposite()))

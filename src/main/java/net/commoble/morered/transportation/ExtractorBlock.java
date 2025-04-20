@@ -1,79 +1,88 @@
 package net.commoble.morered.transportation;
 
-import org.jetbrains.annotations.Nullable;
+import java.util.HashMap;
+import java.util.Map;
 
+import net.commoble.exmachina.api.MechanicalNodeStates;
+import net.commoble.exmachina.api.MechanicalState;
+import net.commoble.exmachina.api.NodeShape;
+import net.commoble.morered.GenericBlockEntity;
+import net.commoble.morered.MoreRed;
+import net.commoble.morered.PlayerData;
+import net.commoble.morered.TwentyFourBlock;
+import net.commoble.morered.util.BlockStateUtil;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
-import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.DirectionalBlock;
-import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityTicker;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraft.world.phys.shapes.CollisionContext;
-import net.minecraft.world.phys.shapes.Shapes;
-import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.items.IItemHandler;
 
-public class ExtractorBlock extends Block
+public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 {
-	// output is current facing, input is face.getOpposite()
-	public static final EnumProperty<Direction> FACING = DirectionalBlock.FACING;
-	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
-
-	protected final VoxelShape[] shapes;
 
 	public ExtractorBlock(Properties properties)
 	{
 		super(properties);
-		this.registerDefaultState(this.stateDefinition.any().setValue(FACING, Direction.DOWN).setValue(POWERED, false));
-		this.shapes = this.makeShapes();
-	}
-
-	@Override
-	public void neighborChanged(BlockState thisState, Level level, BlockPos thisPos, Block neighborBlock, @Nullable Orientation orientation, boolean isMoving)
-	{
-		if (!level.isClientSide())
-		{
-			boolean isReceivingPower = level.hasNeighborSignal(thisPos);
-			boolean isStatePowered = thisState.getValue(POWERED);
-			if (isReceivingPower != isStatePowered)
-			{
-				if (isReceivingPower)
-				{
-					this.transferItem(thisState, thisPos, level);
-					level.playSound(null, thisPos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.3F, level.random.nextFloat() * 0.1F + 0.8F);
-				}
-				else
-				{
-					level.playSound(null, thisPos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.1F, level.random.nextFloat() * 0.1F + 0.9F);
-				}
-				level.setBlock(thisPos, thisState.setValue(POWERED, Boolean.valueOf(isReceivingPower)), 2);
-			}
-
-		}
 	}
 	
-	private void transferItem(BlockState state, BlockPos pos, Level level)
+	public InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit)
 	{
-		Direction outputDir = state.getValue(FACING);
+		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
+		
+		// rotate the block when the player pokes it with a wrench
+		if (isPlayerHoldingWrench && !level.isClientSide)
+		{
+			BlockState newState;
+			level.playSound(null, pos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS,
+				0.9F + level.random.nextFloat()*0.1F,
+				0.95F + level.random.nextFloat()*0.1F);
+			if (PlayerData.getSprinting(player.getUUID()))
+			{
+				// rotate around small gear... weird math here
+				// firstly, figure out which way small gear is facing
+				Direction bigDir = state.getValue(ATTACHMENT_DIRECTION);
+				int rotation = state.getValue(ROTATION);
+				Direction smallDir = BlockStateUtil.getOutputDirection(bigDir, rotation);
+				// now we'd like to rotate bigDir around the smalldir axis
+				// use our rotation indexer using smallDir as the primary axis
+				int bigRotationIndex = BlockStateUtil.getRotationIndexForDirection(smallDir, bigDir);
+				int nextBigRotationIndex = (bigRotationIndex+1) % 4;
+				Direction newBigDir = BlockStateUtil.getOutputDirection(smallDir, nextBigRotationIndex);
+				// now we just need to find the rotation index that preserves smalldir
+				int newSmallRotation = BlockStateUtil.getRotationIndexForDirection(newBigDir, smallDir);
+				newState = state.setValue(ATTACHMENT_DIRECTION, newBigDir)
+					.setValue(ROTATION, newSmallRotation);
+			}
+			else
+			{
+				// rotate around big gear
+				int newRotation = (state.getValue(ROTATION) + 1) % 4;
+				newState = state.setValue(ROTATION, newRotation);
+			}
+			level.setBlockAndUpdate(pos, newState);
+		}
+		
+		return isPlayerHoldingWrench ? InteractionResult.SUCCESS : super.useItemOn(stack, state, level, pos, player, hand, hit);
+	}
+	
+	private static void transferItem(BlockState state, BlockPos pos, Level level)
+	{
+		Direction outputDir = state.getValue(ATTACHMENT_DIRECTION);
 		BlockPos outputPos = pos.relative(outputDir);
 		Direction inputDir = outputDir.getOpposite();
 		BlockPos inputPos = pos.relative(inputDir);
@@ -86,17 +95,17 @@ public class ExtractorBlock extends Block
 			// if the input handler exists and either the output handler exists or we have room to eject the item
 			if (outputHandler != null || !level.getBlockState(outputPos).isCollisionShapeFullBlock(level, outputPos))
 			{
-				ItemStack stack = this.extractNextStack(inputHandler);
+				ItemStack stack = extractNextStack(inputHandler);
 				if (stack.getCount() > 0)
 				{
-					ItemStack remaining = outputHandler == null ? stack : this.putStackInHandler(stack, outputHandler);
+					ItemStack remaining = outputHandler == null ? stack : putStackInHandler(stack, outputHandler);
 					WorldHelper.ejectItemstack(level, pos, outputDir, remaining);
 				}
 			}
 		}
 	}
 	
-	private ItemStack extractNextStack(IItemHandler handler)
+	private static ItemStack extractNextStack(IItemHandler handler)
 	{
 		int slots = handler.getSlots();
 		for (int i=0; i<slots; i++)
@@ -110,7 +119,7 @@ public class ExtractorBlock extends Block
 		return ItemStack.EMPTY;
 	}
 	
-	private ItemStack putStackInHandler(ItemStack stack, IItemHandler handler)
+	private static ItemStack putStackInHandler(ItemStack stack, IItemHandler handler)
 	{
 		ItemStack remaining = stack.copy();
 		int slots = handler.getSlots();
@@ -125,102 +134,99 @@ public class ExtractorBlock extends Block
 		return remaining;
 	}
 
-	//// facing and blockstate boilerplate
-
-	public BlockState getStateForPlacement(BlockPlaceContext context)
-	{
-		return this.defaultBlockState().setValue(FACING, WorldHelper.getBlockFacingForPlacement(context).getOpposite());
-	}
-
-	public BlockState rotate(BlockState state, Rotation rot)
-	{
-		return state.setValue(FACING, rot.rotate(state.getValue(FACING)));
-	}
-
-	@Deprecated
-	public BlockState mirror(BlockState state, Mirror mirrorIn)
-	{
-		return state.rotate(mirrorIn.getRotation(state.getValue(FACING)));
-	}
-
-	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
-	{
-		builder.add(FACING, POWERED);
-	}
-
-	// model shapes
-
 	@Override
-	public VoxelShape getShape(BlockState state, BlockGetter worldIn, BlockPos pos, CollisionContext context)
+	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return this.shapes[this.getShapeIndex(state)];
+		return MoreRed.get().extractorEntity.get().create(pos,state);
 	}
 
+	private static final BlockEntityTicker<GenericBlockEntity> TICKER = ExtractorBlock::serverTick;
+	@SuppressWarnings("unchecked")
 	@Override
-	protected InteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult)
+	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		if (stack.is(Tags.Items.TOOLS_WRENCH))
-		{
-			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-				0.1F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
-			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
-			return InteractionResult.SUCCESS;
-		}
-		return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+		return (!level.isClientSide) && type == MoreRed.get().extractorEntity.get()
+			? (BlockEntityTicker<T>)TICKER
+			: null;
 	}
 	
-
-	public int getShapeIndex(BlockState state)
-	{
-		return state.getValue(FACING).ordinal();
-	}
-
-	protected VoxelShape[] makeShapes()
-	{
-		VoxelShape[] shapes = new VoxelShape[6];
-
-		for (int face = 0; face < 6; face++) // dunswe
+	public static void serverTick(Level level, BlockPos pos, BlockState state, GenericBlockEntity be)
+	{		
+		Map<NodeShape, MechanicalState> nodes = be.getData(MechanicalNodeStates.HOLDER.get());
+		// if missing mechanical data, skip
+		if (nodes == null)
 		{
-			boolean DOWN = face == 0;
-			boolean UP = face == 1;
-			boolean NORTH = face == 2;
-			boolean SOUTH = face == 3;
-			boolean WEST = face == 4;
-			boolean EAST = face == 5;
-			
-			// north==0, south==16
-
-			double input_x_min = WEST ? 10D : 0D;
-			double input_x_max = EAST ? 6D : 16D;
-			double input_y_min = DOWN ? 10D : 0D;
-			double input_y_max = UP ? 6D : 16D;
-			double input_z_min = NORTH ? 10D : 0D;
-			double input_z_max = SOUTH ? 6D : 16D;
-
-			double mid_x_min = EAST ? 6D : 4D;
-			double mid_x_max = WEST ? 10D : 12D;
-			double mid_y_min = UP ? 6D : 4D;
-			double mid_y_max = DOWN ? 10D : 12D;
-			double mid_z_min = SOUTH ? 6D : 4D;
-			double mid_z_max = NORTH ? 10D : 12D;
-
-			double output_x_min = WEST ? 0D : EAST ? 12D : 6D;
-			double output_x_max = WEST ? 4D : EAST ? 16D : 10D;
-			double output_y_min = DOWN ? 0D : UP ? 12D : 6D;
-			double output_y_max = DOWN ? 4D : UP ? 16D : 10D;
-			double output_z_min = SOUTH ? 12D : NORTH ? 0D : 6D;
-			double output_z_max = SOUTH ? 16D : NORTH ? 4D : 10D;
-
-			VoxelShape input = Block.box(input_x_min, input_y_min, input_z_min, input_x_max, input_y_max,
-					input_z_max);
-			VoxelShape mid = Block.box(mid_x_min, mid_y_min, mid_z_min, mid_x_max, mid_y_max, mid_z_max);
-			VoxelShape output = Block.box(output_x_min, output_y_min, output_z_min, output_x_max,
-					output_y_max, output_z_max);
-
-			shapes[face] = Shapes.or(input, mid, output);
+			return;
 		}
-
-		return shapes;
+		Direction attachDir = state.getValue(TwentyFourBlock.ATTACHMENT_DIRECTION);
+		Direction inputDir = attachDir.getOpposite();
+		MechanicalState mechanicalState = nodes.getOrDefault(NodeShape.ofSide(inputDir), MechanicalState.ZERO);
+		// we want to detect when rotation passes 0
+		// also, sign of angular velocity has to match the sign of the direction
+		// i.e. positive for up/south/east, negative for down/north/west
+		// if they mismatch (or we have no rotation), this value will be non-positive and we should ignore:
+		// also at some point our math got wrong'd
+		// just add a minus to fix it
+		double radiansPerSecond = -mechanicalState.angularVelocity() * attachDir.getAxisDirection().getStep();
+		if (radiansPerSecond <= 0D)
+			return;
+		int gameTimeTicks = MechanicalState.getMachineTicks(level);
+		double seconds = gameTimeTicks * 0.05D;
+		double radians = radiansPerSecond * seconds;
+		double simpleRadians = radians % (Math.TAU); // gives a value in the range [0, 2PI)
+		// check if we passed 0 this tick
+		double radiansPerTick = radiansPerSecond * 0.05D;
+		double radiansLastTick = simpleRadians - radiansPerTick;
+		if (radiansLastTick < 0D) // we made a full revolution this tick
+		{
+			transferItem(state,pos,level);
+		}
 	}
+	
+	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> runtimeData)
+	{
+		// let the default state point to down (attachment direction) and north+south (the axles)
+		// the input direction (which has to spin) is the opposite of the attachment direction (so it faces up)
+		// so, no matter which way we're pointing in-world,
+		// store those two states in those three directions
+		Map<NodeShape,MechanicalState> result = new HashMap<>();
+		
+		// input is easier, we can get that directly from the attachment property
+		Direction attachDir = state.getValue(ATTACHMENT_DIRECTION);
+		Direction inputDir = attachDir.getOpposite();
+		MechanicalState inputState = runtimeData.getOrDefault(NodeShape.ofSide(inputDir), MechanicalState.ZERO);
+		result.put(NodeShape.ofSide(Direction.UP), inputState);
+		
+		// axle is trickier, but we can reuse the plate block utils for that
+		// let primary axle = "output direction"
+		int rotation = state.getValue(ROTATION);
+		Direction axleDir = BlockStateUtil.getOutputDirection(attachDir, rotation);
+		Direction reverseAxleDir = axleDir.getOpposite();
+		result.put(NodeShape.ofSide(Direction.NORTH), runtimeData.getOrDefault(NodeShape.ofSide(axleDir), MechanicalState.ZERO));
+		result.put(NodeShape.ofSide(Direction.SOUTH), runtimeData.getOrDefault(NodeShape.ofSide(reverseAxleDir), MechanicalState.ZERO));
+		return result;
+	}
+	
+	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> diskData)
+	{
+		Map<NodeShape,MechanicalState> result = new HashMap<>();
+		MechanicalState inputState = diskData.getOrDefault(NodeShape.ofSide(Direction.UP), MechanicalState.ZERO);
+		MechanicalState axleState = diskData.getOrDefault(NodeShape.ofSide(Direction.NORTH), MechanicalState.ZERO);
+		MechanicalState reverseAxleState = diskData.getOrDefault(NodeShape.ofSide(Direction.SOUTH), MechanicalState.ZERO);
+		Direction attachDir = state.getValue(ATTACHMENT_DIRECTION);
+		Direction inputDir = attachDir.getOpposite();
+		Direction axleDir = BlockStateUtil.getOutputDirection(attachDir, state.getValue(ROTATION));
+		Direction reverseAxleDir = axleDir.getOpposite();
+		result.put(NodeShape.ofSide(inputDir), inputState);
+		result.put(NodeShape.ofSide(axleDir), axleState);
+		result.put(NodeShape.ofSide(reverseAxleDir), reverseAxleState);
+		return result;
+	}
+
+	@Override
+	public boolean hasBlockStateModelsForPlacementPreview(BlockState state)
+	{
+		return false;
+	}
+	
 }
