@@ -11,6 +11,7 @@ import net.commoble.exmachina.api.MechanicalState;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.mechanisms.GearBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -41,7 +42,8 @@ public record GearBlockEntityRenderer(ItemRenderer itemRenderer, Map<Block, Item
 		MechanicalState mechanicalState = states.getOrDefault(NodeShape.ofSide(facing), MechanicalState.ZERO);
 		float radiansPerSecond = (float)mechanicalState.angularVelocity();
 		ItemStack stack = this.stackCache.computeIfAbsent(be.getBlockState().getBlock(), ItemStack::new);
-		Level level = be.getLevel();
+		@SuppressWarnings("resource")
+		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;

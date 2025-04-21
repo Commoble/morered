@@ -11,6 +11,7 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -40,7 +41,8 @@ public record GearsBlockEntityRenderer(ItemRenderer itemRenderer) implements Blo
 			return; // nothing to render
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		BlockState state = be.getBlockState();
-		Level level = be.getLevel();
+		@SuppressWarnings("resource")
+		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		BlockPos pos = be.getBlockPos();

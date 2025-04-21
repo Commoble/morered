@@ -11,6 +11,7 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.mechanisms.GearshifterBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -41,7 +42,8 @@ public record AlternatorBlockEntityRenderer(ItemRenderer itemRenderer, ItemStack
 		Direction attachDir = state.getValue(GearshifterBlock.ATTACHMENT_DIRECTION);
 		int faceRotations = state.getValue(GearshifterBlock.ROTATION);
 		float radiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(attachDir), MechanicalState.ZERO).angularVelocity();
-		Level level = be.getLevel();
+		@SuppressWarnings("resource")
+		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;

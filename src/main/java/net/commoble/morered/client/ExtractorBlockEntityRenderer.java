@@ -12,6 +12,7 @@ import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -61,7 +62,8 @@ public record ExtractorBlockEntityRenderer(
 		float inputRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(inputDir), MechanicalState.ZERO).angularVelocity();
 		float axleRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(axleDir), MechanicalState.ZERO).angularVelocity();
 		float reverseAxleRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(reverseAxleDir), MechanicalState.ZERO).angularVelocity();
-		Level level = be.getLevel();
+		@SuppressWarnings("resource")
+		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float inputRadians = inputRadiansPerSecond * seconds;

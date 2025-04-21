@@ -6,7 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -42,6 +44,7 @@ import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Holder;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
@@ -58,6 +61,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
@@ -75,6 +79,7 @@ import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
+import net.neoforged.neoforge.client.event.RegisterSpecialBlockModelRendererEvent;
 import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
@@ -176,6 +181,7 @@ public class ClientProxy
 		modBus.addListener(ClientProxy::onRegisterBlockColors);
 		modBus.addListener(ClientProxy::onRegisterItemModels);
 		modBus.addListener(ClientProxy::onRegisterRenderers);
+		modBus.addListener(ClientProxy::onRegisterSpecialBlockModelRenderers);
 		modBus.addListener(ClientProxy::onRegisterScreens);
 		modBus.addListener(ClientProxy::onRegisterClientExtensions);
 		
@@ -278,6 +284,20 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.get().windcatcherBlockEntity.get(), WindcatcherBlockEntityRenderer::create);
 	}
 
+	static void onRegisterSpecialBlockModelRenderers(RegisterSpecialBlockModelRendererEvent event)
+	{
+		BiConsumer<Holder<? extends Block>, Holder<? extends BlockEntityType<?>>> renderBlockAsItem = (block,type) -> event.register(block.value(), new UnbakedBlockEntityWithoutLevelRenderer(block.value(), type.value()));
+		Function<Holder<? extends BlockEntityType<?>>, Consumer<Holder<? extends Block>>> renderBlock = type -> block -> renderBlockAsItem.accept(block, type);
+		MoreRed.get().axleBlocks.values().forEach(renderBlock.apply(MoreRed.get().axleBlockEntity));
+		MoreRed.get().gearBlocks.values().forEach(renderBlock.apply(MoreRed.get().gearBlockEntity));
+		MoreRed.get().gearshifterBlocks.values().forEach(renderBlock.apply(MoreRed.get().gearshifterBlockEntity));
+		MoreRed.get().clutchBlocks.values().forEach(renderBlock.apply(MoreRed.get().clutchBlockEntity));
+		MoreRed.get().windcatcherBlocks.values().forEach(renderBlock.apply(MoreRed.get().windcatcherBlockEntity));
+		// don't bother with morered:gears because it'd just render an empty gears anyway which renders nothing
+		renderBlockAsItem.accept(MoreRed.get().extractorBlock, MoreRed.get().extractorEntity);
+		renderBlockAsItem.accept(MoreRed.get().alternatorBlock, MoreRed.get().alternatorBlockEntity);
+	}
+	
 	static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)
 	{
 		// clean up static data on the client

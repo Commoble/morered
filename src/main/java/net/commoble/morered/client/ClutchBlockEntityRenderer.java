@@ -10,6 +10,7 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -39,7 +40,8 @@ public record ClutchBlockEntityRenderer(ItemRenderer itemRenderer) implements Bl
 			Direction facing = state.getValue(GearBlock.FACING);
 			MechanicalState mechanicalState = states.getOrDefault(NodeShape.ofSide(facing), MechanicalState.ZERO);
 			float radiansPerSecond = (float)mechanicalState.angularVelocity();
-			Level level = be.getLevel();
+			@SuppressWarnings("resource")
+			Level level = Minecraft.getInstance().level;
 			int gameTimeTicks = MechanicalState.getMachineTicks(level);
 			float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 			float radians = radiansPerSecond * seconds;

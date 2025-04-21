@@ -13,6 +13,7 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.mechanisms.WindcatcherColors;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -46,7 +47,8 @@ public record WindcatcherBlockEntityRenderer(ItemRenderer itemRenderer, Map<Wind
 			newStack.set(colorsComponent, key.colors);
 			return newStack;
 		});
-		Level level = be.getLevel();
+		@SuppressWarnings("resource")
+		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;		

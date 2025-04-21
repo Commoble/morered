@@ -12,6 +12,7 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.mechanisms.GearshifterBlock;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -46,7 +47,8 @@ public record GearshifterBlockEntityRenderer(ItemRenderer itemRenderer, Map<Bloc
 		float bigRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(bigDir), MechanicalState.ZERO).angularVelocity();
 		float smallRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(smallDir), MechanicalState.ZERO).angularVelocity();
 		GearshifterModels models = this.modelCache.computeIfAbsent(state.getBlock(), GearshifterModels::of);
-		Level level = be.getLevel();
+		@SuppressWarnings("resource")
+		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float bigRadians = bigRadiansPerSecond * seconds;
