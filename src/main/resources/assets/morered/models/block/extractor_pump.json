@@ -1,0 +1,72 @@
+{
+	"parent": "block/block",
+	"textures": {
+		"hopper_inside": "block/hopper_inside",
+		"hopper_outside": "block/hopper_outside",
+		"particle": "block/barrel_side",
+		"barrel_side": "block/barrel_side"
+	},
+	"elements": [
+		{
+			"name": "hopper_bottom",
+			"from": [0, 14, 0],
+			"to": [16, 15, 16],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 12, 8]},
+			"faces": {
+				"north": {"uv": [0, 5, 16, 6], "texture": "#hopper_outside", "cullface": "north"},
+				"east": {"uv": [0, 5, 16, 6], "texture": "#hopper_outside", "cullface": "east"},
+				"south": {"uv": [0, 5, 16, 6], "texture": "#hopper_outside", "cullface": "south"},
+				"west": {"uv": [0, 5, 16, 6], "texture": "#hopper_outside", "cullface": "west"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#hopper_inside"}
+			}
+		},
+		{
+			"name": "piston_0",
+			"from": [1, 10, 1],
+			"to": [3, 14, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [13, 4, 15, 8], "texture": "#barrel_side"},
+				"east": {"uv": [15, 4, 13, 8], "texture": "#barrel_side"},
+				"south": {"uv": [1, 4, 3, 8], "texture": "#barrel_side"},
+				"west": {"uv": [3, 4, 1, 8], "texture": "#barrel_side"}
+			}
+		},
+		{
+			"name": "piston_1",
+			"from": [1, 10, 13],
+			"to": [3, 14, 15],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 20]},
+			"faces": {
+				"north": {"uv": [13, 4, 15, 8], "texture": "#barrel_side"},
+				"east": {"uv": [15, 4, 13, 8], "texture": "#barrel_side"},
+				"south": {"uv": [1, 4, 3, 8], "texture": "#barrel_side"},
+				"west": {"uv": [3, 4, 1, 8], "texture": "#barrel_side"}
+			}
+		},
+		{
+			"name": "piston_2",
+			"from": [13, 10, 13],
+			"to": [15, 14, 15],
+			"rotation": {"angle": 0, "axis": "y", "origin": [20, 8, 20]},
+			"faces": {
+				"north": {"uv": [13, 4, 15, 8], "texture": "#barrel_side"},
+				"east": {"uv": [15, 4, 13, 8], "texture": "#barrel_side"},
+				"south": {"uv": [1, 4, 3, 8], "texture": "#barrel_side"},
+				"west": {"uv": [3, 4, 1, 8], "texture": "#barrel_side"}
+			}
+		},
+		{
+			"name": "piston_3",
+			"from": [13, 10, 1],
+			"to": [15, 14, 3],
+			"rotation": {"angle": 0, "axis": "y", "origin": [20, 8, 8]},
+			"faces": {
+				"north": {"uv": [13, 4, 15, 8], "texture": "#barrel_side"},
+				"east": {"uv": [15, 4, 13, 8], "texture": "#barrel_side"},
+				"south": {"uv": [1, 4, 3, 8], "texture": "#barrel_side"},
+				"west": {"uv": [3, 4, 1, 8], "texture": "#barrel_side"}
+			}
+		}
+	]
+}

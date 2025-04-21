@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "minecraft:model",
-    "model": "morered:block/extractor_screw"
+    "model": "morered:block/extractor_pump"
   }
 }

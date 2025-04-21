@@ -162,20 +162,18 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 		Direction inputDir = attachDir.getOpposite();
 		MechanicalState mechanicalState = nodes.getOrDefault(NodeShape.ofSide(inputDir), MechanicalState.ZERO);
 		// we want to detect when rotation passes 0
-		// also, sign of angular velocity has to match the sign of the direction
-		// i.e. positive for up/south/east, negative for down/north/west
-		// if they mismatch (or we have no rotation), this value will be non-positive and we should ignore:
-		// also at some point our math got wrong'd
-		// just add a minus to fix it
-		double radiansPerSecond = -mechanicalState.angularVelocity() * attachDir.getAxisDirection().getStep();
-		if (radiansPerSecond <= 0D)
+		// when velocity is positive, radians should have been <0 last tick
+		// when velocity is positive, radians should have been >0 last tick
+		double radiansPerSecond = mechanicalState.angularVelocity();
+		if (radiansPerSecond == 0D)
 			return;
+		double absRadiansPerSecond = Math.abs(radiansPerSecond);
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		double seconds = gameTimeTicks * 0.05D;
-		double radians = radiansPerSecond * seconds;
+		double radians = absRadiansPerSecond * seconds;
 		double simpleRadians = radians % (Math.TAU); // gives a value in the range [0, 2PI)
 		// check if we passed 0 this tick
-		double radiansPerTick = radiansPerSecond * 0.05D;
+		double radiansPerTick = absRadiansPerSecond * 0.05D;
 		double radiansLastTick = simpleRadians - radiansPerTick;
 		if (radiansLastTick < 0D) // we made a full revolution this tick
 		{

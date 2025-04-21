@@ -199,7 +199,7 @@ public class ClientProxy
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), RenderType.cutout());
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), RenderType.translucent());
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), RenderType.cutout());
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)

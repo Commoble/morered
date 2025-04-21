@@ -385,26 +385,21 @@ public class MoreRedDataGen
 				BlockState state = MoreRed.get().extractorBlock.get().defaultBlockState()
 					.setValue(GearshifterBlock.ATTACHMENT_DIRECTION, attachDir)
 					.setValue(GearshifterBlock.ROTATION, rotation);
-				Direction screwDir = attachDir.getOpposite();
+				Direction pumpDir = attachDir.getOpposite();
 				Direction axleDir = PlateBlockStateProperties.getOutputDirection(state);
 				Direction reverseAxleDir = axleDir.getOpposite();
-				// if axis of rotation is aligned with screw axis, we want to allow rotation, but have some small load torque
-				// if axis of rotation is misaligned with screw axis, we want to disallow rotation with a large load torque
-				// if axis of rotation is positive, positive countertorque should be small, else large
-				double positiveCounterTorque = screwDir.getAxisDirection().getStep() > 0 ? 10D : 1000D;
-				double negativeCounterTorque = screwDir.getAxisDirection().getStep() > 0 ? 1000D : 10D;
 				extractorMachine.addMultiPropertyVariant(builder -> builder
 					.add(GearshifterBlock.ATTACHMENT_DIRECTION, attachDir)
 					.add(GearshifterBlock.ROTATION, rotation),
-					new RawNode(NodeShape.ofSide(screwDir), 0D,positiveCounterTorque,negativeCounterTorque, 100D, List.of(
-						new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.inversion(screwDir,axleDir), 0),
-						new RawConnection(Optional.empty(), NodeShape.ofSide(reverseAxleDir), Parity.inversion(screwDir, reverseAxleDir), 0))),
+					new RawNode(NodeShape.ofSide(pumpDir), 0D,10D,10D, 100D, List.of(
+						new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.inversion(pumpDir, axleDir), 0),
+						new RawConnection(Optional.empty(), NodeShape.ofSide(reverseAxleDir), Parity.inversion(pumpDir, reverseAxleDir), 0))),
 					new RawNode(NodeShape.ofSide(axleDir), 0D,0D,0D, 0.01D, List.of(
 						new RawConnection(Optional.of(axleDir), NodeShape.ofSide(axleDir.getOpposite()), Parity.POSITIVE,0),
-						new RawConnection(Optional.empty(), NodeShape.ofSide(screwDir), Parity.inversion(screwDir, axleDir), 0))),
+						new RawConnection(Optional.empty(), NodeShape.ofSide(pumpDir), Parity.inversion(pumpDir, axleDir), 0))),
 					new RawNode(NodeShape.ofSide(reverseAxleDir), 0D,0D,0D, 0.01D, List.of(
 						new RawConnection(Optional.of(reverseAxleDir), NodeShape.ofSide(reverseAxleDir.getOpposite()), Parity.POSITIVE,0),
-						new RawConnection(Optional.empty(), NodeShape.ofSide(screwDir), Parity.inversion(screwDir, reverseAxleDir), 0))));
+						new RawConnection(Optional.empty(), NodeShape.ofSide(pumpDir), Parity.inversion(pumpDir, reverseAxleDir), 0))));
 			}
 		}
 		plateBlock(Names.EXTRACTOR, "Extractor", context)
@@ -413,19 +408,23 @@ public class MoreRedDataGen
 			.blockItemWithoutItemModel()
 			.help(helper -> {
 				helper .recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
-					List.of(" H ", "-G-", "pSp"),
+					List.of("lHl", "-G-", "pSp"),
 					Map.of(
 						'H', Ingredient.of(Items.HOPPER),
+						'l', ingredient(Tags.Items.LEATHERS),
 						'p', ingredient(ItemTags.PLANKS),
 						'-', ingredient(MoreRed.Tags.Items.AXLES),
 						'G', ingredient(MoreRed.Tags.Items.GEARS),
 						'S', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()))));
-				ResourceLocation screwId = mangle(helper.id(), "%s_screw");
-				ResourceLocation screwBlockModel = blockModel(screwId);
+				ResourceLocation pumpId = mangle(helper.id(), "%s_pump");
+				ResourceLocation pumpBlockModel = blockModel(pumpId);
 				ResourceLocation axleId = mangle(helper.id(), "%s_axle");
 				ResourceLocation axleBlockModel = blockModel(axleId);
-				clientItems.put(screwId, new ClientItem(new BlockModelWrapper.Unbaked(screwBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+				ResourceLocation bagId = mangle(helper.id(), "%s_bag");
+				ResourceLocation bagBlockModel = blockModel(bagId);
+				clientItems.put(pumpId, new ClientItem(new BlockModelWrapper.Unbaked(pumpBlockModel, List.of()), ClientItem.Properties.DEFAULT));
 				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+				clientItems.put(bagId, new ClientItem(new BlockModelWrapper.Unbaked(bagBlockModel, List.of()), ClientItem.Properties.DEFAULT));
 			});
 			
 

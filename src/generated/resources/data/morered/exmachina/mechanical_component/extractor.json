@@ -14,7 +14,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "up"
       },
@@ -58,7 +58,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "up"
       },
@@ -102,7 +102,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "up"
       },
@@ -146,7 +146,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "up"
       },
@@ -191,7 +191,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "west"
       },
       {
@@ -235,7 +235,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "west"
       },
       {
@@ -279,7 +279,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "west"
       },
       {
@@ -323,7 +323,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "west"
       },
       {
@@ -366,7 +366,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "south"
       },
@@ -410,7 +410,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "south"
       },
@@ -454,7 +454,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "south"
       },
@@ -498,7 +498,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "south"
       },
@@ -543,7 +543,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "north"
       },
       {
@@ -587,7 +587,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "north"
       },
       {
@@ -631,7 +631,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "north"
       },
       {
@@ -675,7 +675,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "north"
       },
       {
@@ -719,7 +719,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "down"
       },
       {
@@ -763,7 +763,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "down"
       },
       {
@@ -807,7 +807,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "down"
       },
       {
@@ -851,7 +851,7 @@
         ],
         "inertia": 100.0,
         "negative_counter_torque": 10.0,
-        "positive_counter_torque": 1000.0,
+        "positive_counter_torque": 10.0,
         "shape": "down"
       },
       {
@@ -894,7 +894,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "east"
       },
@@ -938,7 +938,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "east"
       },
@@ -982,7 +982,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "east"
       },
@@ -1026,7 +1026,7 @@
           }
         ],
         "inertia": 100.0,
-        "negative_counter_torque": 1000.0,
+        "negative_counter_torque": 10.0,
         "positive_counter_torque": 10.0,
         "shape": "east"
       },
