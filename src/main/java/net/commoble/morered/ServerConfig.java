@@ -46,13 +46,15 @@ public record ServerConfig(
 			.translation("morered.config.max_remote_tube_connection_range")
 			.defineInRange("max_remote_tube_connection_range", 32D, 0D, Double.MAX_VALUE);
 		DoubleValue minWindDepth = builder
-			.comment("Minimum percentage of world depth (percentage from bottom to top) at which windcatchers can catch wind")
+			.comment("Minimum percentage of world depth (percentage from bottom to top) at which windcatchers can catch wind",
+				"33% ~= sea level in overworld")
 			.translation("morered.config.min_wind_depth")
-			.defineInRange("min_wind_depth", 0.25D, 0D, 1D);
+			.defineInRange("min_wind_depth", 0.33D, 0D, 1D);
 		DoubleValue maxWindDepth = builder
-			.comment("Percentage of world depth (percentage from bottom to top) above which windcatchers are at maximum efficiency")
+			.comment("Percentage of world depth (percentage from bottom to top) above which windcatchers are at maximum efficiency",
+				"50% ~= +128 in overworld")
 			.translation("morered.config.max_wind_depth")
-			.defineInRange("max_wind_Depth", 0.4D, 0D, 1D);
+			.defineInRange("max_wind_Depth", 0.5D, 0D, 1D);
 		
 		return new ServerConfig(
 			maxWirePostConnectionRange,
