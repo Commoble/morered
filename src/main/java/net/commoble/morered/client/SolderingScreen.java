@@ -245,8 +245,8 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	    	if (variantCount > 0)
 	    	{
             	// if this ingredient has multiple stacks, cycle through them
-            	int variantIndex = (int)((Util.getMillis() / 1000L) / variantCount);
-            	return variants.get(Mth.clamp(variantIndex, 0, variantCount - 1)).value();
+            	int variantIndex = (int)((Util.getMillis() / 1000L) % variantCount);
+            	return variants.get(variantIndex).value();
 	    	}
 	    	else
 	    	{
