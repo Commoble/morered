@@ -2,6 +2,7 @@ package net.commoble.morered.client;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
@@ -10,20 +11,19 @@ import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
@@ -34,11 +34,16 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	public static final ResourceLocation TRADING_SCREEN = ResourceLocation.withDefaultNamespace("textures/gui/container/villager.png");
 	public static final ResourceLocation CRAFTING_SCREEN = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
 	
+	public static final int SEARCHBOX_X = 4;
+	public static final int SEARCHBOX_Y = 17;
+	public static final int SEARCHBOX_WIDTH = 97;
+	public static final int SEARCHBOX_HEIGHT = 12;
 	public static final int SCROLLPANEL_X = 4;
-	public static final int SCROLLPANEL_Y = 17;
+	public static final int SCROLLPANEL_Y = SEARCHBOX_Y + SEARCHBOX_HEIGHT;
 	public static final int SCROLLPANEL_WIDTH = 97;
-	public static final int SCROLLPANEL_HEIGHT = 142;
+	public static final int SCROLLPANEL_HEIGHT = 142 - SEARCHBOX_HEIGHT;
 	
+	private EditBox searchBox;
 	private SolderingScrollPanel scrollPanel;
 
 	public SolderingScreen(SolderingMenu screenContainer, Inventory inv, Component titleIn)
@@ -58,14 +63,40 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int yStart = (this.height - this.imageHeight) / 2;
 		ClientLevel world = this.minecraft.level;
 		List<SolderingRecipeHolder> recipes = world != null ? ClientProxy.getAllSolderingRecipes() : List.of();
+		this.searchBox = new EditBox(this.font, xStart + SEARCHBOX_X, yStart + SEARCHBOX_Y, SEARCHBOX_WIDTH, SEARCHBOX_HEIGHT, Component.literal("a"));
+        this.searchBox.setTextColor(16777215); // same as creative search
+        this.searchBox.setFocused(true); // start with searchbox focused
+		this.addWidget(this.searchBox);
 		this.scrollPanel = new SolderingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
+        this.searchBox.setResponder(this.scrollPanel::updateButtons);
 		this.addWidget(this.scrollPanel);
+		this.setInitialFocus(this.searchBox);
+	}
+
+	@Override
+	public boolean charTyped(char c, int modifier)
+	{
+		return this.searchBox.charTyped(c,modifier);
+	}
+
+	@Override
+	public boolean keyPressed(int keyCode, int scanCode, int uhh)
+	{
+		return this.searchBox.keyPressed(keyCode, scanCode, uhh)
+			|| (this.searchBox.isFocused() && keyCode != 256)
+			|| super.keyPressed(keyCode, scanCode, uhh);
 	}
 
 	@Override
 	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
 	{
 		super.render(graphics, mouseX, mouseY, partialTicks);
+		if (this.searchBox != null)
+		{
+			graphics.pose().pushPose();
+			this.searchBox.render(graphics, mouseX, mouseY, 0);
+			graphics.pose().popPose();
+		}
 		if (this.scrollPanel != null)
 		{
 			graphics.pose().pushPose();
@@ -192,8 +223,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	            // render ingredients
 	            for (int ingredientIndex=0; ingredientIndex<ingredientCount; ingredientIndex++)
 	            {
-	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex).ingredient().getValues().stream().toList()).getDefaultInstance();
-
+	            	ItemStack stack = getIngredientVariant(ingredients.get(ingredientIndex));
 	            	int itemRow = ingredientIndex / 3;
 	            	int itemColumn = ingredientIndex % 3;
 	            	int itemOffsetX = 2 + itemColumn*18;
@@ -239,18 +269,19 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	        }
 		}
 	    
-	    public static Item getIngredientVariant(List<Holder<Item>> variants)
+	    public static ItemStack getIngredientVariant(SizedIngredient sizedIngredient)
 	    {
+	    	List<Holder<Item>> variants = sizedIngredient.ingredient().getValues().stream().toList();
 	    	int variantCount = variants.size();
 	    	if (variantCount > 0)
 	    	{
             	// if this ingredient has multiple stacks, cycle through them
             	int variantIndex = (int)((Util.getMillis() / 1000L) % variantCount);
-            	return variants.get(variantIndex).value();
+            	return new ItemStack(variants.get(variantIndex).value(), sizedIngredient.count());
 	    	}
 	    	else
 	    	{
-	    		return Items.AIR;
+	    		return ItemStack.EMPTY;
 	    	}
 	    }
 
@@ -265,29 +296,35 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		}
 	}
 
-	public static class SolderingScrollPanel extends ScrollPanel implements GuiEventListener
+	public class SolderingScrollPanel extends ScrollPanel implements GuiEventListener
 	{
 		private List<RecipeButton> buttons = new ArrayList<>();
 		public ItemStack tooltipItem = ItemStack.EMPTY;
-		public final int totalButtonHeight;
+		public int totalButtonHeight;
 		
 		public SolderingScrollPanel(Minecraft client, SolderingScreen screen, List<SolderingRecipeHolder> recipes, int left, int top, int width, int height)
 		{
 			super(client, width, height, top, left);
+			this.updateButtons("");
+		}
+		
+		public void updateButtons(String searchText)
+		{
+			List<RecipeButton> buttons = new ArrayList<>();
+			String upperSearchText = searchText.toUpperCase(Locale.ROOT);
 			int buttonWidth = 90;
-			
 			int totalButtonHeight = 0;
-			Level world = client.level;
-			if (world != null)
+			for (SolderingRecipeHolder recipe : ClientProxy.getAllSolderingRecipes())
 			{
-				for (SolderingRecipeHolder recipe : ClientProxy.getAllSolderingRecipes())
+				if (I18n.get(recipe.recipe().result().getItem().getDescriptionId()).toUpperCase(Locale.ROOT).contains(upperSearchText))
 				{
-					RecipeButton recipeButton = new RecipeButton(screen, recipe, left, top + totalButtonHeight, buttonWidth);
-					this.buttons.add(recipeButton);
+					RecipeButton recipeButton = new RecipeButton(SolderingScreen.this, recipe, left, top + totalButtonHeight, buttonWidth);
+					buttons.add(recipeButton);
 					totalButtonHeight += recipeButton.getHeight();
 				}
 			}
 			this.totalButtonHeight = totalButtonHeight;
+			this.buttons = buttons;
 		}
 		
 		@Override
