@@ -11,6 +11,5 @@ public class BitwiseLogicFunctions
 	public static final BitwiseLogicFunction AND_2 = (a,b,c) -> (a & c) & SIXTEEN_BITS;
 	public static final BitwiseLogicFunction XOR_AC = (a,b,c) -> (a ^ c) & SIXTEEN_BITS;
 	public static final BitwiseLogicFunction XNOR_AC = (a,b,c) -> (~(a ^ c)) & SIXTEEN_BITS;
-	
-	
+	public static final BitwiseLogicFunction MULTIPLEX = (a,b,c) -> ((c & b) + (a & ~b)) & SIXTEEN_BITS;
 }

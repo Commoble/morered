@@ -13,6 +13,7 @@
   "block.morered.birch_windcatcher": "Birch Windcatcher",
   "block.morered.bitwise_and_gate": "Bitwise AND Gate",
   "block.morered.bitwise_diode": "Bitwise Diode",
+  "block.morered.bitwise_multiplexer": "Bitwise Multiplexer",
   "block.morered.bitwise_not_gate": "Bitwise NOT Gate",
   "block.morered.bitwise_or_gate": "Bitwise OR Gate",
   "block.morered.bitwise_xnor_gate": "Bitwise XNOR Gate",

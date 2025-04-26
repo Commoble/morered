@@ -49,12 +49,14 @@ public class Names
 	public static final String BITWISE_GATES = "bitwise_gates";
 	public static final String SINGLE_INPUT_BITWISE_GATE = "single_input_bitwise_gate";
 	public static final String TWO_INPUT_BITWISE_GATE = "two_input_bitwise_gate";
+	public static final String THREE_INPUT_BITWISE_GATE = "three_input_bitwise_gate";
 	public static final String BITWISE_DIODE = "bitwise_diode";
 	public static final String BITWISE_NOT_GATE = "bitwise_not_gate";
 	public static final String BITWISE_OR_GATE = "bitwise_or_gate";
 	public static final String BITWISE_AND_GATE = "bitwise_and_gate";
 	public static final String BITWISE_XOR_GATE = "bitwise_xor_gate";
 	public static final String BITWISE_XNOR_GATE = "bitwise_xnor_gate";
+	public static final String BITWISE_MULTIPLEXER = "bitwise_multiplexer";
 	
 	public static final String TUBE = "tube";
 	public static final String SHUNT = "shunt";

@@ -1,0 +1,6 @@
+{
+  "parent": "morered:block/three_input_bitwise_logic_plate_template",
+  "textures": {
+    "symbol": "morered:block/multiplexer_symbol"
+  }
+}

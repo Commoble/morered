@@ -28,6 +28,8 @@ import net.commoble.morered.bitwise_logic.BitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.BitwiseGateSignalComponent;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.SingleInputBitwiseGateBlockEntity;
+import net.commoble.morered.bitwise_logic.ThreeInputBitwiseGateBlock;
+import net.commoble.morered.bitwise_logic.ThreeInputBitwiseGateBlockEntity;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
 import net.commoble.morered.client.ClientProxy;
@@ -260,6 +262,7 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> poweredWireBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<SingleInputBitwiseGateBlockEntity>> singleInputBitwiseGateBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TwoInputBitwiseGateBlockEntity>> twoInputBitwiseGateBeType;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ThreeInputBitwiseGateBlockEntity>> threeInputBitwiseGateBeType;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<DistributorBlockEntity>> distributorEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> extractorEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilterBlockEntity>> filterEntity;
@@ -407,12 +410,14 @@ public class MoreRed
 		// they don't need to have their properties defined on construction but they do need to be registered to the TE type they use
 		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, SingleInputBitwiseGateBlock> singleInput = SingleInputBitwiseGateBlock::new;
 		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, TwoInputBitwiseGateBlock> twoInputs = TwoInputBitwiseGateBlock::new;
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, ThreeInputBitwiseGateBlock> threeInputs = ThreeInputBitwiseGateBlock::new;
 		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_DIODE, BitwiseLogicFunctions.INPUT_B, singleInput);
 		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_NOT_GATE, BitwiseLogicFunctions.NOT_B, singleInput);
 		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_OR_GATE, BitwiseLogicFunctions.OR, twoInputs);
 		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_AND_GATE, BitwiseLogicFunctions.AND_2, twoInputs);
 		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XOR_GATE, BitwiseLogicFunctions.XOR_AC, twoInputs);
 		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XNOR_GATE, BitwiseLogicFunctions.XNOR_AC, twoInputs);
+		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_MULTIPLEXER, BitwiseLogicFunctions.MULTIPLEX, threeInputs);
 		List<Supplier<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
 		
 		this.tubeBlock = registerBlockItem(blocks, items, Names.TUBE,
@@ -624,6 +629,15 @@ public class MoreRed
 			);
 		twoInputBitwiseGateBeType = blockEntityTypes.register(Names.TWO_INPUT_BITWISE_GATE,
 			() -> new BlockEntityType<>(TwoInputBitwiseGateBlockEntity::create,
+				Util.make(() ->
+				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
+					return this.bitwiseLogicPlates.values().stream()
+						.map(rob -> rob.get())
+						.toArray(Block[]::new);
+				}))
+			);
+		threeInputBitwiseGateBeType = blockEntityTypes.register(Names.THREE_INPUT_BITWISE_GATE,
+			() -> new BlockEntityType<>(ThreeInputBitwiseGateBlockEntity::create,
 				Util.make(() ->
 				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
 					return this.bitwiseLogicPlates.values().stream()

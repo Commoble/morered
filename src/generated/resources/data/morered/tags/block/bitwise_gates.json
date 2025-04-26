@@ -5,6 +5,7 @@
     "morered:bitwise_not_gate",
     "morered:bitwise_or_gate",
     "morered:bitwise_xnor_gate",
-    "morered:bitwise_xor_gate"
+    "morered:bitwise_xor_gate",
+    "morered:bitwise_multiplexer"
   ]
 }

@@ -10,8 +10,14 @@
 * Added blocks which make use of mechanical power:
   * Alternators are plate blocks which emit redstone power in one of four output directions, rotating between them when rotated by machines
   * Extractors have been reworked. They now require mechanical power, and extract an entire itemstack from their input side whenever they make a full rotation. Pliers can be used to rotate them after placing (hold sprint to change which way they rotate)
+* Added Bitwise Multiplexer
 * When placing logic plates or gearshifters, sprint can now be held to change which side of the block-being-placed faces the aimed-at face
-* Added client config value machineRenderCycleTicks which controls animation length of most machines
+* Added a search bar to the soldering table
+* Added server config values:
+  * min_wind_depth -- Minimum percentage of world depth (percentage from bottom to top) at which windcatchers can catch wind
+    * Default is 33% which is roughly sea level in overworld
+  * max_wind_depth -- Percentage of world depth (percentage from bottom to top) above which windcatchers are at maximum efficiency
+    * Default is 50% which is roughly y=+128 in overworld
 
 
 # 1.21.3-7.1.0.0

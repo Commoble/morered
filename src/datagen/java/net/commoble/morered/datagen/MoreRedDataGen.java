@@ -26,6 +26,7 @@ import net.commoble.morered.HexidecrubrometerBlock;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.commoble.morered.TwentyFourBlock;
+import net.commoble.morered.bitwise_logic.ThreeInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.client.ColorHandlers;
 import net.commoble.morered.client.UnbakedLogicGateModel;
@@ -156,6 +157,7 @@ public class MoreRedDataGen
 		bitwisePlateBlock(Names.BITWISE_OR_GATE, "Bitwise OR Gate", "or_gate_symbol", context);
 		bitwisePlateBlock(Names.BITWISE_XNOR_GATE, "Bitwise XNOR Gate", "xnor_gate_symbol", context);
 		bitwisePlateBlock(Names.BITWISE_XOR_GATE, "Bitwise XOR Gate", "xor_gate_symbol", context);
+		bitwisePlateBlock(Names.BITWISE_MULTIPLEXER, "Bitwise Multiplexer", "multiplexer_symbol", context);
 		postBlock(Names.CABLE_RELAY, "Cable Relay", context)
 			.tags(MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.simpleBlockItem()
@@ -1052,9 +1054,13 @@ public class MoreRedDataGen
 	{
 		ResourceLocation blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		ResourceLocation parent = block instanceof TwoInputBitwiseGateBlock
-			? MoreRed.id("block/two_input_bitwise_logic_plate_template")
-			: MoreRed.id("block/single_input_bitwise_logic_plate_template");
+		ResourceLocation parent = switch(block)
+		{
+			case ThreeInputBitwiseGateBlock $$$ -> MoreRed.id("block/three_input_bitwise_logic_plate_template");
+			case TwoInputBitwiseGateBlock $$ -> MoreRed.id("block/two_input_bitwise_logic_plate_template");
+			default -> MoreRed.id("block/single_input_bitwise_logic_plate_template"); 
+		};
+
 		ResourceLocation symbolLocation = MoreRed.id("block/" + symbolTexture);
 		
 		context.models().put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
