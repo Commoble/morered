@@ -359,22 +359,42 @@ public class MoreRed
 				.noOcclusion(),
 			AlternatorBlock::new);
 		redwirePostBlock = registerBlockItem(blocks, items, Names.REDWIRE_POST,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(2F, 5F)
+				.forceSolidOn(),
 			WirePostBlock::new);
 		redwireRelayBlock = registerBlockItem(blocks, items, Names.REDWIRE_RELAY,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(2F, 5F)
+				.forceSolidOn(),
 			properties -> new WirePostPlateBlock(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
 		redwireJunctionBlock = registerBlockItem(blocks, items, Names.REDWIRE_JUNCTION,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_RED)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(2F, 5F)
+				.forceSolidOn(),
 			properties -> new WirePostPlateBlock(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
 		hexidecrubrometerBlock = registerBlockItem(blocks, items, Names.HEXIDECRUBROMETER,
 			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
 			HexidecrubrometerBlock::new);
 		cableRelayBlock = registerBlockItem(blocks, items, Names.CABLE_RELAY,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(2F, 5F)
+				.forceSolidOn(),
 			CableRelayBlock::new);
 		cableJunctionBlock = registerBlockItem(blocks, items, Names.CABLE_JUNCTION,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.COLOR_BLUE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(2F, 5F)
+				.forceSolidOn(),
 			CableJunctionBlock::new);
 		
 		redAlloyWireBlock = registerBlockItem(blocks, items, Names.RED_ALLOY_WIRE, 
@@ -1021,7 +1041,12 @@ public class MoreRed
 		LogicFunctionPlateBlockFactory factory)
 	{
 		DeferredHolder<Block, LogicFunctionPlateBlock> blockGetter = registerBlockItem(blocks, items, name,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.STONE)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(0F)
+				.sound(SoundType.WOOD)
+				.forceSolidOn(),
 			properties -> factory.makeBlock(function, properties));
 		logicPlates.put(blockGetter.getId(), blockGetter);
 		return blockGetter;
@@ -1032,7 +1057,12 @@ public class MoreRed
 		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, B> blockFactory)
 	{
 		DeferredHolder<Block, B> rob = registerBlockItem(blocks, items, name,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.QUARTZ).instrument(NoteBlockInstrument.BASEDRUM).strength(0F).sound(SoundType.WOOD),
+			() -> BlockBehaviour.Properties.of()
+				.mapColor(MapColor.QUARTZ)
+				.instrument(NoteBlockInstrument.BASEDRUM)
+				.strength(0F)
+				.sound(SoundType.WOOD)
+				.forceSolidOn(),
 			properties -> blockFactory.apply(properties, function));
 		bitwiseLogicPlates.put(rob.getId(), rob);
 		return rob;
