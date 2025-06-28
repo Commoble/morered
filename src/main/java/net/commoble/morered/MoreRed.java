@@ -93,6 +93,7 @@ import net.commoble.morered.util.BlockSide;
 import net.commoble.morered.util.ConfigHelper;
 import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.FakeStateLevel;
+import net.commoble.morered.util.MoreCodecs;
 import net.commoble.morered.wire_post.CableJunctionBlock;
 import net.commoble.morered.wire_post.CablePostBlockEntity;
 import net.commoble.morered.wire_post.CableRelayBlock;
@@ -197,7 +198,7 @@ public class MoreRed
 	{
 		return ResourceLocation.fromNamespaceAndPath(MODID, name);
 	}
-
+	
 	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
 	public static final ToIntFunction<LevelReader> NO_SOURCE = reader -> 0;
 
@@ -315,12 +316,12 @@ public class MoreRed
 		BlockBehaviour.StatePredicate neverStatePredicate = ($,$$,$$$) -> false;
 		
 		postsInChunkAttachment = attachmentTypes.register(Names.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
-			.serialize(BlockPos.CODEC.listOf().xmap(HashSet::new, List::copyOf))
+			.serialize(MoreCodecs.POSITIONS_MAP_CODEC)
 			.build());
 		voxelCacheAttachment = attachmentTypes.register(Names.VOXEL_CACHE, () -> AttachmentType.<Map<BlockPos,VoxelShape>>builder(() -> new HashMap<>())
 			.build());
 		this.tubesInChunkAttachment = attachmentTypes.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
-			.serialize(TubesInChunk.TUBE_SET_CODEC)
+			.serialize(MoreCodecs.POSITIONS_MAP_CODEC)
 			.build());
 
 		spooledPostComponent = dataComponentTypes.register(Names.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
@@ -613,8 +614,8 @@ public class MoreRed
 			);
 		
 		alternatorBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.ALTERNATOR, this.alternatorBlock);
 		wirePostBeType = blockEntityTypes.register(Names.WIRE_POST,
 			() -> new BlockEntityType<>(WirePostBlockEntity::new,
@@ -677,8 +678,8 @@ public class MoreRed
 		this.redstoneTubeEntity = blockEntityTypes.register(Names.REDSTONE_TUBE,
 			() -> new BlockEntityType<>(RedstoneTubeBlockEntity::new, redstoneTubeBlock.get()));
 		this.extractorEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, ExtractorBlock::normalizeMachine, ExtractorBlock::denormalizeMachine)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, ExtractorBlock::normalizeMachine, ExtractorBlock::denormalizeMachine)
 			.register(blockEntityTypes, Names.EXTRACTOR, this.extractorBlock);
 		this.filterEntity = blockEntityTypes.register(Names.FILTER,
 			() -> new BlockEntityType<>(FilterBlockEntity::new, filterBlock.get()));
@@ -689,29 +690,29 @@ public class MoreRed
 		this.distributorEntity = blockEntityTypes.register(Names.DISTRIBUTOR,
 			() -> new BlockEntityType<>(DistributorBlockEntity::new, distributorBlock.get()));
 		this.axleBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values());
 		this.gearBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.GEAR, this.gearBlocks.values());
 		this.gearsBlockEntity = GenericBlockEntity.builder()
 			.syncedData(this.gearsDataComponent)
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.dataTransformer(this.gearsDataComponent, GearsBlock::normalizeGears, GearsBlock::denormalizeGears)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEARS, this.gearsBlock);
 		this.gearshifterBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEARSHIFTER, this.gearshifterBlocks.values());
 		this.clutchBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
+			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.CLUTCH, this.clutchBlocks.values());
 		this.windcatcherBlockEntity = GenericBlockEntity.builder()
 			.itemData(windcatcherColorsDataComponent)
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.CODEC)
+			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
 
 		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,

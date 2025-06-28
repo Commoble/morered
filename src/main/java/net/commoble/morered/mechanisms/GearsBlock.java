@@ -15,7 +15,6 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup.RegistryLookup;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -315,7 +314,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 	
-	public static Map<Direction, ItemStack> normalizeGears(BlockState state, RegistryLookup.Provider provider, Map<Direction,ItemStack> oldValues)
+	public static Map<Direction, ItemStack> normalizeGears(BlockState state, Map<Direction,ItemStack> oldValues)
 	{
 		OctahedralGroup group = state.getValue(TRANSFORM);
 		if (group == OctahedralGroup.IDENTITY)
@@ -330,7 +329,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 		return newValues;
 	}
 	
-	public static Map<Direction, ItemStack> denormalizeGears(BlockState state, RegistryLookup.Provider provider, Map<Direction,ItemStack> oldValues)
+	public static Map<Direction, ItemStack> denormalizeGears(BlockState state, Map<Direction,ItemStack> oldValues)
 	{
 		OctahedralGroup group = state.getValue(TRANSFORM);
 		if (group == OctahedralGroup.IDENTITY)

@@ -190,7 +190,7 @@ public class WirePostRenderer implements BlockEntityRenderer<WirePostBlockEntity
 	}
 
 	@Override
-	public boolean shouldRenderOffScreen(WirePostBlockEntity te)
+	public boolean shouldRenderOffScreen()
 	{
 		return true;
 	}

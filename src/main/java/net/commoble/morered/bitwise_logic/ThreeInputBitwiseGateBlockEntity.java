@@ -14,13 +14,13 @@ import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup.Provider;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class ThreeInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 {
@@ -82,22 +82,22 @@ public class ThreeInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
-		compound.putInt(INPUT_A_KEY, this.inputs[0]);
-		compound.putInt(INPUT_B_KEY, this.inputs[1]);
-		compound.putInt(INPUT_C_KEY, this.inputs[2]);
+		super.saveAdditional(output);
+		output.putInt(INPUT_A_KEY, this.inputs[0]);
+		output.putInt(INPUT_B_KEY, this.inputs[1]);
+		output.putInt(INPUT_C_KEY, this.inputs[2]);
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag compound, Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
+		super.loadAdditional(input);
 		this.inputs = new int[] {
-			compound.getIntOr(INPUT_A_KEY, 0),
-			compound.getIntOr(INPUT_B_KEY, 0),
-			compound.getIntOr(INPUT_C_KEY, 0)
+			input.getIntOr(INPUT_A_KEY, 0),
+			input.getIntOr(INPUT_B_KEY, 0),
+			input.getIntOr(INPUT_C_KEY, 0)
 		};
 	}
 

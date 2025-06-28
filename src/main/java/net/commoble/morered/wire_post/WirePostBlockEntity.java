@@ -22,7 +22,6 @@ import net.commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
@@ -35,6 +34,8 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.redstone.ExperimentalRedstoneUtils;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.network.PacketDistributor;
@@ -195,17 +196,15 @@ public class WirePostBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		this.readCommonData(compound);
+		super.loadAdditional(input);
+		this.readCommonData(input);
 	}
 	
-	protected void readCommonData(CompoundTag compound)
+	protected void readCommonData(ValueInput input)
 	{
-		if (compound.contains(CONNECTIONS))
-		{
-			List<BlockPos> normalizedPositions = BLOCKPOS_LISTER.parse(NbtOps.INSTANCE, compound.get(CONNECTIONS)).result().orElse(List.of());
+		input.read(CONNECTIONS, BLOCKPOS_LISTER).ifPresent(normalizedPositions -> {
 			List<BlockPos> absolutePositions = new ArrayList<>();
 			for (BlockPos normalPos : normalizedPositions)
 			{
@@ -214,22 +213,20 @@ public class WirePostBlockEntity extends BlockEntity
 			Map<BlockPos, NestedBoundingBox> newMap = new HashMap<>();
 			absolutePositions.forEach(otherPos -> newMap.put(otherPos, this.getNestedBoundingBoxForConnectedPos(otherPos)));
 			this.remoteConnections = newMap;
-		}
+		});
 		this.renderAABB = getAABBContainingAllBlockPos(this.worldPosition, this.remoteConnections.keySet());
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
+		super.saveAdditional(output);
 		List<BlockPos> normalizedPositions = new ArrayList<>();
 		for (BlockPos absolutePos : this.remoteConnections.keySet())
 		{
 			normalizedPositions.add(this.normalizePos(absolutePos));
 		}
-		BLOCKPOS_LISTER.encodeStart(NbtOps.INSTANCE, normalizedPositions)
-			.result()
-			.ifPresent(tag -> compound.put(CONNECTIONS, tag));
+		output.store(CONNECTIONS, BLOCKPOS_LISTER, normalizedPositions);
 	}
 	
 	/**
@@ -260,9 +257,7 @@ public class WirePostBlockEntity extends BlockEntity
 	// called on server when client loads chunk with TE in it
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag compound = super.getUpdateTag(registries);
-		this.saveAdditional(compound, registries);
-		return compound;
+		return this.saveCustomOnly(registries); // calls saveAdditional
 	}
 
 	@Override

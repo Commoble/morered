@@ -20,8 +20,6 @@ import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
@@ -31,6 +29,8 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public abstract class BitwiseGateBlockEntity extends BlockEntity
 {
@@ -101,17 +101,17 @@ public abstract class BitwiseGateBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
-		compound.putInt(OUTPUT, this.output);
+		super.saveAdditional(output);
+		output.putInt(OUTPUT, this.output);
 	}
 	
 	@Override
-	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		this.output = compound.getIntOr(OUTPUT,0);
+		super.loadAdditional(input);
+		this.output = input.getIntOr(OUTPUT,0);
 	}
 
 	public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel)

@@ -17,7 +17,6 @@ import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.RandomSource;
@@ -128,7 +127,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 				context.getLevel().getFluidState(context.getClickedPos()).getType() == Fluids.WATER);
 	}
 	
-	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> runtimeData)
+	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, Map<NodeShape,MechanicalState> runtimeData)
 	{
 		// let the default state point to down and north, for the big gear and little gear's nodes, respectively
 		// so, no matter which way we're pointing in-world,
@@ -152,7 +151,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 		return result;
 	}
 	
-	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> diskData)
+	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, Map<NodeShape,MechanicalState> diskData)
 	{
 		Map<NodeShape,MechanicalState> result = new HashMap<>();
 		MechanicalState bigState = diskData.getOrDefault(NodeShape.ofSide(DEFAULT_BIG_DIR), MechanicalState.ZERO);

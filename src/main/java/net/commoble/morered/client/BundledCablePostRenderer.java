@@ -236,7 +236,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 	}
 
 	@Override
-	public boolean shouldRenderOffScreen(WirePostBlockEntity te)
+	public boolean shouldRenderOffScreen()
 	{
 		return true;
 	}

@@ -11,13 +11,13 @@ import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup.Provider;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class SingleInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 {
@@ -68,17 +68,17 @@ public class SingleInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
-		compound.putInt(INPUT, this.input);
+		super.saveAdditional(output);
+		output.putInt(INPUT, this.input);
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag compound, Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		this.input = compound.getIntOr(INPUT,0);
+		super.loadAdditional(input);
+		this.input = input.getIntOr(INPUT,0);
 	}
 
 	@Override

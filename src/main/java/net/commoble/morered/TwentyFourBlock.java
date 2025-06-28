@@ -10,7 +10,6 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
@@ -109,7 +108,7 @@ public class TwentyFourBlock extends Block
 		return this.getRenderShape(state) == RenderShape.MODEL;
 	}
 	
-	public static Map<NodeShape,MechanicalState> normalizeMachineWithAttachmentNode(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> runtimeData)
+	public static Map<NodeShape,MechanicalState> normalizeMachineWithAttachmentNode(BlockState state, Map<NodeShape,MechanicalState> runtimeData)
 	{
 		Map<NodeShape,MechanicalState> result = new HashMap<>();
 	
@@ -119,7 +118,7 @@ public class TwentyFourBlock extends Block
 		return result;
 	}
 	
-	public static Map<NodeShape,MechanicalState> denormalizeMachineWithAttachmentNode(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> diskData)
+	public static Map<NodeShape,MechanicalState> denormalizeMachineWithAttachmentNode(BlockState state, Map<NodeShape,MechanicalState> diskData)
 	{
 		Map<NodeShape,MechanicalState> result = new HashMap<>();
 		MechanicalState attachState = diskData.getOrDefault(NodeShape.ofSide(DEFAULT_ATTACH_DIR), MechanicalState.ZERO);

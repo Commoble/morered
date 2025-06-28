@@ -2,7 +2,7 @@ package net.commoble.morered.client;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Inventory;
@@ -32,7 +32,7 @@ public class SingleSlotMenuScreen<MENU extends AbstractContainerMenu> extends Ab
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		// window start x/y, texture start x/y, size x/y
-		graphics.blit(RenderType::guiTextured, DISPENSER_GUI, xStart, yStart, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, DISPENSER_GUI, xStart, yStart, 0, 0, this.imageWidth, this.imageHeight, 256, 256);
 		// dispenser gui has 3x3 slots
 		// hide the outer slots and leave the middle one
 		int outerGridStartX = 61;
@@ -40,12 +40,12 @@ public class SingleSlotMenuScreen<MENU extends AbstractContainerMenu> extends Ab
 		int squareSize = 18;
 		int leftHiderStartX = outerGridStartX - squareSize;
 		// left slots
-		graphics.blit(RenderType::guiTextured, DISPENSER_GUI, xStart + outerGridStartX, yStart + outerGridStartY, leftHiderStartX, outerGridStartY, squareSize, squareSize*3, 256, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, DISPENSER_GUI, xStart + outerGridStartX, yStart + outerGridStartY, leftHiderStartX, outerGridStartY, squareSize, squareSize*3, 256, 256);
 		// right slots
-		graphics.blit(RenderType::guiTextured, DISPENSER_GUI, xStart + outerGridStartX + squareSize*2, yStart + outerGridStartY, leftHiderStartX, outerGridStartY, squareSize, squareSize*3, 256, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, DISPENSER_GUI, xStart + outerGridStartX + squareSize*2, yStart + outerGridStartY, leftHiderStartX, outerGridStartY, squareSize, squareSize*3, 256, 256);
 		// top slots
-		graphics.blit(RenderType::guiTextured, DISPENSER_GUI, xStart + outerGridStartX + squareSize, yStart + outerGridStartY, leftHiderStartX, outerGridStartY, squareSize, squareSize, 256, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, DISPENSER_GUI, xStart + outerGridStartX + squareSize, yStart + outerGridStartY, leftHiderStartX, outerGridStartY, squareSize, squareSize, 256, 256);
 		// bottom slots
-		graphics.blit(RenderType::guiTextured, DISPENSER_GUI, xStart + outerGridStartX + squareSize, yStart + outerGridStartY + squareSize*2, leftHiderStartX, outerGridStartY, squareSize, squareSize, 256, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, DISPENSER_GUI, xStart + outerGridStartX + squareSize, yStart + outerGridStartY + squareSize*2, leftHiderStartX, outerGridStartY, squareSize, squareSize, 256, 256);
 	}
 }

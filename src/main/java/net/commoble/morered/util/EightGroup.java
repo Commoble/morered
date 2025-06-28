@@ -9,7 +9,6 @@ import net.commoble.exmachina.api.MechanicalState;
 import net.commoble.exmachina.api.NodeShape;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
@@ -86,7 +85,7 @@ public class EightGroup
 	
 	// this is theoretically useful for any blocks using exmachina's generic mechanical component
 	// we should push EightGroup upstream at some point
-	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> denormalizedData)
+	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, Map<NodeShape,MechanicalState> denormalizedData)
 	{
 		if (!state.hasProperty(TRANSFORM))
 			return denormalizedData;
@@ -109,7 +108,7 @@ public class EightGroup
 		return results;
 	}
 	
-	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> normalizedData)
+	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, Map<NodeShape,MechanicalState> normalizedData)
 	{
 		if (!state.hasProperty(TRANSFORM))
 			return normalizedData;

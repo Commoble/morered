@@ -1,5 +1,9 @@
 package net.commoble.morered.client;
 
+import java.util.Set;
+
+import org.joml.Vector3f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -64,6 +68,12 @@ public record UnbakedBlockEntityWithoutLevelRenderer(Block block, BlockEntityTyp
 			// this isn't used when SpecialModelRenderers are used to render blocks
 			// instead, null is passed as the T for the first argument in render
 			return null;
+		}
+
+		@Override
+		public void getExtents(Set<Vector3f> points)
+		{
+			// *pretty* sure this isn't used when rendering blocks
 		}
 		
 	}

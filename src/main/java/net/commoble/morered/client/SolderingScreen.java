@@ -16,7 +16,7 @@ import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
@@ -64,7 +64,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		ClientLevel world = this.minecraft.level;
 		List<SolderingRecipeHolder> recipes = world != null ? ClientProxy.getAllSolderingRecipes() : List.of();
 		this.searchBox = new EditBox(this.font, xStart + SEARCHBOX_X, yStart + SEARCHBOX_Y, SEARCHBOX_WIDTH, SEARCHBOX_HEIGHT, Component.literal("a"));
-        this.searchBox.setTextColor(16777215); // same as creative search
+        this.searchBox.setTextColor(0xFFFFFF); // same as creative search
         this.searchBox.setFocused(true); // start with searchbox focused
 		this.addWidget(this.searchBox);
 		this.scrollPanel = new SolderingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
@@ -93,22 +93,22 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		super.render(graphics, mouseX, mouseY, partialTicks);
 		if (this.searchBox != null)
 		{
-			graphics.pose().pushPose();
+			graphics.pose().pushMatrix();
 			this.searchBox.render(graphics, mouseX, mouseY, 0);
-			graphics.pose().popPose();
+			graphics.pose().popMatrix();
 		}
 		if (this.scrollPanel != null)
 		{
-			graphics.pose().pushPose();
+			graphics.pose().pushMatrix();
 			this.scrollPanel.render(graphics, mouseX, mouseY, 0);
-			graphics.pose().popPose();
+			graphics.pose().popMatrix();
 		}
 		// the scrollpanel messes with the rendering of the labels, so do those here instead
-		graphics.pose().pushPose();
-		graphics.pose().translate(this.leftPos, this.topPos, 0F);
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 4210752, false);
-        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 4210752, false);
-		graphics.pose().popPose();
+		graphics.pose().pushMatrix();
+		graphics.pose().translate(this.leftPos, this.topPos);
+        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0xFF404040, false);
+        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0xFF404040, false);
+		graphics.pose().popMatrix();
 		this.renderTooltip(graphics, mouseX, mouseY);
 	}
 
@@ -127,11 +127,11 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	{
 		if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
 		{
-			graphics.renderTooltip(this.font, this.hoveredSlot.getItem(), mouseX, mouseY);
+            graphics.setTooltipForNextFrame(this.font, this.hoveredSlot.getItem(), mouseX, mouseY);
 		}
 		else if (this.scrollPanel != null && !this.scrollPanel.tooltipItem.isEmpty())
 		{
-			graphics.renderTooltip(this.font, this.scrollPanel.tooltipItem, mouseX, mouseY);
+			graphics.setTooltipForNextFrame(this.font, this.scrollPanel.tooltipItem, mouseX, mouseY);
 		}
 
 	}
@@ -144,7 +144,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int yStart = (this.height - this.imageHeight) / 2;
 		
 		// screenStartX, screenStartY, textureU, textureV, blitWidth, blitHeight, fileWidth, fileHeight
-		graphics.blit(RenderType::guiTextured, TRADING_SCREEN, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TRADING_SCREEN, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 512, 256);
 		
 		// stretch the arrow over the crafting slot background
 		int arrowU = 186;
@@ -156,7 +156,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		int arrowScreenY = yStart + arrowV;
 		int blitWidth = arrowWidth*tiles;
 		// screenStartX, screenStartY, textureU, textureV, blitToWidth, blitToHeight, blitFromWidth, blitFromHeight, fileWidth, fileHeight
-		graphics.blit(RenderType::guiTextured, TRADING_SCREEN, arrowScreenX, arrowScreenY, arrowU, arrowV,  blitWidth, arrowHeight, arrowWidth, arrowHeight, 512, 256);
+		graphics.blit(RenderPipelines.GUI_TEXTURED, TRADING_SCREEN, arrowScreenX, arrowScreenY, arrowU, arrowV,  blitWidth, arrowHeight, arrowWidth, arrowHeight, 512, 256);
 	}
 
 	@Override
@@ -248,7 +248,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		            int arrowHeight = 9;
 		            int arrowU = 15;
 		            int arrowV = 171;
-		            graphics.blit(RenderType::guiTextured, TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
+		            graphics.blit(RenderPipelines.GUI_TEXTURED, TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
 		            ItemStack outputStack = this.recipe.recipe().result();

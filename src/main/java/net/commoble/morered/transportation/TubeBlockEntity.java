@@ -12,6 +12,9 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.slf4j.Logger;
+
+import com.mojang.logging.LogUtils;
 import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.MoreRed;
@@ -22,10 +25,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
@@ -35,6 +37,10 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueOutput;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
+import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
@@ -43,6 +49,7 @@ import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TubeBlockEntity extends BlockEntity
 {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
 	public static final String INV_NBT_KEY_RESET = "inventory";
 	public static final String CONNECTIONS = "connections";
@@ -497,106 +504,79 @@ public class TubeBlockEntity extends BlockEntity
 
 	@Override
 	/** read **/
-	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries); // reads neoforge data and third-party capabilities
-		this.readAllNBT(compound, registries);
-	}
-
-	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
-	{
-		super.saveAdditional(compound, registries); // saves neoforge data and third-party capabilities
-		this.writeAllNBT(compound, registries);
-	}
-	
-	// write all nbt specific to tubes
-	protected void writeAllNBT(CompoundTag compound, HolderLookup.Provider registries)
-	{
-		BlockPos tubePos = this.getBlockPos();
-		BlockState state = this.getBlockState();
-		OctahedralGroup group = state.getValue(TubeBlock.GROUP);
-		OctahedralGroup normalizer = group.inverse();
-		ListTag invList = new ListTag();
-		this.mergeBuffer();
-
-		for (ItemInTubeWrapper wrapper : this.inventory)
-		{
-			CompoundTag invTag = new CompoundTag();
-			wrapper.writeToNBT(invTag, group, registries);
-			invList.add(invTag);
-		}
-		if (!invList.isEmpty())
-		{
-			compound.put(INV_NBT_KEY_RESET, invList);
-		}
-		
-		CompoundTag connectionsTag = new CompoundTag();
-		this.remoteConnections.forEach((direction, connection) ->
-		{
-			connectionsTag.put(normalizer.rotate(direction).getName(), connection.toStorage(tubePos).toNBT(group));
-		});
-		compound.put(CONNECTIONS, connectionsTag);
-	}
-	
-	// read all nbt specific to tubes
-	protected void readAllNBT(@Nullable CompoundTag compound, HolderLookup.Provider registries)
-	{
+		super.loadAdditional(input); // reads neoforge data and third-party capabilities
 		// ensures stuff gets synced when we load from data in mid-session
 		// (e.g. from a structure block)
 		this.setConnectionSyncDirty(true);
 		
-		if (compound != null) // netcode sends empty compounds as null
-		{
-			BlockState state = this.getBlockState();
-			OctahedralGroup group = state.getValue(TubeBlock.GROUP);
-			if (compound.contains(INV_NBT_KEY_RESET))	// only update inventory if the compound has an inv. key
-			{									// this lets the client receive packets without the inventory being cleared
-				ListTag invList = compound.getListOrEmpty(INV_NBT_KEY_RESET);
-				Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
-				for (int i = 0; i < invList.size(); i++)
-				{
-					CompoundTag itemTag = invList.getCompoundOrEmpty(i);
-					inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group, registries));
-				}
-				this.inventory = inventory;
-			}
-			else if (compound.contains(INV_NBT_KEY_ADD))	// add newly inserted items to this tube
+		BlockState state = this.getBlockState();
+		OctahedralGroup group = state.getValue(TubeBlock.GROUP);
+		
+		input.childrenList(INV_NBT_KEY_RESET).ifPresentOrElse(list -> {
+			// only update inventory if the compound has an inv. key
+			// this lets the client receive packets without the inventory being cleared
+			Queue<ItemInTubeWrapper> inventory = new LinkedList<>();
+			list.stream().forEach(itemInTubeInput -> inventory.add(ItemInTubeWrapper.readFromNBT(itemInTubeInput, group)));
+			this.inventory = inventory;
+		}, () -> input.childrenList(INV_NBT_KEY_ADD).ifPresent(list -> {
+			// if we are not resetting inventory,
+			// add newly inserted items to this tube
+			list.stream().forEach(itemInTubeInput -> this.inventory.add(ItemInTubeWrapper.readFromNBT(itemInTubeInput, group)));
+		}));
+		
+		input.childrenList(INV_NBT_KEY_ADD).ifPresent(list -> {
+		});
+		input.childrenList(INV_NBT_KEY_RESET).ifPresent(list -> {
+		});
+	
+		input.child(CONNECTIONS).ifPresent(connectionsTag -> {
+			Map<Direction, RemoteConnection> newMap = new HashMap<>();
+			Direction[] dirs = Direction.values();
+			for (int i=0; i<6; i++)
 			{
-				ListTag invList = compound.getListOrEmpty(INV_NBT_KEY_ADD);
-				for (int i=0; i<invList.size(); i++)
-				{
-					CompoundTag itemTag = invList.getCompoundOrEmpty(i);
-					this.inventory.add(ItemInTubeWrapper.readFromNBT(itemTag, group, registries));
-				}
+				Direction dir = dirs[i];
+				String dirName = dir.getName();
+				connectionsTag.child(dirName).ifPresent(connectionTag -> {
+					RemoteConnection.Storage storage = RemoteConnection.Storage.fromNBT(connectionTag, group);
+					RemoteConnection connection = RemoteConnection.fromStorage(storage, dir, this.worldPosition);
+					newMap.put(group.rotate(dir), connection);
+				});
 			}
-			
+			this.remoteConnections = newMap;
+		});
 
-			if (compound.contains(CONNECTIONS))
-			{
-				CompoundTag connectionsTag = compound.getCompoundOrEmpty(CONNECTIONS);
-				Map<Direction, RemoteConnection> newMap = new HashMap<>();
-				Direction[] dirs = Direction.values();
-				for (int i=0; i<6; i++)
-				{
-					Direction dir = dirs[i];
-					String dirName = dir.getName();
-					if (connectionsTag.contains(dirName))
-					{
-						CompoundTag connectionTag = connectionsTag.getCompoundOrEmpty(dirName);
-						RemoteConnection.Storage storage = RemoteConnection.Storage.fromNBT(connectionTag, group);
-						RemoteConnection connection = RemoteConnection.fromStorage(storage, dir, this.worldPosition);
-						newMap.put(group.rotate(dir), connection);
-					}
-					
-				}
-				this.remoteConnections = newMap;
-			}
-		}
 		this.renderAABB = getAABBContainingConnectedPositions(this.worldPosition,
 			this.remoteConnections.values().stream()
 				.map(connection -> connection.toPos)
 				.collect(Collectors.toSet()));
+	}
+
+	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
+	public void saveAdditional(ValueOutput output)
+	{
+		super.saveAdditional(output); // saves neoforge data and third-party capabilities
+		BlockPos tubePos = this.getBlockPos();
+		BlockState state = this.getBlockState();
+		OctahedralGroup group = state.getValue(TubeBlock.GROUP);
+		OctahedralGroup normalizer = group.inverse();
+		this.mergeBuffer();
+
+		if (!this.inventory.isEmpty())
+		{
+			ValueOutputList outputList = output.childrenList(INV_NBT_KEY_RESET);
+			for (ItemInTubeWrapper wrapper : this.inventory)
+			{
+				wrapper.writeToNBT(outputList.addChild(), group);
+			}
+		}
+		
+		ValueOutput connectionsTag = output.child(CONNECTIONS);
+		this.remoteConnections.forEach((direction, connection) ->
+		{
+			connection.toStorage(tubePos).toNBT(connectionsTag.child(normalizer.rotate(direction).getName()), group);
+		});
 	}
 
 	/**
@@ -608,18 +588,13 @@ public class TubeBlockEntity extends BlockEntity
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag compound = super.getUpdateTag(registries);
 		this.setConnectionSyncDirty(true);
-		this.writeAllNBT(compound, registries);	// okay to send entire inventory on chunk load
+		CompoundTag tag = this.saveCustomOnly(registries);
 		this.setConnectionSyncDirty(false);
-		return compound;
-	}	
-
-	@Override
-	public void handleUpdateTag(CompoundTag tag, HolderLookup.Provider registries)
-	{
-		this.readAllNBT(tag, registries);
+		return tag;
 	}
+	
+	// super.handleUpdateTag invokes loadAdditional
 
 	/**
 	 * Prepare a packet to sync TE to client
@@ -629,57 +604,55 @@ public class TubeBlockEntity extends BlockEntity
 	@Override
 	public ClientboundBlockEntityDataPacket getUpdatePacket()
 	{
-		return ClientboundBlockEntityDataPacket.create(this, (be,registries) -> this.makeUpdatePacketTag(registries));
+		return ClientboundBlockEntityDataPacket.create(this, (be,registries) -> {
+			CompoundTag tag;
+			try (ProblemReporter.ScopedCollector problemCollector = new ProblemReporter.ScopedCollector(this.problemPath(), LOGGER))
+			{
+				TagValueOutput tagOutput = TagValueOutput.createWithContext(problemCollector, registries);
+				// think there was an old bug here where we were calling saveAdditional incorrectly
+				// (since 1.16.4 or older!)
+				// see if the tube works without this and then remove it later
+//				this.saveCustomOnly(tagOutput);
+				this.writeToUpdatePacket(tagOutput);
+				tag = tagOutput.buildResult();
+			}
+			return tag;
+		});
 	}
 	
-	protected CompoundTag makeUpdatePacketTag(HolderLookup.Provider registries)
+	protected void writeToUpdatePacket(ValueOutput output)
 	{
 		BlockState state = this.getBlockState();
 		BlockPos pos = this.getBlockPos();
 		OctahedralGroup group = state.getValue(TubeBlock.GROUP);
 		OctahedralGroup normalizer = group.inverse();
 		
-		CompoundTag compound = new CompoundTag();
-		super.saveAdditional(compound, registries); // write the basic TE stuff
-
-		ListTag invList = new ListTag();
-
-		while (!this.wrappersToSendToClient.isEmpty())
+		if (!this.wrappersToSendToClient.isEmpty())
 		{
-			// empty itemstacks are not added to the tube
-			ItemInTubeWrapper wrapper = this.wrappersToSendToClient.poll();
-			CompoundTag invTag = new CompoundTag();
-			wrapper.writeToNBT(invTag, group, registries);
-			invList.add(invTag);
-		}
-		if (!invList.isEmpty())
-		{
-			compound.put(INV_NBT_KEY_ADD, invList);
+			ValueOutputList outputList = output.childrenList(INV_NBT_KEY_ADD);
+			// empty itemstacks will not have been added to the tube
+
+			while (!this.wrappersToSendToClient.isEmpty())
+			{
+				ItemInTubeWrapper wrapper = this.wrappersToSendToClient.poll();
+				wrapper.writeToNBT(outputList.addChild(), group);
+			}
 		}
 		
 		if (this.isConnectionSyncDirty())
 		{
-			CompoundTag connectionsTag = new CompoundTag();
+			ValueOutput connectionsTag = output.child(CONNECTIONS);
 			this.remoteConnections.forEach((direction, connection) ->
 			{
-				connectionsTag.put(normalizer.rotate(direction).getName(), connection.toStorage(pos).toNBT(group));
+				connection.toStorage(pos).toNBT(
+					connectionsTag.child(normalizer.rotate(direction).getName()),
+					group);
 			});
-			compound.put(CONNECTIONS, connectionsTag);
 			this.setConnectionSyncDirty(false);
 		}
-		
-		
-		return compound;
 	}
 
-	/**
-	 * Receive packet on client and get data out of it
-	 */
-	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket packet, HolderLookup.Provider registries)
-	{
-		this.readAllNBT(packet.getTag(), registries);
-	}
+	// super.onDataPacket invokes loadAdditional
 	
 	public void setConnectionsRaw(Map<Direction, RemoteConnection> newConnections)
 	{

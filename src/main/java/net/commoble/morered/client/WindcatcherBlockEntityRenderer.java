@@ -66,7 +66,7 @@ public record WindcatcherBlockEntityRenderer(ItemRenderer itemRenderer, Map<Wind
 	}
 
 	@Override
-	public boolean shouldRenderOffScreen(GenericBlockEntity p_112306_)
+	public boolean shouldRenderOffScreen()
 	{
 		return true;
 	}

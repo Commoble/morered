@@ -1,28 +1,28 @@
 package net.commoble.morered;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
 
-import com.mojang.datafixers.util.Function3;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 
+import it.unimi.dsi.fastutil.objects.Reference2ObjectOpenHashMap;
+import net.commoble.morered.util.DelegatingValueInput;
+import net.commoble.morered.util.DelegatingValueOutput;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderLookup.Provider;
-import net.minecraft.core.HolderLookup.RegistryLookup;
 import net.minecraft.core.component.DataComponentGetter;
 import net.minecraft.core.component.DataComponentMap.Builder;
 import net.minecraft.core.component.DataComponentType;
@@ -43,6 +43,8 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.registries.DeferredHolder;
@@ -59,7 +61,7 @@ public class GenericBlockEntity extends BlockEntity
 	private final Set<DataComponentType<?>> itemDataComponents;
 	private final Set<AttachmentSerializer<?>> syncedAttachments;
 	private final Map<DataComponentType<?>, DataTransformer<?>> dataTransformers;
-	private final List<AttachmentTransformer<?>> attachmentTransformers;
+	private final Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers;
 	private final PreRemoveSideEffects preRemoveSideEffects;
 	
 	private Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
@@ -70,7 +72,7 @@ public class GenericBlockEntity extends BlockEntity
 		Set<DataComponentType<?>> itemDataComponents,
 		Set<AttachmentSerializer<?>> syncedAttachments,
 		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers,
-		List<AttachmentTransformer<?>> attachmentTransformers,
+		Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers,
 		PreRemoveSideEffects preRemoveSideEffects)
 	{
 		super(type,pos,state);
@@ -116,7 +118,7 @@ public class GenericBlockEntity extends BlockEntity
 		}
 	}
 	
-	private <T> @Nullable TypedDataComponent<T> getTypedDataForSave(DataComponentType<T> type, BlockState state, RegistryLookup.Provider registries)
+	private <T> @Nullable TypedDataComponent<T> getTypedDataForSave(DataComponentType<T> type, BlockState state)
 	{
 		@SuppressWarnings("unchecked")
 		TypedDataComponent<T> base = (TypedDataComponent<T>) this.data.get(type);
@@ -126,17 +128,17 @@ public class GenericBlockEntity extends BlockEntity
 		@Nullable DataTransformer<T> transformer = (DataTransformer<T>) this.dataTransformers.get(type);
 		return transformer == null
 			? base
-			: transformer.typedTransformOnSave(state, registries, base);
+			: transformer.typedTransformOnSave(state, base);
 	}
 	
-	private <T> @Nullable TypedDataComponent<T> getTypedDataForLoad(TypedDataComponent<T> baseData, BlockState state, RegistryLookup.Provider registries)
+	private <T> @Nullable TypedDataComponent<T> getTypedDataForLoad(TypedDataComponent<T> baseData, BlockState state)
 	{
 		DataComponentType<T> type = baseData.type();
 		@SuppressWarnings("unchecked")
 		@Nullable DataTransformer<T> transformer = (DataTransformer<T>) this.dataTransformers.get(type);
 		return transformer == null
 			? baseData
-			: new TypedDataComponent<>(type, transformer.onLoad.apply(state, registries, baseData.value()));
+			: new TypedDataComponent<>(type, transformer.onLoad.apply(state, baseData.value()));
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -169,34 +171,10 @@ public class GenericBlockEntity extends BlockEntity
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, Provider provider)
+	protected void saveAdditional(ValueOutput output)
 	{
-		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
-		if (this.attachmentTransformers.isEmpty())
-		{
-			super.saveAdditional(tag, provider);
-		}
-		else // override the superbehavior so we can transform attachment data
-		{
-			var customPersistentData = this.getPersistentData();
-			if (!customPersistentData.isEmpty())
-			{
-				tag.put("NeoForgeData", customPersistentData.copy());
-			}
-			// attachment internals are super locked down, so we have to serialize everything first
-			// then we can reserialize any transformed attachments
-			var attachmentsTag = serializeAttachments(provider);
-			if (attachmentsTag != null)
-			{
-				for (var transformer : this.attachmentTransformers)
-				{
-					transformer.serialize(this, attachmentsTag, provider, ops);
-				}
-
-				tag.put(ATTACHMENTS_NBT_KEY, attachmentsTag);
-			}
-		}
-		CompoundTag dataTag = new CompoundTag();
+		super.saveAdditional(new TransformingValueOutput(output, this)); // use delegator to finagle transformable attachments
+		ValueOutput dataTag = output.child(DATA);
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -204,33 +182,26 @@ public class GenericBlockEntity extends BlockEntity
 			// but would be nice to check anyway
 			if (codec == null)
 				continue;
-			var serializableValue = this.getTypedDataForSave(type, getBlockState(), provider);
+			var serializableValue = this.getTypedDataForSave(type, getBlockState());
 			if (serializableValue != null && serializableValue.value() != null)
 			{
-				serializableValue.encodeValue(ops)
-					.result()
-					.ifPresent(valueTag -> dataTag.put(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(serializableValue.type()).toString(), valueTag));
+				storeDataComponent(dataTag, serializableValue);
 			}
 		}
-		tag.put(DATA, dataTag);
+	}
+	
+	private static <T> void storeDataComponent(ValueOutput dataTag, TypedDataComponent<T> typedData)
+	{
+		DataComponentType<T> type = typedData.type();
+		String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
+		dataTag.store(key, type.codec(), typedData.value());
 	}
 
 	@Override
-	protected void loadAdditional(CompoundTag tag, Provider provider)
+	protected void loadAdditional(ValueInput input)
 	{
-		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
-		CompoundTag attachmentsTag = tag.getCompoundOrEmpty(ATTACHMENTS_NBT_KEY);
-		for (var transformer : this.attachmentTransformers)
-		{
-			// attachment internals are locked down super hard and I don't feel like adding more accessor mixins
-			// so, for each transformable attachment we have,
-			// we have to read it, transform it, write it back to the tag
-			// then let super.loadAdditional run over the tag again
-			transformer.denormalize(getBlockState(), attachmentsTag, provider, ops);
-		}
-		tag.put(ATTACHMENTS_NBT_KEY, attachmentsTag);
-		super.loadAdditional(tag, provider);
-		CompoundTag dataTag = tag.getCompoundOrEmpty(DATA);
+		super.loadAdditional(new TransformingValueInput(input, this)); // use delegator to finagle transformable attachments
+		ValueInput dataTag = input.childOrEmpty(DATA);
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -239,13 +210,8 @@ public class GenericBlockEntity extends BlockEntity
 			if (codec == null)
 				continue;
 			String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
-			@Nullable Tag valueTag = dataTag.get(key);
-			if (valueTag != null)
-			{
-				codec.parse(ops,valueTag)
-					.result()
-					.ifPresent(value -> this.data.put(type, this.getTypedDataForLoad(TypedDataComponent.createUnchecked(type,value), this.getBlockState(), provider)));
-			}
+			dataTag.read(key, codec)
+				.ifPresent(value -> this.data.put(type, this.getTypedDataForLoad(TypedDataComponent.createUnchecked(type,value), this.getBlockState())));
 		}
 	}
 
@@ -279,29 +245,22 @@ public class GenericBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void handleUpdateTag(CompoundTag tag, Provider provider)
+	public void handleUpdateTag(ValueInput input)
 	{
-		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
-		
-		CompoundTag dataTag = tag.getCompoundOrEmpty(DATA);
+		ValueInput dataTag = input.childOrEmpty(DATA);
 		Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 		for (DataComponentType<?> type : this.syncedDataComponents)
 		{
 			String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
-			if (dataTag.contains(key))
-			{
-				Tag valueTag = dataTag.get(key);
-				type.codec().parse(ops,valueTag)
-					.result()
-					.ifPresent(value -> data.put(type, TypedDataComponent.createUnchecked(type, value)));
-			}
+			dataTag.read(key, type.codec())
+				.ifPresent(value -> data.put(type, TypedDataComponent.createUnchecked(type, value)));
 		}
 		this.data = data;
 		
-		CompoundTag attachmentTag = tag.getCompoundOrEmpty(ATTACHMENTS);
+		ValueInput attachmentTag = input.childOrEmpty(ATTACHMENTS);
 		for (var serializer : this.syncedAttachments)
 		{
-			serializer.read(attachmentTag, this, ops);
+			serializer.read(attachmentTag);
 		}
 		
 	}
@@ -313,9 +272,9 @@ public class GenericBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, Provider lookupProvider)
+	public void onDataPacket(Connection net, ValueInput input)
 	{
-		this.handleUpdateTag(pkt.getTag(), lookupProvider);
+		this.handleUpdateTag(input);
 	}
 
 	@Override
@@ -349,21 +308,16 @@ public class GenericBlockEntity extends BlockEntity
 
 	@Override
 	@Deprecated
-	public void removeComponentsFromTag(CompoundTag tag)
+	public void removeComponentsFromTag(ValueOutput output)
 	{
-		super.removeComponentsFromTag(tag);
-		if (tag.contains(DATA))
+		super.removeComponentsFromTag(output);
+		ValueOutput dataTag = output.child(DATA);
+		for (var type : this.itemDataComponents)
 		{
-			CompoundTag dataTag = tag.getCompoundOrEmpty(DATA);
-			for (var type : this.itemDataComponents)
-			{
-				String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
-				dataTag.remove(key);
-			}
+			String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
+			dataTag.discard(key);
 		}
-	}
-	
-	
+	}	
 	
 	@Override
 	public void preRemoveSideEffects(BlockPos pos, BlockState state)
@@ -379,7 +333,7 @@ public class GenericBlockEntity extends BlockEntity
 			new HashSet<>(),
 			new HashSet<>(),
 			new HashMap<>(),
-			new ArrayList<>(),
+			new Reference2ObjectOpenHashMap<>(),
 			new MutableObject<>(PreRemoveSideEffects.NONE)
 		);
 	}
@@ -390,7 +344,7 @@ public class GenericBlockEntity extends BlockEntity
 		Set<Supplier<? extends DataComponentType<?>>> itemDataComponents,
 		Set<AttachmentSerializer<?>> syncedAttachments,
 		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers,
-		List<AttachmentTransformer<?>> attachmentTransformers,
+		Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers,
 		MutableObject<PreRemoveSideEffects> preRemoveSideEffects
 	)
 	{
@@ -449,7 +403,7 @@ public class GenericBlockEntity extends BlockEntity
 		 * @param codec Codec to use for serializing (because norge doesn't make the type's serializer public for whatever reason)
 		 * @return this
 		 */
-		public <T> GenericBlockEntityBuilder syncAttachment(Supplier<AttachmentType<T>> type, Codec<T> codec)
+		public <T> GenericBlockEntityBuilder syncAttachment(Supplier<AttachmentType<T>> type, MapCodec<T> codec)
 		{
 			this.syncedAttachments.add(new AttachmentSerializer<>(type,codec));
 			return this;
@@ -467,8 +421,8 @@ public class GenericBlockEntity extends BlockEntity
 		 */
 		public <T> GenericBlockEntityBuilder dataTransformer(
 			Supplier<DataComponentType<T>> type,
-			Function3<BlockState,HolderLookup.Provider,T,T> onSave,
-			Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+			BiFunction<BlockState,T,T> onSave,
+			BiFunction<BlockState,T,T> onLoad)
 		{
 			this.dataTransformers.put(type, new DataTransformer<>(onSave, onLoad));
 			return this;
@@ -476,11 +430,11 @@ public class GenericBlockEntity extends BlockEntity
 		
 		public <T> GenericBlockEntityBuilder transformAttachment(
 			Supplier<AttachmentType<T>> type,
-			Codec<T> codec,
-			Function3<BlockState,HolderLookup.Provider,T,T> onSave,
-			Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+			MapCodec<T> codec,
+			BiFunction<BlockState,T,T> onSave,
+			BiFunction<BlockState,T,T> onLoad)
 		{
-			this.attachmentTransformers.add(new AttachmentTransformer<>(new AttachmentSerializer<>(type,codec),onSave,onLoad));
+			this.attachmentTransformers.put(codec, new AttachmentTransformer<>(new AttachmentSerializer<>(type,codec),onSave,onLoad));
 			return this;
 		}
 		
@@ -531,88 +485,59 @@ public class GenericBlockEntity extends BlockEntity
 		}
 	}
 		
-	private static record AttachmentSerializer<T>(Supplier<AttachmentType<T>> type, Codec<T> codec)
+	private static record AttachmentSerializer<T>(Supplier<AttachmentType<T>> type, MapCodec<T> codec)
 	{
-		public void write(CompoundTag tag, IAttachmentHolder holder, RegistryOps<Tag> ops)
+		public void write(CompoundTag attachmentsTag, IAttachmentHolder holder, RegistryOps<Tag> ops)
 		{
 			AttachmentType<T> theType = this.type.get();
 			@Nullable T data = holder.getData(theType);
-			write(tag,data,ops);
-		}
-		
-		public void write(CompoundTag tag, T data, RegistryOps<Tag> ops)
-		{
-			AttachmentType<T> theType = this.type.get();
-			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
 			if (data != null)
 			{
-				this.codec.encodeStart(ops, data)
-					.result()
-					.ifPresent(dataTag -> tag.put(key, dataTag));
+				write(attachmentsTag,data,ops);
 			}
 		}
 		
-		public void read(CompoundTag tag, IAttachmentHolder holder, RegistryOps<Tag> ops)
+		public void write(CompoundTag attachmentsTag, T data, RegistryOps<Tag> ops)
 		{
 			AttachmentType<T> theType = this.type.get();
 			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
-			if (tag.contains(key))
-			{
-				Tag dataTag = tag.get(key);
-				this.codec.parse(ops, dataTag)
-					.resultOrPartial(e -> holder.removeData(type))
-					.ifPresent(data -> holder.setData(theType, data));
-			}
-			else
-			{
-				holder.removeData(theType);
-			}
+			CompoundTag child = new CompoundTag();
+			child.store(this.codec, data);
+			attachmentsTag.put(key, child);
 		}
 		
-		public Optional<T> read(CompoundTag attachmentsTag, RegistryOps<Tag> ops)
+		@SuppressWarnings("deprecation")
+		public Optional<T> read(ValueInput attachmentsTag)
 		{
 			AttachmentType<T> theType = this.type.get();
 			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
-			if (attachmentsTag.contains(key))
-			{
-				Tag dataTag = attachmentsTag.get(key);
-				return this.codec.parse(ops, dataTag).result();
-			}
-			else
-			{
-				return Optional.empty();
-			}
+			return attachmentsTag.child(key).flatMap(child -> child.read(this.codec));
 		}
 	}
 	
 	private static record DataTransformer<T>(
-		Function3<BlockState,HolderLookup.Provider,T,T> onSave,
-		Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+		BiFunction<BlockState,T,T> onSave,
+		BiFunction<BlockState,T,T> onLoad)
 	{
-		public TypedDataComponent<T> typedTransformOnSave(BlockState state, HolderLookup.Provider registries, TypedDataComponent<T> typedData)
+		public TypedDataComponent<T> typedTransformOnSave(BlockState state, TypedDataComponent<T> typedData)
 		{
-			return new TypedDataComponent<>(typedData.type(), this.onSave.apply(state, registries, typedData.value()));
+			return new TypedDataComponent<>(typedData.type(), this.onSave.apply(state, typedData.value()));
 		}
 	}
 	
 	private static record AttachmentTransformer<T>(
 		AttachmentSerializer<T> serializer,
-		Function3<BlockState,HolderLookup.Provider,T,T> onSave,
-		Function3<BlockState,HolderLookup.Provider,T,T> onLoad)
+		BiFunction<BlockState,T,T> onSave,
+		BiFunction<BlockState,T,T> onLoad)
 	{
-		public void serialize(GenericBlockEntity be, CompoundTag attachmentsTag, HolderLookup.Provider provider, RegistryOps<Tag> ops)
+		public T normalize(BlockEntity be, T denormalizedData)
 		{
-			T denormalizedData = be.getData(this.serializer.type.get());
-			T normalizedData = this.onSave.apply(be.getBlockState(), provider, denormalizedData);
-			this.serializer.write(attachmentsTag, normalizedData, ops);
+			return this.onSave.apply(be.getBlockState(), denormalizedData);
 		}
 		
-		public void denormalize(BlockState state, CompoundTag attachmentsTag, HolderLookup.Provider provider, RegistryOps<Tag> ops)
+		public T denormalize(BlockEntity be, T normalizedData)
 		{
-			this.serializer.read(attachmentsTag, ops).ifPresent(normalizedData -> {
-				T denormalizedData = this.onLoad.apply(state, provider, normalizedData);
-				this.serializer.write(attachmentsTag, denormalizedData, ops);
-			});
+			return this.onLoad.apply(be.getBlockState(), normalizedData);
 		}
 	}
 	
@@ -621,5 +546,47 @@ public class GenericBlockEntity extends BlockEntity
 	{
 		public static final PreRemoveSideEffects NONE = (pos,newState,be) -> {};
 		public abstract void apply(BlockPos pos, BlockState newState, GenericBlockEntity be);
+	}
+	
+	private static record TransformingValueOutput(ValueOutput delegate, GenericBlockEntity be) implements DelegatingValueOutput
+	{
+		@Deprecated
+		@Override
+		public <T> void store(MapCodec<T> codec, T value)
+		{
+			var transformer = be.attachmentTransformers.get(codec);
+			if (transformer == null) // don't transform data
+			{
+				delegate.store(codec, value);
+			}
+			else // transform data
+			{
+				@SuppressWarnings("unchecked")
+				AttachmentTransformer<T> castTransformer = (AttachmentTransformer<T>)transformer;
+				T normalizedValue = castTransformer.normalize(be, value);
+				delegate.store(codec, normalizedValue);
+			}
+		}
+	}
+	
+	private static record TransformingValueInput(ValueInput delegate, GenericBlockEntity be) implements DelegatingValueInput
+	{
+		@Override
+		@Deprecated
+		public <T> Optional<T> read(MapCodec<T> codec)
+		{
+			var transformer = be.attachmentTransformers.get(codec);
+			Optional<T> readValue = delegate.read(codec);
+			if (transformer == null) // don't transform data
+			{
+				return readValue;
+			}
+			else // transform data
+			{
+				@SuppressWarnings("unchecked")
+				AttachmentTransformer<T> castTransformer = (AttachmentTransformer<T>)transformer;
+				return readValue.map(normalizedValue -> castTransformer.denormalize(be, normalizedValue));
+			}
+		}
 	}
 }

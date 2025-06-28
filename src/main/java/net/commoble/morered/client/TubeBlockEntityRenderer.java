@@ -389,7 +389,7 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 	}
 
 	@Override
-	public boolean shouldRenderOffScreen(TubeBlockEntity te)
+	public boolean shouldRenderOffScreen()
 	{
 		return true;
 	}

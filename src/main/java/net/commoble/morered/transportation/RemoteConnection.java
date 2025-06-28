@@ -6,7 +6,8 @@ import net.commoble.morered.util.NestedBoundingBox;
 import net.commoble.morered.util.PosHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
@@ -76,35 +77,33 @@ public class RemoteConnection
 		
 		/**
 		 * Reads from nbt, denormalizing position and side
-		 * @param nbt CompoundTag being read
+		 * @param nbt ValueInput being read
 		 * @param group OctahedralGroup of the tube being loaded, the tube's rotation from e.g. a structure piece.
 		 * Must rotate directions and blockspos to "denormalize" them.
 		 * @return Storage
 		 */
-		public static Storage fromNBT(CompoundTag nbt, OctahedralGroup group)
+		public static Storage fromNBT(ValueInput input, OctahedralGroup group)
 		{
-			Direction toSide = group.rotate(Direction.byName(nbt.getStringOr("toSide", "")));
+			Direction toSide = group.rotate(Direction.byName(input.getStringOr("toSide", "")));
 			if (toSide == null)
 				toSide = Direction.NORTH;
-			BlockPos toPos = PosHelper.transform(nbt.read("toPos", BlockPos.CODEC).orElse(BlockPos.ZERO), group);
-			boolean isPrimary = nbt.getBooleanOr("isPrimary", false);
+			BlockPos toPos = PosHelper.transform(input.read("toPos", BlockPos.CODEC).orElse(BlockPos.ZERO), group);
+			boolean isPrimary = input.getBooleanOr("isPrimary", false);
 			return new Storage(toSide, toPos, isPrimary);
 		}
 		
 		/**
 		 * Normalizes position and side and writes to nbt
+		 * @param output ValueOutput written to
 		 * @param group OctahedralGroup representing the orientation of the tube.
 		 * The inverse of this will apply to position and side.
-		 * @return
 		 */
-		public CompoundTag toNBT(OctahedralGroup group)
+		public void toNBT(ValueOutput output, OctahedralGroup group)
 		{
 			OctahedralGroup normalizer = group.inverse();
-			CompoundTag nbt = new CompoundTag();
-			nbt.putString("toSide", normalizer.rotate(this.toSide).getName());
-			nbt.store("toPos", BlockPos.CODEC, PosHelper.transform(this.toPos, normalizer));
-			nbt.putBoolean("isPrimary", this.isPrimary);
-			return nbt;
+			output.putString("toSide", normalizer.rotate(this.toSide).getName());
+			output.store("toPos", BlockPos.CODEC, PosHelper.transform(this.toPos, normalizer));
+			output.putBoolean("isPrimary", this.isPrimary);
 		}
 	}
 }

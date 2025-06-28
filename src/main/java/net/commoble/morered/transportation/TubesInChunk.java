@@ -1,12 +1,8 @@
 package net.commoble.morered.transportation;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
-
-import com.mojang.serialization.Codec;
-import com.mojang.serialization.MapCodec;
 
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.client.ClientProxy;
@@ -19,14 +15,7 @@ import net.minecraft.world.level.chunk.status.ChunkStatus;
 import net.neoforged.neoforge.network.PacketDistributor;
 
 public class TubesInChunk
-{
-	/** This codec serializes a list-like element **/
-	public static final Codec<Set<BlockPos>> TUBE_SET_CODEC = BlockPos.CODEC.listOf().xmap(HashSet::new, ArrayList::new);
-	/** half-codec that can be used in other places **/
-	public static final MapCodec<Set<BlockPos>> FIELD_CODEC = TUBE_SET_CODEC.fieldOf("positions");
-	/** This codec serializes a maplike element, its results can be cast to CompoundNBT**/
-	public static final Codec<Set<BlockPos>> CODEC = FIELD_CODEC.codec();
-	
+{	
 	public static void updateTubeSet(ServerLevel level, BlockPos pos, BiConsumer<Set<BlockPos>, BlockPos> consumer)
 	{
 		LevelChunk chunk = level.getChunkAt(pos);

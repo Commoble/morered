@@ -7,7 +7,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -15,6 +14,8 @@ import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class FilterBlockEntity extends AbstractFilterBlockEntity
@@ -80,34 +81,24 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	////// NBT and syncing
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
-		if (!this.filterStack.isEmpty())
-		{
-			Tag inventory = this.filterStack.save(registries);
-			compound.put(INV_KEY, inventory);
-		}
+		super.saveAdditional(output);
+		output.store(INV_KEY, ItemStack.OPTIONAL_CODEC, this.filterStack);
 	}
 	
 	@Override
 	/** read **/
-	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		CompoundTag inventory = compound.getCompoundOrEmpty(INV_KEY);
-		this.filterStack = ItemStack.parse(registries, inventory).orElse(ItemStack.EMPTY);
+		super.loadAdditional(input);
+		this.filterStack = input.read(INV_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
 	}
 	
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag tag = super.getUpdateTag(registries);
-		Tag inventory = this.filterStack.isEmpty()
-			? new CompoundTag()
-			: filterStack.save(registries);
-		tag.put(INV_KEY, inventory);
-		return tag;
+		return this.saveCustomOnly(registries);
 	}
 
 	@Override

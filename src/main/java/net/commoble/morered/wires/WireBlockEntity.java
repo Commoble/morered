@@ -15,7 +15,6 @@ import net.commoble.morered.util.DirectionHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
@@ -25,6 +24,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.model.data.ModelData;
 
 public class WireBlockEntity extends BlockEntity
@@ -62,9 +63,9 @@ public class WireBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
+		super.saveAdditional(output);
 		// normalize connection flags
 		long newConnections = 0L;
 		if (this.connections != 0)
@@ -72,14 +73,14 @@ public class WireBlockEntity extends BlockEntity
 			OctahedralGroup normalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM).inverse();
 			newConnections = transformConnectionFlags(this.connections, normalizer);
 		}
-		compound.putLong(CONNECTIONS, newConnections);
+		output.putLong(CONNECTIONS, newConnections);
 	}
 	
 	@Override
-	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		long normalizedConnections = compound.getLongOr(CONNECTIONS,0L);
+		super.loadAdditional(input);
+		long normalizedConnections = input.getLongOr(CONNECTIONS,0L);
 		long newConnections = 0L;
 		if (normalizedConnections != 0L)
 		{
@@ -90,13 +91,11 @@ public class WireBlockEntity extends BlockEntity
 	}
 
 	// called on server to get the data to send to clients when chunk is loaded for client
-	// defaults to this.writeInternal()
+	// defaults to empty tag, so even if we just want to invoke saveAdditional we have to do that ourselves
 	@Override
 	public CompoundTag getUpdateTag(HolderLookup.Provider registries)
 	{
-		CompoundTag compound = super.getUpdateTag(registries); // empty tag
-		this.saveAdditional(compound, registries);
-		return compound;
+		return this.saveCustomOnly(registries); // invokes saveAdditional
 	}
 
 	// called on server when world.notifyBlockUpdate is invoked at this TE's position
@@ -108,9 +107,9 @@ public class WireBlockEntity extends BlockEntity
 	}
 
 	@Override
-	public void handleUpdateTag(CompoundTag tag, Provider lookupProvider)
+	public void handleUpdateTag(ValueInput input)
 	{
-		super.handleUpdateTag(tag, lookupProvider);
+		super.handleUpdateTag(input);
 		this.requestModelDataUpdate();
 		BlockState state = this.getBlockState();
 		this.level.sendBlockUpdated(this.worldPosition, state, state, 8);
@@ -118,10 +117,10 @@ public class WireBlockEntity extends BlockEntity
 
 	// called on client to read the packet sent by getUpdatePacket
 	@Override
-	public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt, HolderLookup.Provider registries)
+	public void onDataPacket(Connection net, ValueInput input)
 	{
 		long oldConnections = this.connections;
-		super.onDataPacket(net, pkt, registries);	// calls load()
+		super.onDataPacket(net, input);	// calls load()
 		BlockState state = this.getBlockState();
 		if (oldConnections != this.connections)
 		{

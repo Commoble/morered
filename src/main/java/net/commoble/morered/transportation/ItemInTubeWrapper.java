@@ -7,10 +7,9 @@ import com.mojang.math.OctahedralGroup;
 
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.IntArrayTag;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 /** Wrapper for the itemstacks being routed for the tubes
  * Tracks an itemstack as well as which tubes the stack has been through
@@ -57,13 +56,13 @@ public class ItemInTubeWrapper
 		}
 	}
 	
-	public static ItemInTubeWrapper readFromNBT(CompoundTag compound, OctahedralGroup group, HolderLookup.Provider registries)
+	public static ItemInTubeWrapper readFromNBT(ValueInput input, OctahedralGroup group)
 	{
-		ItemStack stack = ItemStack.parse(registries, compound.getCompoundOrEmpty(ITEM)).orElse(ItemStack.EMPTY);
-		int[] moveBuffer = compound.getIntArray(MOVES_REMAINING_TAG).orElse(new int[0]);
-		int ticksElapsed = compound.getIntOr(TICKS_REMAINING_TAG, 0);
-		int maxDuration = compound.getIntOr(TICKS_DURATION_TAG, 10);
-		boolean isFreshlyInserted = compound.getBooleanOr(IS_FRESHLY_INSERTED, false);
+		ItemStack stack = input.read(ITEM, ItemStack.CODEC).orElse(ItemStack.EMPTY);
+		int[] moveBuffer = input.getIntArray(MOVES_REMAINING_TAG).orElse(new int[0]);
+		int ticksElapsed = input.getIntOr(TICKS_REMAINING_TAG, 0);
+		int maxDuration = input.getIntOr(TICKS_DURATION_TAG, 10);
+		boolean isFreshlyInserted = input.getBooleanOr(IS_FRESHLY_INSERTED, false);
 
 		ItemInTubeWrapper wrapper = new ItemInTubeWrapper(stack, decompressMoveList(moveBuffer, group), maxDuration);
 		wrapper.ticksElapsed = ticksElapsed;
@@ -71,15 +70,13 @@ public class ItemInTubeWrapper
 		return wrapper;
 	}
 	
-	public CompoundTag writeToNBT(CompoundTag compound, OctahedralGroup group, HolderLookup.Provider registries)
+	public void writeToNBT(ValueOutput output, OctahedralGroup group)
 	{
-		compound.put(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves, group));
-		compound.putInt(TICKS_REMAINING_TAG, this.ticksElapsed);
-		compound.putInt(TICKS_DURATION_TAG, this.maximumDurationInTube);
-		compound.putBoolean(IS_FRESHLY_INSERTED, this.freshlyInserted);
-		compound.put(ITEM, this.stack.save(registries, compound));
-		
-		return compound;
+		output.putIntArray(MOVES_REMAINING_TAG, compressMoveList(this.remainingMoves, group));
+		output.putInt(TICKS_REMAINING_TAG, this.ticksElapsed);
+		output.putInt(TICKS_DURATION_TAG, this.maximumDurationInTube);
+		output.putBoolean(IS_FRESHLY_INSERTED, this.freshlyInserted);
+		output.store(ITEM, ItemStack.CODEC, this.stack);
 	}
 	
 	// compress the move list into an intarray NBT
@@ -87,10 +84,10 @@ public class ItemInTubeWrapper
 	// i.e. consisting of pairs of Direction indexes and how many times to move in that direction
 	// group is the orientation of the tube (which may have been rotated by a structure piece or similar)
 	// we need to "normalize" the moves to an unrotated state
-	public static IntArrayTag compressMoveList(Queue<Direction> moves, OctahedralGroup group)
+	public static int[] compressMoveList(Queue<Direction> moves, OctahedralGroup group)
 	{
 		if (moves == null || moves.isEmpty())
-			return new IntArrayTag(new int[0]);
+			return new int[0];
 		
 		OctahedralGroup normalizer = group.inverse();
 		int moveIndex = 0;
@@ -114,9 +111,7 @@ public class ItemInTubeWrapper
 			}
 		}
 		
-		IntArrayTag nbt = new IntArrayTag(buffer.toIntArray());
-
-		return nbt;
+		return buffer.toIntArray();
 	}
 	
 	// group is the orientation of the tube (if it's been rotated by structures etc)

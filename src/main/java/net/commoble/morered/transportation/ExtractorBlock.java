@@ -14,7 +14,6 @@ import net.commoble.morered.util.BlockStateUtil;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
@@ -181,7 +180,7 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 		}
 	}
 	
-	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> runtimeData)
+	public static Map<NodeShape,MechanicalState> normalizeMachine(BlockState state, Map<NodeShape,MechanicalState> runtimeData)
 	{
 		// let the default state point to down (attachment direction) and north+south (the axles)
 		// the input direction (which has to spin) is the opposite of the attachment direction (so it faces up)
@@ -205,7 +204,7 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 		return result;
 	}
 	
-	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, HolderLookup.Provider provider, Map<NodeShape,MechanicalState> diskData)
+	public static Map<NodeShape,MechanicalState> denormalizeMachine(BlockState state, Map<NodeShape,MechanicalState> diskData)
 	{
 		Map<NodeShape,MechanicalState> result = new HashMap<>();
 		MechanicalState inputState = diskData.getOrDefault(NodeShape.ofSide(Direction.UP), MechanicalState.ZERO);

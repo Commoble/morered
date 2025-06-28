@@ -14,13 +14,13 @@ import net.commoble.morered.plate_blocks.PlateBlockStateProperties;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup.Provider;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 {
@@ -106,19 +106,19 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
-		compound.putInt(CLOCKWISE_INPUT, this.clockwiseInput);
-		compound.putInt(COUNTERCLOCKWISE_INPUT, this.counterClockwiseInput);
+		super.saveAdditional(output);
+		output.putInt(CLOCKWISE_INPUT, this.clockwiseInput);
+		output.putInt(COUNTERCLOCKWISE_INPUT, this.counterClockwiseInput);
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag compound, Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		this.clockwiseInput = compound.getIntOr(CLOCKWISE_INPUT,0);
-		this.counterClockwiseInput = compound.getIntOr(COUNTERCLOCKWISE_INPUT,0);
+		super.loadAdditional(input);
+		this.clockwiseInput = input.getIntOr(CLOCKWISE_INPUT,0);
+		this.counterClockwiseInput = input.getIntOr(COUNTERCLOCKWISE_INPUT,0);
 	}
 
 	@Override

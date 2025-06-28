@@ -5,10 +5,10 @@ import com.mojang.math.OctahedralGroup;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 
 public class PoweredWireBlockEntity extends WireBlockEntity
 {
@@ -96,9 +96,9 @@ public class PoweredWireBlockEntity extends WireBlockEntity
 	}
 
 	@Override
-	public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(compound, registries);
+		super.saveAdditional(output);
 		// normalize power array based on structure transform
 		int[] normalizedPower = new int[6];
 		OctahedralGroup normalizer = this.getBlockState().getValue(AbstractWireBlock.TRANSFORM).inverse();
@@ -108,14 +108,14 @@ public class PoweredWireBlockEntity extends WireBlockEntity
 			int normalizedIndex = normalizer.rotate(Direction.from3DDataValue(i)).ordinal();
 			normalizedPower[normalizedIndex] = sidedPower;
 		}
-		compound.putIntArray(POWER, normalizedPower);
+		output.putIntArray(POWER, normalizedPower);
 	}
 	
 	@Override
-	public void loadAdditional(CompoundTag compound, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(compound, registries);
-		compound.getIntArray(POWER).ifPresent(normalizedPower -> {
+		super.loadAdditional(input);
+		input.getIntArray(POWER).ifPresent(normalizedPower -> {
 			if (normalizedPower.length == 6)
 			{
 				// denormalize power array based on structure transform

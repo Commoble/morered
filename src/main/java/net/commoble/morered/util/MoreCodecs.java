@@ -1,11 +1,15 @@
 package net.commoble.morered.util;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
 import io.netty.buffer.ByteBuf;
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.codec.ByteBufCodecs;
@@ -15,6 +19,8 @@ import net.minecraft.world.phys.Vec3;
 
 public class MoreCodecs
 {
+	public static final Codec<Set<BlockPos>> POSITIONS_CODEC = BlockPos.CODEC.listOf().xmap(HashSet::new, ArrayList::new);
+	public static final MapCodec<Set<BlockPos>> POSITIONS_MAP_CODEC = POSITIONS_CODEC.fieldOf("positions");
 	public static final StreamCodec<ByteBuf,Vec3> VEC3_STREAM_CODEC = StreamCodec.composite(
 		ByteBufCodecs.DOUBLE, Vec3::x,
 		ByteBufCodecs.DOUBLE, Vec3::y,

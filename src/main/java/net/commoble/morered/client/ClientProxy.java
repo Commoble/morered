@@ -38,7 +38,7 @@ import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
@@ -196,16 +196,16 @@ public class ClientProxy
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		// render layer setting is synchronized, safe to do during multithreading
-		MoreRed.get().logicPlates.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
+		MoreRed.get().logicPlates.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
 		MoreRed.get().bitwiseLogicPlates.values()
-			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), RenderType.cutout()));
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().alternatorBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().latchBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), RenderType.cutout());
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), RenderType.cutout());
+			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().alternatorBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().latchBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), ChunkSectionLayer.CUTOUT);
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)

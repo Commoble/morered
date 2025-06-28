@@ -5,13 +5,13 @@ import org.jetbrains.annotations.Nullable;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
@@ -68,16 +68,16 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 	}
 
 	@Override
-	public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		super.loadAdditional(tag, registries);
-		this.inventory.deserializeNBT(registries, tag.getCompoundOrEmpty(INV_KEY));
+		super.loadAdditional(input);
+		input.child(INV_KEY).ifPresent(this.inventory::deserialize);
 	}
 
 	@Override
-	protected void saveAdditional(CompoundTag tag, HolderLookup.Provider registries)
+	protected void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(tag, registries);
-		tag.put(INV_KEY, this.inventory.serializeNBT(registries));
+		super.saveAdditional(output);
+		this.inventory.serialize(output.child(INV_KEY));
 	}
 }

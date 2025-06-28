@@ -7,11 +7,11 @@ import javax.annotation.Nullable;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.ValueInput;
+import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.items.IItemHandler;
 
 public class DistributorBlockEntity extends BlockEntity
@@ -42,24 +42,24 @@ public class DistributorBlockEntity extends BlockEntity
 	}
 	
 	@Override
-	public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries)
+	public void saveAdditional(ValueOutput output)
 	{
-		super.saveAdditional(nbt, registries);
-		nbt.putIntArray(NEXT_DIRECTIONS, IntStream.range(0, 6)
+		super.saveAdditional(output);
+		output.putIntArray(NEXT_DIRECTIONS, IntStream.range(0, 6)
 			.map(i-> this.handlers[i].getNextDirectionIndex())
 			.toArray());
 	}
 	
 	@Override
-	public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries)
+	public void loadAdditional(ValueInput input)
 	{
-		nbt.getIntArray(NEXT_DIRECTIONS).ifPresent(directionIndices -> {
+		input.getIntArray(NEXT_DIRECTIONS).ifPresent(directionIndices -> {
 			int maxSize = Math.min(this.handlers.length, directionIndices.length);
 			for (int i=0; i<maxSize; i++)
 			{
 				this.handlers[i].setNextDirectionIndex(directionIndices[i]);
 			}
 		});
-		super.loadAdditional(nbt, registries);
+		super.loadAdditional(input);
 	}
 }

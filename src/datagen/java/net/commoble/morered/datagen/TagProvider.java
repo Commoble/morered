@@ -8,7 +8,8 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.TagsProvider;
+import net.minecraft.data.tags.KeyTagProvider;
+import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagBuilder;
@@ -19,7 +20,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 /**
  * Better TagsProvider that allows other things to add tags to it
  */
-public class TagProvider<T> extends TagsProvider<T>
+public class TagProvider<T> extends KeyTagProvider<T>
 {	
 	// mojang clears the map for some reason so we have to maintain our own
 	protected final Map<ResourceLocation, TagBuilder> subclassBuilders = Maps.newLinkedHashMap();
@@ -38,7 +39,7 @@ public class TagProvider<T> extends TagsProvider<T>
       return this.subclassBuilders.computeIfAbsent(tagKey.location(), (key) -> TagBuilder.create());
    }
 	
-	public TagAppender<T> tag(TagKey<T> tagKey)
+	public TagAppender<ResourceKey<T>, T> tag(TagKey<T> tagKey)
 	{
 		return super.tag(tagKey);
 	}
