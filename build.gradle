@@ -3,7 +3,7 @@ plugins {
 	id 'eclipse'
 	id 'idea'
 	id 'maven-publish'
-	id 'net.neoforged.moddev' version '1.0.+'
+	id 'net.neoforged.moddev' version '2.0.+'
 	id "org.moddedmc.wiki.toolkit" version "0.2.7"
 }
 
@@ -33,7 +33,8 @@ sourceSets
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 neoForge {
-	version = "${neo_version}"
+	//version = "${neo_version}"
+	version = "21.8.15"
 	mods {
 		"${modid}" {
 			sourceSet(sourceSets.main)
@@ -80,10 +81,10 @@ configurations {
 dependencies {
 	jarJar(implementation("net.commoble.exmachina:exmachina-${exmachina_mc_version}:${exmachina_version}"))
 
-	//compileOnly "mezz.jei:jei-${mc_version}-common-api:${jei_version}"
-	//compileOnly "mezz.jei:jei-${mc_version}-neoforge-api:${jei_version}"
+	compileOnly "mezz.jei:jei-${jei_mc_version}-common-api:${jei_version}"
+	compileOnly "mezz.jei:jei-${jei_mc_version}-neoforge-api:${jei_version}"
 	// at runtime, use the full JEI jar for NeoForge
-	//localRuntime "mezz.jei:jei-${mc_version}-neoforge:${jei_version}"
+	localRuntime "mezz.jei:jei-${jei_mc_version}-neoforge:${jei_version}"
 	
 	//compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
 	//localRuntime "dev.emi:emi-neoforge:${emi_version}"

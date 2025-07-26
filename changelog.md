@@ -1,6 +1,6 @@
-# 1.21.5-8.0.0.0
-* Updated to 1.21.5
-* Updated to use exmachina 0.11.0.0-beta
+# 1.21.8-8.0.0.0
+* Updated to 1.21.8
+* Updated to use exmachina 0.13.0.2-beta
 * Added new mechanical blocks:
   * Axles transfer mechanical power
   * Clutches transfer mechanical power but only while powered by redstone. Pliers can be used to rotate them after placing.

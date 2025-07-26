@@ -85,7 +85,6 @@ import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class ClientProxy
 {
@@ -147,7 +146,7 @@ public class ClientProxy
 	{
 		// mark the capability on the client and send a packet to the server to do the same
 		isHoldingSprint = isSprinting;
-		PacketDistributor.sendToServer(new IsWasSprintPacket(isSprinting));
+		Minecraft.getInstance().getConnection().send(new IsWasSprintPacket(isSprinting));
 	}
 	
 	public static void updateTubesInChunk(ChunkPos pos, Set<BlockPos> tubes)

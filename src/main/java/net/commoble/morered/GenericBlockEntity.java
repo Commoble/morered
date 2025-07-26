@@ -46,10 +46,8 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.attachment.AttachmentType;
-import net.neoforged.neoforge.attachment.IAttachmentHolder;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.neoforged.neoforge.registries.NeoForgeRegistries;
 
 public class GenericBlockEntity extends BlockEntity
 {
@@ -59,7 +57,6 @@ public class GenericBlockEntity extends BlockEntity
 	private final Set<DataComponentType<?>> serverDataComponents;
 	private final Set<DataComponentType<?>> syncedDataComponents;
 	private final Set<DataComponentType<?>> itemDataComponents;
-	private final Set<AttachmentSerializer<?>> syncedAttachments;
 	private final Map<DataComponentType<?>, DataTransformer<?>> dataTransformers;
 	private final Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers;
 	private final PreRemoveSideEffects preRemoveSideEffects;
@@ -70,7 +67,6 @@ public class GenericBlockEntity extends BlockEntity
 		Set<DataComponentType<?>> serverDataComponents,
 		Set<DataComponentType<?>> syncedDataComponents,
 		Set<DataComponentType<?>> itemDataComponents,
-		Set<AttachmentSerializer<?>> syncedAttachments,
 		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers,
 		Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers,
 		PreRemoveSideEffects preRemoveSideEffects)
@@ -79,7 +75,6 @@ public class GenericBlockEntity extends BlockEntity
 		this.serverDataComponents = serverDataComponents;
 		this.syncedDataComponents = syncedDataComponents;
 		this.itemDataComponents = itemDataComponents;
-		this.syncedAttachments = syncedAttachments;
 		this.dataTransformers = dataTransformers;
 		this.attachmentTransformers = attachmentTransformers;
 		this.preRemoveSideEffects = preRemoveSideEffects;
@@ -164,10 +159,6 @@ public class GenericBlockEntity extends BlockEntity
 	public void setChanged()
 	{
 		super.setChanged();
-		if (!this.syncedAttachments.isEmpty())
-		{
-			this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 0);
-		}
 	}
 
 	@Override
@@ -234,13 +225,6 @@ public class GenericBlockEntity extends BlockEntity
 		}
 		tag.put(DATA, dataTag);
 		
-		CompoundTag attachmentsTag = new CompoundTag();
-		for (AttachmentSerializer<?> serializer : this.syncedAttachments)
-		{
-			serializer.write(attachmentsTag, this, ops);
-		}
-		tag.put(ATTACHMENTS, attachmentsTag);
-		
 		return tag;
 	}
 
@@ -255,14 +239,7 @@ public class GenericBlockEntity extends BlockEntity
 			dataTag.read(key, type.codec())
 				.ifPresent(value -> data.put(type, TypedDataComponent.createUnchecked(type, value)));
 		}
-		this.data = data;
-		
-		ValueInput attachmentTag = input.childOrEmpty(ATTACHMENTS);
-		for (var serializer : this.syncedAttachments)
-		{
-			serializer.read(attachmentTag);
-		}
-		
+		this.data = data;		
 	}
 
 	@Override
@@ -331,7 +308,6 @@ public class GenericBlockEntity extends BlockEntity
 			new HashSet<>(),
 			new HashSet<>(),
 			new HashSet<>(),
-			new HashSet<>(),
 			new HashMap<>(),
 			new Reference2ObjectOpenHashMap<>(),
 			new MutableObject<>(PreRemoveSideEffects.NONE)
@@ -342,7 +318,6 @@ public class GenericBlockEntity extends BlockEntity
 		Set<Supplier<? extends DataComponentType<?>>> serverDataComponents,
 		Set<Supplier<? extends DataComponentType<?>>> syncedDataComponents,
 		Set<Supplier<? extends DataComponentType<?>>> itemDataComponents,
-		Set<AttachmentSerializer<?>> syncedAttachments,
 		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers,
 		Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers,
 		MutableObject<PreRemoveSideEffects> preRemoveSideEffects
@@ -397,19 +372,6 @@ public class GenericBlockEntity extends BlockEntity
 		}
 		
 		/**
-		 * Specifies a synced data attachment. Any specified data attachments present on the blockentity when synced will be sent to the client.
-		 * @param <T> data type
-		 * @param type AttachmentType
-		 * @param codec Codec to use for serializing (because norge doesn't make the type's serializer public for whatever reason)
-		 * @return this
-		 */
-		public <T> GenericBlockEntityBuilder syncAttachment(Supplier<AttachmentType<T>> type, MapCodec<T> codec)
-		{
-			this.syncedAttachments.add(new AttachmentSerializer<>(type,codec));
-			return this;
-		}
-		
-		/**
 		 * Registers a data transformer used for altering data on save/load.
 		 * Used for e.g. rotating/mirroring data in structures.
 		 * Only applies on serverside save load, does not affect synced data
@@ -434,7 +396,7 @@ public class GenericBlockEntity extends BlockEntity
 			BiFunction<BlockState,T,T> onSave,
 			BiFunction<BlockState,T,T> onLoad)
 		{
-			this.attachmentTransformers.put(codec, new AttachmentTransformer<>(new AttachmentSerializer<>(type,codec),onSave,onLoad));
+			this.attachmentTransformers.put(codec, new AttachmentTransformer<>(onSave,onLoad));
 			return this;
 		}
 		
@@ -473,7 +435,6 @@ public class GenericBlockEntity extends BlockEntity
 							serverDataComponents.stream().map(Supplier::get).filter(type -> !type.isTransient() && type.codec() != null).collect(Collectors.toSet()),
 							syncedDataComponents.stream().map(Supplier::get).filter(type -> type.codec() != null).collect(Collectors.toSet()),
 							itemDataComponents.stream().map(Supplier::get).collect(Collectors.toSet()),
-							syncedAttachments,
 							dataTransformers.entrySet().stream().collect(Collectors.toMap(
 								entry -> entry.getKey().get(),
 								Map.Entry::getValue)),
@@ -482,36 +443,6 @@ public class GenericBlockEntity extends BlockEntity
 						Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new))
 				);
 			return holder;
-		}
-	}
-		
-	private static record AttachmentSerializer<T>(Supplier<AttachmentType<T>> type, MapCodec<T> codec)
-	{
-		public void write(CompoundTag attachmentsTag, IAttachmentHolder holder, RegistryOps<Tag> ops)
-		{
-			AttachmentType<T> theType = this.type.get();
-			@Nullable T data = holder.getData(theType);
-			if (data != null)
-			{
-				write(attachmentsTag,data,ops);
-			}
-		}
-		
-		public void write(CompoundTag attachmentsTag, T data, RegistryOps<Tag> ops)
-		{
-			AttachmentType<T> theType = this.type.get();
-			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
-			CompoundTag child = new CompoundTag();
-			child.store(this.codec, data);
-			attachmentsTag.put(key, child);
-		}
-		
-		@SuppressWarnings("deprecation")
-		public Optional<T> read(ValueInput attachmentsTag)
-		{
-			AttachmentType<T> theType = this.type.get();
-			String key = NeoForgeRegistries.ATTACHMENT_TYPES.getKey(theType).toString();
-			return attachmentsTag.child(key).flatMap(child -> child.read(this.codec));
 		}
 	}
 	
@@ -526,7 +457,6 @@ public class GenericBlockEntity extends BlockEntity
 	}
 	
 	private static record AttachmentTransformer<T>(
-		AttachmentSerializer<T> serializer,
 		BiFunction<BlockState,T,T> onSave,
 		BiFunction<BlockState,T,T> onLoad)
 	{

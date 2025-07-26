@@ -614,7 +614,6 @@ public class MoreRed
 			);
 		
 		alternatorBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.ALTERNATOR, this.alternatorBlock);
 		wirePostBeType = blockEntityTypes.register(Names.WIRE_POST,
@@ -678,7 +677,6 @@ public class MoreRed
 		this.redstoneTubeEntity = blockEntityTypes.register(Names.REDSTONE_TUBE,
 			() -> new BlockEntityType<>(RedstoneTubeBlockEntity::new, redstoneTubeBlock.get()));
 		this.extractorEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, ExtractorBlock::normalizeMachine, ExtractorBlock::denormalizeMachine)
 			.register(blockEntityTypes, Names.EXTRACTOR, this.extractorBlock);
 		this.filterEntity = blockEntityTypes.register(Names.FILTER,
@@ -690,29 +688,23 @@ public class MoreRed
 		this.distributorEntity = blockEntityTypes.register(Names.DISTRIBUTOR,
 			() -> new BlockEntityType<>(DistributorBlockEntity::new, distributorBlock.get()));
 		this.axleBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values());
 		this.gearBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.GEAR, this.gearBlocks.values());
 		this.gearsBlockEntity = GenericBlockEntity.builder()
 			.syncedData(this.gearsDataComponent)
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.dataTransformer(this.gearsDataComponent, GearsBlock::normalizeGears, GearsBlock::denormalizeGears)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEARS, this.gearsBlock);
 		this.gearshifterBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
 			.register(blockEntityTypes, Names.GEARSHIFTER, this.gearshifterBlocks.values());
 		this.clutchBlockEntity = GenericBlockEntity.builder()
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
 			.register(blockEntityTypes, Names.CLUTCH, this.clutchBlocks.values());
 		this.windcatcherBlockEntity = GenericBlockEntity.builder()
 			.itemData(windcatcherColorsDataComponent)
-			.syncAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC)
 			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
 
 		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,
@@ -807,7 +799,7 @@ public class MoreRed
 	
 	private void onRegisterPackets(RegisterPayloadHandlersEvent event)
 	{
-		PayloadRegistrar r = event.registrar("6.0.0");
+		PayloadRegistrar r = event.registrar("8.0.0");
 		r.playToClient(SolderingRecipesPacket.TYPE, SolderingRecipesPacket.STREAM_CODEC, SolderingRecipesPacket::handle);
 		r.playToServer(SolderingRecipeButtonPacket.TYPE, SolderingRecipeButtonPacket.STREAM_CODEC, SolderingRecipeButtonPacket::handle);
 		r.playToClient(WireBreakPacket.TYPE, WireBreakPacket.STREAM_CODEC, WireBreakPacket::handle);

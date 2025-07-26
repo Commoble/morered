@@ -27,7 +27,6 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.client.gui.widget.ExtendedButton;
 import net.neoforged.neoforge.client.gui.widget.ScrollPanel;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
-import net.neoforged.neoforge.network.PacketDistributor;
 
 public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 {
@@ -190,7 +189,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		
 		public static void onButtonClicked(SolderingMenu container, SolderingRecipeHolder recipe)
 		{
-			PacketDistributor.sendToServer(new SolderingRecipeButtonPacket(recipe.id()));
+			Minecraft.getInstance().getConnection().send(new SolderingRecipeButtonPacket(recipe.id()));
 			container.attemptRecipeAssembly(recipe.recipe());
 		}
 		
