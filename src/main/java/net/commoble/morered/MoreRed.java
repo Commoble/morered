@@ -41,6 +41,9 @@ import net.commoble.morered.mechanisms.GearBlockItem;
 import net.commoble.morered.mechanisms.GearsBlock;
 import net.commoble.morered.mechanisms.GearsLootEntry;
 import net.commoble.morered.mechanisms.GearshifterBlock;
+import net.commoble.morered.mechanisms.StonemillBlock;
+import net.commoble.morered.mechanisms.StonemillBlock.StonemillData;
+import net.commoble.morered.mechanisms.StonemillMenu;
 import net.commoble.morered.mechanisms.WindCatcherBlockItem;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherColors;
@@ -119,6 +122,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -213,6 +217,7 @@ public class MoreRed
 	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> plieredTubeDataComponent;
 	public final DeferredHolder<DataComponentType<?>, DataComponentType<WindcatcherColors>> windcatcherColorsDataComponent;
 	public final DeferredHolder<DataComponentType<?>, DataComponentType<Map<Direction,ItemStack>>> gearsDataComponent;
+	public final DeferredHolder<DataComponentType<?>, DataComponentType<StonemillData>> stonemillDataComponent;
 	
 	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
 	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
@@ -248,6 +253,7 @@ public class MoreRed
 	public final Map<String, DeferredHolder<Block, WindcatcherBlock>> windcatcherBlocks = new HashMap<>();
 	public final DeferredHolder<Block, AirFoilBlock> airFoilBlock;
 	public final DeferredHolder<Block, GearsBlock> gearsBlock;
+	public final DeferredHolder<Block, StonemillBlock> stonemillBlock;
 
 	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
 	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
@@ -278,18 +284,19 @@ public class MoreRed
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearshifterBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearsBlockEntity;
 	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> clutchBlockEntity;
+	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> stonemillBlockEntity;
 
 	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
+	public final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> filterMenu;
+	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
+	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
+	public final DeferredHolder<MenuType<?>, MenuType<StonemillMenu>> stonemillMenuType;
 	
 	public final DeferredHolder<RecipeType<?>, RecipeType<SolderingRecipe>> solderingRecipeType;
 	
 	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
 	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherRecipe>> windcatcherRecipeSerializer;
 	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherDyeRecipe>> windcatcherDyeRecipeSerializer;
-
-	public final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> filterMenu;
-	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
-	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
 	
 	public final DeferredHolder<LootPoolEntryType, LootPoolEntryType> gearsLootEntry;
 	public final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> wireCountLootFunction;
@@ -337,6 +344,9 @@ public class MoreRed
 		this.gearsDataComponent = dataComponentTypes.register(Names.GEARS, () -> DataComponentType.<Map<Direction,ItemStack>>builder()
 			.persistent(Codec.unboundedMap(Direction.CODEC, ItemStack.OPTIONAL_CODEC))
 			.networkSynchronized(ByteBufCodecs.map(HashMap::new, Direction.STREAM_CODEC, ItemStack.OPTIONAL_STREAM_CODEC))
+			.build());
+		this.stonemillDataComponent = dataComponentTypes.register(Names.STONEMILL, () -> DataComponentType.<StonemillData>builder()
+			.persistent(StonemillData.CODEC)
 			.build());
 		
 		solderingTableBlock = registerBlockItem(blocks, items, Names.SOLDERING_TABLE,
@@ -598,7 +608,13 @@ public class MoreRed
 				.noLootTable()
 				.isSuffocating(neverStatePredicate),
 			AirFoilBlock::new);
-
+		
+		this.stonemillBlock = registerBlockItem(blocks, items, Names.STONEMILL, () -> Block.Properties.of()
+			.mapColor(MapColor.COLOR_BLACK)
+			.strength(2F, 6F)
+			.noOcclusion(),
+			StonemillBlock::new);
+			
 		// notblock items
 		redwireSpoolItem = registerItem(items, Names.REDWIRE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.REDWIRE_POSTS));
 		bundledCableSpoolItem = registerItem(items, Names.BUNDLED_CABLE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
@@ -706,9 +722,20 @@ public class MoreRed
 		this.windcatcherBlockEntity = GenericBlockEntity.builder()
 			.itemData(windcatcherColorsDataComponent)
 			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
+		this.stonemillBlockEntity = GenericBlockEntity.builder()
+			.serverData(
+				stonemillDataComponent,	// holds the progress counters
+				() -> DataComponents.CONTAINER) // holds the inventory
+			.preRemoveSideEffects(StonemillBlock::preRemoveSideEffects)
+			.register(blockEntityTypes, Names.STONEMILL, this.stonemillBlock);
 
 		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,
 			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
+		loaderMenu = menuTypes.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
+		filterMenu = menuTypes.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
+		multiFilterMenu = menuTypes.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
+		stonemillMenuType = menuTypes.register(Names.STONEMILL,
+			() -> new MenuType<>(StonemillMenu::clientMenu, FeatureFlags.VANILLA_SET));
 		
 		solderingRecipeType = recipeTypes.register(Names.SOLDERING_RECIPE, () -> RecipeType.simple(id(Names.SOLDERING_RECIPE)));
 		
@@ -718,10 +745,6 @@ public class MoreRed
 			() -> new SimpleRecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
 		windcatcherDyeRecipeSerializer = recipeSerializers.register(Names.WINDCATCHER_DYE,
 			() -> new SimpleRecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
-		
-		this.loaderMenu = menuTypes.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
-		this.filterMenu = menuTypes.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
-		this.multiFilterMenu = menuTypes.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
 		
 		this.gearsLootEntry = lootEntries.register(Names.GEARS, () -> new LootPoolEntryType(GearsLootEntry.CODEC));
 		this.wireCountLootFunction = lootFunctions.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
@@ -819,6 +842,8 @@ public class MoreRed
 		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.redstoneTubeEntity.get(), (be,side) -> be.getItemHandler(side));
 		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.shuntEntity.get(), (be,side) -> be.getItemHandler(side));
 		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.tubeEntity.get(), (be,side) -> be.getItemHandler(side));
+		
+		event.registerBlock(Capabilities.ItemHandler.BLOCK, StonemillBlock::getItemHandler, this.stonemillBlock.get());
 	}
 	
 	@SuppressWarnings("deprecation")

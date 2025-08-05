@@ -76,6 +76,7 @@ public class Names
 	public static final String CLUTCH = "clutch";
 	public static final String WINDCATCHER = "windcatcher";
 	public static final String AIRFOIL = "airfoil";
+	public static final String STONEMILL = "stonemill";
 
 	// raw items
 	public static final String RED_ALLOY_INGOT = "red_alloy_ingot";

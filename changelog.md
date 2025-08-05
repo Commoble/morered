@@ -10,6 +10,7 @@
 * Added blocks which make use of mechanical power:
   * Alternators are plate blocks which emit redstone power in one of four output directions, rotating between them when rotated by machines
   * Extractors have been reworked. They now require mechanical power, and extract an entire itemstack from their input side whenever they make a full rotation. Pliers can be used to rotate them after placing (hold sprint to change which way they rotate)
+  * Stonemills continually produce cobblestone while mechanically powered. They must also have a supply of lava and water touching their grates to function. They require a lot of torque; using gearshifters will reduce the minimum amount of torque needed, though they won't produce cobblestone as fast.
 * Added Bitwise Multiplexer
 * Logic Gates and wire/cable posts and junctions are now waterloggable and will no longer be broken by flowing water
 * When placing logic plates or gearshifters, sprint can now be held to change which side of the block-being-placed faces the aimed-at face

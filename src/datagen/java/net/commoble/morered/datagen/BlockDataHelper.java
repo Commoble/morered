@@ -132,6 +132,11 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return blockItemWithoutItemModel(id -> new ClientItem(new BlockModelWrapper.Unbaked(ItemDataHelper.itemModel(id()), List.of()), ClientItem.Properties.DEFAULT));
 	}
 	
+	public ItemDataHelper blockItemUsingBlockModel()
+	{
+		return ItemDataHelper.create(this.block.asItem(), context, new ClientItem(new BlockModelWrapper.Unbaked(blockModel(this.id()), List.of()), ClientItem.Properties.DEFAULT));
+	}
+	
 	public ItemDataHelper blockItemWithoutItemModel(Function<ResourceLocation, ClientItem> modelFactory)
 	{
 		return ItemDataHelper.create(this.block.asItem(), context, modelFactory.apply(ItemDataHelper.itemModel(this.id())));

@@ -87,6 +87,34 @@ public class GenericBlockEntity extends BlockEntity
 		return holder == null ? null : (T)holder.value();
 	}
 	
+	public <T> T getOrDefault(DataComponentType<T> type, T defaultValue)
+	{
+		T value = this.get(type);
+		return value == null ? defaultValue : value;
+	}
+	
+	public <T> T getOrCreate(DataComponentType<T> type, T defaultValue)
+	{
+		T value = this.get(type);
+		if (value == null)
+		{
+			this.set(type, defaultValue);
+			value = defaultValue;
+		}
+		return value;
+	}
+	
+	public <T> T getOrCreate(DataComponentType<T> type, Supplier<T> defaultValueSupplier)
+	{
+		T value = this.get(type);
+		if (value == null)
+		{
+			value = defaultValueSupplier.get();
+			this.set(type, value);
+		}
+		return value;
+	}
+	
 	public <T> void set(DataComponentType<T> type, T value)
 	{
 		if (value == null)

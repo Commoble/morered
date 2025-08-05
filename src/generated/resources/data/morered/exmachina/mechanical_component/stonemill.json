@@ -1,0 +1,28 @@
+{
+  "type": "exmachina:variants",
+  "save": true,
+  "variants": {
+    "enabled=false": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        }
+      ],
+      "inertia": 1.0,
+      "shape": "up"
+    },
+    "enabled=true": {
+      "connections": [
+        {
+          "direction": "up",
+          "neighbor_shape": "down"
+        }
+      ],
+      "inertia": 1.0,
+      "negative_counter_torque": 500.0,
+      "positive_counter_torque": 500.0,
+      "shape": "up"
+    }
+  }
+}

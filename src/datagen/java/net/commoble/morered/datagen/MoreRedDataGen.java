@@ -38,6 +38,7 @@ import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
 import net.commoble.morered.mechanisms.GearsLootEntry;
 import net.commoble.morered.mechanisms.GearshifterBlock;
+import net.commoble.morered.mechanisms.StonemillBlock;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
@@ -60,6 +61,7 @@ import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CompositeModel;
 import net.minecraft.core.Direction;
+import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.RegistrySetBuilder;
@@ -930,6 +932,53 @@ public class MoreRedDataGen
 			.tags(BlockTags.MINEABLE_WITH_AXE)
 			.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", ResourceLocation.withDefaultNamespace("block/stripped_oak_log_top")))
 			.mechanicalComponent(gearsMechanicalComponent);
+		
+		BlockDataHelper.create(MoreRed.get().stonemillBlock.get(), context,
+			(id,block) -> BlockStateBuilder.variants(variants -> variants
+				.addVariant(StonemillBlock.HORIZONTAL_AXIS, Axis.X, BlockStateBuilder.model(MoreRed.id("block/stonemill_block"), Quadrant.R0, Quadrant.R90))
+				.addVariant(StonemillBlock.HORIZONTAL_AXIS, Axis.Z, BlockStateBuilder.model(MoreRed.id("block/stonemill_block")))),
+			(id, block) -> simpleLoot(block))
+			.localize()
+			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+			.mechanicalComponent(VariantsMechanicalComponent.builder(true)
+				.addVariant(StonemillBlock.ENABLED, false, new RawNode(
+					NodeShape.ofSide(Direction.UP),
+					0D,
+					0D,
+					0D,
+					1D,
+					List.of(new RawConnection(
+						Optional.of(Direction.UP),
+						NodeShape.ofSide(Direction.DOWN),
+						Parity.POSITIVE,
+						0))))
+				.addVariant(StonemillBlock.ENABLED, true, new RawNode(
+					NodeShape.ofSide(Direction.UP),
+					0D,
+					500D,
+					500D,
+					1D,
+					List.of(new RawConnection(
+						Optional.of(Direction.UP),
+						NodeShape.ofSide(Direction.DOWN),
+						Parity.POSITIVE,
+						0)))))
+			.blockItemUsingBlockModel()
+			.help(helper -> {
+				helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
+					List.of("i|i", "IPI", "#H#"),
+					Map.of(
+						'i', ingredient(Tags.Items.INGOTS_IRON),
+						'|', ingredient(MoreRed.Tags.Items.AXLES),
+						'P', Ingredient.of(Items.DIAMOND_PICKAXE),
+						'I', Ingredient.of(Items.IRON_BARS),
+						'H', Ingredient.of(Items.HOPPER),
+						'#', Ingredient.of(Items.OBSIDIAN))));
+
+				ResourceLocation axleId = mangle(helper.id(), "%s_axle");
+				ResourceLocation axleBlockModel = blockModel(axleId);
+				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+			});
 			
 		
 		// special recipes

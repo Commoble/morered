@@ -205,6 +205,7 @@ public class ClientProxy
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), ChunkSectionLayer.CUTOUT);
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), ChunkSectionLayer.CUTOUT);
 		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().stonemillBlock.get(), ChunkSectionLayer.CUTOUT);
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
@@ -214,6 +215,7 @@ public class ClientProxy
 		event.<FilterMenu, SingleSlotMenuScreen<FilterMenu>>register(MoreRed.get().filterMenu.get(), SingleSlotMenuScreen::new);
 		event.register(MoreRed.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
 			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.get().multiFilterBlock.get().getDescriptionId()));
+		event.register(MoreRed.get().stonemillMenuType.get(), SingleSlotMenuScreen::new);
 	}
 	
 	private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
@@ -281,6 +283,7 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.get().gearshifterBlockEntity.get(), GearshifterBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().clutchBlockEntity.get(), ClutchBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.get().windcatcherBlockEntity.get(), WindcatcherBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.get().stonemillBlockEntity.get(), StonemillBlockEntityRenderer::create);
 	}
 
 	static void onRegisterSpecialBlockModelRenderers(RegisterSpecialBlockModelRendererEvent event)

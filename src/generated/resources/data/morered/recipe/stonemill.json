@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "building",
+  "key": {
+    "#": "minecraft:obsidian",
+    "H": "minecraft:hopper",
+    "I": "minecraft:iron_bars",
+    "P": "minecraft:diamond_pickaxe",
+    "i": "#c:ingots/iron",
+    "|": "#morered:axles"
+  },
+  "pattern": [
+    "i|i",
+    "IPI",
+    "#H#"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:stonemill"
+  }
+}
