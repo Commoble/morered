@@ -1,0 +1,11 @@
+{
+	"values": {
+		"overworld": {
+			"min_y": 80,
+			"max_y": 160
+		},
+		"end": {
+			"value": 3
+		}
+	}
+}

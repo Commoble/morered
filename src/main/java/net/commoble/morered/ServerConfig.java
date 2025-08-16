@@ -11,9 +11,7 @@ public record ServerConfig(
 	IntValue ticksInTube,
 	IntValue maxItemsInTube,
 	IntValue osmosisFilterTransferRate,
-	DoubleValue maxTubeConnectionRange,
-	DoubleValue minWindDepth,
-	DoubleValue maxWindDepth)
+	DoubleValue maxTubeConnectionRange)
 {	
 	public static ServerConfig create(ModConfigSpec.Builder builder)
 	{
@@ -45,16 +43,6 @@ public record ServerConfig(
 			.comment("Maximum range at which tubes can be remotely connected to each other. This also affects how many nearby chunks are checked for longtube intersections when placing a block.")
 			.translation("morered.config.max_remote_tube_connection_range")
 			.defineInRange("max_remote_tube_connection_range", 32D, 0D, Double.MAX_VALUE);
-		DoubleValue minWindDepth = builder
-			.comment("Minimum percentage of world depth (percentage from bottom to top) at which windcatchers can catch wind",
-				"33% ~= sea level in overworld")
-			.translation("morered.config.min_wind_depth")
-			.defineInRange("min_wind_depth", 0.33D, 0D, 1D);
-		DoubleValue maxWindDepth = builder
-			.comment("Percentage of world depth (percentage from bottom to top) above which windcatchers are at maximum efficiency",
-				"50% ~= +128 in overworld")
-			.translation("morered.config.max_wind_depth")
-			.defineInRange("max_wind_Depth", 0.5D, 0D, 1D);
 		
 		return new ServerConfig(
 			maxWirePostConnectionRange,
@@ -63,9 +51,7 @@ public record ServerConfig(
 			ticksInTube,
 			maxItemsInTube,
 			osmosisFilterTransferRate,
-			maxTubeConnectionRange,
-			minWindDepth,
-			maxWindDepth);
+			maxTubeConnectionRange);
 	}
 }
 

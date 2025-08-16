@@ -15,11 +15,21 @@
 * Logic Gates and wire/cable posts and junctions are now waterloggable and will no longer be broken by flowing water
 * When placing logic plates or gearshifters, sprint can now be held to change which side of the block-being-placed faces the aimed-at face
 * Added a search bar to the soldering table
-* Added server config values:
-  * min_wind_depth -- Minimum percentage of world depth (percentage from bottom to top) at which windcatchers can catch wind
-    * Default is 33% which is roughly sea level in overworld
-  * max_wind_depth -- Percentage of world depth (percentage from bottom to top) above which windcatchers are at maximum efficiency
-    * Default is 50% which is roughly y=+128 in overworld
+* Added a datamap file at `data/morered/data_maps/dimension_type/wind.json` which specifies how much wind windcatchers can have in different dimensions. Currently there are two formats supported, both of which can be seen in the default file:
+```
+{
+	"values": {
+		"overworld": { // with this format, wind increases linearly from min to max y
+			"min_y": 80, // wind is 0 if y < min_y
+			"max_y": 160 // wind is 8 (the highest it can go) if y >= max_y
+		},
+		"end": {
+			"value": 3 // constant wind value, can be in the range [0,8] inclusive
+		}
+	}
+}
+```
+  * Dimensions whose types are not specified in the datamap have no wind
 
 
 # 1.21.3-7.1.0.0

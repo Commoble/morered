@@ -44,6 +44,7 @@ import net.commoble.morered.mechanisms.GearshifterBlock;
 import net.commoble.morered.mechanisms.StonemillBlock;
 import net.commoble.morered.mechanisms.StonemillBlock.StonemillData;
 import net.commoble.morered.mechanisms.StonemillMenu;
+import net.commoble.morered.mechanisms.Wind;
 import net.commoble.morered.mechanisms.WindCatcherBlockItem;
 import net.commoble.morered.mechanisms.WindcatcherBlock;
 import net.commoble.morered.mechanisms.WindcatcherColors;
@@ -163,6 +164,7 @@ import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
@@ -190,6 +192,8 @@ import net.neoforged.neoforge.network.registration.PayloadRegistrar;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.registries.datamaps.DataMapType;
+import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 
 @Mod(MoreRed.MODID)
 public class MoreRed
@@ -300,6 +304,13 @@ public class MoreRed
 	
 	public final DeferredHolder<LootPoolEntryType, LootPoolEntryType> gearsLootEntry;
 	public final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> wireCountLootFunction;
+	
+	public static final DataMapType<DimensionType, Wind> WIND_DATA_MAP_TYPE = DataMapType.builder(
+			id(Names.WIND),
+			Registries.DIMENSION_TYPE,
+			Wind.CODEC)
+		.synced(Wind.CODEC, true)
+		.build();
 	
 	@SuppressWarnings("unchecked")
 	public MoreRed(IEventBus modBus)
@@ -759,6 +770,7 @@ public class MoreRed
 		
 		modBus.addListener(this::onRegisterPackets);
 		modBus.addListener(this::onRegisterCapabilities);
+		modBus.addListener(this::onRegisterDataMapTypes);
 		
 		forgeBus.addListener(EventPriority.LOW, this::onUseItemOnBlock);
 		forgeBus.addListener(EventPriority.LOW, this::onLeftClickBlock);
@@ -844,6 +856,10 @@ public class MoreRed
 		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.tubeEntity.get(), (be,side) -> be.getItemHandler(side));
 		
 		event.registerBlock(Capabilities.ItemHandler.BLOCK, StonemillBlock::getItemHandler, this.stonemillBlock.get());
+	}
+	
+	private void onRegisterDataMapTypes(RegisterDataMapTypesEvent event) {
+		event.register(WIND_DATA_MAP_TYPE);
 	}
 	
 	@SuppressWarnings("deprecation")

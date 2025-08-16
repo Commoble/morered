@@ -112,6 +112,9 @@ public class Names
 	public static final String PLIERED_TUBE = "pliered_tube";
 	public static final String WINDCATCHER_COLORS = "windcatcher_colors";
 	
+	// data maps
+	public static final String WIND = "wind";
+	
 	// recipe types
 	public static final String SOLDERING_RECIPE = "soldering";
 	public static final String WINDCATCHER_DYE = "windcatcher_dye";

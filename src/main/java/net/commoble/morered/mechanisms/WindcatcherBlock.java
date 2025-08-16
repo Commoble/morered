@@ -82,7 +82,7 @@ public class WindcatcherBlock extends Block implements EntityBlock
 	@SuppressWarnings("deprecation")
 	public static int getWind(LevelReader level, BlockPos pos)
 	{
-		int wind = getHeightWind(level,pos);
+		int wind = Wind.getWind(level, pos);
 		if (wind <= 0)
 			return wind;
 		for (int radius=2; radius<=5; radius++)
@@ -109,32 +109,6 @@ public class WindcatcherBlock extends Block implements EntityBlock
 			}
 		}
 		return wind;
-	}
-	
-	public static int getHeightWind(LevelReader level, BlockPos pos)
-	{
-		if (level.dimensionType().hasCeiling())
-		{
-			return 0;
-		}
-		// lerp windiness from 25% to 40% of world depth (configurable)
-		// TODO add xz noise?
-		int y = pos.getY();
-		int minY = level.getMinY();
-		int maxY = level.getMaxY();
-		double yDepthPerc = Mth.inverseLerp(y, minY, maxY);
-		double minDepthPerc = MoreRed.SERVERCONFIG.minWindDepth().getAsDouble();
-		double maxDepthPerc = MoreRed.SERVERCONFIG.maxWindDepth().getAsDouble();
-		if (yDepthPerc <= minDepthPerc)
-		{
-			return 0;
-		}
-		if (yDepthPerc >= maxDepthPerc)
-		{
-			return 8;
-		}
-		double relerpedPerc = Mth.inverseLerp(yDepthPerc, minDepthPerc, maxDepthPerc);
-		return Mth.lerpInt((float)relerpedPerc, 0, 8); 
 	}
 
 	@Override
