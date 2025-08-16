@@ -70,20 +70,21 @@ public sealed interface Wind permits Wind.ConstantWind, Wind.LinearWind
 		public int getWindLevel(LevelReader level, BlockPos pos)
 		{
 			int y = pos.getY();
-			int minY = level.getMinY();
-			int maxY = level.getMaxY();
-			if (y < minY)
+			if (y < this.minY)
 			{
 				return 0;
 			}
-			if (y >= maxY)
+			if (y >= this.maxY)
 			{
 				return 8;
 			}
 			int yIncrement = (this.maxY - this.minY) / 7; // we start at 1 and wind=8 doesn't count, there are seven wind layers below max
-			int heightAboveMin = y - minY;
+			int heightAboveMin = y - this.minY;
 			int increments = heightAboveMin / yIncrement;
-			return increments + 1;
+			int wind = increments + 1;
+			return wind < 0 ? 0
+				: wind > 8 ? 8
+				: wind;
 		}
 	}
 }

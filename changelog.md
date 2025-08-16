@@ -15,16 +15,16 @@
 * Logic Gates and wire/cable posts and junctions are now waterloggable and will no longer be broken by flowing water
 * When placing logic plates or gearshifters, sprint can now be held to change which side of the block-being-placed faces the aimed-at face
 * Added a search bar to the soldering table
-* Added a datamap file at `data/morered/data_maps/dimension_type/wind.json` which specifies how much wind windcatchers can have in different dimensions. Currently there are two formats supported, both of which can be seen in the default file:
+* Added a datamap file at `data/morered/data_maps/dimension_type/wind.json` which specifies how much wind windcatchers can have in different dimensions. Currently there are valid formats, both of which can be seen in the default file:
 ```
 {
 	"values": {
-		"overworld": { // with this format, wind increases linearly from min to max y
-			"min_y": 80, // wind is 0 if y < min_y
-			"max_y": 160 // wind is 8 (the highest it can go) if y >= max_y
+		"overworld": {
+			"min_y": 63,
+			"max_y": 150
 		},
 		"end": {
-			"value": 3 // constant wind value, can be in the range [0,8] inclusive
+			"value": 2
 		}
 	}
 }
