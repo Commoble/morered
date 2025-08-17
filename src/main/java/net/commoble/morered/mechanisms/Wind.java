@@ -15,7 +15,7 @@ import net.minecraft.world.level.LevelReader;
 
 public sealed interface Wind permits Wind.ConstantWind, Wind.LinearWind
 {
-	public static final Codec<Wind> CODEC = Codec.either(ConstantWind.CODEC, LinearWind.CODEC)
+	public static final Codec<Wind> CODEC = Codec.xor(ConstantWind.CODEC, LinearWind.CODEC)
 		.xmap(
 			either -> either.map(Function.identity(), Function.identity()),
 			wind -> switch(wind) {

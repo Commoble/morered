@@ -1,10 +1,10 @@
 {
 	"values": {
-		"overworld": {
+		"#morered:overworld_wind": {
 			"min_y": 63,
-			"max_y": 128
+			"max_y": 150
 		},
-		"end": {
+		"#morered:end_wind": {
 			"value": 2
 		}
 	}

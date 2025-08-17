@@ -19,18 +19,20 @@
 ```
 {
 	"values": {
-		"overworld": {
+		"#morered:overworld_wind": {
 			"min_y": 63,
 			"max_y": 150
 		},
-		"end": {
+		"#morered:end_wind": {
 			"value": 2
 		}
 	}
 }
 ```
   * Dimensions whose types are not specified in the datamap have no wind
-
+* Added two dimension_type tags:
+  * #morered:overworld_wind (defaults to overworld)
+  * #morered:end_wind (defaults to end)
 
 # 1.21.3-7.1.0.0
 * Updated to exmachina 0.8.0.2-beta
