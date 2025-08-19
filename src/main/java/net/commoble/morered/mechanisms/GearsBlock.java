@@ -310,10 +310,30 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 					be.set(MoreRed.get().gearsDataComponent.get(), newDataComponent);
 				}
 			}
+			if (this.isEmptyGearsBlock(newState))
+			{
+				// if gears is empty, remove it next tick
+				// (can't destroy in onPlace)
+				level.scheduleTick(pos, this, 1);
+			}
 		}
 		super.onPlace(newState, level, pos, oldState, isMoving);
 	}
 	
+	public boolean isEmptyGearsBlock(BlockState state)
+	{
+		return state == this.defaultBlockState().setValue(WATERLOGGED, state.getValue(WATERLOGGED));
+	}
+	
+	@Override
+	protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random)
+	{
+		super.tick(state, level, pos, random);
+		if (this.isEmptyGearsBlock(state)) {
+			level.removeBlock(pos,  false);
+		}
+	}
+
 	public static Map<Direction, ItemStack> normalizeGears(BlockState state, Map<Direction,ItemStack> oldValues)
 	{
 		OctahedralGroup group = state.getValue(TRANSFORM);
