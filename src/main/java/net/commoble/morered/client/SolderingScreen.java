@@ -63,7 +63,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		ClientLevel world = this.minecraft.level;
 		List<SolderingRecipeHolder> recipes = world != null ? ClientProxy.getAllSolderingRecipes() : List.of();
 		this.searchBox = new EditBox(this.font, xStart + SEARCHBOX_X, yStart + SEARCHBOX_Y, SEARCHBOX_WIDTH, SEARCHBOX_HEIGHT, Component.literal("a"));
-        this.searchBox.setTextColor(0xFFFFFF); // same as creative search
+        this.searchBox.setTextColor(0xFFFFFFFF); // same as creative search
         this.searchBox.setFocused(true); // start with searchbox focused
 		this.addWidget(this.searchBox);
 		this.scrollPanel = new SolderingScrollPanel(this.minecraft, this, recipes, xStart + SCROLLPANEL_X, yStart + SCROLLPANEL_Y, SCROLLPANEL_WIDTH, SCROLLPANEL_HEIGHT);
