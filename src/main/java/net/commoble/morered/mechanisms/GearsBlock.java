@@ -49,6 +49,7 @@ import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent.LeftClickBlock;
 
+// TODO make flammable unless all component gears are not flammable
 public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedBlock, FaceSegmentBlock
 {
     public static final BooleanProperty WATERLOGGED = BlockStateProperties.WATERLOGGED;
@@ -421,5 +422,5 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 	public Map<Direction, VoxelShape> getRaytraceBackboards()
 	{
 		return GearBlock.SHAPES;
-	}	
+	}
 }

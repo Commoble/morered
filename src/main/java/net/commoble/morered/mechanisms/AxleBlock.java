@@ -94,4 +94,20 @@ public class AxleBlock extends RotatedPillarBlock implements EntityBlock, Simple
 	{
 		return state.getValue(WATERLOGGED) ? Fluids.WATER.getSource(false) : super.getFluidState(state);
 	}
+
+	@Override
+	public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+	{
+		return state.getValue(WATERLOGGED) || !state.ignitedByLava()
+			? 0
+			: 5; // same as stripped logs
+	}
+
+	@Override
+	public int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
+	{
+		return state.getValue(WATERLOGGED) || !state.ignitedByLava()
+			? 0
+			: 5; // same as stripped logs
+	}
 }
