@@ -483,8 +483,7 @@ public class MoreRedDataGen
 		BlockDataHelper.create(MoreRed.get().osmosisSlimeBlock.get(), context, sixWayBlockState(MoreRed.get().osmosisSlimeBlock.get()));
 		
 		BlockDataHelper.createWithoutLoot(MoreRed.get().airFoilBlock.get(), context,
-			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(blockId(Blocks.AIR)))))
-			.tags(MoreRed.Tags.Blocks.AIRFOILS);
+			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(blockId(Blocks.AIR)))));
 			
 		
 		// other items

@@ -809,7 +809,6 @@ public class MoreRed
 			public static final TagKey<Block> GEARS = tag(Names.GEARS);
 			public static final TagKey<Block> GEARSHIFTERS = tag(Names.GEARSHIFTERS);
 			public static final TagKey<Block> WINDCATCHERS = tag(Names.WINDCATCHERS);
-			public static final TagKey<Block> AIRFOILS = tag(Names.AIRFOILS);
 		}
 		
 		public static class Items
