@@ -95,6 +95,7 @@ public class Names
 	public static final String COLORED_TUBES = "colored_tubes";
 	public static final String TUBES = "tubes";
 	public static final String AXLES = "axles";
+	public static final String CLUTCHES = "clutches";
 	public static final String WOODEN_AXLES = "wooden_axles";
 	public static final String GEARS = "gears";
 	public static final String WOODEN_GEARS = "wooden_gears";

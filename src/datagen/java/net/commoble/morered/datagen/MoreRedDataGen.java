@@ -518,7 +518,9 @@ public class MoreRedDataGen
 			.addTag(MoreRed.Tags.Items.BUNDLED_CABLES)
 			.addTag(MoreRed.Tags.Items.COLORED_CABLES);
 		blockTags.tag(MoreRed.Tags.Blocks.TUBES).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
-		blockTags.tag(BlockTags.MINEABLE_WITH_PICKAXE).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
+		blockTags.tag(BlockTags.MINEABLE_WITH_PICKAXE).addTags(
+			MoreRed.Tags.Blocks.CLUTCHES,
+			MoreRed.Tags.Blocks.COLORED_TUBES);
 		blockTags.tag(BlockTags.MINEABLE_WITH_AXE).addTags(
 			MoreRed.Tags.Blocks.WOODEN_AXLES,
 			MoreRed.Tags.Blocks.WOODEN_GEARS,
@@ -827,7 +829,7 @@ public class MoreRedDataGen
 				}),
 				(id,block) -> simpleLoot(block))
 				.localize()
-				.tags(BlockTags.MINEABLE_WITH_PICKAXE)
+				.tags(MoreRed.Tags.Blocks.CLUTCHES)
 				.mechanicalComponent(clutchMachine)
 				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/clutch_template"))
 					.addTexture("side", strippedLogBlockModel)

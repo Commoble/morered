@@ -17,18 +17,8 @@
     "morered:multifilter",
     "morered:loader",
     "morered:osmosis_filter",
+    "#morered:clutches",
     "#morered:colored_tubes",
-    "morered:acacia_clutch",
-    "morered:birch_clutch",
-    "morered:cherry_clutch",
-    "morered:crimson_clutch",
-    "morered:dark_oak_clutch",
-    "morered:jungle_clutch",
-    "morered:mangrove_clutch",
-    "morered:oak_clutch",
-    "morered:pale_oak_clutch",
-    "morered:spruce_clutch",
-    "morered:warped_clutch",
     "morered:stonemill"
   ]
 }
