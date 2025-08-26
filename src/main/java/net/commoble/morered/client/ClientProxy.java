@@ -55,6 +55,7 @@ import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.BlockPlaceContext;
+import net.minecraft.world.item.crafting.RecipeMap;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
@@ -75,6 +76,7 @@ import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
+import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
 import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
@@ -93,6 +95,7 @@ public class ClientProxy
 	// block positions are in absolute world coordinates, not local chunk coords
 	private static Map<ChunkPos, Set<BlockPos>> clientPostsInChunk = new HashMap<>();
 	private static Map<ChunkPos, Set<BlockPos>> clientTubesInChunk = new HashMap<>();
+	public static RecipeMap recipeMap = RecipeMap.create(List.of());
 	private static List<SolderingRecipeHolder> solderingRecipes = new ArrayList<>();
 	private static boolean isHoldingSprint = false;
 	
@@ -100,6 +103,7 @@ public class ClientProxy
 	{
 		clientPostsInChunk = new HashMap<>();
 		clientTubesInChunk = new HashMap<>();
+		recipeMap = RecipeMap.create(List.of());
 		solderingRecipes = new ArrayList<>();
 		isHoldingSprint = false;
 	}
@@ -158,14 +162,6 @@ public class ClientProxy
 	{
 		return clientTubesInChunk.getOrDefault(pos, Set.of());
 	}
-	
-	public static void updateSolderingRecipes(List<SolderingRecipeHolder> recipes)
-	{
-		solderingRecipes = recipes
-			.stream()
-			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().getItem().getDescriptionId())))
-			.toList();
-	}
 
 	public static List<SolderingRecipeHolder> getAllSolderingRecipes()
 	{
@@ -189,6 +185,7 @@ public class ClientProxy
 		forgeBus.addListener(ClientProxy::onHighlightBlock);
 		forgeBus.addListener(ClientProxy::onInteract);
 		forgeBus.addListener(ClientProxy::onClientTick);
+		forgeBus.addListener(ClientProxy::onRecipesReceived);
 	}
 
 	@SuppressWarnings("deprecation")
@@ -376,6 +373,19 @@ public class ClientProxy
 				ClientProxy.setIsSprintingAndNotifyServer(sprintIsDown);
 			}
 		}
+	}
+	
+	private static void onRecipesReceived(RecipesReceivedEvent event)
+	{
+		// soldering recipes are always synced and received here
+		// converting them to SolderingRecipeHolder because can't deal with the RecipeHolder generics
+		RecipeMap recipeMap = event.getRecipeMap();
+		solderingRecipes = recipeMap.byType(MoreRed.get().solderingRecipeType.get())
+			.stream()
+			.map(recipeHolder -> new SolderingRecipeHolder(recipeHolder.id().location(), recipeHolder.value()))
+			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().getItem().getDescriptionId())))
+			.toList();
+		ClientProxy.recipeMap = recipeMap;
 	}
 
 	public static void onInteract(InputEvent.InteractionKeyMappingTriggered event)

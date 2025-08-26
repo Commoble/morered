@@ -65,7 +65,6 @@ import net.commoble.morered.plate_blocks.PulseGateBlock;
 import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
-import net.commoble.morered.soldering.SolderingRecipesPacket;
 import net.commoble.morered.soldering.SolderingTableBlock;
 import net.commoble.morered.transportation.ColoredTubeBlock;
 import net.commoble.morered.transportation.DistributorBlock;
@@ -835,7 +834,6 @@ public class MoreRed
 	private void onRegisterPackets(RegisterPayloadHandlersEvent event)
 	{
 		PayloadRegistrar r = event.registrar("8.0.0");
-		r.playToClient(SolderingRecipesPacket.TYPE, SolderingRecipesPacket.STREAM_CODEC, SolderingRecipesPacket::handle);
 		r.playToServer(SolderingRecipeButtonPacket.TYPE, SolderingRecipeButtonPacket.STREAM_CODEC, SolderingRecipeButtonPacket::handle);
 		r.playToClient(WireBreakPacket.TYPE, WireBreakPacket.STREAM_CODEC, WireBreakPacket::handle);
 		r.playToClient(SyncPostsInChunkPacket.TYPE, SyncPostsInChunkPacket.STREAM_CODEC, SyncPostsInChunkPacket::handle);
@@ -1007,15 +1005,7 @@ public class MoreRed
 	
 	private void onDataPackSyncEvent(OnDatapackSyncEvent event)
 	{
-		// we need to sync our recipes since vanilla doesn't anymore
-		// on player login, event fires after tag sync
-		// on reload, event fires BEFORE tag sync
-		// until neoforge fixes that we'll use a mixin to sync recipes on reload
-		ServerPlayer player = event.getPlayer();
-		if (player != null)
-		{
-			PacketDistributor.sendToPlayer(player, SolderingRecipesPacket.create(player.getServer().getRecipeManager()));
-		}
+		event.sendRecipes(MoreRed.get().solderingRecipeType.get());
 	}
 	
 	private static <T> DeferredRegister<T> defreg(IEventBus modBus, ResourceKey<Registry<T>> registryKey)
