@@ -10,7 +10,6 @@ import mezz.jei.api.registration.IRecipeRegistration;
 import mezz.jei.api.registration.IVanillaCategoryExtensionRegistration;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.client.ClientProxy;
-import net.commoble.morered.mechanisms.WindcatcherDyeRecipe;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.minecraft.resources.ResourceLocation;
