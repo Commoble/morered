@@ -805,9 +805,9 @@ public class MoreRed
 			public static final TagKey<Block> COLORED_TUBES = tag(Names.COLORED_TUBES);
 			public static final TagKey<Block> TUBES = tag(Names.TUBES);
 			
-			public static final TagKey<Block> AXLES = tag(Names.AXLES);
-			public static final TagKey<Block> GEARS = tag(Names.GEARS);
-			public static final TagKey<Block> GEARSHIFTERS = tag(Names.GEARSHIFTERS);
+			public static final TagKey<Block> WOODEN_AXLES = tag(Names.WOODEN_AXLES);
+			public static final TagKey<Block> WOODEN_GEARS = tag(Names.WOODEN_GEARS);
+			public static final TagKey<Block> WOODEN_GEARSHIFTERS = tag(Names.WOODEN_GEARSHIFTERS);
 			public static final TagKey<Block> WINDCATCHERS = tag(Names.WINDCATCHERS);
 		}
 		

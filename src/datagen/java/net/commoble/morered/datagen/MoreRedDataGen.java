@@ -520,9 +520,9 @@ public class MoreRedDataGen
 		blockTags.tag(MoreRed.Tags.Blocks.TUBES).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
 		blockTags.tag(BlockTags.MINEABLE_WITH_PICKAXE).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
 		blockTags.tag(BlockTags.MINEABLE_WITH_AXE).addTags(
-			MoreRed.Tags.Blocks.AXLES,
-			MoreRed.Tags.Blocks.GEARS,
-			MoreRed.Tags.Blocks.GEARSHIFTERS,
+			MoreRed.Tags.Blocks.WOODEN_AXLES,
+			MoreRed.Tags.Blocks.WOODEN_GEARS,
+			MoreRed.Tags.Blocks.WOODEN_GEARSHIFTERS,
 			MoreRed.Tags.Blocks.WINDCATCHERS);
 		itemTags.tag(MoreRed.Tags.Items.TUBES).addTag(MoreRed.Tags.Items.COLORED_TUBES);
 		
@@ -641,7 +641,7 @@ public class MoreRedDataGen
 					.addTexture("particle", strippedLogBlockModel))
 				.localize()
 				.mechanicalComponent(axleMechanicalComponent)
-				.tags(MoreRed.Tags.Blocks.AXLES)
+				.tags(MoreRed.Tags.Blocks.WOODEN_AXLES)
 				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/axle_template"))
 					.addTexture("side", strippedLogBlockModel)
 					.addTexture("top", strippedLogTopTexture))
@@ -688,7 +688,7 @@ public class MoreRedDataGen
 					.addTexture("particle", strippedLogTopTexture))
 				.localize()
 				.mechanicalComponent(gearMechanicalComponent)
-				.tags(MoreRed.Tags.Blocks.GEARS)
+				.tags(MoreRed.Tags.Blocks.WOODEN_GEARS)
 				.blockItem(SimpleModel.createWithoutRenderType(MoreRed.id("item/gear_template"))
 					.addTexture("side", strippedLogBlockModel)
 					.addTexture("top", strippedLogTopTexture))
@@ -739,7 +739,7 @@ public class MoreRedDataGen
 					.addTexture("particle", strippedLogTopTexture))
 				.localize()
 				.mechanicalComponent(gearshifterMechanicalComponent)
-				.tags(MoreRed.Tags.Blocks.GEARSHIFTERS)
+				.tags(MoreRed.Tags.Blocks.WOODEN_GEARSHIFTERS)
 				.blockItemWithoutItemModel(itemModelId -> new ClientItem(
 					new CompositeModel.Unbaked(List.of(
 						new BlockModelWrapper.Unbaked(mangle(itemModelId, "%s_gear"), List.of()),

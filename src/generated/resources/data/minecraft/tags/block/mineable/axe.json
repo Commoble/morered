@@ -1,9 +1,9 @@
 {
   "values": [
     "morered:extractor",
-    "#morered:axles",
-    "#morered:gears",
-    "#morered:gearshifters",
+    "#morered:wooden_axles",
+    "#morered:wooden_gears",
+    "#morered:wooden_gearshifters",
     "#morered:windcatchers",
     "morered:gears"
   ]

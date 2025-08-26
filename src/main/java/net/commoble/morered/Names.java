@@ -95,10 +95,12 @@ public class Names
 	public static final String COLORED_TUBES = "colored_tubes";
 	public static final String TUBES = "tubes";
 	public static final String AXLES = "axles";
+	public static final String WOODEN_AXLES = "wooden_axles";
 	public static final String GEARS = "gears";
+	public static final String WOODEN_GEARS = "wooden_gears";
 	public static final String GEARSHIFTERS = "gearshifters";
+	public static final String WOODEN_GEARSHIFTERS = "wooden_gearshifters";
 	public static final String WINDCATCHERS = "windcatchers";
-	public static final String AIRFOILS = "airfoils";
 	
 	public static final String SUPPORTED_STRIPPED_LOGS = "supported_stripped_logs";
 	
