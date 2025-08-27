@@ -827,6 +827,7 @@ public class MoreRed
 			public static final TagKey<Item> GEARS = tag(Names.GEARS);
 			public static final TagKey<Item> GEARSHIFTERS = tag(Names.GEARSHIFTERS);
 			public static final TagKey<Item> WINDCATCHERS = tag(Names.WINDCATCHERS);
+			public static final TagKey<Item> DYEABLE_WINDCATCHERS = tag(Names.DYEABLE_WINDCATCHERS);
 			public static final TagKey<Item> SUPPORTED_STRIPPED_LOGS = tag(Names.SUPPORTED_STRIPPED_LOGS);
 		}
 	}

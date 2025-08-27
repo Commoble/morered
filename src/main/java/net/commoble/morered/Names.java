@@ -102,6 +102,7 @@ public class Names
 	public static final String GEARSHIFTERS = "gearshifters";
 	public static final String WOODEN_GEARSHIFTERS = "wooden_gearshifters";
 	public static final String WINDCATCHERS = "windcatchers";
+	public static final String DYEABLE_WINDCATCHERS = "dyeable_windcatchers";
 	
 	public static final String SUPPORTED_STRIPPED_LOGS = "supported_stripped_logs";
 	

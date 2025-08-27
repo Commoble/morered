@@ -527,6 +527,7 @@ public class MoreRedDataGen
 			MoreRed.Tags.Blocks.WOODEN_GEARSHIFTERS,
 			MoreRed.Tags.Blocks.WINDCATCHERS);
 		itemTags.tag(MoreRed.Tags.Items.TUBES).addTag(MoreRed.Tags.Items.COLORED_TUBES);
+		itemTags.tag(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS).addTag(MoreRed.Tags.Items.WINDCATCHERS);
 		
 		// misc. translations
 		lang.add("itemGroup.morered", "More Red");
@@ -984,7 +985,7 @@ public class MoreRedDataGen
 			
 		
 		// special recipes
-		recipes.put(MoreRed.get().windcatcherDyeRecipeSerializer.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.WINDCATCHERS)));
+		recipes.put(MoreRed.get().windcatcherDyeRecipeSerializer.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS)));
 		
 		// add recipes for unsupported wood types so they can default to oak
 		Ingredient unsupportedStrippedLogsIngredient = new Ingredient(new DifferenceIngredient(
