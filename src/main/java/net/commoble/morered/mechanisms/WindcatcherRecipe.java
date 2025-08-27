@@ -26,7 +26,7 @@ public class WindcatcherRecipe extends ShapedRecipe
 {
 	public static final MapCodec<WindcatcherRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
 			Codec.STRING.optionalFieldOf("group", "").forGetter(WindcatcherRecipe::group),
-			CraftingBookCategory.CODEC.fieldOf("category").orElse(CraftingBookCategory.MISC).forGetter(WindcatcherRecipe::category),
+			CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(WindcatcherRecipe::category),
 			ShapedRecipePattern.MAP_CODEC.forGetter(WindcatcherRecipe::pattern),
 			ItemStack.STRICT_CODEC.fieldOf("result").forGetter(WindcatcherRecipe::result),
 			Codec.BOOL.optionalFieldOf("show_notification", Boolean.valueOf(true)).forGetter(WindcatcherRecipe::showNotification),
@@ -61,9 +61,9 @@ public class WindcatcherRecipe extends ShapedRecipe
 		this.east = east;
 	}
 	
-	public static WindcatcherRecipe of(Item item, CraftingBookCategory category, List<String> pattern, Map<Character,Ingredient> key)
+	public static WindcatcherRecipe of(Item item, List<String> pattern, Map<Character,Ingredient> key)
 	{
-		return new WindcatcherRecipe("", category, ShapedRecipePattern.of(key, pattern), new ItemStack(item,1), true,
+		return new WindcatcherRecipe("", CraftingBookCategory.MISC, ShapedRecipePattern.of(key, pattern), new ItemStack(item,1), true,
 			DyeColor.WHITE,
 			XY.NORTH,
 			XY.SOUTH,

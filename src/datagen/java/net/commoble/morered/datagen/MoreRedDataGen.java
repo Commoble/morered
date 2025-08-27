@@ -876,7 +876,7 @@ public class MoreRedDataGen
 						airfoilSailDummyModels),
 					ClientItem.Properties.DEFAULT))
 				.tags(MoreRed.Tags.Items.WINDCATCHERS)
-				.help(helper -> helper.recipe(WindcatcherRecipe.of(helper.item(), CraftingBookCategory.BUILDING, List.of(
+				.help(helper -> helper.recipe(WindcatcherRecipe.of(helper.item(), List.of(
 					// putting the sticks on the cardinal directions would look nicer
 					// but having the top wool be north is important
 					"-W-",
