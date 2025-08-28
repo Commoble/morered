@@ -5,11 +5,15 @@ hide_meta: true
 
 More Red uses several custom model loaders to load and bake models for certain blocks.
 
-## Wire Parts
+## Block Model Types
 
-The `morered:wire_parts` model loader is used to generate protruding lines and convex edges for certain wire blocks, using neoforge's model loader APIs to allow a blockstate to have one of multiple different models based on world context.
+Custom blockstate models are used in [blockstate definitions](https://minecraft.wiki/w/Tutorial:Models#Block_states) (assets/namespace/blockstates).
 
-The format of a Wire Parts model json is as follows:
+### Wire Parts
+
+The `morered:wire_parts` blockstate model type is used to generate protruding lines and convex edges for certain wire blocks, using neoforge's model loader APIs to allow a blockstate to have one of multiple different models based on world context.
+
+The format of a Wire Parts blockstate model is as follows:
 
 ```json
 {
@@ -23,9 +27,25 @@ Where the "line" and "edge" objects are the model jsons to use for the line and 
 
 ```json
 {
-	"loader": "morered:wire_parts",
-	"line": {"parent": "morered:block/red_alloy_wire_line"},
-	"edge": {"parent": "morered:block/red_alloy_wire_edge"}
+	"type": "morered:wire_parts",
+	"edge": {"parent": "morered:block/red_alloy_wire_edge"},
+	"line": {"parent": "morered:block/red_alloy_wire_line"}
+}
+```
+
+This should generally be used in a multipart blockstate json to apply dynamic model parts to all blockstates:
+
+```json
+{
+	"multipart": [
+		{
+			"apply": {
+				"type": "morered:wire_parts",
+				"edge": "morered:block/red_alloy_wire_edge",
+				"line": "morered:block/red_alloy_wire_line"
+			}
+		}
+	]
 }
 ```
 
@@ -53,7 +73,7 @@ Assuming a wire block uses the standard wire blockstate json format (consisting 
 * Node models are to be defined by the multipart blockstate json for each interior face a wire is attached to
 * Elbow models are to be defined by the multipart blockstate json for each pair of adjacent interior faces where a wire is attached to both faces
 * For each of the four neighbors orthagonally adjacent to an attached node, a line model is generated if the node is allowed to connect to that neighbor block
-  * A valid connector is defined as a block that allows redstone to connect to it and has a block support shape big enough for a 2x2 pixel wire to attach to it. [Redstone Dust](https://minecraft.wiki/Redstone_Dust) and all of More Red's wire blocks are overridden to have different connection behavior. Mods can specify connection behaviours for additional blocks via the [Ex Machina API](https://github.com/Commoble/exmachina).
+  * A valid connector is defined as a block that allows redstone to connect to it and has a block support shape big enough for a 2x2 pixel wire to attach to it. [Redstone Dust](@redstone_dust) and all of More Red's wire blocks are overridden to have different connection behavior. Mods can specify connection behaviours for additional blocks via the [Ex Machina API](https://github.com/Commoble/exmachina).
 * For each of the 12 edges inside the block, an edge model is generated if neither of the interior faces have an attached wire node, but both of the blocks adjacent to the edge are the same block as the central wire, and have wire nodes on the faces that that edge would connect.
   * Wire blocks will replace air blocks with an "empty" wire block when an edge needs to be rendered in a block where no wire exists; this empty wire block will revert to air when the edge model no longer needs to exist.
 
@@ -62,22 +82,110 @@ The Wire Parts model loader is used by the following blocks:
 * All [Colored Cables](@morered:orange_cable)
 * [Bundled Cables](@morered:bundled_cable)
 
-## Rotate Tints
+### XYZ
+The `morered:xyz` block model allows a block model part to be rotated on the z-axis, in addition to x and y (unlike the vanilla blockstate format which only allows x and y-rotations).
+
+This is primarily used by blocks such as logic gates which can be oriented in 24 different directions, averting the need to have two separate model files (which would be required with the vanilla blockstate format).
+
+Example from the [AND Gate](@morered:and_gate) model:
+
+```json
+{
+    "facing=east,rotation=1": {
+      "type": "morered:xyz",
+      "model": "morered:block/and_gate",
+      "y": 180,
+      "z": 270
+    }
+}
+```
+
+## Item Model Types
+
+Custom item model types are used in [item model definitions](https://minecraft.wiki/w/Items_model_definition) (assets/namespace/items).
+
+### Logic Gate
+
+The `morered:logic_gate` item model format has a format similar to the `minecraft:model` format, only specifing the ID of a model json. For example, the `morered:and_gate` item json:
+
+```json
+{
+  "model": {
+    "type": "morered:logic_gate",
+    "model": "morered:item/and_gate"
+  }
+}
+```
+
+The logic gate item model sets [tint colors]($pack_development/tintindexes) for logic gate items such as the [AND Gate](@morered:and_gate) or [Latch](@morered:latch),
+so that the item will be tinted in the same manner as an unpowered block.
+
+### Windcatcher
+
+The `morered:windcatcher` item model format specifies the ids of submodels used for [windcatchers](@morered:oak_windcatcher).
+
+Using the oak windcatcher item json as an example:
+
+```json
+{
+  "model": {
+    "type": "morered:windcatcher",
+    "airfoil": "morered:block/oak_airfoil",
+    "airfoil_sails": {
+      "black": "morered:block/black_airfoil_sail",
+      "blue": "morered:block/blue_airfoil_sail",
+      "brown": "morered:block/brown_airfoil_sail",
+      "cyan": "morered:block/cyan_airfoil_sail",
+      "gray": "morered:block/gray_airfoil_sail",
+      "green": "morered:block/green_airfoil_sail",
+      "light_blue": "morered:block/light_blue_airfoil_sail",
+      "light_gray": "morered:block/light_gray_airfoil_sail",
+      "lime": "morered:block/lime_airfoil_sail",
+      "magenta": "morered:block/magenta_airfoil_sail",
+      "orange": "morered:block/orange_airfoil_sail",
+      "pink": "morered:block/pink_airfoil_sail",
+      "purple": "morered:block/purple_airfoil_sail",
+      "red": "morered:block/red_airfoil_sail",
+      "white": "morered:block/white_airfoil_sail",
+      "yellow": "morered:block/yellow_airfoil_sail"
+    },
+    "axle": "morered:block/oak_windcatcher_axle"
+  }
+}
+```
+* The `axle` field specifies the model id of the center axle:
+
+![](https://commoble.s3.us-east-1.amazonaws.com/images/morered/windcatcher_axle_template.png)
+
+* The `airfoil` field specifies the model id of the airfoils, which are rendered four times in the model:
+
+![](https://commoble.s3.us-east-1.amazonaws.com/images/morered/airfoil_template.png)
+
+* The `airfoil_sails` field specifies a model id for each color. Four of these will be rendered, depending on the item data of the windcatcher:
+
+![](https://commoble.s3.us-east-1.amazonaws.com/images/morered/airfoil_sail_template.png)
+
+
+## Model Loaders
+
+Model loaders are used in [model definitions](https://minecraft.wiki/w/Tutorial:Models#Block_models) (assets/namespace/models).
+
+### Rotate Tints
 
 The `morered:rotate_tints` model loader is used to ensure that [red alloy wires](@morered:red_alloy_wire)
-have the correct [tintindexes](/en/mod/morered/docs/pack_development/tintindexes) when rotated by the wire part loader and the blockstate json.
+have the correct [tintindexes]($pack_development/tintindexes) when rotated by the wire part loader and the blockstate json.
 It has the following JSON format:
 ```json
 {
 	"loader": "morered:rotate_tints",
 	"model": {
-		// any model json
+		// inline model json object
 	}
 }
 ```
 
 Tintindexes in a rotate_tints model loader will be transformed into other tintindexes if the model is rotated;
-the tintindex assigned to each orientation is described in [tintindexes](/en/mod/morered/docs/pack_development/tintindexes#red-alloy-wire).
+the tintindex assigned to each orientation is described in [tintindexes]($pack_development/tintindexes).
 Currently, only red alloy wires use the Rotate Tints model loader.
 
 
@@ -86,5 +194,6 @@ Currently, only red alloy wires use the Rotate Tints model loader.
 
 | Version | Changelog
 |---|-
+|1.21.8-8.0.0.0 | Wire Parts is now a block model type rather than a model loader; add Logic Gate item model, Windcatcher item model, and XYZ block model
 |1.21.3-7.0.0.0| Rotate Tints's delegate model is now specified in a "model" field instead of in the root object
 |1.16.5-2.1.0.0 | Added Wire Parts and Rotate Tints model loaders
