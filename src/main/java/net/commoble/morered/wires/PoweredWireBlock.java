@@ -58,7 +58,7 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().poweredWireBeType.get().create(pos, state);
+		return MoreRed.POWERED_WIRE_BLOCK_ENTITY.get().create(pos, state);
 	}
 	
 	@Override

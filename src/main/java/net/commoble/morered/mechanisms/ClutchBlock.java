@@ -71,7 +71,7 @@ public class ClutchBlock extends Block implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().clutchBlockEntity.get().create(pos,state);
+		return MoreRed.CLUTCH_BLOCK_ENTITY.get().create(pos,state);
 	}
 
 	@Override

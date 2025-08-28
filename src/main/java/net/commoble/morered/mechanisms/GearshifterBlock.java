@@ -114,7 +114,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().gearshifterBlockEntity.get().create(pos, state);
+		return MoreRed.GEARSHIFTER_BLOCK_ENTITY.get().create(pos, state);
 	}
 	
 	@Nullable

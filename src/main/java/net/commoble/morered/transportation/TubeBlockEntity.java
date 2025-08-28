@@ -85,7 +85,7 @@ public class TubeBlockEntity extends BlockEntity
 
 	public TubeBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().tubeEntity.get(), pos, state);
+		this(MoreRed.TUBE_BLOCK_ENTITY.get(), pos, state);
 	}
 
 	// connects two tube TEs

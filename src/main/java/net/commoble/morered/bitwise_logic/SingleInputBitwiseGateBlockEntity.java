@@ -32,7 +32,7 @@ public class SingleInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 
 	public static SingleInputBitwiseGateBlockEntity create(BlockPos pos, BlockState state)
 	{
-		return new SingleInputBitwiseGateBlockEntity(MoreRed.get().singleInputBitwiseGateBeType.get(), pos, state);
+		return new SingleInputBitwiseGateBlockEntity(MoreRed.SINGLE_INPUT_BITWISE_GATE_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	public void setInputOnChannel(boolean hasInput, int channel)

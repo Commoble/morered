@@ -50,13 +50,13 @@ public class WireSpoolItem extends Item
 	{
 		if (level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer)
 		{
-			var spooledPost = MoreRed.get().spooledPostComponent.get();
+			var spooledPost = MoreRed.SPOOLED_POST_DATA_COMPONENT.get();
 			BlockPos lastPos = stack.get(spooledPost);
 			
 			// if we don't currently have a pos stored in the spool, store this pos
 			if (lastPos == null)
 			{
-				stack.set(MoreRed.get().spooledPostComponent.get(), pos);
+				stack.set(MoreRed.SPOOLED_POST_DATA_COMPONENT.get(), pos);
 			}
 			else // existing position stored in stack
 			{
@@ -120,7 +120,7 @@ public class WireSpoolItem extends Item
 		super.inventoryTick(stack, worldIn, entityIn, slot);
 		if (entityIn instanceof ServerPlayer serverPlayer)
 		{
-			var spooledPost = MoreRed.get().spooledPostComponent.get();
+			var spooledPost = MoreRed.SPOOLED_POST_DATA_COMPONENT.get();
 			BlockPos postPos = stack.get(spooledPost);
 			if (postPos != null && this.shouldRemoveConnection(postPos, worldIn, entityIn))
 			{

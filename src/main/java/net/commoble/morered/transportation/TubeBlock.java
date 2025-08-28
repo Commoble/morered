@@ -328,14 +328,14 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().tubeEntity.get().create(pos, state);
+		return MoreRed.TUBE_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return type == MoreRed.get().tubeEntity.get() ? (BlockEntityTicker<T>) TubeBlockEntity.TICKER : EntityBlock.super.getTicker(level, state, type);
+		return type == MoreRed.TUBE_BLOCK_ENTITY.get() ? (BlockEntityTicker<T>) TubeBlockEntity.TICKER : EntityBlock.super.getTicker(level, state, type);
 	}
 
 	@Override

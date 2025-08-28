@@ -193,16 +193,16 @@ public class PliersItem extends Item
 	
 	public static void setPlieredTube(ItemStack stack, BlockSide blockSide)
 	{
-		stack.set(MoreRed.get().plieredTubeDataComponent.get(), blockSide);
+		stack.set(MoreRed.PLIERED_TUBE_DATA_COMPONENT.get(), blockSide);
 	}
 	
 	public static @Nullable BlockSide getPlieredTube(ItemStack stack)
 	{
-		return stack.get(MoreRed.get().plieredTubeDataComponent.get());
+		return stack.get(MoreRed.PLIERED_TUBE_DATA_COMPONENT.get());
 	}
 	
 	public static void removePlieredTube(ItemStack stack)
 	{
-		stack.remove(MoreRed.get().plieredTubeDataComponent.get());
+		stack.remove(MoreRed.PLIERED_TUBE_DATA_COMPONENT.get());
 	}
 }

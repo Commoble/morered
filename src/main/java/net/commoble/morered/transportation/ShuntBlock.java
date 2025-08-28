@@ -142,7 +142,7 @@ public class ShuntBlock extends Block implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().shuntEntity.get().create(pos, state);
+		return MoreRed.SHUNT_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

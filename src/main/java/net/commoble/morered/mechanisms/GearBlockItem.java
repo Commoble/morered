@@ -67,7 +67,7 @@ public class GearBlockItem extends BlockItem
 			
 			// firstly: if we used this on a gear/gears block, we might want to add the new gear inside that block
 			BlockState activatedState = level.getBlockState(activatedPos);
-			if (activatedState.getBlock() == MoreRed.get().gearsBlock.get()
+			if (activatedState.getBlock() == MoreRed.GEARS_BLOCK.get()
 				&& activatedState.getValue(sideProperty))
 			{
 				// use a finagled context to make sure the block is placed at the activation pos
@@ -93,7 +93,7 @@ public class GearBlockItem extends BlockItem
 			}
 			// if the position of placement contains a gear assembly
 			// but we don't have a gear on the given face,
-			if (placePosBlock == MoreRed.get().gearsBlock.get()
+			if (placePosBlock == MoreRed.GEARS_BLOCK.get()
 				&& !existingPlacePosState.getValue(sideProperty))
 			{
 				return upgradeGears(level, placePos, existingPlacePosState, sideProperty, blockItemContext);
@@ -148,7 +148,7 @@ public class GearBlockItem extends BlockItem
 	{
 		BooleanProperty newSideProperty = FaceSegmentBlock.getProperty(newAttachmentSide);
 		// set a new gear assembly using existing gear side + the new side we're placing
-		BlockState newState = MoreRed.get().gearsBlock.get().defaultBlockState()
+		BlockState newState = MoreRed.GEARS_BLOCK.get().defaultBlockState()
 			.setValue(FaceSegmentBlock.getProperty(existingGearSide), true)
 			.setValue(newSideProperty, true);
 			
@@ -167,7 +167,7 @@ public class GearBlockItem extends BlockItem
         	Map<Direction,ItemStack> items = Map.of(
         		existingGearSide, new ItemStack(existingState.getBlock()),
         		newAttachmentSide, stack.copyWithCount(1));
-        	be.set(MoreRed.get().gearsDataComponent.get(), items);
+        	be.set(MoreRed.GEARS_DATA_COMPONENT.get(), items);
         }
 		if (player instanceof ServerPlayer)
 		{

@@ -21,9 +21,9 @@ public class TubesInChunk
 		LevelChunk chunk = level.getChunkAt(pos);
 		if (chunk != null)
 		{
-			var set = chunk.getData(MoreRed.get().tubesInChunkAttachment.get());
+			var set = chunk.getData(MoreRed.TUBES_IN_CHUNK_ATTACHMENT.get());
 			consumer.accept(set, pos);
-			chunk.setData(MoreRed.get().tubesInChunkAttachment.get(), set);
+			chunk.setData(MoreRed.TUBES_IN_CHUNK_ATTACHMENT.get(), set);
 			PacketDistributor.sendToPlayersTrackingChunk(level, chunk.getPos(), new SyncTubesInChunkPacket(chunk.getPos(), Set.copyOf(set)));
 		}
 	}
@@ -47,7 +47,7 @@ public class TubesInChunk
 	
 	public static Set<BlockPos> getTubesInChunk(LevelChunk chunk)
 	{
-		return chunk.getData(MoreRed.get().tubesInChunkAttachment.get());
+		return chunk.getData(MoreRed.TUBES_IN_CHUNK_ATTACHMENT.get());
 	}
 	
 	/**

@@ -40,7 +40,7 @@ public record WindcatcherBlockEntityRenderer(ItemRenderer itemRenderer, Map<Wind
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		MechanicalState mechanicalState = states.getOrDefault(NodeShape.ofCube(), MechanicalState.ZERO);
 		float radiansPerSecond = (float)mechanicalState.angularVelocity();
-		var colorsComponent = MoreRed.get().windcatcherColorsDataComponent.get();
+		var colorsComponent = MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get();
 		WindcatcherColors colors = Objects.requireNonNullElse(be.get(colorsComponent), WindcatcherColors.DEFAULT);
 		ItemStack stack = this.stackCache.computeIfAbsent(new WindcatcherKey(be.getBlockState().getBlock(), colors), key -> {
 			ItemStack newStack = new ItemStack(key.block);

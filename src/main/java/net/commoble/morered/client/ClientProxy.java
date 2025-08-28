@@ -68,7 +68,9 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
+import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
@@ -86,8 +88,10 @@ import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
+@Mod(value=MoreRed.MODID, dist=Dist.CLIENT)
 public class ClientProxy
 {
 	public static final ClientConfig CLIENTCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.CLIENT, ClientConfig::create);
@@ -98,6 +102,28 @@ public class ClientProxy
 	public static RecipeMap recipeMap = RecipeMap.create(List.of());
 	private static List<SolderingRecipeHolder> solderingRecipes = new ArrayList<>();
 	private static boolean isHoldingSprint = false;
+
+	public ClientProxy(IEventBus modBus)
+	{
+		IEventBus gameBus = NeoForge.EVENT_BUS;
+		
+		modBus.addListener(ClientProxy::onClientSetup);
+		modBus.addListener(ClientProxy::onRegisterModelLoaders);
+		modBus.addListener(ClientProxy::onRegisterBlockStateModels);
+		modBus.addListener(ClientProxy::onRegisterBlockColors);
+		modBus.addListener(ClientProxy::onRegisterItemModels);
+		modBus.addListener(ClientProxy::onRegisterRenderers);
+		modBus.addListener(ClientProxy::onRegisterSpecialBlockModelRenderers);
+		modBus.addListener(ClientProxy::onRegisterScreens);
+		modBus.addListener(ClientProxy::onRegisterClientExtensions);
+		
+		gameBus.addListener(ClientProxy::onClientLogIn);
+		gameBus.addListener(ClientProxy::onClientLogOut);
+		gameBus.addListener(ClientProxy::onHighlightBlock);
+		gameBus.addListener(ClientProxy::onInteract);
+		gameBus.addListener(ClientProxy::onClientTick);
+		gameBus.addListener(ClientProxy::onRecipesReceived);
+	}
 	
 	public static void clear()
 	{
@@ -119,7 +145,7 @@ public class ClientProxy
 		if (chunk == null)
 			return;
 		
-		chunk.setData(MoreRed.get().postsInChunkAttachment.get(), Set.copyOf(posts));
+		chunk.setData(MoreRed.POSTS_IN_CHUNK_ATTACHMENT.get(), Set.copyOf(posts));
 	}
 	
 	@Nonnull
@@ -168,51 +194,31 @@ public class ClientProxy
 		return solderingRecipes;
 	}
 
-	public static void addClientListeners(IEventBus modBus, IEventBus forgeBus)
-	{
-		modBus.addListener(ClientProxy::onClientSetup);
-		modBus.addListener(ClientProxy::onRegisterModelLoaders);
-		modBus.addListener(ClientProxy::onRegisterBlockStateModels);
-		modBus.addListener(ClientProxy::onRegisterBlockColors);
-		modBus.addListener(ClientProxy::onRegisterItemModels);
-		modBus.addListener(ClientProxy::onRegisterRenderers);
-		modBus.addListener(ClientProxy::onRegisterSpecialBlockModelRenderers);
-		modBus.addListener(ClientProxy::onRegisterScreens);
-		modBus.addListener(ClientProxy::onRegisterClientExtensions);
-		
-		forgeBus.addListener(ClientProxy::onClientLogIn);
-		forgeBus.addListener(ClientProxy::onClientLogOut);
-		forgeBus.addListener(ClientProxy::onHighlightBlock);
-		forgeBus.addListener(ClientProxy::onInteract);
-		forgeBus.addListener(ClientProxy::onClientTick);
-		forgeBus.addListener(ClientProxy::onRecipesReceived);
-	}
-
 	@SuppressWarnings("deprecation")
 	public static void onClientSetup(FMLClientSetupEvent event)
 	{
 		// render layer setting is synchronized, safe to do during multithreading
-		MoreRed.get().logicPlates.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
-		MoreRed.get().bitwiseLogicPlates.values()
+		MoreRed.LOGIC_PLATES.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
+		MoreRed.BITWISE_LOGIC_PLATES.values()
 			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().alternatorBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().latchBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().pulseGateBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireRelayBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().redwireJunctionBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().cableJunctionBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().extractorBlock.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.get().stonemillBlock.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.ALTERNATOR_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.LATCH_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.PULSE_GATE_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.REDWIRE_RELAY_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.REDWIRE_JUNCTION_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.CABLE_JUNCTION_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.EXTRACTOR_BLOCK.get(), ChunkSectionLayer.CUTOUT);
+		ItemBlockRenderTypes.setRenderLayer(MoreRed.STONEMILL_BLOCK.get(), ChunkSectionLayer.CUTOUT);
 	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
 	{
-		event.register(MoreRed.get().solderingMenuType.get(), SolderingScreen::new);
-		event.register(MoreRed.get().loaderMenu.get(), LoaderScreen::new);
-		event.<FilterMenu, SingleSlotMenuScreen<FilterMenu>>register(MoreRed.get().filterMenu.get(), SingleSlotMenuScreen::new);
-		event.register(MoreRed.get().multiFilterMenu.get(), StandardSizeContainerScreenFactory.of(
-			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.get().multiFilterBlock.get().getDescriptionId()));
-		event.register(MoreRed.get().stonemillMenuType.get(), SingleSlotMenuScreen::new);
+		event.register(MoreRed.SOLDERING_MENU.get(), SolderingScreen::new);
+		event.register(MoreRed.LOADER_MENU.get(), LoaderScreen::new);
+		event.<FilterMenu, SingleSlotMenuScreen<FilterMenu>>register(MoreRed.FILTER_MENU.get(), SingleSlotMenuScreen::new);
+		event.register(MoreRed.MULTI_FILTER_MENU.get(), StandardSizeContainerScreenFactory.of(
+			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.MULTI_FILTER_BLOCK.get().getDescriptionId()));
+		event.register(MoreRed.STONEMILL_MENU.get(), SingleSlotMenuScreen::new);
 	}
 	
 	private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
@@ -227,9 +233,9 @@ public class ClientProxy
 					return block.getWireCount(state) == 0;
 				}
 			}, block);
-		registerWireBlock.accept(MoreRed.get().redAlloyWireBlock.get());
-		registerWireBlock.accept(MoreRed.get().bundledCableBlock.get());
-		for (var block : MoreRed.get().coloredCableBlocks)
+		registerWireBlock.accept(MoreRed.RED_ALLOY_WIRE_BLOCK.get());
+		registerWireBlock.accept(MoreRed.BUNDLED_CABLE_BLOCK.get());
+		for (var block : MoreRed.COLORED_CABLE_BLOCKS.values())
 		{
 			registerWireBlock.accept(block.get());
 		}
@@ -254,47 +260,47 @@ public class ClientProxy
 
 	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
 	{
-		MoreRed.get().logicPlates.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockTint, rob.get()));
-		event.register(ColorHandlers::getLatchBlockTint, MoreRed.get().latchBlock.get());
-		event.register(ColorHandlers::getPulseGateBlockTint, MoreRed.get().pulseGateBlock.get());
-		event.register(ColorHandlers::getAlternatorBlockTint, MoreRed.get().alternatorBlock.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwirePostBlock.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireRelayBlock.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.get().redwireJunctionBlock.get());
-		event.register(ColorHandlers::getRedAlloyWireBlockTint, MoreRed.get().redAlloyWireBlock.get());
+		MoreRed.LOGIC_PLATES.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockTint, rob.get()));
+		event.register(ColorHandlers::getLatchBlockTint, MoreRed.LATCH_BLOCK.get());
+		event.register(ColorHandlers::getPulseGateBlockTint, MoreRed.PULSE_GATE_BLOCK.get());
+		event.register(ColorHandlers::getAlternatorBlockTint, MoreRed.ALTERNATOR_BLOCK.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.REDWIRE_POST_BLOCK.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.REDWIRE_RELAY_BLOCK.get());
+		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.REDWIRE_JUNCTION_BLOCK.get());
+		event.register(ColorHandlers::getRedAlloyWireBlockTint, MoreRed.RED_ALLOY_WIRE_BLOCK.get());
 	}
 
 	static void onRegisterRenderers(RegisterRenderers event)
 	{
-		event.registerBlockEntityRenderer(MoreRed.get().alternatorBlockEntity.get(), AlternatorBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().wirePostBeType.get(), WirePostRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().cablePostBeType.get(), BundledCablePostRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().tubeEntity.get(), TubeBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().redstoneTubeEntity.get(), TubeBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().extractorEntity.get(), ExtractorBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().filterEntity.get(), FilterBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().osmosisFilterEntity.get(), OsmosisFilterBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.get().axleBlockEntity.get(), AxleBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().gearBlockEntity.get(), GearBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().gearsBlockEntity.get(), GearsBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().gearshifterBlockEntity.get(), GearshifterBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().clutchBlockEntity.get(), ClutchBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().windcatcherBlockEntity.get(), WindcatcherBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.get().stonemillBlockEntity.get(), StonemillBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.ALTERNATOR_BLOCK_ENTITY.get(), AlternatorBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.WIRE_POST_BLOCK_ENTITY.get(), WirePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.CABLE_POST_BLOCK_ENTITY.get(), BundledCablePostRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.TUBE_BLOCK_ENTITY.get(), TubeBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.REDSTONE_TUBE_BLOCK_ENTITY.get(), TubeBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.EXTRACTOR_BLOCK_ENTITY.get(), ExtractorBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.FILTER_BLOCK_ENTITY.get(), FilterBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get(), OsmosisFilterBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.AXLE_BLOCK_ENTITY.get(), AxleBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.GEAR_BLOCK_ENTITY.get(), GearBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.GEARS_BLOCK_ENTITY.get(), GearsBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.GEARSHIFTER_BLOCK_ENTITY.get(), GearshifterBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.CLUTCH_BLOCK_ENTITY.get(), ClutchBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.WINDCATCHER_BLOCK_ENTITY.get(), WindcatcherBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.STONEMILL_BLOCK_ENTITY.get(), StonemillBlockEntityRenderer::create);
 	}
 
 	static void onRegisterSpecialBlockModelRenderers(RegisterSpecialBlockModelRendererEvent event)
 	{
 		BiConsumer<Holder<? extends Block>, Holder<? extends BlockEntityType<?>>> renderBlockAsItem = (block,type) -> event.register(block.value(), new UnbakedBlockEntityWithoutLevelRenderer(block.value(), type.value()));
 		Function<Holder<? extends BlockEntityType<?>>, Consumer<Holder<? extends Block>>> renderBlock = type -> block -> renderBlockAsItem.accept(block, type);
-		MoreRed.get().axleBlocks.values().forEach(renderBlock.apply(MoreRed.get().axleBlockEntity));
-		MoreRed.get().gearBlocks.values().forEach(renderBlock.apply(MoreRed.get().gearBlockEntity));
-		MoreRed.get().gearshifterBlocks.values().forEach(renderBlock.apply(MoreRed.get().gearshifterBlockEntity));
-		MoreRed.get().clutchBlocks.values().forEach(renderBlock.apply(MoreRed.get().clutchBlockEntity));
-		MoreRed.get().windcatcherBlocks.values().forEach(renderBlock.apply(MoreRed.get().windcatcherBlockEntity));
+		MoreRed.AXLE_BLOCKS.values().forEach(renderBlock.apply(MoreRed.AXLE_BLOCK_ENTITY));
+		MoreRed.GEAR_BLOCKS.values().forEach(renderBlock.apply(MoreRed.GEAR_BLOCK_ENTITY));
+		MoreRed.GEARSHIFTER_BLOCKS.values().forEach(renderBlock.apply(MoreRed.GEARSHIFTER_BLOCK_ENTITY));
+		MoreRed.CLUTCH_BLOCKS.values().forEach(renderBlock.apply(MoreRed.CLUTCH_BLOCK_ENTITY));
+		MoreRed.WINDCATCHER_BLOCKS.values().forEach(renderBlock.apply(MoreRed.WINDCATCHER_BLOCK_ENTITY));
 		// don't bother with morered:gears because it'd just render an empty gears anyway which renders nothing
-		renderBlockAsItem.accept(MoreRed.get().extractorBlock, MoreRed.get().extractorEntity);
-		renderBlockAsItem.accept(MoreRed.get().alternatorBlock, MoreRed.get().alternatorBlockEntity);
+		renderBlockAsItem.accept(MoreRed.EXTRACTOR_BLOCK, MoreRed.EXTRACTOR_BLOCK_ENTITY);
+		renderBlockAsItem.accept(MoreRed.ALTERNATOR_BLOCK, MoreRed.ALTERNATOR_BLOCK_ENTITY);
 	}
 	
 	static void onClientLogIn(ClientPlayerNetworkEvent.LoggingIn event)
@@ -380,7 +386,7 @@ public class ClientProxy
 		// soldering recipes are always synced and received here
 		// converting them to SolderingRecipeHolder because can't deal with the RecipeHolder generics
 		RecipeMap recipeMap = event.getRecipeMap();
-		solderingRecipes = recipeMap.byType(MoreRed.get().solderingRecipeType.get())
+		solderingRecipes = recipeMap.byType(MoreRed.SOLDERING_RECIPE_TYPE.get())
 			.stream()
 			.map(recipeHolder -> new SolderingRecipeHolder(recipeHolder.id().location(), recipeHolder.value()))
 			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().getItem().getDescriptionId())))

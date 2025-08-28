@@ -36,14 +36,14 @@ public class RedstoneTubeBlock extends TubeBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().redstoneTubeEntity.get().create(pos, state);
+		return MoreRed.REDSTONE_TUBE_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return type == MoreRed.get().redstoneTubeEntity.get()
+		return type == MoreRed.REDSTONE_TUBE_BLOCK_ENTITY.get()
 			? (BlockEntityTicker<T>) TubeBlockEntity.TICKER
 			: super.getTicker(level, state, type);
 	}

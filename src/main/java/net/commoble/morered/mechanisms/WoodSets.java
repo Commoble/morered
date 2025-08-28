@@ -7,6 +7,7 @@ import net.minecraft.Util;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.MapColor;
 
 public final class WoodSets
@@ -27,5 +28,15 @@ public final class WoodSets
 		map.put("warped", new WoodSet(Blocks.STRIPPED_WARPED_STEM, MapColor.WARPED_STEM, SoundType.STEM, false));
 	});
 		
-	public static record WoodSet(Block strippedLog, MapColor mapColor, SoundType soundType, boolean ignitedByLava) {}
+	public static record WoodSet(Block strippedLog, MapColor mapColor, SoundType soundType, boolean ignitedByLava)
+	{
+		public BlockBehaviour.Properties finagleProps(BlockBehaviour.Properties props)
+		{
+			if (this.ignitedByLava)
+			{
+				props.ignitedByLava();
+			}
+			return props;
+		}
+	}
 }

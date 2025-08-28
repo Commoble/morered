@@ -347,7 +347,7 @@ public class MoreRedDataGen
 		    "ttt",
 		    "###");
 		
-		BlockDataHelper.create(MoreRed.get().tubeBlock.get(), context, MoreRedDataGen::tubeBlockState, MoreRedDataGen::simpleLoot)
+		BlockDataHelper.create(MoreRed.TUBE_BLOCK.get(), context, MoreRedDataGen::tubeBlockState, MoreRedDataGen::simpleLoot)
 			.localize("Tube")
 			.tags(MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
 			.simpleBlockItem()
@@ -359,7 +359,7 @@ public class MoreRedDataGen
 					'i', ingredient(Tags.Items.INGOTS_COPPER),
 					'G', ingredient(Tags.Items.GLASS_BLOCKS_COLORLESS))))
 				.tags(MoreRed.Tags.Items.TUBES));
-		tubeBlock(Names.REDSTONE_TUBE, "Redstone Tube", context, redstoneTubeBlockState(MoreRed.get().redstoneTubeBlock.get()))
+		tubeBlock(Names.REDSTONE_TUBE, "Redstone Tube", context, redstoneTubeBlockState(MoreRed.REDSTONE_TUBE_BLOCK.get()))
 			.model("block/%s_on", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
 				.addTexture("all", ResourceLocation.fromNamespaceAndPath(MoreRed.MODID, "block/redstone_tube_on")))
 			.tags(MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
@@ -378,7 +378,7 @@ public class MoreRedDataGen
 					List.of("csc", "sGs", "csc"),
 					Map.of(
 						'c', ingredient(Tags.Items.COBBLESTONES),
-						's', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
+						's', Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()),
 						'G', ingredient(Tags.Items.FENCE_GATES)))));
 		VariantsMechanicalComponent extractorMachine = VariantsMechanicalComponent.builder(true);
 		for (Direction attachDir : Direction.values())
@@ -386,7 +386,7 @@ public class MoreRedDataGen
 			for (int i=0; i<4; i++)
 			{
 				final int rotation = i;
-				BlockState state = MoreRed.get().extractorBlock.get().defaultBlockState()
+				BlockState state = MoreRed.EXTRACTOR_BLOCK.get().defaultBlockState()
 					.setValue(GearshifterBlock.ATTACHMENT_DIRECTION, attachDir)
 					.setValue(GearshifterBlock.ROTATION, rotation);
 				Direction pumpDir = attachDir.getOpposite();
@@ -419,7 +419,7 @@ public class MoreRedDataGen
 						'p', ingredient(ItemTags.PLANKS),
 						'-', ingredient(MoreRed.Tags.Items.AXLES),
 						'G', ingredient(MoreRed.Tags.Items.GEARS),
-						'S', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()))));
+						'S', Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()))));
 				ResourceLocation pumpId = mangle(helper.id(), "%s_pump");
 				ResourceLocation pumpBlockModel = blockModel(pumpId);
 				ResourceLocation axleId = mangle(helper.id(), "%s_axle");
@@ -446,7 +446,7 @@ public class MoreRedDataGen
 			.simpleBlockItem()
 			.help(helper -> helper
 				.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
-					Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
+					Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()),
 					Ingredient.of(Items.ITEM_FRAME)))));
 		sixWayBlock(Names.MULTIFILTER, "Multifilter", context)
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -456,7 +456,7 @@ public class MoreRedDataGen
 					List.of("ifi", "fCf", "ifi"),
 					Map.of(
 						'i', ingredient(Tags.Items.INGOTS_IRON),
-						'f', Ingredient.of(MoreRed.get().filterBlock.get().asItem()),
+						'f', Ingredient.of(MoreRed.FILTER_BLOCK.get().asItem()),
 						'C', ingredient(Tags.Items.CHESTS)))));
 		sixWayBlock(Names.LOADER, "Loader", context)
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -466,9 +466,9 @@ public class MoreRedDataGen
 					List.of("sss", "P S", "sss"),
 					Map.of(
 						's', ingredient(Tags.Items.COBBLESTONES),
-						'S', Ingredient.of(MoreRed.get().shuntBlock.get().asItem()),
+						'S', Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()),
 						'P', Ingredient.of(Items.PISTON)))));
-		BlockDataHelper.create(MoreRed.get().osmosisFilterBlock.get(), context, MoreRedDataGen::sixWayBlockState, MoreRedDataGen::simpleLoot)
+		BlockDataHelper.create(MoreRed.OSMOSIS_FILTER_BLOCK.get(), context, MoreRedDataGen::sixWayBlockState, MoreRedDataGen::simpleLoot)
 			.localize("Osmosis Filter")
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
 			.blockItemWithoutItemModel() // model isn't generated
@@ -476,13 +476,13 @@ public class MoreRedDataGen
 				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("f", "s", "h"),
 					Map.of(
-						'f', Ingredient.of(MoreRed.get().filterBlock.get().asItem()),
+						'f', Ingredient.of(MoreRed.FILTER_BLOCK.get().asItem()),
 						's', ingredient(Tags.Items.SLIME_BALLS),
 						'h', Ingredient.of(Items.HOPPER)))));
 		
-		BlockDataHelper.create(MoreRed.get().osmosisSlimeBlock.get(), context, sixWayBlockState(MoreRed.get().osmosisSlimeBlock.get()));
+		BlockDataHelper.create(MoreRed.OSMOSIS_SLIME_BLOCK.get(), context, sixWayBlockState(MoreRed.OSMOSIS_SLIME_BLOCK.get()));
 		
-		BlockDataHelper.createWithoutLoot(MoreRed.get().airFoilBlock.get(), context,
+		BlockDataHelper.createWithoutLoot(MoreRed.AIRFOIL_BLOCK.get(), context,
 			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(blockId(Blocks.AIR)))));
 			
 		
@@ -491,7 +491,7 @@ public class MoreRedDataGen
 		spool(Names.REDWIRE_SPOOL, "Redwire Spool", context, MoreRed.Tags.Items.RED_ALLOY_WIRES);
 		simpleItem(Names.RED_ALLOY_INGOT, "Red Alloy Ingot", context)
 			.tags(REDSTONE_ALLOY_INGOTS);
-		Util.make(MoreRed.get().tubingPliers.get(), pliers -> ItemDataHelper.create(pliers, context, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
+		Util.make(MoreRed.TUBING_PLIERS.get(), pliers -> ItemDataHelper.create(pliers, context, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
 			.addTexture("layer0", mangle(MoreRed.id(Names.PLIERS), "item/%s")))
 			.tags(Tags.Items.TOOLS_WRENCH)
 			.recipe(RecipeHelpers.shaped(pliers, 1, CraftingBookCategory.MISC,
@@ -504,7 +504,7 @@ public class MoreRedDataGen
 		// data for vanilla things
 		recipes.put(MoreRed.id("smooth_stone_slab_from_stone_plate"), RecipeHelpers.shaped(Items.SMOOTH_STONE_SLAB, 1, CraftingBookCategory.BUILDING, List.of(
 				"###"), Map.of(
-				'#', Ingredient.of(MoreRed.get().stonePlateBlock.get()))));
+				'#', Ingredient.of(MoreRed.STONE_PLATE_BLOCK.get()))));
 		
 		itemTags.tag(SMOOTH_STONE)
 			.add(Items.SMOOTH_STONE.builtInRegistryHolder().key());
@@ -541,7 +541,7 @@ public class MoreRedDataGen
 		for (int i=0; i<16; i++)
 		{
 			final DyeColor color = DyeColor.values()[i];
-			final DeferredHolder<Block, PoweredWireBlock> wireBlockHolder = MoreRed.get().coloredCableBlocks[i];
+			final DeferredHolder<Block, PoweredWireBlock> wireBlockHolder = MoreRed.COLORED_CABLE_BLOCKS.get(color);
 			final ResourceLocation wireBlockId = wireBlockHolder.getId();
 			final String modid = wireBlockId.getNamespace();
 			final String wireBlockPath = wireBlockId.getPath();
@@ -583,7 +583,7 @@ public class MoreRedDataGen
 			
 			// color tubes
 			// capitalize each letter of each word in color name
-			final DeferredHolder<Block, ColoredTubeBlock> tubeBlockHolder = MoreRed.get().coloredTubeBlocks[i];
+			final DeferredHolder<Block, ColoredTubeBlock> tubeBlockHolder = MoreRed.COLORED_TUBE_BLOCKS.get(color);
 			final ResourceLocation tubeBlockId = tubeBlockHolder.getId();
 			final String tubeBlockPath = tubeBlockId.getPath();
 			
@@ -637,7 +637,7 @@ public class MoreRedDataGen
 					new RawConnection(Optional.of(axis.getNegative()), NodeShape.ofSide(axis.getPositive()), Parity.POSITIVE, 0))));
 			}
 			
-			BlockDataHelper.create(MoreRed.get().axleBlocks.get(woodName).get(), context,
+			BlockDataHelper.create(MoreRed.AXLE_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
@@ -684,7 +684,7 @@ public class MoreRedDataGen
 				gearMechanicalComponent.addVariant(GearBlock.FACING, directionToNeighbor, new RawNode(NodeShape.ofSide(directionToNeighbor), 0D,0D,0D, 2D, connections));
 			}
 			
-			BlockDataHelper.create(MoreRed.get().gearBlocks.get(woodName).get(), context,
+			BlockDataHelper.create(MoreRed.GEAR_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
@@ -709,7 +709,7 @@ public class MoreRedDataGen
 				});
 			
 			VariantsMechanicalComponent gearshifterMechanicalComponent = VariantsMechanicalComponent.builder(true);
-			BlockState defaultGearshifterState = MoreRed.get().gearshifterBlocks.get(woodName).get().defaultBlockState();
+			BlockState defaultGearshifterState = MoreRed.GEARSHIFTER_BLOCKS.get(woodName).get().defaultBlockState();
 			for (Direction bigDir : Direction.values())
 			{
 				for (int i=0; i<4; i++)
@@ -735,7 +735,7 @@ public class MoreRedDataGen
 							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.POSITIVE, 0))));
 				}
 			}
-			BlockDataHelper.create(MoreRed.get().gearshifterBlocks.get(woodName).get(), context,
+			BlockDataHelper.create(MoreRed.GEARSHIFTER_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock)
@@ -766,8 +766,8 @@ public class MoreRedDataGen
 					helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
 						"-G",
 						"G "), Map.of(
-						'-', Ingredient.of(MoreRed.get().axleBlocks.get(woodName).get()),
-						'G', Ingredient.of(MoreRed.get().gearBlocks.get(woodName).get()))));
+						'-', Ingredient.of(MoreRed.AXLE_BLOCKS.get(woodName).get()),
+						'G', Ingredient.of(MoreRed.GEAR_BLOCKS.get(woodName).get()))));
 				});
 			
 			VariantsMechanicalComponent clutchMachine = VariantsMechanicalComponent.builder(true);
@@ -803,7 +803,7 @@ public class MoreRedDataGen
 			
 			ResourceLocation clutchBlockModel = MoreRed.id("block/clutch");
 			ResourceLocation clutchBlockModelExtended = MoreRed.id("block/clutch_extended");
-			BlockDataHelper.create(MoreRed.get().clutchBlocks.get(woodName).get(), context,
+			BlockDataHelper.create(MoreRed.CLUTCH_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.variants(clutchVariants -> {
 					for (Direction facing : Direction.values())
 					{
@@ -836,7 +836,7 @@ public class MoreRedDataGen
 					.addTexture("side", strippedLogBlockModel)
 					.addTexture("top", strippedLogTopTexture))
 				.help(helper -> helper.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
-					Ingredient.of(MoreRed.get().gearBlocks.get(woodName).get().asItem()),
+					Ingredient.of(MoreRed.GEAR_BLOCKS.get(woodName).get().asItem()),
 					Ingredient.of(Items.PISTON)))));
 			
 			
@@ -857,13 +857,13 @@ public class MoreRedDataGen
 					new RawConnection(Optional.of(Direction.UP), NodeShape.ofSide(Direction.DOWN), Parity.POSITIVE, 0),
 					new RawConnection(Optional.of(Direction.DOWN), NodeShape.ofSide(Direction.UP), Parity.POSITIVE, 0))));
 			}
-			BlockDataHelper.create(MoreRed.get().windcatcherBlocks.get(woodName).get(), context,
+			BlockDataHelper.create(MoreRed.WINDCATCHER_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> LootTable.lootTable()
 					.withPool(LootPool.lootPool()
 						.add(LootItem.lootTableItem(block)
 							.apply(CopyComponentsFunction.copyComponents(CopyComponentsFunction.Source.BLOCK_ENTITY)
-								.include(MoreRed.get().windcatcherColorsDataComponent.get())))
+								.include(MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get())))
 						.when(ExplosionCondition.survivesExplosion()))
 					.build())
 				.localize()
@@ -885,7 +885,7 @@ public class MoreRedDataGen
 					"-W-"), Map.of(
 					'W', ingredient(ItemTags.WOOL),
 					'-', ingredient(Tags.Items.RODS_WOODEN),
-					'o', Ingredient.of(MoreRed.get().axleBlocks.get(woodName).get())))));			
+					'o', Ingredient.of(MoreRed.AXLE_BLOCKS.get(woodName).get())))));			
 		}
 		
 		MultipartMechanicalComponent gearsMechanicalComponent = MultipartMechanicalComponent.builder(true);
@@ -924,7 +924,7 @@ public class MoreRedDataGen
 					MultipartMechanicalComponent.Case.create(FaceSegmentBlock.getProperty(directionToNeighbor),true),
 					new RawNode(NodeShape.ofSide(directionToNeighbor), 0,0,0,2D, connections)));
 		}
-		BlockDataHelper.create(MoreRed.get().gearsBlock.get(), context,
+		BlockDataHelper.create(MoreRed.GEARS_BLOCK.get(), context,
 			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 			(id,block) -> LootTable.lootTable()
 				.withPool(LootPool.lootPool()
@@ -936,7 +936,7 @@ public class MoreRedDataGen
 			.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", ResourceLocation.withDefaultNamespace("block/stripped_oak_log_top")))
 			.mechanicalComponent(gearsMechanicalComponent);
 		
-		BlockDataHelper.create(MoreRed.get().stonemillBlock.get(), context,
+		BlockDataHelper.create(MoreRed.STONEMILL_BLOCK.get(), context,
 			(id,block) -> BlockStateBuilder.variants(variants -> variants
 				.addVariant(StonemillBlock.HORIZONTAL_AXIS, Axis.X, BlockStateBuilder.model(MoreRed.id("block/stonemill_block"), Quadrant.R0, Quadrant.R90))
 				.addVariant(StonemillBlock.HORIZONTAL_AXIS, Axis.Z, BlockStateBuilder.model(MoreRed.id("block/stonemill_block")))),
@@ -985,19 +985,19 @@ public class MoreRedDataGen
 			
 		
 		// special recipes
-		recipes.put(MoreRed.get().windcatcherDyeRecipeSerializer.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS)));
+		recipes.put(MoreRed.WINDCATCHER_DYE_RECIPE_SERIALIZER.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS)));
 		
 		// add recipes for unsupported wood types so they can default to oak
 		Ingredient unsupportedStrippedLogsIngredient = new Ingredient(new DifferenceIngredient(
 			ingredient(Tags.Items.STRIPPED_LOGS),
 			ingredient(MoreRed.Tags.Items.SUPPORTED_STRIPPED_LOGS)));
 		
-		recipes.put(MoreRed.id("oak_" + Names.AXLE), RecipeHelpers.shaped(MoreRed.get().axleBlocks.get("oak").get().asItem(), 16, CraftingBookCategory.BUILDING, List.of(
+		recipes.put(MoreRed.id("oak_" + Names.AXLE), RecipeHelpers.shaped(MoreRed.AXLE_BLOCKS.get("oak").get().asItem(), 16, CraftingBookCategory.BUILDING, List.of(
 			"#",
 			"#",
 			"#"),
 			Map.of('#', unsupportedStrippedLogsIngredient)));
-		recipes.put(MoreRed.id("oak_" + Names.GEAR), RecipeHelpers.shaped(MoreRed.get().gearBlocks.get("oak").get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
+		recipes.put(MoreRed.id("oak_" + Names.GEAR), RecipeHelpers.shaped(MoreRed.GEAR_BLOCKS.get("oak").get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
 			"///",
 			"/O/",
 			"///"),
@@ -1180,8 +1180,8 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper hexidecrubrometerBlock(DataGenContext context)
 	{
-		Block block = MoreRed.get().hexidecrubrometerBlock.get();
-		ResourceLocation blockId = MoreRed.get().hexidecrubrometerBlock.getId();
+		Block block = MoreRed.HEXIDECRUBROMETER_BLOCK.get();
+		ResourceLocation blockId = MoreRed.HEXIDECRUBROMETER_BLOCK.getId();
 		
 		var helper = BlockDataHelper.create(block, context, BlockStateBuilder.variants(variants -> {
 			for (int i=0; i<16; i++)

@@ -20,7 +20,7 @@ public class SingleInputBitwiseGateBlock extends BitwiseGateBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().singleInputBitwiseGateBeType.get().create(pos, state);
+		return MoreRed.SINGLE_INPUT_BITWISE_GATE_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

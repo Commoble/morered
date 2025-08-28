@@ -29,7 +29,7 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 	
 	public OsmosisFilterBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().osmosisFilterEntity.get(), pos, state);
+		this(MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	public boolean getCheckedItemsAndMarkChecked()

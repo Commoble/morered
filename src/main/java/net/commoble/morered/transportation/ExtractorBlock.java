@@ -136,7 +136,7 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().extractorEntity.get().create(pos,state);
+		return MoreRed.EXTRACTOR_BLOCK_ENTITY.get().create(pos,state);
 	}
 
 	private static final BlockEntityTicker<GenericBlockEntity> TICKER = ExtractorBlock::serverTick;
@@ -144,7 +144,7 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return (!level.isClientSide) && type == MoreRed.get().extractorEntity.get()
+		return (!level.isClientSide) && type == MoreRed.EXTRACTOR_BLOCK_ENTITY.get()
 			? (BlockEntityTicker<T>)TICKER
 			: null;
 	}

@@ -19,7 +19,7 @@ public class RedstoneTubeBlockEntity extends TubeBlockEntity
 		
 	public RedstoneTubeBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().redstoneTubeEntity.get(), pos, state);
+		this(MoreRed.REDSTONE_TUBE_BLOCK_ENTITY.get(), pos, state);
 	}
 
 	@Override

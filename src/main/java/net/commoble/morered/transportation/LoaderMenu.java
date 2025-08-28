@@ -22,7 +22,7 @@ public class LoaderMenu extends AbstractContainerMenu
 
 	public LoaderMenu(int id, Inventory playerInventory, BlockPos pos)
 	{
-		super(MoreRed.get().loaderMenu.get(), id);
+		super(MoreRed.LOADER_MENU.get(), id);
 		this.player = playerInventory.player;
 		this.pos = pos;
 
@@ -47,7 +47,7 @@ public class LoaderMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player playerIn)
 	{
-		return AbstractContainerMenu.stillValid(ContainerLevelAccess.create(playerIn.level(), this.pos), playerIn, MoreRed.get().loaderBlock.get());
+		return AbstractContainerMenu.stillValid(ContainerLevelAccess.create(playerIn.level(), this.pos), playerIn, MoreRed.LOADER_BLOCK.get());
 	}
 
 	/**

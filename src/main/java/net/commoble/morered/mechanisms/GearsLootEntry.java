@@ -36,7 +36,7 @@ public class GearsLootEntry extends LootPoolSingletonContainer
 		if (state.getBlock() instanceof GearsBlock
 			&& context.getParameter(LootContextParams.BLOCK_ENTITY) instanceof GenericBlockEntity be)
 		{
-			var items = be.get(MoreRed.get().gearsDataComponent.get());
+			var items = be.get(MoreRed.GEARS_DATA_COMPONENT.get());
 			if (items == null)
 				return;
 			for (Direction dir : Direction.values())
@@ -56,7 +56,7 @@ public class GearsLootEntry extends LootPoolSingletonContainer
 	@Override
 	public LootPoolEntryType getType()
 	{
-		return MoreRed.get().gearsLootEntry.get();
+		return MoreRed.GEARS_LOOT_ENTRY.get();
 	}
 
     public static LootPoolSingletonContainer.Builder<?> gearsLoot() {

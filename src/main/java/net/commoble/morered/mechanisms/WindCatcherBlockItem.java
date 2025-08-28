@@ -47,7 +47,7 @@ public class WindCatcherBlockItem extends BlockItem
 			for (int segment=0; segment<8; segment++)
 			{
 				BlockPos airFoilPos = AirFoilBlock.getAirFoilPos(segment, corePos);
-				level.setBlock(airFoilPos, MoreRed.get().airFoilBlock.get().defaultBlockState().setValue(AirFoilBlock.SEGMENT, segment), Block.UPDATE_ALL);
+				level.setBlock(airFoilPos, MoreRed.AIRFOIL_BLOCK.get().defaultBlockState().setValue(AirFoilBlock.SEGMENT, segment), Block.UPDATE_ALL);
 			}
 		}
 		return true;

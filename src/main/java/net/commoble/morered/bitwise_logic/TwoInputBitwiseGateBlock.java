@@ -22,7 +22,7 @@ public class TwoInputBitwiseGateBlock extends BitwiseGateBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().twoInputBitwiseGateBeType.get().create(pos, state);
+		return MoreRed.TWO_INPUT_BITWISE_GATE_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

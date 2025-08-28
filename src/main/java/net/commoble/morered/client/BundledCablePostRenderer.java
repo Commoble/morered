@@ -86,7 +86,7 @@ public class BundledCablePostRenderer implements BlockEntityRenderer<WirePostBlo
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.getItem() instanceof WireSpoolItem)
 			{
-				BlockPos positionOfCurrentPostOfPlayer = stack.get(MoreRed.get().spooledPostComponent.get());
+				BlockPos positionOfCurrentPostOfPlayer = stack.get(MoreRed.SPOOLED_POST_DATA_COMPONENT.get());
 				if (positionOfCurrentPostOfPlayer != null)
 				{
 					EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();

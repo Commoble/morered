@@ -3,8 +3,8 @@ package net.commoble.morered.client.emi;
 //@EmiEntrypoint
 public class EmiProxy //implements EmiPlugin
 {
-//	public static final EmiStack SOLDERING_ICON = EmiStack.of(MoreRed.get().solderingTableBlock.get());
-//	public static final EmiRecipeCategory SOLDERING_CATEGORY = new EmiRecipeCategory(MoreRed.get().solderingSerializer.getId(), SOLDERING_ICON);
+//	public static final EmiStack SOLDERING_ICON = EmiStack.of(MoreRed.SolderingTableBlock.get());
+//	public static final EmiRecipeCategory SOLDERING_CATEGORY = new EmiRecipeCategory(MoreRed.SolderingSerializer.getId(), SOLDERING_ICON);
 //
 //	@Override
 //	public void register(EmiRegistry registry)
@@ -12,7 +12,7 @@ public class EmiProxy //implements EmiPlugin
 //		registry.addCategory(SOLDERING_CATEGORY);
 //		registry.addWorkstation(SOLDERING_CATEGORY, SOLDERING_ICON);
 //		
-//		for (var recipe : registry.getRecipeManager().getAllRecipesFor(MoreRed.get().solderingRecipeType.get()))
+//		for (var recipe : registry.getRecipeManager().getAllRecipesFor(MoreRed.SolderingRecipeType.get()))
 //		{
 //			registry.addRecipe(SolderingEmiRecipe.create(recipe));
 //		}

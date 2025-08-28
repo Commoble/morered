@@ -33,7 +33,7 @@ public class DistributorBlockEntity extends BlockEntity
 	
 	public DistributorBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().distributorEntity.get(), pos, state);
+		this(MoreRed.DISTRIBUTOR_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	public IItemHandler getItemHandler(@Nullable Direction side)

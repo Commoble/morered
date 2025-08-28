@@ -107,6 +107,6 @@ public class FilterBlock extends AbstractFilterBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().filterEntity.get().create(pos, state);
+		return MoreRed.FILTER_BLOCK_ENTITY.get().create(pos, state);
 	}
 }

@@ -91,7 +91,7 @@ public class AlternatorBlock extends PlateBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().alternatorBlockEntity.get().create(pos, state);
+		return MoreRed.ALTERNATOR_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	private static final BlockEntityTicker<GenericBlockEntity> TICKER = AlternatorBlock::serverTick;
@@ -99,7 +99,7 @@ public class AlternatorBlock extends PlateBlock implements EntityBlock
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return (!level.isClientSide) && type == MoreRed.get().alternatorBlockEntity.get()
+		return (!level.isClientSide) && type == MoreRed.ALTERNATOR_BLOCK_ENTITY.get()
 			? (BlockEntityTicker<T>)TICKER
 			: null;
 	}

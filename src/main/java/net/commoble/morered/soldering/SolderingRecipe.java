@@ -48,13 +48,13 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 	@Override
 	public RecipeType<? extends Recipe<CraftingInput>> getType()
 	{
-		return MoreRed.get().solderingRecipeType.get();
+		return MoreRed.SOLDERING_RECIPE_TYPE.get();
 	}
 
 	@Override
 	public RecipeSerializer<? extends Recipe<CraftingInput>> getSerializer()
 	{
-		return MoreRed.get().solderingSerializer.get();
+		return MoreRed.SOLDERING_RECIPE_SERIALIZER.get();
 	}
 	
 	public static boolean doesPlayerHaveIngredients(Inventory playerInventory, @NotNull SolderingRecipe recipe)

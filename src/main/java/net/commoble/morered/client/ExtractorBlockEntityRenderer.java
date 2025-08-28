@@ -36,7 +36,7 @@ public record ExtractorBlockEntityRenderer(
 {
 	public static ExtractorBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		ResourceLocation blockId = MoreRed.get().extractorBlock.getId();
+		ResourceLocation blockId = MoreRed.EXTRACTOR_BLOCK.getId();
 		ResourceLocation pumpModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_pump");
 		ResourceLocation axleModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
 		ResourceLocation bagModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_bag");

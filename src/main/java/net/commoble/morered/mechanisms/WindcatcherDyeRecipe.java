@@ -90,14 +90,14 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 		XY offset = findOffset(input);
 		XY actualWindcatcherCoord = this.windcatcher.add(offset);
 		ItemStack windcatcher = input.getItem(actualWindcatcherCoord.x(), actualWindcatcherCoord.y());
-		WindcatcherColors colors = Objects.requireNonNullElse(windcatcher.get(MoreRed.get().windcatcherColorsDataComponent.get()), WindcatcherColors.DEFAULT);
+		WindcatcherColors colors = Objects.requireNonNullElse(windcatcher.get(MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get()), WindcatcherColors.DEFAULT);
 		DyeColor north = this.getColor(input, this.north.add(offset), colors.north());
 		DyeColor south = this.getColor(input, this.south.add(offset), colors.south());
 		DyeColor west = this.getColor(input, this.west.add(offset), colors.west());
 		DyeColor east = this.getColor(input, this.east.add(offset), colors.east());
 		WindcatcherColors newColors = new WindcatcherColors(north,south,west,east);
 		ItemStack result = windcatcher.copyWithCount(1);
-		result.set(MoreRed.get().windcatcherColorsDataComponent.get(), newColors);
+		result.set(MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get(), newColors);
 		return result;
 	}
 	
@@ -156,6 +156,6 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 	@Override
 	public RecipeSerializer<? extends CustomRecipe> getSerializer()
 	{
-		return MoreRed.get().windcatcherDyeRecipeSerializer.get();
+		return MoreRed.WINDCATCHER_DYE_RECIPE_SERIALIZER.get();
 	}
 }

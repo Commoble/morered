@@ -29,7 +29,7 @@ public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 	
 	public SolderingCategory(IGuiHelper guiHelper)
 	{
-		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.get().solderingTableBlock.get()));
+		this.icon = guiHelper.createDrawableIngredient(VanillaTypes.ITEM_STACK, new ItemStack(MoreRed.SOLDERING_TABLE_BLOCK.get()));
 		this.background = guiHelper.createDrawable(CRAFTING_TEXTURE, 29, 16, 116, 54);
 	}
 	

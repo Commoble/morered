@@ -1,10 +1,8 @@
 package net.commoble.morered;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
@@ -12,8 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
@@ -32,7 +29,6 @@ import net.commoble.morered.bitwise_logic.ThreeInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.ThreeInputBitwiseGateBlockEntity;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlockEntity;
-import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.mechanisms.AirFoilBlock;
 import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.ClutchBlock;
@@ -170,12 +166,11 @@ import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
+import net.neoforged.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
-import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
@@ -198,8 +193,6 @@ import net.neoforged.neoforge.registries.datamaps.RegisterDataMapTypesEvent;
 public class MoreRed
 {
 	public static final String MODID = "morered";
-	private static MoreRed instance;
-	public static MoreRed get() { return instance; }
 	
 	public static ResourceLocation id(String name)
 	{
@@ -208,102 +201,456 @@ public class MoreRed
 	
 	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
 	public static final ToIntFunction<LevelReader> NO_SOURCE = reader -> 0;
+	private static final BlockBehaviour.StatePredicate NEVER_STATE_PREDICATE = ($,$$,$$$) -> false;
+	
+	private static final DeferredRegister<Block> BLOCKS = defreg(Registries.BLOCK);
+	private static final DeferredRegister<Item> ITEMS = defreg(Registries.ITEM);
+	private static final DeferredRegister<CreativeModeTab> TABS = defreg(Registries.CREATIVE_MODE_TAB);
+	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = defreg(Registries.BLOCK_ENTITY_TYPE);
+	private static final DeferredRegister<MenuType<?>> MENU_TYPES = defreg(Registries.MENU);
+	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = defreg(Registries.RECIPE_SERIALIZER);
+	private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = defreg(Registries.RECIPE_TYPE);
+	private static final DeferredRegister<LootPoolEntryType> LOOT_ENTRIES = defreg(Registries.LOOT_POOL_ENTRY_TYPE);
+	private static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTIONS = defreg(Registries.LOOT_FUNCTION_TYPE);
+	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = defreg(NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
+	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = defreg(Registries.DATA_COMPONENT_TYPE);
+	private static final DeferredRegister<MapCodec<? extends SignalComponent>> SIGNAL_COMPONENT_TYPES = defreg(ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
+	
+	public static final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> LOGIC_PLATES = new HashMap<>();
+	public static final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseGateBlock>> BITWISE_LOGIC_PLATES = new HashMap<>();
+		
+	// data component types
+	public static final DeferredHolder<DataComponentType<?>, DataComponentType<Map<Direction,ItemStack>>> GEARS_DATA_COMPONENT = DATA_COMPONENT_TYPES.register(Names.GEARS, () -> DataComponentType.<Map<Direction,ItemStack>>builder()
+		.persistent(Codec.unboundedMap(Direction.CODEC, ItemStack.OPTIONAL_CODEC))
+		.networkSynchronized(ByteBufCodecs.map(HashMap::new, Direction.STREAM_CODEC, ItemStack.OPTIONAL_STREAM_CODEC))
+		.build());
+	public static final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> PLIERED_TUBE_DATA_COMPONENT = DATA_COMPONENT_TYPES.register(Names.PLIERED_TUBE, () -> DataComponentType.<BlockSide>builder()
+		.networkSynchronized(BlockSide.STREAM_CODEC)
+		.build());
+	public static final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> SPOOLED_POST_DATA_COMPONENT = DATA_COMPONENT_TYPES.register(Names.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
+		.networkSynchronized(BlockPos.STREAM_CODEC)
+		.build());
+	public static final DeferredHolder<DataComponentType<?>, DataComponentType<StonemillData>> STONEMILL_DATA_COMPONENT = DATA_COMPONENT_TYPES.register(Names.STONEMILL, () -> DataComponentType.<StonemillData>builder()
+		.persistent(StonemillData.CODEC)
+		.build());
+	public static final DeferredHolder<DataComponentType<?>, DataComponentType<WindcatcherColors>> WINDCATCHER_COLORS_DATA_COMPONENT = DATA_COMPONENT_TYPES.register(Names.WINDCATCHER_COLORS, () -> DataComponentType.<WindcatcherColors>builder()
+		.persistent(WindcatcherColors.CODEC)
+		.networkSynchronized(WindcatcherColors.STREAM_CODEC)
+		.build());
+	
+	// blocks and items! the order they're defined here affects the creative tab
+	// group them by categories and then roughly alphabetical order within categories
+	public static final DeferredHolder<Block, SolderingTableBlock> SOLDERING_TABLE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.SOLDERING_TABLE,
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion(),
+		SolderingTableBlock::new);
+	public static final DeferredHolder<Block, PlateBlock> STONE_PLATE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.STONE_PLATE,
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD),
+		PlateBlock::new);
+	
+	// logic plates
+	public static final DeferredHolder<Block, AlternatorBlock> ALTERNATOR_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.ALTERNATOR,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.STONE)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(0)
+			.sound(SoundType.WOOD)
+			.noOcclusion(),
+		AlternatorBlock::new);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> AND_GATE_BLOCK = registerLogicGateType(BLOCKS, ITEMS, Names.AND_GATE, LogicFunctions.AND, LogicFunctionPlateBlock.THREE_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> DIODE = registerLogicGateType(BLOCKS, ITEMS, Names.DIODE, LogicFunctions.INPUT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
+	public static final DeferredHolder<Block, LatchBlock> LATCH_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.LATCH,
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD),
+		LatchBlock::new);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> MULTIPLEXER = registerLogicGateType(BLOCKS, ITEMS, Names.MULTIPLEXER, LogicFunctions.MULTIPLEX, LogicFunctionPlateBlock.THREE_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> NAND_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.NAND_GATE, LogicFunctions.NAND, LogicFunctionPlateBlock.THREE_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> NOR_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.NOR_GATE, LogicFunctions.NOR, LogicFunctionPlateBlock.THREE_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> NOT_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.NOT_GATE, LogicFunctions.NOT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> OR_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.OR_GATE, LogicFunctions.OR, LogicFunctionPlateBlock.THREE_INPUTS);
+	public static final DeferredHolder<Block, PulseGateBlock> PULSE_GATE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.PULSE_GATE,
+		() ->BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD),
+		PulseGateBlock::new);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> TWO_INPUT_AND_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.TWO_INPUT_AND_GATE, LogicFunctions.AND_2, LogicFunctionPlateBlock.T_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> TWO_INPUT_NAND_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.TWO_INPUT_NAND_GATE, LogicFunctions.NAND_2, LogicFunctionPlateBlock.T_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> XNOR_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.XNOR_GATE, LogicFunctions.XNOR_AC, LogicFunctionPlateBlock.T_INPUTS);
+	public static final DeferredHolder<Block, LogicFunctionPlateBlock> XOR_GATE = registerLogicGateType(BLOCKS, ITEMS, Names.XOR_GATE, LogicFunctions.XOR_AC, LogicFunctionPlateBlock.T_INPUTS);
+	
+	// bitwise gates
+	static
+	{
+		// bitwise logic gates store state in a TE instead of block properties
+		// they don't need to have their properties defined on construction but they do need to be registered to the TE type they use
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, SingleInputBitwiseGateBlock> singleInput = SingleInputBitwiseGateBlock::new;
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, TwoInputBitwiseGateBlock> twoInputs = TwoInputBitwiseGateBlock::new;
+		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, ThreeInputBitwiseGateBlock> threeInputs = ThreeInputBitwiseGateBlock::new;
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_AND_GATE, BitwiseLogicFunctions.AND_2, twoInputs);
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_DIODE, BitwiseLogicFunctions.INPUT_B, singleInput);
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_MULTIPLEXER, BitwiseLogicFunctions.MULTIPLEX, threeInputs);
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_NOT_GATE, BitwiseLogicFunctions.NOT_B, singleInput);
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_OR_GATE, BitwiseLogicFunctions.OR, twoInputs);
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_XNOR_GATE, BitwiseLogicFunctions.XNOR_AC, twoInputs);
+		registerBitwiseLogicGateType(BLOCKS, ITEMS, Names.BITWISE_XOR_GATE, BitwiseLogicFunctions.XOR_AC, twoInputs);
+	}
+	
+	// cable posts
+	public static final DeferredHolder<Block, WirePostPlateBlock> REDWIRE_JUNCTION_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.REDWIRE_JUNCTION,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_RED)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(2F, 5F)
+			.forceSolidOn(),
+		properties -> new WirePostPlateBlock(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
+	public static final DeferredHolder<Block, WirePostBlock> REDWIRE_POST_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.REDWIRE_POST,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_RED)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(2F, 5F)
+			.forceSolidOn(),
+		WirePostBlock::new);
+	public static final DeferredHolder<Block, WirePostPlateBlock> REDWIRE_RELAY_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.REDWIRE_RELAY,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_RED)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(2F, 5F)
+			.forceSolidOn(),
+		properties -> new WirePostPlateBlock(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
+	public static final DeferredHolder<Block, CableJunctionBlock> CABLE_JUNCTION_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.CABLE_JUNCTION,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_BLUE)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(2F, 5F)
+			.forceSolidOn(),
+		CableJunctionBlock::new);
+	public static final DeferredHolder<Block, CableRelayBlock> CABLE_RELAY_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.CABLE_RELAY,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.COLOR_BLUE)
+			.instrument(NoteBlockInstrument.BASEDRUM)
+			.strength(2F, 5F)
+			.forceSolidOn(),
+		CableRelayBlock::new);
+	
+	// uncategorized redstone blocks
+	public static final DeferredHolder<Block, HexidecrubrometerBlock> HEXIDECRUBROMETER_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.HEXIDECRUBROMETER,
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
+		HexidecrubrometerBlock::new);
+	
+	// wires and cables
+	public static final DeferredHolder<Block, PoweredWireBlock> RED_ALLOY_WIRE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.RED_ALLOY_WIRE, 
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
+		PoweredWireBlock::createRedAlloyWireBlock,
+		Item.Properties::new,
+		WireBlockItem::new);
+	public static final Map<DyeColor, DeferredHolder<Block, PoweredWireBlock>> COLORED_CABLE_BLOCKS = Util.make(new LinkedHashMap<>(), map -> {
+		for (DyeColor color : DyeColor.values())
+		{
+			map.put(color, registerBlockItem(BLOCKS, ITEMS, Names.COLORED_CABLES_BY_COLOR[color.ordinal()],
+				() -> BlockBehaviour.Properties.of().mapColor(color).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
+				properties -> PoweredWireBlock.createColoredCableBlock(properties, color),
+				Item.Properties::new,
+				WireBlockItem::new));
+		}
+	});
+	public static final DeferredHolder<Block, BundledCableBlock> BUNDLED_CABLE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.BUNDLED_CABLE,
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
+		BundledCableBlock::new,
+		Item.Properties::new,
+		WireBlockItem::new);
 
-	public final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> logicPlates = new HashMap<>();
-	public final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseGateBlock>> bitwiseLogicPlates = new HashMap<>();
+	// tubes
+	public static final DeferredHolder<Block, TubeBlock> TUBE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.TUBE,
+		() -> BlockBehaviour.Properties.of()
+			.instrument(NoteBlockInstrument.DIDGERIDOO)
+			.mapColor(MapColor.TERRACOTTA_YELLOW)
+			.strength(0.4F)
+			.sound(SoundType.METAL),
+		properties -> new TubeBlock(id("block/tube"), properties));
+	public static final DeferredHolder<Block, RedstoneTubeBlock> REDSTONE_TUBE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.REDSTONE_TUBE,
+		() -> BlockBehaviour.Properties.of()
+		.mapColor(MapColor.GOLD)
+		.strength(0.4F)
+		.sound(SoundType.METAL),
+		properties -> new RedstoneTubeBlock(id("block/tube"), properties));
+	public static final Map<DyeColor, DeferredHolder<Block, ColoredTubeBlock>> COLORED_TUBE_BLOCKS = Util.make(new LinkedHashMap<>(), map -> {
+		for (DyeColor color : DyeColor.values()) {
+			String name = Names.COLORED_TUBE_NAMES[color.ordinal()];
+			DeferredHolder<Block, ColoredTubeBlock> block = registerBlockItem(BLOCKS, ITEMS, name,
+				() -> BlockBehaviour.Properties.of()
+				.mapColor(color)
+				.instrument(NoteBlockInstrument.DIDGERIDOO)
+				.strength(0.4F)
+				.sound(SoundType.METAL),
+				properties -> new ColoredTubeBlock(id("block/" + name),	color, properties));
+			map.put(color, block);
+		}
+	});
 	
-	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> postsInChunkAttachment;
-	public final DeferredHolder<AttachmentType<?>, AttachmentType<Map<BlockPos, VoxelShape>>> voxelCacheAttachment;
-	public final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> tubesInChunkAttachment;
+	// logistics blocks
+	public static final DeferredHolder<Block, DistributorBlock> DISTRIBUTOR_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.DISTRIBUTOR,
+		() -> BlockBehaviour.Properties.of()
+		.mapColor(MapColor.WOOD)
+		.strength(2F, 6F)
+		.sound(SoundType.METAL),
+		DistributorBlock::new);
+	public static final DeferredHolder<Block, ExtractorBlock> EXTRACTOR_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.EXTRACTOR,
+		() -> BlockBehaviour.Properties.of()
+		.mapColor(MapColor.WOOD)
+		.strength(2F, 6F)
+		.noOcclusion()
+        .isRedstoneConductor(NEVER_STATE_PREDICATE)
+        .isSuffocating(NEVER_STATE_PREDICATE)
+        .isViewBlocking(NEVER_STATE_PREDICATE)
+		.sound(SoundType.WOOD),
+		ExtractorBlock::new);
+	public static final DeferredHolder<Block, FilterBlock> FILTER_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.FILTER,
+		() -> BlockBehaviour.Properties.of()
+		.mapColor(MapColor.TERRACOTTA_YELLOW)
+		.strength(2F, 6F)
+		.sound(SoundType.METAL),
+		FilterBlock::new);
+	public static final DeferredHolder<Block, LoaderBlock> LOADER_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.LOADER,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.STONE)
+			.strength(2F, 6F)
+			.sound(SoundType.METAL),
+		LoaderBlock::new);
+	public static final DeferredHolder<Block, MultiFilterBlock> MULTI_FILTER_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.MULTIFILTER,
+		() -> BlockBehaviour.Properties.of()
+		.mapColor(MapColor.STONE)
+		.strength(2F, 6F)
+		.sound(SoundType.METAL),
+		MultiFilterBlock::new);
+	public static final DeferredHolder<Block, OsmosisFilterBlock> OSMOSIS_FILTER_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.OSMOSIS_FILTER,
+		() -> BlockBehaviour.Properties.of()
+		.mapColor(MapColor.GRASS)
+		.strength(2F, 6F)
+		.sound(SoundType.METAL),
+		OsmosisFilterBlock::new);
+	public static final DeferredHolder<Block, OsmosisSlimeBlock> OSMOSIS_SLIME_BLOCK = registerBlock(BLOCKS, Names.OSMOSIS_SLIME, BlockBehaviour.Properties::of, OsmosisSlimeBlock::new);
+	public static final DeferredHolder<Block, ShuntBlock> SHUNT_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.SHUNT,
+		() -> BlockBehaviour.Properties.of()
+			.mapColor(MapColor.TERRACOTTA_YELLOW)
+			.strength(2F, 6F)
+			.sound(SoundType.METAL),
+		ShuntBlock::new);
 	
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockPos>> spooledPostComponent;
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<BlockSide>> plieredTubeDataComponent;
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<WindcatcherColors>> windcatcherColorsDataComponent;
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<Map<Direction,ItemStack>>> gearsDataComponent;
-	public final DeferredHolder<DataComponentType<?>, DataComponentType<StonemillData>> stonemillDataComponent;
-	
-	public final DeferredHolder<Block, SolderingTableBlock> solderingTableBlock;
-	public final DeferredHolder<Block, PlateBlock> stonePlateBlock;
-	public final DeferredHolder<Block, LatchBlock> latchBlock;
-	public final DeferredHolder<Block, PulseGateBlock> pulseGateBlock;
-	public final DeferredHolder<Block, AlternatorBlock> alternatorBlock;
-	public final DeferredHolder<Block, WirePostBlock> redwirePostBlock;
-	public final DeferredHolder<Block, WirePostPlateBlock> redwireRelayBlock;
-	public final DeferredHolder<Block, WirePostPlateBlock> redwireJunctionBlock;
-	public final DeferredHolder<Block, HexidecrubrometerBlock> hexidecrubrometerBlock;
-	public final DeferredHolder<Block, PoweredWireBlock> redAlloyWireBlock;
-	public final DeferredHolder<Block, PoweredWireBlock>[] coloredCableBlocks;
-	public final DeferredHolder<Block, BundledCableBlock> bundledCableBlock;
-	public final DeferredHolder<Block, CableRelayBlock> cableRelayBlock;
-	public final DeferredHolder<Block, CableJunctionBlock> cableJunctionBlock;
+	// mechanisms
+	public static final DeferredHolder<Block, AirFoilBlock> AIRFOIL_BLOCK = registerBlock(BLOCKS, Names.AIRFOIL, () -> Block.Properties.of()
+		.air()
+		.noCollission()
+		.noOcclusion()
+		.noLootTable()
+		.isSuffocating(NEVER_STATE_PREDICATE),
+		AirFoilBlock::new);
+	public static final Map<String, DeferredHolder<Block, AxleBlock>> AXLE_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.AXLE,
+		() -> Block.Properties.ofFullCopy(woodSet.strippedLog()).noOcclusion(),
+		AxleBlock::new));
+	// cheat to register clutch blocks before GEAR_BLOCKS is defined
+	private static final GearBlock getGearBlock(String woodName)
+	{
+		return GEAR_BLOCKS.get(woodName).get();
+	}
+	public static final Map<String, DeferredHolder<Block, ClutchBlock>> CLUTCH_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.CLUTCH,
+		() -> Block.Properties.of()
+			.mapColor(MapColor.STONE)
+			.strength(1.5F)
+			.noOcclusion()
+	        .isRedstoneConductor(NEVER_STATE_PREDICATE)
+	        .isSuffocating(NEVER_STATE_PREDICATE)
+	        .isViewBlocking(NEVER_STATE_PREDICATE),
+		props -> new ClutchBlock(props, Suppliers.memoize(() -> new ItemStack(getGearBlock(woodName))))));
+	public static final Map<String, DeferredHolder<Block, GearBlock>> GEAR_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.GEAR,
+		() -> woodSet.finagleProps(Block.Properties.of()
+			.mapColor(woodSet.mapColor())
+			.strength(2F)
+			.sound(woodSet.soundType())
+			.noOcclusion()),
+		GearBlock::new,
+		Item.Properties::new,
+		GearBlockItem::new));
+	public static final DeferredHolder<Block, GearsBlock> GEARS_BLOCK = registerBlock(BLOCKS, Names.GEARS, () -> Block.Properties.of()
+		.mapColor(MapColor.WOOD)
+		.strength(2F)
+		.sound(SoundType.WOOD)
+		.noOcclusion(),
+		GearsBlock::new);
+	public static final Map<String, DeferredHolder<Block, GearshifterBlock>> GEARSHIFTER_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.GEARSHIFTER,
+		() -> woodSet.finagleProps(Block.Properties.of()
+			.mapColor(woodSet.mapColor())
+			.strength(2F)
+			.sound(woodSet.soundType())
+			.noOcclusion()
+            .isValidSpawn(Blocks::never)
+            .isRedstoneConductor(NEVER_STATE_PREDICATE)
+            .isSuffocating(NEVER_STATE_PREDICATE)
+            .isViewBlocking(NEVER_STATE_PREDICATE)),
+		GearshifterBlock::new));
+	public static final DeferredHolder<Block, StonemillBlock> STONEMILL_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.STONEMILL, () -> Block.Properties.of()
+		.mapColor(MapColor.COLOR_BLACK)
+		.strength(2F, 6F)
+		.noOcclusion(),
+		StonemillBlock::new);
+	public static final Map<String, DeferredHolder<Block, WindcatcherBlock>> WINDCATCHER_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.WINDCATCHER,
+		() -> Block.Properties.of()
+			.mapColor(woodSet.mapColor())
+			.strength(2F)
+			.sound(woodSet.soundType())
+			.ignitedByLava()
+			.noOcclusion()
+			.randomTicks()
+	        .isValidSpawn(Blocks::never)
+	        .isRedstoneConductor(NEVER_STATE_PREDICATE)
+	        .isSuffocating(NEVER_STATE_PREDICATE)
+	        .isViewBlocking(NEVER_STATE_PREDICATE),
+		WindcatcherBlock::new,
+		Item.Properties::new,
+		WindCatcherBlockItem::new
+	));
 
-	public final DeferredHolder<Block, ColoredTubeBlock>[] coloredTubeBlocks;
-	public final DeferredHolder<Block, DistributorBlock> distributorBlock;
-	public final DeferredHolder<Block, ExtractorBlock> extractorBlock;
-	public final DeferredHolder<Block, FilterBlock> filterBlock;
-	public final DeferredHolder<Block, MultiFilterBlock> multiFilterBlock;
-	public final DeferredHolder<Block, LoaderBlock> loaderBlock;
-	public final DeferredHolder<Block, OsmosisFilterBlock> osmosisFilterBlock;
-	public final DeferredHolder<Block, OsmosisSlimeBlock> osmosisSlimeBlock;
-	public final DeferredHolder<Block, RedstoneTubeBlock> redstoneTubeBlock;
-	public final DeferredHolder<Block, ShuntBlock> shuntBlock;
-	public final DeferredHolder<Block, TubeBlock> tubeBlock;
+	// misc items
+	public static final DeferredHolder<Item, Item> BUNDLED_CABLE_SPOOL_ITEM = registerItem(ITEMS, Names.BUNDLED_CABLE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
+	public static final DeferredHolder<Item, WireSpoolItem> REDWIRE_SPOOL_ITEM = registerItem(ITEMS, Names.REDWIRE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.REDWIRE_POSTS));
+	public static final DeferredHolder<Item, Item> RED_ALLOY_INGOT_ITEM = registerItem(ITEMS, Names.RED_ALLOY_INGOT, Item.Properties::new, Item::new);
+	public static final DeferredHolder<Item, PliersItem> TUBING_PLIERS = registerItem(ITEMS, Names.PLIERS, () -> new Item.Properties().durability(128), PliersItem::new);
 	
-	public final Map<String, DeferredHolder<Block, AxleBlock>> axleBlocks = new HashMap<>();
-	public final Map<String, DeferredHolder<Block, GearBlock>> gearBlocks = new HashMap<>();
-	public final Map<String, DeferredHolder<Block, GearshifterBlock>> gearshifterBlocks = new HashMap<>();
-	public final Map<String, DeferredHolder<Block, ClutchBlock>> clutchBlocks = new HashMap<>();
-	public final Map<String, DeferredHolder<Block, WindcatcherBlock>> windcatcherBlocks = new HashMap<>();
-	public final DeferredHolder<Block, AirFoilBlock> airFoilBlock;
-	public final DeferredHolder<Block, GearsBlock> gearsBlock;
-	public final DeferredHolder<Block, StonemillBlock> stonemillBlock;
 
-	public final DeferredHolder<Item, WireSpoolItem> redwireSpoolItem;
-	public final DeferredHolder<Item, Item> bundledCableSpoolItem;
-	public final DeferredHolder<Item, Item> redAlloyIngotItem;
-	public final DeferredHolder<Item, PliersItem> tubingPliers;
-	
-	public final DeferredHolder<CreativeModeTab, CreativeModeTab> tab;
+	// blockentity types
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> ALTERNATOR_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+		.register(BLOCK_ENTITY_TYPES, Names.ALTERNATOR, ALTERNATOR_BLOCK);
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> AXLE_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.register(BLOCK_ENTITY_TYPES, Names.AXLE, AXLE_BLOCKS.values());
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<CablePostBlockEntity>> CABLE_POST_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.CABLE_RELAY,
+		() -> new BlockEntityType<>(CablePostBlockEntity::new,
+			CABLE_RELAY_BLOCK.get(),
+			CABLE_JUNCTION_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> CLUTCH_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+		.register(BLOCK_ENTITY_TYPES, Names.CLUTCH, CLUTCH_BLOCKS.values());
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<DistributorBlockEntity>> DISTRIBUTOR_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.DISTRIBUTOR,
+		() -> new BlockEntityType<>(DistributorBlockEntity::new, DISTRIBUTOR_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> EXTRACTOR_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, ExtractorBlock::normalizeMachine, ExtractorBlock::denormalizeMachine)
+		.register(BLOCK_ENTITY_TYPES, Names.EXTRACTOR, EXTRACTOR_BLOCK);
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilterBlockEntity>> FILTER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.FILTER,
+		() -> new BlockEntityType<>(FilterBlockEntity::new, FILTER_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> GEAR_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
+		.register(BLOCK_ENTITY_TYPES, Names.GEAR, GEAR_BLOCKS.values());
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> GEARS_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.syncedData(GEARS_DATA_COMPONENT)
+		.dataTransformer(GEARS_DATA_COMPONENT, GearsBlock::normalizeGears, GearsBlock::denormalizeGears)
+		.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
+		.register(BLOCK_ENTITY_TYPES, Names.GEARS, GEARS_BLOCK);
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> GEARSHIFTER_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
+		.register(BLOCK_ENTITY_TYPES, Names.GEARSHIFTER, GEARSHIFTER_BLOCKS.values());
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiFilterBlockEntity>> MULTIFILTER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.MULTIFILTER,
+		() -> new BlockEntityType<>(MultiFilterBlockEntity::new, MULTI_FILTER_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<OsmosisFilterBlockEntity>> OSMOSIS_FILTER_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.OSMOSIS_FILTER,
+		() -> new BlockEntityType<>(OsmosisFilterBlockEntity::new, OSMOSIS_FILTER_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> POWERED_WIRE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.POWERED_WIRE,
+		() -> new BlockEntityType<>(PoweredWireBlockEntity::new, Util.make(new HashSet<>(), set -> {
+			set.add(RED_ALLOY_WIRE_BLOCK.get());
+			for (var block : COLORED_CABLE_BLOCKS.values())
+			{
+				set.add(block.get());
+			}
+		})));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<RedstoneTubeBlockEntity>> REDSTONE_TUBE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.REDSTONE_TUBE,
+		() -> new BlockEntityType<>(RedstoneTubeBlockEntity::new, REDSTONE_TUBE_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShuntBlockEntity>> SHUNT_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.SHUNT,
+		() -> new BlockEntityType<>(ShuntBlockEntity::new, SHUNT_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<SingleInputBitwiseGateBlockEntity>> SINGLE_INPUT_BITWISE_GATE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.SINGLE_INPUT_BITWISE_GATE,
+		() -> new BlockEntityType<>(SingleInputBitwiseGateBlockEntity::create, BITWISE_LOGIC_PLATES.values().stream()
+			.map(DeferredHolder::get)
+			.filter(block -> block instanceof SingleInputBitwiseGateBlock)
+			.collect(Collectors.toSet())));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> STONEMILL_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.serverData(
+			STONEMILL_DATA_COMPONENT,	// holds the progress counters
+			() -> DataComponents.CONTAINER) // holds the inventory
+		.preRemoveSideEffects(StonemillBlock::preRemoveSideEffects)
+		.register(BLOCK_ENTITY_TYPES, Names.STONEMILL, STONEMILL_BLOCK);
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ThreeInputBitwiseGateBlockEntity>> THREE_INPUT_BITWISE_GATE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.THREE_INPUT_BITWISE_GATE,
+		() -> new BlockEntityType<>(ThreeInputBitwiseGateBlockEntity::create, BITWISE_LOGIC_PLATES.values().stream()
+			.map(DeferredHolder::get)
+			.filter(block -> block instanceof ThreeInputBitwiseGateBlock)
+			.collect(Collectors.toSet())));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> TUBE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.TUBE,
+		() -> new BlockEntityType<>(
+			TubeBlockEntity::new,
+			Util.make(new HashSet<>(), set -> {
+				set.add(TUBE_BLOCK.get());
+				for (var block : COLORED_TUBE_BLOCKS.values())
+				{
+					set.add(block.get());
+				}
+			})));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<TwoInputBitwiseGateBlockEntity>> TWO_INPUT_BITWISE_GATE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.TWO_INPUT_BITWISE_GATE,
+		() -> new BlockEntityType<>(TwoInputBitwiseGateBlockEntity::create, BITWISE_LOGIC_PLATES.values().stream()
+			.map(DeferredHolder::get)
+			.filter(block -> block instanceof TwoInputBitwiseGateBlock)
+			.collect(Collectors.toSet())));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> WIRE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.WIRE,
+		() -> new BlockEntityType<>(WireBlockEntity::new,
+			BUNDLED_CABLE_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> WIRE_POST_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.WIRE_POST,
+		() -> new BlockEntityType<>(WirePostBlockEntity::new,
+			REDWIRE_POST_BLOCK.get(),
+			REDWIRE_RELAY_BLOCK.get(),
+			REDWIRE_JUNCTION_BLOCK.get()));
+	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> WINDCATCHER_BLOCK_ENTITY = GenericBlockEntity.builder()
+		.itemData(WINDCATCHER_COLORS_DATA_COMPONENT)
+		.register(BLOCK_ENTITY_TYPES, Names.WINDCATCHER, WINDCATCHER_BLOCKS.values());
 
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> alternatorBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WirePostBlockEntity>> wirePostBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<CablePostBlockEntity>> cablePostBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<WireBlockEntity>> wireBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<PoweredWireBlockEntity>> poweredWireBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<SingleInputBitwiseGateBlockEntity>> singleInputBitwiseGateBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TwoInputBitwiseGateBlockEntity>> twoInputBitwiseGateBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ThreeInputBitwiseGateBlockEntity>> threeInputBitwiseGateBeType;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<DistributorBlockEntity>> distributorEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> extractorEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<FilterBlockEntity>> filterEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<MultiFilterBlockEntity>> multiFilterEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<OsmosisFilterBlockEntity>> osmosisFilterEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<RedstoneTubeBlockEntity>> redstoneTubeEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<ShuntBlockEntity>> shuntEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<TubeBlockEntity>> tubeEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> axleBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> windcatcherBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearshifterBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> gearsBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> clutchBlockEntity;
-	public final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> stonemillBlockEntity;
+	// menu types
+	public static final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> FILTER_MENU = MENU_TYPES.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
+	public static final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> LOADER_MENU = MENU_TYPES.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
+	public static final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> MULTI_FILTER_MENU = MENU_TYPES.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
+	public static final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> SOLDERING_MENU = MENU_TYPES.register(Names.SOLDERING_TABLE,
+		() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
+	public static final DeferredHolder<MenuType<?>, MenuType<StonemillMenu>> STONEMILL_MENU = MENU_TYPES.register(Names.STONEMILL,
+		() -> new MenuType<>(StonemillMenu::clientMenu, FeatureFlags.VANILLA_SET));
+	
+	// recipe things
+	public static final DeferredHolder<RecipeType<?>, RecipeType<SolderingRecipe>> SOLDERING_RECIPE_TYPE = RECIPE_TYPES.register(Names.SOLDERING_RECIPE, () -> RecipeType.simple(id(Names.SOLDERING_RECIPE)));
+	public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> SOLDERING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(Names.SOLDERING_RECIPE,
+		() -> new SimpleRecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
+	public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherRecipe>> WINDCATCHER_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(Names.WINDCATCHER,
+		() -> new SimpleRecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
+	public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherDyeRecipe>> WINDCATCHER_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(Names.WINDCATCHER_DYE,
+		() -> new SimpleRecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
+	
+	// loot things
+	public static final DeferredHolder<LootPoolEntryType, LootPoolEntryType> GEARS_LOOT_ENTRY = LOOT_ENTRIES.register(Names.GEARS, () -> new LootPoolEntryType(GearsLootEntry.CODEC));
+	public static final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> WIRE_COUNT_LOOT_FUNCTION = LOOT_FUNCTIONS.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
 
-	public final DeferredHolder<MenuType<?>, MenuType<SolderingMenu>> solderingMenuType;
-	public final DeferredHolder<MenuType<?>, MenuType<FilterMenu>> filterMenu;
-	public final DeferredHolder<MenuType<?>, MenuType<MultiFilterMenu>> multiFilterMenu;
-	public final DeferredHolder<MenuType<?>, MenuType<LoaderMenu>> loaderMenu;
-	public final DeferredHolder<MenuType<?>, MenuType<StonemillMenu>> stonemillMenuType;
+	// creative tabs
+	public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB = TABS.register(MoreRed.MODID, () -> CreativeModeTab.builder()
+		.icon(() -> new ItemStack(LOGIC_PLATES.get(id(Names.NOR_GATE)).get()))
+		.title(Component.translatable("itemGroup.morered"))
+		.displayItems((params, output) -> output.acceptAll(ITEMS.getEntries().stream().map(rob -> new ItemStack(rob.get())).toList()))
+		.build());
+
+	// attachment types
+	public static final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> POSTS_IN_CHUNK_ATTACHMENT = ATTACHMENT_TYPES.register(Names.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
+		.serialize(MoreCodecs.POSITIONS_MAP_CODEC)
+		.build());
+	public static final DeferredHolder<AttachmentType<?>, AttachmentType<Set<BlockPos>>> TUBES_IN_CHUNK_ATTACHMENT = ATTACHMENT_TYPES.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
+		.serialize(MoreCodecs.POSITIONS_MAP_CODEC)
+		.build());
+	public static final DeferredHolder<AttachmentType<?>, AttachmentType<Map<BlockPos, VoxelShape>>> VOXEL_CACHE_ATTACHMENT = ATTACHMENT_TYPES.register(Names.VOXEL_CACHE, () -> AttachmentType.<Map<BlockPos,VoxelShape>>builder(() -> new HashMap<>())
+		.build());
 	
-	public final DeferredHolder<RecipeType<?>, RecipeType<SolderingRecipe>> solderingRecipeType;
+	//signal components
+	static
+	{
+		BiConsumer<ResourceKey<MapCodec<? extends SignalComponent>>, MapCodec<? extends SignalComponent>> registerSignalComponent = (key,codec) -> SIGNAL_COMPONENT_TYPES.register(key.location().getPath(), () -> codec);
+		registerSignalComponent.accept(WireSignalComponent.RESOURCE_KEY, WireSignalComponent.CODEC);
+		registerSignalComponent.accept(WirePostSignalComponent.RESOURCE_KEY, WirePostSignalComponent.CODEC);
+		registerSignalComponent.accept(BitwiseGateSignalComponent.RESOURCE_KEY, BitwiseGateSignalComponent.CODEC);
+	}
 	
-	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> solderingSerializer;
-	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherRecipe>> windcatcherRecipeSerializer;
-	public final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherDyeRecipe>> windcatcherDyeRecipeSerializer;
-	
-	public final DeferredHolder<LootPoolEntryType, LootPoolEntryType> gearsLootEntry;
-	public final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> wireCountLootFunction;
-	
+	// data maps (which are registered elsewhere)
 	public static final DataMapType<DimensionType, Wind> WIND_DATA_MAP_TYPE = DataMapType.builder(
 			id(Names.WIND),
 			Registries.DIMENSION_TYPE,
@@ -311,461 +658,9 @@ public class MoreRed
 		.synced(Wind.CODEC, true)
 		.build();
 	
-	@SuppressWarnings("unchecked")
 	public MoreRed(IEventBus modBus)
 	{
-		instance = this;
-		
 		IEventBus forgeBus = NeoForge.EVENT_BUS;
-
-		DeferredRegister<Block> blocks = defreg(modBus, Registries.BLOCK);
-		DeferredRegister<Item> items = defreg(modBus, Registries.ITEM);
-		DeferredRegister<CreativeModeTab> tabs = defreg(modBus, Registries.CREATIVE_MODE_TAB);
-		DeferredRegister<BlockEntityType<?>> blockEntityTypes = defreg(modBus, Registries.BLOCK_ENTITY_TYPE);
-		DeferredRegister<MenuType<?>> menuTypes = defreg(modBus, Registries.MENU);
-		DeferredRegister<RecipeSerializer<?>> recipeSerializers = defreg(modBus, Registries.RECIPE_SERIALIZER);
-		DeferredRegister<RecipeType<?>> recipeTypes = defreg(modBus, Registries.RECIPE_TYPE);
-		DeferredRegister<LootPoolEntryType> lootEntries = defreg(modBus, Registries.LOOT_POOL_ENTRY_TYPE);
-		DeferredRegister<LootItemFunctionType<?>> lootFunctions = defreg(modBus, Registries.LOOT_FUNCTION_TYPE);
-		DeferredRegister<AttachmentType<?>> attachmentTypes = defreg(modBus, NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
-		DeferredRegister<DataComponentType<?>> dataComponentTypes = defreg(modBus, Registries.DATA_COMPONENT_TYPE);
-		var signalComponentTypes = defreg(modBus, ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
-		BlockBehaviour.StatePredicate neverStatePredicate = ($,$$,$$$) -> false;
-		
-		postsInChunkAttachment = attachmentTypes.register(Names.POSTS_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
-			.serialize(MoreCodecs.POSITIONS_MAP_CODEC)
-			.build());
-		voxelCacheAttachment = attachmentTypes.register(Names.VOXEL_CACHE, () -> AttachmentType.<Map<BlockPos,VoxelShape>>builder(() -> new HashMap<>())
-			.build());
-		this.tubesInChunkAttachment = attachmentTypes.register(Names.TUBES_IN_CHUNK, () -> AttachmentType.<Set<BlockPos>>builder(() -> new HashSet<>())
-			.serialize(MoreCodecs.POSITIONS_MAP_CODEC)
-			.build());
-
-		spooledPostComponent = dataComponentTypes.register(Names.SPOOLED_POST, () -> DataComponentType.<BlockPos>builder()
-			.networkSynchronized(BlockPos.STREAM_CODEC)
-			.build());
-		this.plieredTubeDataComponent = dataComponentTypes.register(Names.PLIERED_TUBE, () -> DataComponentType.<BlockSide>builder()
-			.networkSynchronized(BlockSide.STREAM_CODEC)
-			.build());
-		this.windcatcherColorsDataComponent = dataComponentTypes.register(Names.WINDCATCHER_COLORS, () -> DataComponentType.<WindcatcherColors>builder()
-			.persistent(WindcatcherColors.CODEC)
-			.networkSynchronized(WindcatcherColors.STREAM_CODEC)
-			.build());
-		this.gearsDataComponent = dataComponentTypes.register(Names.GEARS, () -> DataComponentType.<Map<Direction,ItemStack>>builder()
-			.persistent(Codec.unboundedMap(Direction.CODEC, ItemStack.OPTIONAL_CODEC))
-			.networkSynchronized(ByteBufCodecs.map(HashMap::new, Direction.STREAM_CODEC, ItemStack.OPTIONAL_STREAM_CODEC))
-			.build());
-		this.stonemillDataComponent = dataComponentTypes.register(Names.STONEMILL, () -> DataComponentType.<StonemillData>builder()
-			.persistent(StonemillData.CODEC)
-			.build());
-		
-		solderingTableBlock = registerBlockItem(blocks, items, Names.SOLDERING_TABLE,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(3.5F).noOcclusion(),
-			SolderingTableBlock::new);
-		stonePlateBlock = registerBlockItem(blocks, items, Names.STONE_PLATE,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).requiresCorrectToolForDrops().strength(1.5F).sound(SoundType.WOOD),
-			PlateBlock::new);
-		latchBlock = registerBlockItem(blocks, items, Names.LATCH,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD),
-			LatchBlock::new);
-		pulseGateBlock = registerBlockItem(blocks, items, Names.PULSE_GATE,
-			() ->BlockBehaviour.Properties.of().mapColor(MapColor.STONE).instrument(NoteBlockInstrument.BASEDRUM).strength(0).sound(SoundType.WOOD),
-			PulseGateBlock::new);
-		alternatorBlock = registerBlockItem(blocks, items, Names.ALTERNATOR,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.STONE)
-				.instrument(NoteBlockInstrument.BASEDRUM)
-				.strength(0)
-				.sound(SoundType.WOOD)
-				.noOcclusion(),
-			AlternatorBlock::new);
-		redwirePostBlock = registerBlockItem(blocks, items, Names.REDWIRE_POST,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.COLOR_RED)
-				.instrument(NoteBlockInstrument.BASEDRUM)
-				.strength(2F, 5F)
-				.forceSolidOn(),
-			WirePostBlock::new);
-		redwireRelayBlock = registerBlockItem(blocks, items, Names.REDWIRE_RELAY,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.COLOR_RED)
-				.instrument(NoteBlockInstrument.BASEDRUM)
-				.strength(2F, 5F)
-				.forceSolidOn(),
-			properties -> new WirePostPlateBlock(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForEmptyPlate));
-		redwireJunctionBlock = registerBlockItem(blocks, items, Names.REDWIRE_JUNCTION,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.COLOR_RED)
-				.instrument(NoteBlockInstrument.BASEDRUM)
-				.strength(2F, 5F)
-				.forceSolidOn(),
-			properties -> new WirePostPlateBlock(properties, WirePostPlateBlock::getRedstoneConnectionDirectionsForRelayPlate));
-		hexidecrubrometerBlock = registerBlockItem(blocks, items, Names.HEXIDECRUBROMETER,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).instrument(NoteBlockInstrument.BASEDRUM).strength(2F, 5F),
-			HexidecrubrometerBlock::new);
-		cableRelayBlock = registerBlockItem(blocks, items, Names.CABLE_RELAY,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.COLOR_BLUE)
-				.instrument(NoteBlockInstrument.BASEDRUM)
-				.strength(2F, 5F)
-				.forceSolidOn(),
-			CableRelayBlock::new);
-		cableJunctionBlock = registerBlockItem(blocks, items, Names.CABLE_JUNCTION,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.COLOR_BLUE)
-				.instrument(NoteBlockInstrument.BASEDRUM)
-				.strength(2F, 5F)
-				.forceSolidOn(),
-			CableJunctionBlock::new);
-		
-		redAlloyWireBlock = registerBlockItem(blocks, items, Names.RED_ALLOY_WIRE, 
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
-			PoweredWireBlock::createRedAlloyWireBlock,
-			Item.Properties::new,
-			WireBlockItem::new);
-		coloredCableBlocks = Util.make((DeferredHolder<Block, PoweredWireBlock>[])new DeferredHolder[16], array ->
-			Arrays.setAll(array, i -> registerBlockItem(blocks, items, Names.COLORED_CABLES_BY_COLOR[i],
-				() -> BlockBehaviour.Properties.of().mapColor(DyeColor.values()[i]).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
-				properties -> PoweredWireBlock.createColoredCableBlock(properties, DyeColor.values()[i]),
-				Item.Properties::new,
-				WireBlockItem::new)));
-		bundledCableBlock = registerBlockItem(blocks, items, Names.BUNDLED_CABLE,
-			() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
-			BundledCableBlock::new,
-			Item.Properties::new,
-			WireBlockItem::new);
-		
-		registerLogicGateType(blocks, items, Names.DIODE, LogicFunctions.INPUT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
-		registerLogicGateType(blocks, items, Names.NOT_GATE, LogicFunctions.NOT_B, LogicFunctionPlateBlock.LINEAR_INPUT);
-		registerLogicGateType(blocks, items, Names.NOR_GATE, LogicFunctions.NOR, LogicFunctionPlateBlock.THREE_INPUTS);
-		registerLogicGateType(blocks, items, Names.NAND_GATE, LogicFunctions.NAND, LogicFunctionPlateBlock.THREE_INPUTS);
-		registerLogicGateType(blocks, items, Names.OR_GATE, LogicFunctions.OR, LogicFunctionPlateBlock.THREE_INPUTS);
-		registerLogicGateType(blocks, items, Names.AND_GATE, LogicFunctions.AND, LogicFunctionPlateBlock.THREE_INPUTS);
-		registerLogicGateType(blocks, items, Names.XOR_GATE, LogicFunctions.XOR_AC, LogicFunctionPlateBlock.T_INPUTS);
-		registerLogicGateType(blocks, items, Names.XNOR_GATE, LogicFunctions.XNOR_AC, LogicFunctionPlateBlock.T_INPUTS);
-		registerLogicGateType(blocks, items, Names.MULTIPLEXER, LogicFunctions.MULTIPLEX, LogicFunctionPlateBlock.THREE_INPUTS);
-		registerLogicGateType(blocks, items, Names.TWO_INPUT_AND_GATE, LogicFunctions.AND_2, LogicFunctionPlateBlock.T_INPUTS);
-		registerLogicGateType(blocks, items, Names.TWO_INPUT_NAND_GATE, LogicFunctions.NAND_2, LogicFunctionPlateBlock.T_INPUTS);
-		
-		// bitwise logic gates store state in a TE instead of block properties
-		// they don't need to have their properties defined on construction but they do need to be registered to the TE type they use
-		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, SingleInputBitwiseGateBlock> singleInput = SingleInputBitwiseGateBlock::new;
-		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, TwoInputBitwiseGateBlock> twoInputs = TwoInputBitwiseGateBlock::new;
-		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, ThreeInputBitwiseGateBlock> threeInputs = ThreeInputBitwiseGateBlock::new;
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_DIODE, BitwiseLogicFunctions.INPUT_B, singleInput);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_NOT_GATE, BitwiseLogicFunctions.NOT_B, singleInput);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_OR_GATE, BitwiseLogicFunctions.OR, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_AND_GATE, BitwiseLogicFunctions.AND_2, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XOR_GATE, BitwiseLogicFunctions.XOR_AC, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_XNOR_GATE, BitwiseLogicFunctions.XNOR_AC, twoInputs);
-		registerBitwiseLogicGateType(blocks, items, Names.BITWISE_MULTIPLEXER, BitwiseLogicFunctions.MULTIPLEX, threeInputs);
-		List<Supplier<? extends TubeBlock>> tubeBlocksWithTubeBlockEntity = new ArrayList<>();
-		
-		this.tubeBlock = registerBlockItem(blocks, items, Names.TUBE,
-			() -> BlockBehaviour.Properties.of()
-				.instrument(NoteBlockInstrument.DIDGERIDOO)
-				.mapColor(MapColor.TERRACOTTA_YELLOW)
-				.strength(0.4F)
-				.sound(SoundType.METAL),
-			properties -> new TubeBlock(id("block/tube"), properties));
-		this.shuntBlock = registerBlockItem(blocks, items, Names.SHUNT,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.TERRACOTTA_YELLOW)
-				.strength(2F, 6F)
-				.sound(SoundType.METAL),
-				ShuntBlock::new);
-		this.loaderBlock = registerBlockItem(blocks, items, Names.LOADER,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.STONE)
-				.strength(2F, 6F)
-				.sound(SoundType.METAL),
-				LoaderBlock::new);
-		this.redstoneTubeBlock = registerBlockItem(blocks, items, Names.REDSTONE_TUBE,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.GOLD)
-				.strength(0.4F)
-				.sound(SoundType.METAL),
-				properties -> new RedstoneTubeBlock(id("block/tube"), properties));
-		this.extractorBlock = registerBlockItem(blocks, items, Names.EXTRACTOR,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.WOOD)
-				.strength(2F, 6F)
-				.noOcclusion()
-	            .isRedstoneConductor(neverStatePredicate)
-	            .isSuffocating(neverStatePredicate)
-	            .isViewBlocking(neverStatePredicate)
-				.sound(SoundType.WOOD),
-				ExtractorBlock::new);
-		this.filterBlock = registerBlockItem(blocks, items, Names.FILTER,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.TERRACOTTA_YELLOW)
-				.strength(2F, 6F)
-				.sound(SoundType.METAL),
-				FilterBlock::new);
-		this.multiFilterBlock = registerBlockItem(blocks, items, Names.MULTIFILTER,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.STONE)
-				.strength(2F, 6F)
-				.sound(SoundType.METAL),
-				MultiFilterBlock::new);
-		this.osmosisFilterBlock = registerBlockItem(blocks, items, Names.OSMOSIS_FILTER,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.GRASS)
-				.strength(2F, 6F)
-				.sound(SoundType.METAL),
-				OsmosisFilterBlock::new);
-		this.osmosisSlimeBlock = registerBlock(blocks, Names.OSMOSIS_SLIME, BlockBehaviour.Properties::of, OsmosisSlimeBlock::new);
-		this.distributorBlock = registerBlockItem(blocks, items, Names.DISTRIBUTOR,
-			() -> BlockBehaviour.Properties.of()
-				.mapColor(MapColor.WOOD)
-				.strength(2F, 6F)
-				.sound(SoundType.METAL),
-				DistributorBlock::new);
-		this.coloredTubeBlocks = Util.make((DeferredHolder<Block, ColoredTubeBlock>[])new DeferredHolder[16], array -> Arrays.setAll(array, i -> {
-			DyeColor color = DyeColor.values()[i];
-			String name = Names.COLORED_TUBE_NAMES[i];
-			DeferredHolder<Block, ColoredTubeBlock> block = registerBlockItem(blocks, items, name,
-				() -> BlockBehaviour.Properties.of()
-				.mapColor(color)
-				.instrument(NoteBlockInstrument.DIDGERIDOO)
-				.strength(0.4F)
-				.sound(SoundType.METAL),
-				properties -> new ColoredTubeBlock(id("block/" + name),	color, properties));
-			tubeBlocksWithTubeBlockEntity.add(block);
-			return block;
-		}));
-		tubeBlocksWithTubeBlockEntity.add(this.tubeBlock);
-
-		// register mechanisms per wood type
-		for (var entry : WoodSets.LOOKUP.entrySet())
-		{
-			String woodName = entry.getKey();
-			WoodSet woodSet = entry.getValue();
-			
-			UnaryOperator<Block.Properties> finagleProps = props -> {
-				if (woodSet.ignitedByLava())
-				{
-					props.ignitedByLava();
-				}
-				return props;
-			};
-			
-			this.axleBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.AXLE,
-				() -> Block.Properties.ofFullCopy(woodSet.strippedLog()).noOcclusion(),
-				AxleBlock::new));
-			
-			this.gearBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.GEAR,
-				() -> finagleProps.apply(Block.Properties.of()
-					.mapColor(woodSet.mapColor())
-					.strength(2F)
-					.sound(woodSet.soundType())
-					.noOcclusion()),
-				GearBlock::new,
-				Item.Properties::new,
-				GearBlockItem::new));
-			
-			this.gearshifterBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.GEARSHIFTER,
-				() -> finagleProps.apply(Block.Properties.of()
-					.mapColor(woodSet.mapColor())
-					.strength(2F)
-					.sound(woodSet.soundType())
-					.noOcclusion()
-		            .isValidSpawn(Blocks::never)
-		            .isRedstoneConductor(neverStatePredicate)
-		            .isSuffocating(neverStatePredicate)
-		            .isViewBlocking(neverStatePredicate)),
-				GearshifterBlock::new));
-			
-			this.clutchBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.CLUTCH,
-				() -> Block.Properties.of()
-					.mapColor(MapColor.STONE)
-					.strength(1.5F)
-					.noOcclusion()
-		            .isRedstoneConductor(neverStatePredicate)
-		            .isSuffocating(neverStatePredicate)
-		            .isViewBlocking(neverStatePredicate),
-				props -> new ClutchBlock(props, Suppliers.memoize(() -> new ItemStack(this.gearBlocks.get(woodName).get())))));
-			
-			this.windcatcherBlocks.put(woodName, registerBlockItem(blocks, items, woodName + "_" + Names.WINDCATCHER,
-				() -> Block.Properties.of()
-					.mapColor(woodSet.mapColor())
-					.strength(2F)
-					.sound(woodSet.soundType())
-					.ignitedByLava()
-					.noOcclusion()
-					.randomTicks()
-		            .isValidSpawn(Blocks::never)
-		            .isRedstoneConductor(neverStatePredicate)
-		            .isSuffocating(neverStatePredicate)
-		            .isViewBlocking(neverStatePredicate),
-				WindcatcherBlock::new,
-				Item.Properties::new,
-				WindCatcherBlockItem::new
-			));
-		}
-		
-		this.gearsBlock = registerBlock(blocks, Names.GEARS, () -> Block.Properties.of()
-			.mapColor(MapColor.WOOD)
-			.strength(2F)
-			.sound(SoundType.WOOD)
-			.noOcclusion(),
-			GearsBlock::new);
-		
-		this.airFoilBlock = registerBlock(blocks, Names.AIRFOIL, () -> Block.Properties.of()
-				.air()
-				.noCollission()
-				.noOcclusion()
-				.noLootTable()
-				.isSuffocating(neverStatePredicate),
-			AirFoilBlock::new);
-		
-		this.stonemillBlock = registerBlockItem(blocks, items, Names.STONEMILL, () -> Block.Properties.of()
-			.mapColor(MapColor.COLOR_BLACK)
-			.strength(2F, 6F)
-			.noOcclusion(),
-			StonemillBlock::new);
-			
-		// notblock items
-		redwireSpoolItem = registerItem(items, Names.REDWIRE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.REDWIRE_POSTS));
-		bundledCableSpoolItem = registerItem(items, Names.BUNDLED_CABLE_SPOOL, () -> new Item.Properties().durability(64), properties -> new WireSpoolItem(properties, MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS));
-		redAlloyIngotItem = registerItem(items, Names.RED_ALLOY_INGOT, Item.Properties::new, Item::new);
-		tubingPliers = registerItem(items, Names.PLIERS, () -> new Item.Properties().durability(128), PliersItem::new);
-
-		ResourceLocation tabIconId = id(Names.NOR_GATE);
-		this.tab = tabs.register(MoreRed.MODID, () -> CreativeModeTab.builder()
-			.icon(() -> new ItemStack(this.logicPlates.get(tabIconId).get()))
-			.title(Component.translatable("itemGroup.morered"))
-			.displayItems((params, output) -> output.acceptAll(items.getEntries().stream().map(rob -> new ItemStack(rob.get())).toList()))
-			.build()
-			);
-		
-		alternatorBlockEntity = GenericBlockEntity.builder()
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
-			.register(blockEntityTypes, Names.ALTERNATOR, this.alternatorBlock);
-		wirePostBeType = blockEntityTypes.register(Names.WIRE_POST,
-			() -> new BlockEntityType<>(WirePostBlockEntity::new,
-				redwirePostBlock.get(),
-				redwireRelayBlock.get(),
-				redwireJunctionBlock.get()));
-		cablePostBeType = blockEntityTypes.register(Names.CABLE_RELAY,
-			() -> new BlockEntityType<>(CablePostBlockEntity::new,
-				cableRelayBlock.get(),
-				cableJunctionBlock.get())
-			);
-		wireBeType = blockEntityTypes.register(Names.WIRE,
-			() -> new BlockEntityType<>(WireBlockEntity::new,
-				bundledCableBlock.get())
-			);
-		poweredWireBeType = blockEntityTypes.register(Names.POWERED_WIRE,
-			() -> new BlockEntityType<>(PoweredWireBlockEntity::new,
-				Stream.concat(
-					Stream.of(redAlloyWireBlock),
-					Arrays.stream(coloredCableBlocks))
-				.map(DeferredHolder::get)
-				.toArray(Block[]::new))
-			);
-		singleInputBitwiseGateBeType = blockEntityTypes.register(Names.SINGLE_INPUT_BITWISE_GATE,
-			() -> new BlockEntityType<>(SingleInputBitwiseGateBlockEntity::create,
-				Util.make(() ->
-				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
-					return this.bitwiseLogicPlates.values().stream()
-						.map(rob -> rob.get())
-						.toArray(Block[]::new);
-				}))
-			);
-		twoInputBitwiseGateBeType = blockEntityTypes.register(Names.TWO_INPUT_BITWISE_GATE,
-			() -> new BlockEntityType<>(TwoInputBitwiseGateBlockEntity::create,
-				Util.make(() ->
-				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
-					return this.bitwiseLogicPlates.values().stream()
-						.map(rob -> rob.get())
-						.toArray(Block[]::new);
-				}))
-			);
-		threeInputBitwiseGateBeType = blockEntityTypes.register(Names.THREE_INPUT_BITWISE_GATE,
-			() -> new BlockEntityType<>(ThreeInputBitwiseGateBlockEntity::create,
-				Util.make(() ->
-				{	// valid blocks are all of the bitwise logic gate blocks registered from LogicGateType
-					return this.bitwiseLogicPlates.values().stream()
-						.map(rob -> rob.get())
-						.toArray(Block[]::new);
-				}))
-			);
-		this.tubeEntity = blockEntityTypes.register(Names.TUBE,
-			() -> new BlockEntityType<>(
-					TubeBlockEntity::new,
-					tubeBlocksWithTubeBlockEntity.stream()
-						.map(Supplier::get)
-						.toArray(TubeBlock[]::new))
-				);
-		this.shuntEntity = blockEntityTypes.register(Names.SHUNT,
-			() -> new BlockEntityType<>(ShuntBlockEntity::new, shuntBlock.get()));
-		this.redstoneTubeEntity = blockEntityTypes.register(Names.REDSTONE_TUBE,
-			() -> new BlockEntityType<>(RedstoneTubeBlockEntity::new, redstoneTubeBlock.get()));
-		this.extractorEntity = GenericBlockEntity.builder()
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, ExtractorBlock::normalizeMachine, ExtractorBlock::denormalizeMachine)
-			.register(blockEntityTypes, Names.EXTRACTOR, this.extractorBlock);
-		this.filterEntity = blockEntityTypes.register(Names.FILTER,
-			() -> new BlockEntityType<>(FilterBlockEntity::new, filterBlock.get()));
-		this.multiFilterEntity = blockEntityTypes.register(Names.MULTIFILTER,
-			() -> new BlockEntityType<>(MultiFilterBlockEntity::new, multiFilterBlock.get()));
-		this.osmosisFilterEntity = blockEntityTypes.register(Names.OSMOSIS_FILTER,
-			() -> new BlockEntityType<>(OsmosisFilterBlockEntity::new, osmosisFilterBlock.get()));
-		this.distributorEntity = blockEntityTypes.register(Names.DISTRIBUTOR,
-			() -> new BlockEntityType<>(DistributorBlockEntity::new, distributorBlock.get()));
-		this.axleBlockEntity = GenericBlockEntity.builder()
-			.register(blockEntityTypes, Names.AXLE, this.axleBlocks.values());
-		this.gearBlockEntity = GenericBlockEntity.builder()
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
-			.register(blockEntityTypes, Names.GEAR, this.gearBlocks.values());
-		this.gearsBlockEntity = GenericBlockEntity.builder()
-			.syncedData(this.gearsDataComponent)
-			.dataTransformer(this.gearsDataComponent, GearsBlock::normalizeGears, GearsBlock::denormalizeGears)
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, EightGroup::normalizeMachine, EightGroup::denormalizeMachine)
-			.register(blockEntityTypes, Names.GEARS, this.gearsBlock);
-		this.gearshifterBlockEntity = GenericBlockEntity.builder()
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, GearshifterBlock::normalizeMachine, GearshifterBlock::denormalizeMachine)
-			.register(blockEntityTypes, Names.GEARSHIFTER, this.gearshifterBlocks.values());
-		this.clutchBlockEntity = GenericBlockEntity.builder()
-			.transformAttachment(MechanicalNodeStates.HOLDER, MechanicalNodeStates.MAP_CODEC, TwentyFourBlock::normalizeMachineWithAttachmentNode, TwentyFourBlock::denormalizeMachineWithAttachmentNode)
-			.register(blockEntityTypes, Names.CLUTCH, this.clutchBlocks.values());
-		this.windcatcherBlockEntity = GenericBlockEntity.builder()
-			.itemData(windcatcherColorsDataComponent)
-			.register(blockEntityTypes, Names.WINDCATCHER, this.windcatcherBlocks.values());
-		this.stonemillBlockEntity = GenericBlockEntity.builder()
-			.serverData(
-				stonemillDataComponent,	// holds the progress counters
-				() -> DataComponents.CONTAINER) // holds the inventory
-			.preRemoveSideEffects(StonemillBlock::preRemoveSideEffects)
-			.register(blockEntityTypes, Names.STONEMILL, this.stonemillBlock);
-
-		solderingMenuType = menuTypes.register(Names.SOLDERING_TABLE,
-			() -> new MenuType<>(SolderingMenu::getClientContainer, FeatureFlags.VANILLA_SET));
-		loaderMenu = menuTypes.register(Names.LOADER, () -> new MenuType<>(LoaderMenu::new, FeatureFlags.VANILLA_SET));
-		filterMenu = menuTypes.register(Names.FILTER, () -> new MenuType<>(FilterMenu::createClientMenu, FeatureFlags.VANILLA_SET));
-		multiFilterMenu = menuTypes.register(Names.MULTIFILTER, () -> new MenuType<>(MultiFilterMenu::clientMenu, FeatureFlags.VANILLA_SET));
-		stonemillMenuType = menuTypes.register(Names.STONEMILL,
-			() -> new MenuType<>(StonemillMenu::clientMenu, FeatureFlags.VANILLA_SET));
-		
-		solderingRecipeType = recipeTypes.register(Names.SOLDERING_RECIPE, () -> RecipeType.simple(id(Names.SOLDERING_RECIPE)));
-		
-		solderingSerializer = recipeSerializers.register(Names.SOLDERING_RECIPE,
-			() -> new SimpleRecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
-		windcatcherRecipeSerializer = recipeSerializers.register(Names.WINDCATCHER,
-			() -> new SimpleRecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
-		windcatcherDyeRecipeSerializer = recipeSerializers.register(Names.WINDCATCHER_DYE,
-			() -> new SimpleRecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
-		
-		this.gearsLootEntry = lootEntries.register(Names.GEARS, () -> new LootPoolEntryType(GearsLootEntry.CODEC));
-		this.wireCountLootFunction = lootFunctions.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
-
-		BiConsumer<ResourceKey<MapCodec<? extends SignalComponent>>, MapCodec<? extends SignalComponent>> registerSignalComponent = (key,codec) -> signalComponentTypes.register(key.location().getPath(), () -> codec);
-
-		registerSignalComponent.accept(WireSignalComponent.RESOURCE_KEY, WireSignalComponent.CODEC);
-		registerSignalComponent.accept(WirePostSignalComponent.RESOURCE_KEY, WirePostSignalComponent.CODEC);
-		registerSignalComponent.accept(BitwiseGateSignalComponent.RESOURCE_KEY, BitwiseGateSignalComponent.CODEC);
-
-		// menu types
 		
 		modBus.addListener(this::onRegisterPackets);
 		modBus.addListener(this::onRegisterCapabilities);
@@ -776,12 +671,6 @@ public class MoreRed
 		forgeBus.addListener(this::onUseItemOnBlock);
 		forgeBus.addListener(this::onChunkWatch);
 		forgeBus.addListener(this::onDataPackSyncEvent);
-		
-		// add layer of separation to client stuff so we don't break servers
-		if (FMLEnvironment.dist == Dist.CLIENT)
-		{
-			ClientProxy.addClientListeners(modBus, forgeBus);
-		}
 	}
 	
 	public static class Tags
@@ -846,15 +735,15 @@ public class MoreRed
 	
 	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.distributorEntity.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.filterEntity.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.multiFilterEntity.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.osmosisFilterEntity.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.redstoneTubeEntity.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.shuntEntity.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, this.tubeEntity.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, DISTRIBUTOR_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, FILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, MULTIFILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, OSMOSIS_FILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, REDSTONE_TUBE_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, SHUNT_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TUBE_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
 		
-		event.registerBlock(Capabilities.ItemHandler.BLOCK, StonemillBlock::getItemHandler, this.stonemillBlock.get());
+		event.registerBlock(Capabilities.ItemHandler.BLOCK, StonemillBlock::getItemHandler, STONEMILL_BLOCK.get());
 	}
 	
 	private void onRegisterDataMapTypes(RegisterDataMapTypesEvent event) {
@@ -897,7 +786,7 @@ public class MoreRed
 					LevelChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
 					
 					// check wires blocking placement
-					Set<BlockPos> posts = chunk.getData(this.postsInChunkAttachment.get());
+					Set<BlockPos> posts = chunk.getData(POSTS_IN_CHUNK_ATTACHMENT.get());
 					if (posts != null)
 					{
 						Set<BlockPos> checkedPostPositions = new HashSet<BlockPos>();
@@ -996,7 +885,7 @@ public class MoreRed
 		ServerPlayer player = event.getPlayer();
 		LevelChunk chunk = event.getChunk();
 		ChunkPos pos = chunk.getPos();
-		Set<BlockPos> postsInChunk = chunk.getData(postsInChunkAttachment.get());
+		Set<BlockPos> postsInChunk = chunk.getData(POSTS_IN_CHUNK_ATTACHMENT.get());
 		if (postsInChunk != null && !postsInChunk.isEmpty())
 		{
 			PacketDistributor.sendToPlayer(player, new SyncPostsInChunkPacket(pos, postsInChunk));
@@ -1006,14 +895,7 @@ public class MoreRed
 	
 	private void onDataPackSyncEvent(OnDatapackSyncEvent event)
 	{
-		event.sendRecipes(MoreRed.get().solderingRecipeType.get());
-	}
-	
-	private static <T> DeferredRegister<T> defreg(IEventBus modBus, ResourceKey<Registry<T>> registryKey)
-	{
-		var reg = DeferredRegister.create(registryKey, MODID);
-		reg.register(modBus);
-		return reg;
+		event.sendRecipes(MoreRed.SOLDERING_RECIPE_TYPE.get());
 	}
 	
 	private static <BLOCK extends Block> DeferredHolder<Block, BLOCK> registerBlock(
@@ -1061,7 +943,7 @@ public class MoreRed
 		return registerBlockItem(blocks, items, name, blockProperties, blockFactory, () -> new Item.Properties(), BlockItem::new);
 	}
 	
-	public DeferredHolder<Block, LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public static DeferredHolder<Block, LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
 		LogicFunction function,
 		LogicFunctionPlateBlockFactory factory)
 	{
@@ -1073,11 +955,11 @@ public class MoreRed
 				.sound(SoundType.WOOD)
 				.forceSolidOn(),
 			properties -> factory.makeBlock(function, properties));
-		logicPlates.put(blockGetter.getId(), blockGetter);
+		LOGIC_PLATES.put(blockGetter.getId(), blockGetter);
 		return blockGetter;
 	}
 	
-	public <B extends BitwiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public static <B extends BitwiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
 		BitwiseLogicFunction function,
 		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, B> blockFactory)
 	{
@@ -1089,7 +971,25 @@ public class MoreRed
 				.sound(SoundType.WOOD)
 				.forceSolidOn(),
 			properties -> blockFactory.apply(properties, function));
-		bitwiseLogicPlates.put(rob.getId(), rob);
+		BITWISE_LOGIC_PLATES.put(rob.getId(), rob);
 		return rob;
+	}
+	
+	public static <T> DeferredRegister<T> defreg(ResourceKey<Registry<T>> registryKey)
+	{
+		var reg = DeferredRegister.create(registryKey, MODID);
+		reg.register(ModList.get().getModContainerById(MODID).get().getEventBus());
+		return reg;
+	}
+	
+	public static <BLOCK extends Block> Map<String, DeferredHolder<Block, BLOCK>> registerWoodSetBlocks(BiFunction<String, WoodSet, DeferredHolder<Block,BLOCK>> registerer)
+	{
+		Map<String, DeferredHolder<Block, BLOCK>> map = new HashMap<>();
+		for (var entry : WoodSets.LOOKUP.entrySet())
+		{
+			String woodName = entry.getKey();
+			map.put(woodName, registerer.apply(woodName, entry.getValue()));
+		}
+		return map;
 	}
 }

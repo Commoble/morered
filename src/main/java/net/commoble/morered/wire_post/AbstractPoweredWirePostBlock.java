@@ -67,7 +67,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().wirePostBeType.get().create(pos, state);
+		return MoreRed.WIRE_POST_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

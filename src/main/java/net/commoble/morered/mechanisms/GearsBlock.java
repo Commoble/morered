@@ -63,7 +63,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 		double nearestDistSquared = Double.MAX_VALUE;
 		Pair<Direction,ItemStack> nearest = Pair.of(Direction.NORTH, ItemStack.EMPTY);
 		Vec3 localHitVec = worldHitVec.subtract(pos.getX(), pos.getY(), pos.getZ());
-		var items = be.get(MoreRed.get().gearsDataComponent.get());
+		var items = be.get(MoreRed.GEARS_DATA_COMPONENT.get());
 		if (items != null)
 		{
 			for (var entry : FaceSegmentBlock.HITVECS.entrySet())
@@ -112,7 +112,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().gearsBlockEntity.get().create(pos, state);
+		return MoreRed.GEARS_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override
@@ -232,7 +232,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 				}
 			}
 			
-			var items = be.get(MoreRed.get().gearsDataComponent.get());
+			var items = be.get(MoreRed.GEARS_DATA_COMPONENT.get());
 			if (items != null)
 			{
 				// if the raytrace failed, try to estimate from nearest direction
@@ -249,7 +249,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 		}
 		
 		// fallback, default to oak gear (we have no item at all for this block, can't just store a blockentity copy in it)
-		return new ItemStack(MoreRed.get().gearBlocks.get("oak").get());
+		return new ItemStack(MoreRed.GEAR_BLOCKS.get("oak").get());
 	}
 
 	// called after a block is placed into an empty position and blockentity data has been transferred from itemstack
@@ -260,7 +260,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 		// set blockentity data
 		if (level.getBlockEntity(pos) instanceof GenericBlockEntity be)
 		{
-			var gearsComponent = MoreRed.get().gearsDataComponent.get();
+			var gearsComponent = MoreRed.GEARS_DATA_COMPONENT.get();
 			Map<Direction, ItemStack> oldData = Objects.requireNonNullElseGet(be.get(gearsComponent), HashMap::new);
 			if (oldData != null)
 			{
@@ -290,7 +290,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 	{
 		if (level.getBlockEntity(pos) instanceof GenericBlockEntity be)
 		{
-			var items = be.get(MoreRed.get().gearsDataComponent.get());
+			var items = be.get(MoreRed.GEARS_DATA_COMPONENT.get());
 			if (items != null)
 			{
 				// if we are altering which gear states exist, clean out the datacomponent
@@ -308,7 +308,7 @@ public class GearsBlock extends Block implements EntityBlock, SimpleWaterloggedB
 							}
 						}
 					}
-					be.set(MoreRed.get().gearsDataComponent.get(), newDataComponent);
+					be.set(MoreRed.GEARS_DATA_COMPONENT.get(), newDataComponent);
 				}
 			}
 			if (this.isEmptyGearsBlock(newState))

@@ -22,7 +22,7 @@ public class VoxelCache
 		if (chunk == null)
 			return Shapes.empty();
 		
-		var map = chunk.getData(MoreRed.get().voxelCacheAttachment.get());
+		var map = chunk.getData(MoreRed.VOXEL_CACHE_ATTACHMENT.get());
 		@Nullable VoxelShape cachedShape = map.get(pos);
 		if (cachedShape != null)
 		{
@@ -48,7 +48,7 @@ public class VoxelCache
 		var chunk = level.getChunkSource().getChunk(chunkX, chunkZ, ChunkStatus.FULL, false);
 		if (chunk == null)
 			return;
-		var map = chunk.getData(MoreRed.get().voxelCacheAttachment.get());
+		var map = chunk.getData(MoreRed.VOXEL_CACHE_ATTACHMENT.get());
 		map.remove(pos);
 	}
 }

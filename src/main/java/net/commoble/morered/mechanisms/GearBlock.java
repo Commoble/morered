@@ -62,7 +62,7 @@ public class GearBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().gearBlockEntity.get().create(pos, state);
+		return MoreRed.GEAR_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

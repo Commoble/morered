@@ -37,7 +37,7 @@ public class ThreeInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 
 	public static ThreeInputBitwiseGateBlockEntity create(BlockPos pos, BlockState state)
 	{
-		return new ThreeInputBitwiseGateBlockEntity(MoreRed.get().threeInputBitwiseGateBeType.get(), pos, state);
+		return new ThreeInputBitwiseGateBlockEntity(MoreRed.THREE_INPUT_BITWISE_GATE_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	public void setInputOnChannel(InputSide side, boolean hasInput, int channel)

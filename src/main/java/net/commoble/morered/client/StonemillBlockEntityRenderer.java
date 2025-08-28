@@ -28,7 +28,7 @@ public record StonemillBlockEntityRenderer(ItemRenderer itemRenderer, ItemStack 
 {
 	public static StonemillBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		ResourceLocation blockId = MoreRed.get().stonemillBlock.getId();
+		ResourceLocation blockId = MoreRed.STONEMILL_BLOCK.getId();
 		ResourceLocation axleModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
 		ItemStack axle = new ItemStack(Items.STICK);
 		axle.set(DataComponents.ITEM_MODEL, axleModel);

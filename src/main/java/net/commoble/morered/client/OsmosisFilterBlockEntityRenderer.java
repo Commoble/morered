@@ -33,7 +33,7 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
 		BlockPos blockpos = filter.getBlockPos();
 		BlockState filterState = filter.getBlockState();
 		Direction dir = filterState.getValue(OsmosisFilterBlock.FACING);
-		BlockState renderState = MoreRed.get().osmosisSlimeBlock.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
+		BlockState renderState = MoreRed.OSMOSIS_SLIME_BLOCK.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
 		long transferhash = blockpos.hashCode();
 		int rate = MoreRed.SERVERCONFIG.osmosisFilterTransferRate().get();
 		double ticks = (double)filter.getLevel().getGameTime() + (double)transferhash + (double)partialTicks; // casting to doubles fixes a weird rounding error that was causing choppy animation

@@ -36,7 +36,7 @@ public class MultiFilterMenu extends AbstractContainerMenu
 
 	protected MultiFilterMenu(int id, Inventory playerInventory, Predicate<Player> validator, SetItemHandler filterInventory)
 	{
-		super(MoreRed.get().multiFilterMenu.get(), id);
+		super(MoreRed.MULTI_FILTER_MENU.get(), id);
 		this.validator = validator;
 		
 		int rows = 3;

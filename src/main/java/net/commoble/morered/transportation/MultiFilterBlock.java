@@ -29,7 +29,7 @@ public class MultiFilterBlock extends AbstractFilterBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().multiFilterEntity.get().create(pos, state);
+		return MoreRed.MULTIFILTER_BLOCK_ENTITY.get().create(pos, state);
 	}
 	
 	@Override

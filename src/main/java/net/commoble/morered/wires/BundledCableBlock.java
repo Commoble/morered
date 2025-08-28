@@ -32,7 +32,7 @@ public class BundledCableBlock extends AbstractWireBlock implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().wireBeType.get().create(pos, state);
+		return MoreRed.WIRE_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

@@ -30,7 +30,7 @@ public class FilterMenu extends AbstractContainerMenu
 
 	private FilterMenu(int id, Inventory playerInventory, Container filterInventory)
 	{
-		super(MoreRed.get().filterMenu.get(), id);
+		super(MoreRed.FILTER_MENU.get(), id);
 		this.inventory = filterInventory;
 
 		// add filter slot

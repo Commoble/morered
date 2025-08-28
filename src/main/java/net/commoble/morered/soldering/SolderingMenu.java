@@ -48,7 +48,7 @@ public class SolderingMenu extends AbstractContainerMenu
 
 	protected SolderingMenu(int id, Inventory playerInventory, BlockPos pos)
 	{
-		super(MoreRed.get().solderingMenuType.get(), id);
+		super(MoreRed.SOLDERING_MENU.get(), id);
 		this.player = playerInventory.player;
 		this.positionInWorld = ContainerLevelAccess.create(this.player.level(), pos);
 		
@@ -77,7 +77,7 @@ public class SolderingMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player playerIn)
 	{
-		return stillValid(this.positionInWorld, playerIn, MoreRed.get().solderingTableBlock.get());
+		return stillValid(this.positionInWorld, playerIn, MoreRed.SOLDERING_TABLE_BLOCK.get());
 	}
 
 		/**
@@ -165,7 +165,7 @@ public class SolderingMenu extends AbstractContainerMenu
 
 	public static @Nullable RecipeHolder<SolderingRecipe> getSolderingRecipe(RecipeManager manager, ResourceKey<Recipe<?>> id)
 	{
-		return manager.byKeyTyped(MoreRed.get().solderingRecipeType.get(), id);
+		return manager.byKeyTyped(MoreRed.SOLDERING_RECIPE_TYPE.get(), id);
 	}
 	
 	/**

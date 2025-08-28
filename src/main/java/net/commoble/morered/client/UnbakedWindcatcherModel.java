@@ -97,7 +97,7 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 			{
 				model.update(renderState, stack, resolver, displayContext, level, entity, seed);
 			}
-			WindcatcherColors colors = Objects.requireNonNullElse(stack.get(MoreRed.get().windcatcherColorsDataComponent.get()), WindcatcherColors.DEFAULT);
+			WindcatcherColors colors = Objects.requireNonNullElse(stack.get(MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get()), WindcatcherColors.DEFAULT);
 			airfoilSails.get(new SailKey(colors.north(), Direction.NORTH)).update(renderState, stack, resolver, displayContext, level, entity, seed);
 			airfoilSails.get(new SailKey(colors.south(), Direction.SOUTH)).update(renderState, stack, resolver, displayContext, level, entity, seed);
 			airfoilSails.get(new SailKey(colors.west(), Direction.WEST)).update(renderState, stack, resolver, displayContext, level, entity, seed);

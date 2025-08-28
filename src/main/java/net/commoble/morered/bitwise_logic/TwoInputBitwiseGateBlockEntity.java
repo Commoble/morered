@@ -37,7 +37,7 @@ public class TwoInputBitwiseGateBlockEntity extends BitwiseGateBlockEntity
 
 	public static TwoInputBitwiseGateBlockEntity create(BlockPos pos, BlockState state)
 	{
-		return new TwoInputBitwiseGateBlockEntity(MoreRed.get().twoInputBitwiseGateBeType.get(), pos, state);
+		return new TwoInputBitwiseGateBlockEntity(MoreRed.TWO_INPUT_BITWISE_GATE_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	public void setClockwiseInputOnChannel(boolean hasInput, int channel)

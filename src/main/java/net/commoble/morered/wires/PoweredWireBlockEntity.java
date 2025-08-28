@@ -17,7 +17,7 @@ public class PoweredWireBlockEntity extends WireBlockEntity
 
 	public PoweredWireBlockEntity(BlockPos pos, BlockState state)
 	{
-		super(MoreRed.get().poweredWireBeType.get(), pos, state);
+		super(MoreRed.POWERED_WIRE_BLOCK_ENTITY.get(), pos, state);
 	}
 	public PoweredWireBlockEntity(BlockEntityType<? extends WireBlockEntity> type, BlockPos pos, BlockState state)
 	{

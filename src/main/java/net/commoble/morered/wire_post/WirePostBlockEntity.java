@@ -60,7 +60,7 @@ public class WirePostBlockEntity extends BlockEntity
 	
 	public WirePostBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().wirePostBeType.get(), pos, state);
+		this(MoreRed.WIRE_POST_BLOCK_ENTITY.get(), pos, state);
 	}
 
 	// connects two post TEs

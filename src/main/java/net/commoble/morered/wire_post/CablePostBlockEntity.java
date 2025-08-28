@@ -15,7 +15,7 @@ public class CablePostBlockEntity extends WirePostBlockEntity
 
 	public CablePostBlockEntity(BlockPos pos, BlockState state)
 	{
-		super(MoreRed.get().cablePostBeType.get(), pos, state);
+		super(MoreRed.CABLE_POST_BLOCK_ENTITY.get(), pos, state);
 	}
 
 }

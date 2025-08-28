@@ -78,7 +78,7 @@ public class ColorHandlers
 	
 	public static int getLatchItemTint(ItemStack stack, int tintIndex)
 	{
-		return getLatchTint(MoreRed.get().latchBlock.get().defaultBlockState(), tintIndex);
+		return getLatchTint(MoreRed.LATCH_BLOCK.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getLatchTint(BlockState state, int tintIndex)
@@ -106,7 +106,7 @@ public class ColorHandlers
 	
 	public static int getPulseGateItemTint(ItemStack stack, int tintIndex)
 	{
-		return getPulseGateTint(MoreRed.get().pulseGateBlock.get().defaultBlockState(), tintIndex);
+		return getPulseGateTint(MoreRed.PULSE_GATE_BLOCK.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getPulseGateTint(BlockState state, int tintIndex)
@@ -138,7 +138,7 @@ public class ColorHandlers
 	
 	public static int getRedwirePostItemTint(ItemStack stack, int tintIndex)
 	{
-		return getRedwirePostTint(MoreRed.get().redwirePostBlock.get().defaultBlockState(), tintIndex);
+		return getRedwirePostTint(MoreRed.REDWIRE_POST_BLOCK.get().defaultBlockState(), tintIndex);
 	}
 	
 	public static int getRedwirePostTint(BlockState state, int tintIndex)

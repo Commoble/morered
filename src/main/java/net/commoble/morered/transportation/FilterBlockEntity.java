@@ -31,7 +31,7 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	
 	public FilterBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().filterEntity.get(), pos, state);
+		this(MoreRed.FILTER_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	@Override

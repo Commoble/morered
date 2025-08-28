@@ -82,7 +82,7 @@ public class WirePostRenderer implements BlockEntityRenderer<WirePostBlockEntity
 			ItemStack stack = player.getItemInHand(hand);
 			if (stack.getItem() instanceof WireSpoolItem)
 			{
-				@Nullable BlockPos positionOfCurrentPostOfPlayer = stack.get(MoreRed.get().spooledPostComponent.get());
+				@Nullable BlockPos positionOfCurrentPostOfPlayer = stack.get(MoreRed.SPOOLED_POST_DATA_COMPONENT.get());
 				if (positionOfCurrentPostOfPlayer != null && positionOfCurrentPostOfPlayer.equals(postPos))
 				{
 					EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();

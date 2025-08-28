@@ -43,14 +43,14 @@ public class OsmosisFilterBlock extends FilterBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().osmosisFilterEntity.get().create(pos, state);
+		return MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		if (!level.isClientSide && type == MoreRed.get().osmosisFilterEntity.get())
+		if (!level.isClientSide && type == MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get())
 		{
 			return (BlockEntityTicker<T>) OsmosisFilterBlockEntity.SERVER_TICKER;
 		}

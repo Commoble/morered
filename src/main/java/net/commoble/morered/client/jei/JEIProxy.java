@@ -67,6 +67,6 @@ public class JEIProxy implements IModPlugin
 	@Override
 	public void registerRecipeCatalysts(IRecipeCatalystRegistration registration)
 	{
-		registration.addCraftingStation(SolderingCategory.TYPE, new ItemStack(MoreRed.get().solderingTableBlock.get()));
+		registration.addCraftingStation(SolderingCategory.TYPE, new ItemStack(MoreRed.SOLDERING_TABLE_BLOCK.get()));
 	}
 }

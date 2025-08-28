@@ -33,7 +33,7 @@ public class StonemillMenu extends AbstractContainerMenu
 	
 	public static StonemillMenu clientMenu(int id, Inventory playerInventory)
 	{
-		return new StonemillMenu(MoreRed.get().stonemillMenuType.get(), playerInventory, id , new ItemStackHandler(1), ContainerLevelAccess.NULL);
+		return new StonemillMenu(MoreRed.STONEMILL_MENU.get(), playerInventory, id , new ItemStackHandler(1), ContainerLevelAccess.NULL);
 	}
 	
 	public static MenuProvider serverMenuProvider(GenericBlockEntity be)
@@ -42,7 +42,7 @@ public class StonemillMenu extends AbstractContainerMenu
 		BlockPos pos = be.getBlockPos(); 
 		return new SimpleMenuProvider(
 			(id, playerInventory, serverPlayer) -> new StonemillMenu(
-				MoreRed.get().stonemillMenuType.get(),
+				MoreRed.STONEMILL_MENU.get(),
 				playerInventory,
 				id,
 				level.getCapability(Capabilities.ItemHandler.BLOCK, pos, Direction.DOWN),
@@ -134,7 +134,7 @@ public class StonemillMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player player)
 	{
-		return stillValid(this.positionInWorld, player, MoreRed.get().stonemillBlock.get());
+		return stillValid(this.positionInWorld, player, MoreRed.STONEMILL_BLOCK.get());
 	}
 
 }

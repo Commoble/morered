@@ -33,7 +33,7 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 
 	public MultiFilterBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().multiFilterEntity.get(), pos, state);
+		this(MoreRed.MULTIFILTER_BLOCK_ENTITY.get(), pos, state);
 	}
 
 	@Nullable

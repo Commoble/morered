@@ -80,7 +80,7 @@ public class WindcatcherRecipe extends ShapedRecipe
 	@Override
 	public RecipeSerializer<? extends ShapedRecipe> getSerializer()
 	{
-		return MoreRed.get().windcatcherRecipeSerializer.get();
+		return MoreRed.WINDCATCHER_RECIPE_SERIALIZER.get();
 	}
 	
 	public DyeColor getColor(ItemStack input)
@@ -117,7 +117,7 @@ public class WindcatcherRecipe extends ShapedRecipe
 			this.getColor(input, this.west),
 			this.getColor(input, this.east));
 		
-		output.set(MoreRed.get().windcatcherColorsDataComponent.get(), colors);
+		output.set(MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get(), colors);
 		return output;
 	}
 	

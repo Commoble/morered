@@ -52,6 +52,6 @@ public class OsmosisSlimeBlock extends DirectionalBlock
 	@Override
 	protected MapCodec<? extends DirectionalBlock> codec()
 	{
-		return MapCodec.unit((() -> MoreRed.get().osmosisSlimeBlock.get()));
+		return MapCodec.unit((() -> MoreRed.OSMOSIS_SLIME_BLOCK.get()));
 	}
 }

@@ -36,7 +36,7 @@ public record GearsBlockEntityRenderer(ItemRenderer itemRenderer) implements Blo
 	@Override
 	public void render(GenericBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay, Vec3 Camera)
 	{
-		var items = be.get(MoreRed.get().gearsDataComponent.get());
+		var items = be.get(MoreRed.GEARS_DATA_COMPONENT.get());
 		if (items == null || items.isEmpty())
 			return; // nothing to render
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());

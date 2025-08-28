@@ -48,7 +48,7 @@ public class AxleBlock extends RotatedPillarBlock implements EntityBlock, Simple
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().axleBlockEntity.get().create(pos, state);
+		return MoreRed.AXLE_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override

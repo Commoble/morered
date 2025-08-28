@@ -39,7 +39,7 @@ public class WireCountLootFunction implements LootItemFunction
 	@Override
 	public LootItemFunctionType<WireCountLootFunction> getType()
 	{
-		return MoreRed.get().wireCountLootFunction.get();
+		return MoreRed.WIRE_COUNT_LOOT_FUNCTION.get();
 	}
 	
 	@Override

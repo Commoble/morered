@@ -75,7 +75,7 @@ public enum WindcatcherExtension implements ICraftingCategoryExtension<Windcatch
 				colorMap.getOrDefault(recipe.west(), recipe.defaultColor()),
 				colorMap.getOrDefault(recipe.east(), recipe.defaultColor()));
 			ItemStack newOutputStack = outputStack.copy();
-			newOutputStack.set(MoreRed.get().windcatcherColorsDataComponent.get(), windcatcherColors);
+			newOutputStack.set(MoreRed.WINDCATCHER_COLORS_DATA_COMPONENT.get(), windcatcherColors);
 			outputSlot.createDisplayOverrides().add(newOutputStack);
 		});
 	}

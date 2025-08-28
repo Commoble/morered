@@ -17,6 +17,6 @@ public class DistributorBlock extends Block implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().distributorEntity.get().create(pos, state);
+		return MoreRed.DISTRIBUTOR_BLOCK_ENTITY.get().create(pos, state);
 	}
 }

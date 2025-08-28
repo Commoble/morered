@@ -86,7 +86,7 @@ public class StonemillBlock extends Block implements EntityBlock
 	@Override
 	public BlockEntity newBlockEntity(BlockPos pos, BlockState state)
 	{
-		return MoreRed.get().stonemillBlockEntity.get().create(pos, state);
+		return MoreRed.STONEMILL_BLOCK_ENTITY.get().create(pos, state);
 	}
 
 	@Override
@@ -138,7 +138,7 @@ public class StonemillBlock extends Block implements EntityBlock
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return level.isClientSide && type == MoreRed.get().stonemillBlockEntity.get() ? null : (BlockEntityTicker<T>) TICKER;
+		return level.isClientSide && type == MoreRed.STONEMILL_BLOCK_ENTITY.get() ? null : (BlockEntityTicker<T>) TICKER;
 	}
 
 	public static final BlockEntityTicker<GenericBlockEntity> TICKER = StonemillBlock::serverTick;
@@ -150,7 +150,7 @@ public class StonemillBlock extends Block implements EntityBlock
 			return;
 		
 		// get data and check generation timestamp
-		DataComponentType<StonemillData> stonemillDataComponent = MoreRed.get().stonemillDataComponent.get();
+		DataComponentType<StonemillData> stonemillDataComponent = MoreRed.STONEMILL_DATA_COMPONENT.get();
 		StonemillData oldData = be.getOrDefault(stonemillDataComponent, StonemillData.ZERO);
 		// if we are on tick 30, play the lava cooling effects
 		long genTimestamp = oldData.genTimestamp;

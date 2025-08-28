@@ -110,7 +110,7 @@ public abstract class AbstractPostBlock extends Block implements SimpleWaterlogg
 		LevelChunk chunk = world.getChunkAt(pos);
 		if (chunk != null)
 		{
-			Set<BlockPos> set = chunk.getData(MoreRed.get().postsInChunkAttachment.get());
+			Set<BlockPos> set = chunk.getData(MoreRed.POSTS_IN_CHUNK_ATTACHMENT.get());
 			boolean setUpdated = setFunction.test(set, pos);
 			if (setUpdated && world instanceof ServerLevel serverLevel)
 			{

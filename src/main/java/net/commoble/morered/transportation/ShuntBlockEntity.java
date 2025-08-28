@@ -22,7 +22,7 @@ public class ShuntBlockEntity extends BlockEntity
 
 	public ShuntBlockEntity(BlockPos pos, BlockState state)
 	{
-		this(MoreRed.get().shuntEntity.get(), pos, state);
+		this(MoreRed.SHUNT_BLOCK_ENTITY.get(), pos, state);
 	}
 	
 	public IItemHandler getItemHandler(@Nullable Direction side)
