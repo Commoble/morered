@@ -51,7 +51,6 @@ import net.neoforged.neoforge.registries.DeferredRegister;
 
 public class GenericBlockEntity extends BlockEntity
 {
-	public static final String DATA = "data";
 	public static final String ATTACHMENTS = "attachments";
 	
 	private final Set<DataComponentType<?>> serverDataComponents;
@@ -193,7 +192,6 @@ public class GenericBlockEntity extends BlockEntity
 	protected void saveAdditional(ValueOutput output)
 	{
 		super.saveAdditional(new TransformingValueOutput(output, this)); // use delegator to finagle transformable attachments
-		ValueOutput dataTag = output.child(DATA);
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -204,7 +202,7 @@ public class GenericBlockEntity extends BlockEntity
 			var serializableValue = this.getTypedDataForSave(type, getBlockState());
 			if (serializableValue != null && serializableValue.value() != null)
 			{
-				storeDataComponent(dataTag, serializableValue);
+				storeDataComponent(output, serializableValue);
 			}
 		}
 	}
@@ -220,7 +218,6 @@ public class GenericBlockEntity extends BlockEntity
 	protected void loadAdditional(ValueInput input)
 	{
 		super.loadAdditional(new TransformingValueInput(input, this)); // use delegator to finagle transformable attachments
-		ValueInput dataTag = input.childOrEmpty(DATA);
 		for (DataComponentType<?> type : this.serverDataComponents)
 		{
 			Codec<?> codec = type.codec();
@@ -229,7 +226,7 @@ public class GenericBlockEntity extends BlockEntity
 			if (codec == null)
 				continue;
 			String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
-			dataTag.read(key, codec)
+			input.read(key, codec)
 				.ifPresent(value -> this.data.put(type, this.getTypedDataForLoad(TypedDataComponent.createUnchecked(type,value), this.getBlockState())));
 		}
 	}
@@ -240,7 +237,6 @@ public class GenericBlockEntity extends BlockEntity
 		var tag = super.getUpdateTag(provider);	// empty tag
 		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
 		
-		CompoundTag dataTag = new CompoundTag();
 		for (DataComponentType<?> type : this.syncedDataComponents)
 		{
 			var holder = this.data.get(type);
@@ -248,10 +244,9 @@ public class GenericBlockEntity extends BlockEntity
 			{
 				holder.encodeValue(ops)
 					.result()
-					.ifPresent(valueTag -> dataTag.put(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(holder.type()).toString(), valueTag));
+					.ifPresent(valueTag -> tag.put(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(holder.type()).toString(), valueTag));
 			}
 		}
-		tag.put(DATA, dataTag);
 		
 		return tag;
 	}
@@ -259,12 +254,11 @@ public class GenericBlockEntity extends BlockEntity
 	@Override
 	public void handleUpdateTag(ValueInput input)
 	{
-		ValueInput dataTag = input.childOrEmpty(DATA);
 		Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 		for (DataComponentType<?> type : this.syncedDataComponents)
 		{
 			String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
-			dataTag.read(key, type.codec())
+			input.read(key, type.codec())
 				.ifPresent(value -> data.put(type, TypedDataComponent.createUnchecked(type, value)));
 		}
 		this.data = data;		
@@ -316,11 +310,10 @@ public class GenericBlockEntity extends BlockEntity
 	public void removeComponentsFromTag(ValueOutput output)
 	{
 		super.removeComponentsFromTag(output);
-		ValueOutput dataTag = output.child(DATA);
 		for (var type : this.itemDataComponents)
 		{
 			String key = BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(type).toString();
-			dataTag.discard(key);
+			output.discard(key);
 		}
 	}	
 	
