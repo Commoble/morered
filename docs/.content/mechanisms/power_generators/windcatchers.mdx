@@ -1,0 +1,164 @@
+---
+title: Windcatchers
+id: morered:oak_windcatcher
+type: block
+---
+
+Windcatchers generate mechanical power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='white_wool'/> Wool](@wool)
+				* 4x [<ModAsset width={32} height={32} location='stick'/> Stick](@stick)
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_axle'/> Axle](@morered:oak_axle)
+			</td>
+			<td>
+				* 1x Windcatcher (of the same wood type as the axle)
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Windcatchers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/windcatcher_recipe.png)
+				<br/>
+			</td>
+		</tr>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='lime_wool'/> Dyed Wool](@wool)
+				* 4x [<ModAsset width={32} height={32} location='stick'/> Stick](@stick)
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_axle'/> Axle](@morered:oak_axle)
+			</td>
+			<td>
+				* 1x Windcatcher (with the same colors as the wool)
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Dyed Windcatchers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/windcatcher_recipe_dyed.png)
+				<br/>
+			</td>
+		</tr>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='cyan_dye'/> Dye](@dye)
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_windcatcher'/> Windcatcher](@morered:oak_windcatcher)
+			</td>
+			<td>
+				* 1x Windcatcher (with the same colors as the dye)
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Dyeing Windcatchers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/windcatcher_dyeing_recipe.png)
+				<br/>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Windcatchers take up 3x3 blocks horizontally, and can be placed where enough room exists to place them (the center "axle" block will be placed at the clicked position).
+
+![Windcatcher placed in an area just big enough to hold it](https://commoble.s3.us-east-1.amazonaws.com/images/morered/windcatcher_placement.png)
+
+Windcatchers can be used to power other mechanical blocks such as [Stonemills](/en/mod/morered/docs/content/mechanisms/stonemill),
+[Extractors](@morered:extractor),
+or [Alternators](@morered:alternator).
+
+Mechanical blocks such as [Axles](/en/mod/morered/docs/content/mechanisms/axles) and [Gears](/en/mod/morered/docs/content/mechanisms/gears)
+can be used to get power from one place to another. Windcatchers can connect to other mechanisms vertically (including other windcatchers).
+
+![Several windcatchers stacked together and connected to axles](https://commoble.s3.us-east-1.amazonaws.com/images/morered/windcatchers_stacked.png)
+
+Windcatchers in the overworld generate more power the higher they are (scaling from minimal power at y=63 to maximum power at y=150).
+They work best when there aren't too many solid blocks nearby horizontally.
+Windcatchers also generate a small amount of power in [The End](https://minecraft.wiki/w/The_End), regardless of y-level.
+
+How much power windcatchers generate is configurable per-dimension via datapacks.
+
+## Data
+<table>
+	<thead><tr><th>Block</th><th>Block/Item ID</th><th>Localization Key</th></tr></thead>
+	<tbody>
+		<tr><td><ModAsset width={32} height={32} location='morered:acacia_windcatcher'/> Acacia Windcatcher</td><td>`morered:acacia_windcatcher`</td><td>`block.morered.acacia_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:birch_windcatcher'/> Birch Windcatcher</td><td>`morered:birch_windcatcher`</td><td>`block.morered.birch_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:cherry_windcatcher'/> Cherry Windcatcher</td><td>`morered:cherry_windcatcher`</td><td>`block.morered.cherry_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:crimson_windcatcher'/> Crimson Windcatcher</td><td>`morered:crimson_windcatcher`</td><td>`block.morered.crimson_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:dark_oak_windcatcher'/> Dark Oak Windcatcher</td><td>`morered:dark_oak_windcatcher`</td><td>`block.morered.dark_oak_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:jungle_windcatcher'/> Jungle Windcatcher</td><td>`morered:jungle_windcatcher`</td><td>`block.morered.jungle_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:mangrove_windcatcher'/> Mangrove Windcatcher</td><td>`morered:mangrove_windcatcher`</td><td>`block.morered.mangrove_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:oak_windcatcher'/> Oak Windcatcher</td><td>`morered:oak_windcatcher`</td><td>`block.morered.oak_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:pale_oak_windcatcher'/> Pale Oak Windcatcher</td><td>`morered:pale_oak_windcatcher`</td><td>`block.morered.pale_oak_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:spruce_windcatcher'/> Spruce Windcatcher</td><td>`morered:spruce_windcatcher`</td><td>`block.morered.spruce_windcatcher`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:warped_windcatcher'/> Warped Windcatcher</td><td>`morered:warped_windcatcher`</td><td>`block.morered.warped_windcatcher`</td></tr>
+	</tbody>
+</table>
+
+Crimson and warped windcatchers are not flammable.
+
+Windcatcher blocks have the following blockstate properties:
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `wind` | `[0,8]` | Wind level of the block. The higher the wind level, the more power the block generates.
+
+Windcatchers are surrounded by eight invisible [technical blocks](https://minecraft.wiki/w/Technical_blocks), which have the id `morered:airfoil`.
+Airfoil blocks have the following blockstate properties:
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `segment` | `[0,7]` | Indicates which of the eight positions around the windcatcher the segment exists at.
+
+Dyed windcatcher blockentities and itemstacks have a `morered:windcatcher_colors` data component of the format
+```json
+{
+	"east": "color",
+	"south": "color",
+	"north": "color",
+	"west": "color"
+}
+```
+
+Where "color" is any of the sixteen [color names](https://minecraft.wiki/w/Dye#Color_values).
+
+If a direction is absent or the entire datacomponent is absent, the color will be treated as `white`.
+
+Windcatcher blockentities have the same datacomponent in blockentity data:
+```json
+{
+	"morered:windcatcher_colors": {
+		"east": "color",
+		"south": "color",
+		"north": "color",
+		"west": "color"
+	}
+}
+```
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.21.8.8.0.0.0 | Added to More Red

@@ -1,0 +1,97 @@
+---
+title: Gearshifters
+id: morered:oak_gearshifter
+type: block
+---
+
+Gearshifters are mechanisms which can double torque by halving speed, or vice-versa.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='morered:oak_gear'/> Gear](@morered:oak_gear)
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_axle'/> Axle](@morered:oak_axle)
+			</td>
+			<td>
+				* 1x Gearshifter (of the same wood type)
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Gearshifters](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/gearshifter_recipe.png)
+				<br/>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Gearshifters can connect to other mechanical blocks on three sides; one connection on the side of the big gear, and two connections to the small gear.
+
+When placing the block, the big gear will face the block the gearshifter is placed against.
+If the sprint key is held, the small gear axle will face the block placed against instead.
+A placement preview is displayed while placing the block:
+
+![A preview of a Gearshifter about to be placed against an axle](https://commoble.s3.us-east-1.amazonaws.com/images/morered/gearshifter_placement_preview.png)
+
+When a mechanical power source is connected to the big gear, the small axle will spin twice the speed, but it will only feel half the torque.
+
+![Step-up gearshifter](https://commoble.s3.us-east-1.amazonaws.com/images/morered/gearshifter_step_up.png)
+
+When a mechanical power source is connected to the small gear's axle, the big gear will spin at half the speed, but it will feel twice as much torque.
+
+![Step-down gearshifter](https://commoble.s3.us-east-1.amazonaws.com/images/morered/gearshifter_step_down.png)
+
+## Data
+
+<table>
+	<thead><tr><th>Block</th><th>Block/Item ID</th><th>Localization Key</th></tr></thead>
+	<tbody>
+		<tr><td><ModAsset width={32} height={32} location='morered:acacia_gearshifter'/> Acacia Gearshifter</td><td>`morered:acacia_gearshifter`</td><td>`block.morered.acacia_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:birch_gearshifter'/> Birch Gearshifter</td><td>`morered:birch_gearshifter`</td><td>`block.morered.birch_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:cherry_gearshifter'/> Cherry Gearshifter</td><td>`morered:cherry_gearshifter`</td><td>`block.morered.cherry_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:crimson_gearshifter'/> Crimson Gearshifter</td><td>`morered:crimson_gearshifter`</td><td>`block.morered.crimson_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:dark_oak_gearshifter'/> Dark Oak Gearshifter</td><td>`morered:dark_oak_gearshifter`</td><td>`block.morered.dark_oak_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:jungle_gearshifter'/> Jungle Gearshifter</td><td>`morered:jungle_gearshifter`</td><td>`block.morered.jungle_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:mangrove_gearshifter'/> Mangrove Gearshifter</td><td>`morered:mangrove_gearshifter`</td><td>`block.morered.mangrove_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:oak_gearshifter'/> Oak Gearshifter</td><td>`morered:oak_gearshifter`</td><td>`block.morered.oak_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:pale_oak_gearshifter'/> Pale Oak Gearshifter</td><td>`morered:pale_oak_gearshifter`</td><td>`block.morered.pale_oak_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:spruce_gearshifter'/> Spruce Gearshifter</td><td>`morered:spruce_gearshifter`</td><td>`block.morered.spruce_gearshifter`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:warped_gearshifter'/> Warped Gearshifter</td><td>`morered:warped_gearshifter`</td><td>`block.morered.warped_gearshifter`</td></tr>
+	</tbody>
+</table>
+
+Crimson and warped gearshifters are not flammable.
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the gearshifter's big gear is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.21.8.8.0.0.0 | Added to More Red

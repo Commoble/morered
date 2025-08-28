@@ -1,0 +1,83 @@
+---
+title: Osmosis Filter
+id: morered:osmosis_filter
+type: block
+---
+
+Osmosis Filters are item-handling blocks which can pull items of a specific type from an adjacent inventory.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='morered:filter'/> Filter](@morered:filter)
+				* 1x [<ModAsset width={32} height={32} location='slime_ball'/> Slimeball](https://minecraft.wiki/Slimeball)
+				* 1x [<ModAsset width={32} height={32} location='hopper'/> Hopper](https://minecraft.wiki/Hopper)
+			</td>
+			<td>
+				* 1x Osmosis Filter
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Osmosis Filters](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/osmosis_filter_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The osmosis filter behaves similarly to a [Filter](@morered:filter).
+
+In addition to the behavior of the filter, the osmosis filter will also pull items from an adjacent inventory,
+and attempt to insert them into an inventory on its output side, similar to a [Hopper](https://minecraft.wiki/Hopper).
+Like hoppers, this occurs at a rate of 8 ticks per item (or 2.5 items per second);
+this can be configured in the [Server Config](/en/mod/morered/docs/configuration/server_config).
+
+If the osmosis filter holds a filtering item, it will only pull that type of item.
+
+![](https://commoble.s3.us-east-1.amazonaws.com/images/tubesreloaded/osmosis_filter_showcase_2.gif)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Output direction
+| `enabled` | `{"false", "true"}` | Whether the osmosis filter is currently pulling items
+
+<table>
+	<thead><tr><th>BlockEntity Data</th><th>Format</th><th>Description</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>`inventory`</td>
+			<td><ul><li>Itemstack object</li><li>e.g. `{"id": "cobblestone"}`</li></ul></td>
+			<td>The item the filter is holding and accepting</td>
+		</tr>
+	</tbody>
+</table>
+
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.3-7.0.0.0 | Added to More Red

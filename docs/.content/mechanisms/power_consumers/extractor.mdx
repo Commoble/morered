@@ -1,0 +1,79 @@
+---
+title: Extractor
+id: morered:extractor
+type: block
+---
+
+The Extractor continually extracts entire itemstacks from inventories while rotated by mechanical power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='leather'/> Leather](@leather)
+				* 2x [<ModAsset width={32} height={32} location='morered:oak_axle'/> Axle](@morered:oak_axle)
+				* 2x [<ModAsset width={32} height={32} location='oak_planks'/> Planks](@planks)
+				* 1x [<ModAsset width={32} height={32} location='hopper'/> Hopper](@hopper)
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_gear'/> Gear](@morered:oak_gear)
+				* 1x [<ModAsset width={32} height={32} location='morered:shunt'/> Shunt](@morered:shunt)
+			</td>
+			<td>
+				* 1x Extractor
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Extractors](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/extractor_recipe_8.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The Extractor can be placed in any of 24 orientations. Holding the sprint key changes the axis of rotation when being placed. A placement preview is provided to assist with placing the block.
+
+![](https://commoble.s3.us-east-1.amazonaws.com/images/morered/extractor_preview.png)
+
+The Extractor has an item input side, an item output side, and two mechanical power input sides.
+
+![](https://commoble.s3.us-east-1.amazonaws.com/images/morered/extractor.png)
+
+Using the [Pliers](@morered:pliers) or another mod's wrenchlike item on an extractor will rotate it.
+Holding the sprint key while pliering the block also changes the axis it rotates around.
+
+While rotated by mechanical power, whenever a full revolution is completed, the Extractor will extract an entire item stack from the inventory its input side faces,
+and eject the itemstack on its output side (into another inventory if possible).
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Output direction
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | Now requires mechanical power instead of a redstone pulse. Updated model to match new behavior.
+| 1.21.3-7.0.0.0 | Added to More Red

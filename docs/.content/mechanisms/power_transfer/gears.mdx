@@ -1,0 +1,120 @@
+---
+title: Gears
+id: morered:oak_gear
+type: block
+---
+
+Gears transfer mechanical power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 8x [<ModAsset width={32} height={32} location='stick'/> Stick](@stick)
+				* 1x [<ModAsset width={32} height={32} location='stripped_oak_log'/> Stripped Log](@stripped_log)
+			</td>
+			<td>
+				* 1x Gear (of the same wood type)
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Gears](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/gear_recipe.png)
+				<br/>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Gears can be placed against the side of a block, or in a block where an existing gear is. Up to four gears can exist in a single cube without jamming.
+
+![Gears](https://commoble.s3.us-east-1.amazonaws.com/images/morered/gears.png)
+
+Gears will connect to other mechanical blocks that touch their face or to gears that touch their teeth.
+Tooth-to-tooth connections invert rotation (clockwise to counterclockwise or vice-versa).
+Gears will jam (or at least not work very well) if two power sources try to rotate a gear in both directions at once, or if three gears meet on a corner.
+
+![Four gears arranged in a circle, which are able to move, and three gears meeting on a corner, which do not move](https://commoble.s3.us-east-1.amazonaws.com/images/morered/gears_move_and_dont_move.png)
+
+## Data
+
+<table>
+	<thead><tr><th>Block</th><th>Block/Item ID</th><th>Localization Key</th></tr></thead>
+	<tbody>
+		<tr><td><ModAsset width={32} height={32} location='morered:acacia_gear'/> Acacia Gear</td><td>`morered:acacia_gear`</td><td>`block.morered.acacia_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:birch_gear'/> Birch Gear</td><td>`morered:birch_gear`</td><td>`block.morered.birch_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:cherry_gear'/> Cherry Gear</td><td>`morered:cherry_gear`</td><td>`block.morered.cherry_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:crimson_gear'/> Crimson Gear</td><td>`morered:crimson_gear`</td><td>`block.morered.crimson_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:dark_oak_gear'/> Dark Oak Gear</td><td>`morered:dark_oak_gear`</td><td>`block.morered.dark_oak_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:jungle_gear'/> Jungle Gear</td><td>`morered:jungle_gear`</td><td>`block.morered.jungle_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:mangrove_gear'/> Mangrove Gear</td><td>`morered:mangrove_gear`</td><td>`block.morered.mangrove_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:oak_gear'/> Oak Gear</td><td>`morered:oak_gear`</td><td>`block.morered.oak_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:pale_oak_gear'/> Pale Oak Gear</td><td>`morered:pale_oak_gear`</td><td>`block.morered.pale_oak_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:spruce_gear'/> Spruce Gear</td><td>`morered:spruce_gear`</td><td>`block.morered.spruce_gear`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:warped_gear'/> Warped Gear</td><td>`morered:warped_gear`</td><td>`block.morered.warped_gear`</td></tr>
+	</tbody>
+</table>
+
+Crimson and warped gears are not flammable.
+
+Single gear blocks have the following properties:
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the gear is attached to
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+When multiple gears exist in one block, a special `morered:gears` block is used instead, which has the following properties:
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `waterlogged` | `{"false", "true"}` | Whether the block is waterlogged
+| `transform` | `{"identity", "rot_180_face_xz", "rot_90_y_neg", "rot_80_y_pos", "invert_x", "invert_z", "swap_xz", "swap_neg_xz"}` | Set when the block is rotated/mirrored by structure generation or similar mechanics; it ensures blockentity data is transformed accordingly. When placed by a player, this will always be `"identity"`
+
+Multi-gear blocks have blockentity data in the following format:
+```json
+{
+	"morered:gears": {
+		"down": <itemstack>, // optional field
+		"up": <itemstack>, // optional field
+		"north": <itemstack>, // optional field
+		"south": <itemstack>, // optional field
+		"west": <itemstack>, // optional field
+		"east": <itemstack>, // optional field
+	}
+}
+```
+Where itemstacks are objects with the following format:
+```json
+{
+	"count": 1, // can be any integer but will generally be 1
+	"id": <string> // id of an item, such as "morered:oak_gear"
+}
+```
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.21.8.8.0.0.0 | Added to More Red

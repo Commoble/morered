@@ -1,0 +1,9 @@
+{
+	"distributor.mdx": "Distributor",
+	"extractor.mdx": "Extractor",
+	"filter.mdx": "Filter",
+	"loader.mdx": "Loader",
+	"multifilter.mdx": "Multifilter",
+	"osmosis_filter.mdx": "Osmosis Filter",
+	"shunt.mdx": "Shunt"
+}

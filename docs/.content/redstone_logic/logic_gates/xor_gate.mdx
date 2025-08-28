@@ -1,0 +1,94 @@
+---
+title: XOR Gate
+id: morered:xor_gate
+type: block
+---
+
+The XOR Gate is a block that outputs maximum-strength redstone power from its output side while one (but not both) of its input sides is receiving redstone power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 5x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 3x [<ModAsset width={32} height={32} location='redstone_torch'/> Redstone Torch](https://minecraft.wiki/Redstone_Torch)
+				* 1x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+			</td>
+			<td>
+				* 1x XOR Gate
+			</td>
+			<td>
+				![Shaped Crafting Recipe for XOR Gates](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/xor_gate_recipe.png)
+			</td>
+		</tr>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 4x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+			</td>
+			<td>
+				* 1x XOR Gate
+			</td>
+			<td>
+				![Shaped Crafting Recipe for XOR Gates](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/xor_gate_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The XOR Gate can be placed in 24 different orientations, on floors, walls, and ceilings.
+
+When placing the block, the flat side will be placed against the face clicked by the player, and the output side will point to the edge of the clicked face nearest to where the player clicked. A transparent preview is rendered to assist with orienting the block; this can be disabled in the [Client Config](/en/mod/morered/configuration/client_config) if this is undesired.
+
+![A preview of an XOR Gate about to be placed against a wall with the output facing up](https://commoble.s3.us-east-1.amazonaws.com/images/morered/xor_gate_preview.png)
+
+The sprint key can be held while placing the block to change the axis of rotation.
+
+While one (but not both) of the XOR Gate's input sides is receiving power, the XOR Gate outputs redstone power at maximum strength. While neither or both of the input sides are powered, the XOR Gate does not output power.
+
+![XOR Gates in all four input combinations](https://commoble.s3.us-east-1.amazonaws.com/images/morered/xor_gate_combinations.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `input_a` | `{false, true}` | Whether the input side clockwise from the output is receiving power
+| `input_c` | `{false, true}` | Whether the input side counterclockwise from the output is receiving power
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+| Tint Index | Tint Value
+| --- | -
+| 1+ | [See Logic Gate Tintindexes](../pack_development/tintindexes#Logic-Gates)
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | <ul><li>Added `waterlogged` blockstate property property</li><li>Can now hold sprint while placing to change the axis of rotation</li></ul>
+| 1.16.3-2.0.0.0 | More Red recipes now use tag ingredients instead of specific items in more places
+| 1.0.0.0 | Added to game
+

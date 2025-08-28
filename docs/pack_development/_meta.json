@@ -1,4 +1,5 @@
 {
+	"datamaps": "Datamaps",
 	"loot_components.mdx": "Loot Components",
 	"model_loaders.mdx": "Model Loaders",
 	"recipe_types.mdx": "Recipe Types",

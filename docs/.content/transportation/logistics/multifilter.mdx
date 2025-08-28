@@ -1,0 +1,90 @@
+---
+title: Multifilter
+id: morered:multifilter
+type: block
+---
+
+Multifilters are item-handling blocks which can accept insertions of specific types of items, rejecting other items.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='morered:filter'/> Filter](@morered:filter)
+				* 4x [<ModAsset width={32} height={32} location='iron_ingot'/> Iron Ingot](https://minecraft.wiki/Iron_Ingot)
+				* 1x [<ModAsset width={32} height={32} location='hopper'/> Chest](https://minecraft.wiki/Chest)
+			</td>
+			<td>
+				* 1x Multifilter
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Multifilters](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/multifilter_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The multifilter behaves similarly to a [Filter](@morered:filter).
+
+Unlike the filter, the multifilter can hold up to 27 filtering items, and will allow any of them.
+Additionally, the multifilter allows no item to pass through while its filter inventory is empty.
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Output direction
+
+<table>
+	<thead><tr><th>BlockEntity Data</th><th>Format</th><th>Description</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>`inventory`</td>
+			<td>
+				```json
+					{
+						"Size": 27,
+						"Items": [
+							{
+								"id": "item_id",
+								"count": 1,
+								"components": {},
+								"Slot": number
+							}
+						]
+					}
+				```
+			</td>
+			<td>The inventory of the filter</td>
+		</tr>
+	</tbody>
+</table>
+
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.3-7.0.0.0 | Added to More Red

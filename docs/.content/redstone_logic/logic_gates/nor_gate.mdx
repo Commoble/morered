@@ -1,0 +1,94 @@
+---
+title: NOR Gate
+id: morered:nor_gate
+type: block
+---
+
+The NOR Gate is a block that outputs maximum-strength redstone power from its output side while none of its input sides are receiving redstone power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 1x [<ModAsset width={32} height={32} location='redstone_torch'/> Redstone Torch](https://minecraft.wiki/Redstone_Torch)
+				* 1x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+			</td>
+			<td>
+				* 1x NOR Gate
+			</td>
+			<td>
+				![Shaped Crafting Recipe for NOR Gates](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/nor_gate_recipe.png)
+			</td>
+		</tr>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 2x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+			</td>
+			<td>
+				* 1x NOR Gate
+			</td>
+			<td>
+				![Shaped Crafting Recipe for NOR Gates](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/nor_gate_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The NOR Gate can be placed in 24 different orientations, on floors, walls, and ceilings.
+
+When placing the block, the flat side will be placed against the face clicked by the player, and the output side will point to the edge of the clicked face nearest to where the player clicked. A transparent preview is rendered to assist with orienting the block; this can be disabled in the [Client Config](/en/mod/morered/configuration/client_config) if this is undesired.
+
+![A preview of an NOR Gate about to be placed against a wall with the output facing up](https://commoble.s3.us-east-1.amazonaws.com/images/morered/nor_gate_preview.png)
+
+The sprint key can be held while placing the block to change the axis of rotation.
+
+While none of its three input sides are receiving redstone power, the NOR Gate emits maximum-strength redstone power from its output side. If any of its three input sides are receiving redstone power, the NOR Gate emits no power.
+
+![NOR Gates in all eight input combinations](https://commoble.s3.us-east-1.amazonaws.com/images/morered/nor_gate_combinations.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `input_a` | `{false, true}` | Whether the input side clockwise from the output is receiving power
+| `input_b` | `{false, true}` | Whether the input side opposite from the output is receiving power
+| `input_c` | `{false, true}` | Whether the input side counterclockwise from the output is receiving power
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+| Tint Index | Tint Value
+| --- | -
+| 1+ | [See Logic Gate Tintindexes](../pack_development/tintindexes#Logic-Gates)
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | <ul><li>Added `waterlogged` blockstate property property</li><li>Can now hold sprint while placing to change the axis of rotation</li></ul>
+| 1.16.3-2.0.0.0 | More Red recipes now use tag ingredients instead of specific items in more places
+| 1.0.0.0 | Added to game

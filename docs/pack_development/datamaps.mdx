@@ -1,0 +1,43 @@
+---
+title: Datamaps
+hide_meta: true
+---
+
+More Red adds the following [datamap](https://docs.neoforged.net/docs/resources/server/datamaps/) types:
+
+## Dimension Type
+
+### Wind
+
+A datamap is defined at `data/morered/data_maps/dimension_type/wind.json`, which specifies the wind levels observed by [windcatchers](@morered:oak_windcatcher) in different dimensions.
+
+There are two valid formats for defining wind per dimension type, both of which are present in the default file:
+
+```json
+{
+	"values": {
+		"#morered:overworld_wind": {
+			"min_y": 63,
+			"max_y": 150
+		},
+		"#morered:end_wind": {
+			"value": 2
+		}
+	}
+}
+```
+
+The format used by the overworld specifies a min and max y; if a windcatcher's y-level is below `min_y`, its wind level will be 0.
+If its y-level is above `max_y`, its wind level will be the maximum of 8.
+Wind increases linearly from min y to max y.
+
+The format used by the end specifies a constant wind value, which windcatchers in that dimension will have regardless of y-level.
+
+The two tags used above only contain `minecraft:overworld` and `minecraft:the_end`, respectively;
+additional dimension types can be added to those tags to make windcatchers function similarly in those dimensions.
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | Added "morered:wind" dimension type datamap

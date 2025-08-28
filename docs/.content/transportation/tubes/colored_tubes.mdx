@@ -1,0 +1,126 @@
+---
+title: Colored Tubes
+id: morered:red_tube
+type: block
+---
+
+Colored Tube blocks behave identically to [Tubes](@morered:tube), but cannot connect to tubes of the same color.
+
+![Colored tubes](https://commoble.s3.us-east-1.amazonaws.com/images/tubesreloaded/color_tubes.png)
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='copper_ingot'/> Copper Ingot](https://minecraft.wiki/Copper_Ingot)
+				* 1x [<ModAsset width={32} height={32} location='red_stained_glass'/> Stained Glass](https://minecraft.wiki/Stained_Glass)
+			</td>
+			<td>
+				* 2x Colored Tube (matching the glass color)
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Tubes (From Copper Ingots)](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/colored_tube_recipe_from_copper.png)
+			</td>
+		</tr>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='gold_ingot'/> Gold Ingot](https://minecraft.wiki/Gold_Ingot)
+				* 1x [<ModAsset width={32} height={32} location='red_stained_glass'/> Stained Glass](https://minecraft.wiki/Stained_Glass)
+			</td>
+			<td>
+				* 8x Colored Tube (matching the glass color)
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Colored Tubes (From Gold Ingots)](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/colored_tube_recipe_from_gold.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Data
+
+<table>
+	<thead><tr><th>Block</th><th>Block/Item ID</th><th>Localization Key</th></tr></thead>
+	<tbody>
+		<tr><td><ModAsset width={32} height={32} location='morered:white_tube'/> White Tube</td><td>`morered:white_tube`</td><td>`block.morered.white_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:orange_tube'/> Orange Tube</td><td>`morered:orange_tube`</td><td>`block.morered.orange_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:magenta_tube'/> Magenta Tube</td><td>`morered:magenta_tube`</td><td>`block.morered.magenta_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:light_blue_tube'/> Light Blue Tube</td><td>`morered:light_blue_tube`</td><td>`block.morered.light_blue_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:yellow_tube'/> Yellow Tube</td><td>`morered:yellow_tube`</td><td>`block.morered.yellow_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:lime_tube'/> Lime Tube</td><td>`morered:lime_tube`</td><td>`block.morered.lime_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:pink_tube'/> Pink Tube</td><td>`morered:pink_tube`</td><td>`block.morered.pink_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:gray_tube'/> Gray Tube</td><td>`morered:gray_tube`</td><td>`block.morered.gray_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:light_gray_tube'/> Light Gray Tube</td><td>`morered:light_gray_tube`</td><td>`block.morered.light_gray_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:cyan_tube'/> Cyan Tube</td><td>`morered:cyan_tube`</td><td>`block.morered.cyan_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:purple_tube'/> Purple Tube</td><td>`morered:purple_tube`</td><td>`block.morered.purple_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:blue_tube'/> Blue Tube</td><td>`morered:blue_tube`</td><td>`block.morered.blue_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:brown_tube'/> Brown Tube</td><td>`morered:brown_tube`</td><td>`block.morered.brown_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:green_tube'/> Green Tube</td><td>`morered:green_tube`</td><td>`block.morered.green_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:red_tube'/> Red Tube</td><td>`morered:red_tube`</td><td>`block.morered.red_tube`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:black_tube'/> Black Tube</td><td>`morered:black_tube`</td><td>`block.morered.black_tube`</td></tr>
+	</tbody>
+</table>
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `down` | `{"false", "true"}` | Whether the tube is connected to the block below it
+| `up` | `{"false", "true"}` | Whether the tube is connected to the block above it
+| `north` | `{"false", "true"}` | Whether the tube is connected to the north
+| `south` | `{"false", "true"}` | Whether the tube is connected to the south
+| `west` | `{"false", "true"}` | Whether the tube is connected to the west
+| `east` | `{"false", "true"}` | Whether the tube is connected to the east
+| `waterlogged` | `{"false", "true"}` | Whether the tube is waterlogged
+| `transform` | `{"identity", "rot_180_face_xz", "rot_90_y_neg", "rot_80_y_pos", "invert_x", "invert_z", "swap_xz", "swap_neg_xz"}` | Set when the block is rotated/mirrored by structure generation or similar mechanics; it ensures blockentity data is transformed accordingly. When placed by a player, this will always be `"identity"`
+
+<table>
+	<thead><tr><th>BlockEntity Data</th><th>Format</th><th>Description</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>`connections`</td>
+			<td><ul><li>List of block positions in [X,Y,Z] format</li><li>e.g. `[[2, 5, -6], [2, 5, -9]]`</li></ul></td>
+			<td>Relative distances to other blocks which this tube is connected to</td>
+		</tr>
+		<tr>
+			<td>`inventory`</td>
+			<td>
+				```json
+				[
+					{
+						"item": {}, // itemstack object
+						"moves": [], // move list
+						"ticks_remaining": integer,
+						"max_duration": integer,
+						"fresh": boolean
+					}
+				]
+				```
+			</td>
+			<td>
+				List of the items currently travelling through the tube:
+				* `item` is an itemstack object in standard vanilla format (with sub-fields id, count, components)
+				* `moves` is the item's remaining moves encoded as a list of pairs of numbers [`dir0`, `count0`, `dir1`, `count1`, etc] where `dirN`, `countN` indicates `count` moves in the `dir` direction, where `dirN` is a direction ordinal in DUNSWE order
+				  * e.g. [0, 5, 4, 2] indicates DOWN 5 blocks followed by WEST 2 blocks
+				* `ticks_remaining` is the number of ticks remaining in this tube before it moves to the next tube
+				* `max_duration` is the total number of ticks the item spends in the tube
+				* `fresh` indicates the tube is the tube which the item was originally inserted into (as opposed to a tube the item travelled to from another tube)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.3-7.0.0.0 | Added to More Red

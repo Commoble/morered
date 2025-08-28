@@ -1,0 +1,83 @@
+---
+title: Bitwise Multiplexer
+id: morered:bitwise_multiplexer
+type: block
+---
+
+The Bitwise Multiplexer is a three-input, single-output bitwise logic block, applying a data-selector operation to individual channels of bundled cable signals.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '250px'}}>
+				* 2x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 1x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+				* 1x [<ModAsset width={32} height={32} location='quartz'/> Nether Quartz](https://minecraft.wiki/Nether_Quartz)
+				* 1x [<ModAsset width={32} height={32} location='morered:bundled_cable'/> Bundled Cable](@morered:bundled_cable)
+			</td>
+			<td>
+				* 1x Bitwise Multiplexer
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Bitwise Multiplexers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/bitwise_multiplexer_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The Bitwise Multiplexer can be placed in 24 different orientations, on floors, walls, and ceilings.
+
+When placing the block, the flat side will be placed against the face clicked by the player, and the output side will point to the edge of the clicked face nearest to where the player clicked. A transparent preview is rendered to assist with orienting the block; this can be disabled in the [Client Config](/en/mod/morered/configuration/client_config) if this is undesired.
+
+The sprint key can be held while placing the block to change the axis of rotation.
+
+Bitwise logic plates can connect to [Bundled Cables](@morered:bundled_cable), [Colored Cables](@morered:orange_cable), or similar blocks.
+
+The Bitwise Multiplexer has three input sides, designated A, B, and C (the sides 90, 180, and 270 degrees clockwise from the output while facing the top of the block, respectively).
+For each color channel, while input B is off, the output side emits power on that channel while side A is powered.
+While input B has power on the given channel, the output side instead emits power on the same channel while side C is powered.
+[Red Alloy Wires](@morered:red_alloy_wire) will provide input signal to all sixteen channels.
+
+![Bitwise Multiplexer with input combinations](https://commoble.s3.us-east-1.amazonaws.com/images/morered/bitwise_multiplexer_combinations.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+| BlockEntity Data | Format | Description
+| --- | - | -
+| `input_a` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+| `input_b` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+| `input_c` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+| `output` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | Added to More Red

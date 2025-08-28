@@ -1,0 +1,100 @@
+---
+title: Stonemill
+id: morered:stonemill
+type: block
+---
+
+Stonemills are mechanical-power-consuming blocks that continually generate cobblestone when supplied with water and lava.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td>
+				* 2x [<ModAsset width={32} height={32} location='iron_ingot'/> Iron Ingot](@iron_ingot)
+				* 2x [<ModAsset width={32} height={32} location='iron_bars'/> Iron Bars](@iron_bars)
+				* 2x [<ModAsset width={32} height={32} location='obsidian'/> Obsidian](@obsidan)
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_axle'/> Axle](@morered:oak_axle)
+				* 1x [<ModAsset width={32} height={32} location='diamond_pickaxe'/> Diamond Pickaxe](@diamond_pickaxe)
+				* 1x [<ModAsset width={32} height={32} location='hopper'/> Hopper](@hopper)
+			</td>
+			<td>
+				* 1x Stonemill
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Stonemills](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/stonemill_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+In order to function, a stonemill must receive mechanical power via its top side, and have [water](@water) and [lava](@lava) and lava with a fluid depth of at least 4 next to the "grates" on two of its sides.
+
+![Stonemill connected to water, lava, and a rotating axle](https://commoble.s3.us-east-1.amazonaws.com/images/morered/stonemill.png)
+
+The stonemill requires a large amount of torque in order to grind cobblestone. Using [Gearshifters](@morered:oak_gearshifter) can reduce the required power generated.
+
+If the stonemill is rotated at least 1/32 rotations per second, and has both lava and water touching the grates,
+the stonemill will generate cobblestone at a rate of betweeen 31 and 94 ticks per cobblestone, depending on how fast it spins.
+To reach maximum cobblestone per second, a stonemill must rotate at 2 rotations per second.
+
+The stonemill has a one-slot inventory which can be accessed by right-clicking it.
+
+![Stonemill GUI with one inventory slot containing cobblestone](https://commoble.s3.us-east-1.amazonaws.com/images/morered/stonemill_gui.png)
+
+If there is an inventory such as a [barrel](@barrel) or [tube](@morered:tube) underneath the block, the stonemill will automatically insert its stack of cobblestone
+into the inventory when there is no more room for new cobblestone (meaning [hoppers](@hopper) are not necessary to automate item transfers).
+
+Wooden axles and gears are ignitable by lava, but using mechanisms made from [crimson stems](@crimson_forest) or [warped stems](@warped_forest) can avert this.
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `axis` | `{"x", "z"}` | Whether the grates are facing west and east, or north and south
+| `enabled` | `{"true", "false"}` | Whether the grates are connected to sufficient levels of both water and lava
+
+Blockentity data has the following format:
+
+```json
+{
+	"morered:stonemill": {
+		"progress": <int>,
+		"gen_timestamp": <long>
+	},
+	"minecraft:container": <container>
+}
+```
+| BlockEntity Data | Format | Description
+| --- | - | -
+| `progress` | integer | Value in the range [0, 63]. How much progress the stonemill has accumulated to the next cobblestone.
+| `gen_timestamp` | long | Timestamp (in game time ticks) of when the last cobblestone was generated. Cobblestone begins generating again 30 ticks after this timestamp.
+| `minecraft:container` | List of Itemstacks | See [vanilla container datacomponent](https://minecraft.wiki/w/Data_component_format#container). Only the first slot is used.
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | Added to More Red

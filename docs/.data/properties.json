@@ -1,0 +1,859 @@
+{
+  "morered:lime_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:mangrove_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:crimson_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:orange_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:blue_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:warped_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:oak_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:or_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:bitwise_multiplexer": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:pale_oak_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:spruce_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:acacia_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:red_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:jungle_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:diode": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:acacia_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:nand_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:gray_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:magenta_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:crimson_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:oak_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:soldering_table": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 3.5,
+    "hardness": 3.5,
+    "flammable": false
+  },
+  "morered:dark_oak_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:bitwise_xnor_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:cable_relay": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 5.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:pale_oak_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:white_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:cyan_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:spruce_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:stone_plate": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:spruce_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:xor_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:redwire_relay": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 5.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:dark_oak_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:pulse_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:crimson_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:crimson_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:bitwise_xor_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:bitwise_and_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:dark_oak_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:two_input_nand_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:brown_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:extractor": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:bitwise_not_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:acacia_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:blue_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:redwire_post": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 5.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:and_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:yellow_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:birch_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:stonemill": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:multifilter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:cable_junction": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 5.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:light_blue_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:orange_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:jungle_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:birch_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:crimson_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:jungle_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:oak_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:brown_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:cherry_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:green_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:not_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:warped_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:mangrove_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:red_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:pale_oak_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:osmosis_filter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:magenta_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:purple_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:birch_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:cherry_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:cyan_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:redstone_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:bundled_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:green_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:bitwise_diode": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:spruce_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:latch": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:multiplexer": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:birch_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:birch_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:cherry_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:gray_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:distributor": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:white_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:acacia_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:oak_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:light_gray_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:redwire_junction": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 5.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:black_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:pink_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:jungle_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:cherry_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:mangrove_gearshifter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:jungle_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:warped_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:black_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:pink_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:pale_oak_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:dark_oak_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:alternator": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:oak_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:bitwise_or_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:loader": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:hexidecrubrometer": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 5.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:mangrove_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:nor_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:two_input_and_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:dark_oak_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:light_blue_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:acacia_windcatcher": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:xnor_gate": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:spruce_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:light_gray_cable": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:cherry_axle": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:purple_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:red_alloy_wire": {
+    "stack_size": 64,
+    "blast_resistance": 0.0,
+    "hardness": 0.0,
+    "flammable": false
+  },
+  "morered:filter": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:warped_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:lime_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:mangrove_clutch": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 1.5,
+    "hardness": 1.5,
+    "flammable": false
+  },
+  "morered:warped_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": false
+  },
+  "morered:pale_oak_gear": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_axe",
+    "blast_resistance": 2.0,
+    "hardness": 2.0,
+    "flammable": true
+  },
+  "morered:yellow_tube": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 0.4,
+    "hardness": 0.4,
+    "flammable": false
+  },
+  "morered:shunt": {
+    "stack_size": 64,
+    "required_tool": "minecraft:wooden_pickaxe",
+    "blast_resistance": 6.0,
+    "hardness": 2.0,
+    "flammable": false
+  }
+}

@@ -39,10 +39,129 @@ Numerous examples of soldering recipe jsons can found in More Red's data files, 
 
 Soldering recipes currently only support up to at most nine ingredients per recipe.
 
+## Windcatcher
+
+Windcatchers use a special shaped recipe to add color data to the result based on their ingredients. The simplest windcatcher recipe has the same format as shaped recipes:
+
+```json
+{
+  "type": "morered:windcatcher",
+  "key": {
+    "-": "#c:rods/wooden",
+    "W": "#minecraft:wool",
+    "o": "morered:oak_axle"
+  },
+  "pattern": [
+    "-W-",
+    "WoW",
+    "-W-"
+  ],
+  "result": {
+    "count": 1,
+    "id": "morered:oak_windcatcher"
+  }
+}
+```
+
+The recipe adds a a `morered:windcatcher_colors` data component to the result itemstack, which has the format
+```json
+{
+	"east": "color",
+	"south": "color",
+	"north": "color",
+	"west": "color"
+}
+```
+
+Where "color" is any of the sixteen [color names](https://minecraft.wiki/w/Dye#Color_values).
+
+![Shaped Crafting Recipe for Dyed Windcatchers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/windcatcher_recipe_dyed.png)
+
+There are additional fields which can be in the root recipe object:
+* `"north"`: Position in the recipe pattern of the item whose color will be used for the north value of the data component. Defaults to `{"x": 1, "y": 0}` if not specified.
+* `"south"`: Position in the recipe pattern of the item whose color will be used for the south value of the data component. Defaults to `{"x": 1, "y": 2}`.
+* `"west"`: Position in the recipe pattern of the item whose color will be used for the west value of the data component. Defaults to `{"x": 0, "y": 1}`.
+* `"east"`: Position in the recipe pattern of the item whose color will be used for the east value of the data component. Defaults to `{"x": 2, "y": 1}`.
+* `"default_color"`: Name of the color to use when a direction is absent or the ingredient at that position has no color. Defaults to `"white"`.
+
+If an ingredient at the specified positions is in any `#c:dyed/<color>` tag (e.g. `#c:dyed/lime`), that color will be added to the result itemstack.
+
+If the above recipe's defaulted fields were shown, it would look like this:
+```json
+{
+  "type": "morered:windcatcher",
+  "key": {
+    "-": "#c:rods/wooden",
+    "W": "#minecraft:wool",
+    "o": "morered:oak_axle"
+  },
+  "pattern": [
+    "-W-",
+    "WoW",
+    "-W-"
+  ],
+  "north": {"x": 1, "y": 0},
+  "south": {"x": 1, "y": 2},
+  "west": {"x": 0, "y": 1},
+  "east": {"x": 2, "y": 1},
+  "default_color": "white",
+  "result": {
+    "count": 1,
+    "id": "morered:oak_windcatcher"
+  }
+}
+```
+
+## Windcatcher Dyeing
+
+Windcatchers can be re-dyed after being created. This is defined via a single special crafting recipe with the id `morered:windcatcher_dye` which has the following format:
+
+```json
+{
+  "type": "morered:windcatcher_dye",
+  "ingredient": "#morered:dyeable_windcatchers"
+}
+```
+
+![Shaped Crafting Recipe for Dyeing Windcatchers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/windcatcher_dyeing_recipe.png)
+
+Similar to the windcatcher shaped crafting recipe, there are additional optional fields that may be specified:
+
+* `"north"`: Position in the 3x3 recipe grid of the item whose color will be used for the north value of the data component. Defaults to `{"x": 1, "y": 0}` if not specified.
+* `"south"`: Position in the 3x3 recipe grid of the item whose color will be used for the south value of the data component. Defaults to `{"x": 1, "y": 2}`.
+* `"west"`: Position in the 3x3 recipe grid of the item whose color will be used for the west value of the data component. Defaults to `{"x": 0, "y": 1}`.
+* `"east"`: Position in the 3x3 recipe grid of the item whose color will be used for the east value of the data component. Defaults to `{"x": 2, "y": 1}`.
+* `"windcatcher"`: Position in the 3x3 recipe grid of the item being dyed. Defaults to `{"x": 1, "y": 1}`.
+
+The recipe will copy the windcatcher ingredient to the result itemstack, replacing its `morered:windcatcher_colors` data component's colors based on any dye ingredients at the specified positions.
+
+If an ingredient in the specified positions is in a `#c:dye/<color>` item tag (such as `#c:dye/orange`), that dye color will replace the original windcatcher's color.
+
+If the player places the windcatcher somewhere other than the position specified by the `windcatcher` field in the recipe,
+the other positions will be offset accordingly and stay relative to the 
+This allows the dye recipe to work even in the 2x2 crafting grid.
+
+![Small Shaped Crafting Recipe for Dyeing Windcatchers](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/windcatcher_dyeing_recipe_small.png)
+
+With the optional fields present, the default windcatcher dyeing recipe would look like:
+
+```json
+{
+  "type": "morered:windcatcher_dye",
+  "ingredient": "#morered:dyeable_windcatchers",
+  "north": {"x": 1, "y": 0},
+  "south": {"x": 1, "y": 2},
+  "west": {"x": 0, "y": 1},
+  "east": {"x": 2, "y": 1},
+  "windcatcher":{"x": 1, "y": 1}
+}
+```
+
 ## History
 
 | Version | Changelog
 |---|-
+| 1.21.8-8.0.0.0 | Added `morered:windcatcher` and `morered:windcatcher_dye` recipe serializers
 | 6.0.0.0 | Now uses Sized Ingredients, which may have a "count" field
 | 4.0.0.0 | The gatecrafting_plinth block has been renamed to soldering_table. The gatecrafting recipe type has been renamed to soldering. Gatecrafting recipe files have been renamed accordingly.
 | 1.0.0.0 | Added gatecrafting recipes to game

@@ -1,0 +1,14 @@
+{
+	"and_gate.mdx": "AND Gate",
+	"diode.mdx": "Diode",
+	"latch.mdx": "Latch",
+	"multiplexer.mdx": "Multiplexer",
+	"pulse_gate.mdx": "Pulse Gate",
+	"nand_gate.mdx": "NAND Gate",
+	"nor_gate.mdx": "NOR Gate",
+	"not_gate.mdx": "NOT Gate",
+	"two_input_and_gate.mdx": "Two Input AND Gate",
+	"two_input_nand_gate.mdx": "Two Input NAND Gate",
+	"xnor_gate.mdx": "XNOR Gate",
+	"xor_gate.mdx": "XOR Gate"
+}

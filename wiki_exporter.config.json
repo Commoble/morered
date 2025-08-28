@@ -1,0 +1,16 @@
+{
+  "output_path": "wiki_exporter",
+  "namespaces": [
+    "morered"
+  ],
+  "enabled": [
+    "metadata",
+    "render"
+  ],
+  "modules": {
+    "render": {
+      "resolution": 128,
+      "png": true
+    }
+  }
+}

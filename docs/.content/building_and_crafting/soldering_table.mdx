@@ -1,0 +1,70 @@
+---
+title: Soldering Table
+id: morered:soldering_table
+type: block
+---
+
+The Soldering Table can be used to solder materials directly to each other,
+allowing for more efficient crafting of certain blocks than the crafting table;
+however, exotic materials are required to create it.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='red_nether_bricks'/> Red Nether Bricks](https://minecraft.wiki/Red_Nether_Bricks)
+				* 3x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 2x [<ModAsset width={32} height={32} location='blaze_rod'/> Blaze Rod](https://minecraft.wiki/Blaze_Rod)
+			</td>
+			<td>
+				* 1x Soldering Table
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Soldering Tables](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/gatecrafting_plinth_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Activating the Soldering Table brings up the Soldering screen:
+
+![Image of the Soldering Table screen](https://commoble.s3.us-east-1.amazonaws.com/images/morered/soldering_screen.png)
+
+The scrollable panel at the left displays all soldering recipes available on the server.
+Clicking a recipe button will display the recipe's output item in the right slot if the player has enough ingredients in their inventory.
+Clicking the output item will craft the item, picking it up and consuming the ingredients listed on the left.
+Shift-clicking the output slot will craft as many items as the player has the resources to create.
+
+## Data
+
+No blockstate properties or blockentity data.
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.1-8.0.0.0 | Added a search bar to soldering screen
+| 1.20.1-4.0.0.0 | The gatecrafting_plinth block has been renamed to soldering_table. The gatecrafting recipe type has been renamed to soldering. Gatecrafting recipe files have been renamed accordingly.
+| 1.16.3-2.0.0.0 | Added to game

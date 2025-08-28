@@ -4,7 +4,7 @@ plugins {
 	id 'idea'
 	id 'maven-publish'
 	id 'net.neoforged.moddev' version '2.0.+'
-	id "org.moddedmc.wiki.toolkit" version "0.2.7"
+	id "org.moddedmc.wiki.toolkit" version "0.3.2"
 }
 
 tasks.named('wrapper', Wrapper).configure {
@@ -33,8 +33,7 @@ sourceSets
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 neoForge {
-	//version = "${neo_version}"
-	version = "21.8.15"
+	version = "${neo_version}"
 	mods {
 		"${modid}" {
 			sourceSet(sourceSets.main)
@@ -54,6 +53,17 @@ neoForge {
 		clientData {
 			clientData()
 			programArguments.addAll '--mod', "morered", '--all', '--output', file('src/generated/resources/').getAbsolutePath(), '--existing', file('src/main/resources/').getAbsolutePath()
+		}
+		exportClient {
+			client()
+			systemProperty 'wiki_exporter.enabled', 'true'
+			systemProperty "wiki_exporter.config.path", file('wiki_exporter.config.json').getAbsolutePath()
+		}
+		exportServer {
+			server()
+			programArgument 'nogui'
+			systemProperty 'wiki_exporter.enabled', 'true'
+			systemProperty "wiki_exporter.config.path", file('wiki_exporter.config.json').getAbsolutePath()
 		}
 		configureEach {
 			
@@ -89,7 +99,7 @@ dependencies {
 	//compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
 	//localRuntime "dev.emi:emi-neoforge:${emi_version}"
 	
-	//localRuntime "org.sinytra:item-asset-export-neoforge:${item_asset_export_version}"
+	localRuntime "org.sinytra:wiki-exporter-neoforge:${wiki_exporter_version}"
 }
 
 java
@@ -130,7 +140,6 @@ wiki {
 	docs {
 		morered {
 			root = file('docs')
-			exportedAssetNamespaces = ['morered']
 		}
 	}
 }

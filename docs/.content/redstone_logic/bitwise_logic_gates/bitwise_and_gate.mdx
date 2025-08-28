@@ -1,0 +1,81 @@
+---
+title: Bitwise AND Gate
+id: morered:bitwise_and_gate
+type: block
+---
+
+The Bitwise AND Gate is a two-input, single-output bitwise logic block, applying the AND operator to individual channels of bundled cable signals.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>[Soldering]('/en/mod/morered/docs/content/soldering_table')</td>
+			<td style={{width: '30%'}}>
+				* 2x [<ModAsset width={32} height={32} location='morered:stone_plate'/> Stone Plate](@morered:stone_plate)
+				* 1x [<ModAsset width={32} height={32} location='redstone'/> Redstone Dust](https://minecraft.wiki/Redstone_Dust)
+				* 1x [<ModAsset width={32} height={32} location='quartz'/> Nether Quartz](https://minecraft.wiki/Nether_Quartz)
+				* 1x [<ModAsset width={32} height={32} location='morered:bundled_cable'/> Bundled Cable](@morered:bundled_cable)
+			</td>
+			<td>
+				* 1x Bitwise AND Gate
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Bitwise AND Gates](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/bitwise_and_gate_from_gatecrafting.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+The Bitwise AND Gate can be placed in 24 different orientations, on floors, walls, and ceilings.
+
+When placing the block, the flat side will be placed against the face clicked by the player, and the output side will point to the edge of the clicked face nearest to where the player clicked. A transparent preview is rendered to assist with orienting the block; this can be disabled in the [Client Config](../configuration/client_config) if this is undesired.
+
+The sprint key can be held while placing the block to change the axis of rotation.
+
+Bitwise logic plates can connect to [Bundled Cables](@morered:bundled_cable), [Colored Cables](@morered:colored_cable), or similar blocks.
+For each color channel, if the Bitwise AND gate is receiving power from both inputs on that channel, the output side will output a full-strength signal on that channel.
+[Red Alloy Wires](@morered:red_alloy_wire) will provide input signal to all sixteen channels.
+
+![Bitwise AND Gate with input combinations](https://commoble.s3.us-east-1.amazonaws.com/images/morered/bitwise_and_gate_combinations.png)
+
+## Data
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the plate is attached to
+| `rotation` | `[0,3]` | Rotations about the axis of attachment in 90-degree increments
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+| BlockEntity Data | Format | Description
+| --- | - | -
+| `clockwise_input` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+| `counterclockwise_output` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+| `output` | integer | Bitflag [in wool color order](https://minecraft.wiki/Wool#ID) where the least significant bit is white.
+
+## History
+| Version | Changelog
+| --- | -
+| 1.21.8-8.0.0.0 | <ul><li>Added `waterlogged` blockstate property property</li><li>Can now hold sprint while placing to change the axis of rotation</li></ul>
+| 1.21.3-7.0.0.0 | Power is now stored as input/output bitflags instead of sixteen output integers
+| 2.1.1.0 | Added to game

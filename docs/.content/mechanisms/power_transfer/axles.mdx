@@ -1,0 +1,88 @@
+---
+title: Axles
+id: morered:oak_axle
+type: block
+---
+
+Axles efficiently transport mechanical power in one direction.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 3x [<ModAsset width={32} height={32} location='stripped_oak_log'/> Stripped Log](@stripped_log)
+			</td>
+			<td>
+				* 16x Axle (of the same wood type)
+			</td>
+			<td>
+				<br/>
+				![Shaped Crafting Recipe for Axles](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/axle_recipe.png)
+				<br/>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Axles can be placed in three different orientations (along the x/y/z axes, like logs).
+
+![Axles](https://commoble.s3.us-east-1.amazonaws.com/images/morered/axles.png)
+
+Axles will connect to mechanical blocks that they touch. [Gears](/en/mod/morered/docs/content/mechanisms/gears) can be used to change direction.
+
+![Axles and Gears](https://commoble.s3.us-east-1.amazonaws.com/images/morered/axles_and_gears.png)
+
+Axles have a very low inertia and are an effective way to transfer mechanical power across moderate distances.
+
+## Data
+<table>
+	<thead><tr><th>Block</th><th>Block/Item ID</th><th>Localization Key</th></tr></thead>
+	<tbody>
+		<tr><td><ModAsset width={32} height={32} location='morered:acacia_axle'/> Acacia Axle</td><td>`morered:acacia_axle`</td><td>`block.morered.acacia_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:birch_axle'/> Birch Axle</td><td>`morered:birch_axle`</td><td>`block.morered.birch_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:cherry_axle'/> Cherry Axle</td><td>`morered:cherry_axle`</td><td>`block.morered.cherry_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:crimson_axle'/> Crimson Axle</td><td>`morered:crimson_axle`</td><td>`block.morered.crimson_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:dark_oak_axle'/> Dark Oak Axle</td><td>`morered:dark_oak_axle`</td><td>`block.morered.dark_oak_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:jungle_axle'/> Jungle Axle</td><td>`morered:jungle_axle`</td><td>`block.morered.jungle_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:mangrove_axle'/> Mangrove Axle</td><td>`morered:mangrove_axle`</td><td>`block.morered.mangrove_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:oak_axle'/> Oak Axle</td><td>`morered:oak_axle`</td><td>`block.morered.oak_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:pale_oak_axle'/> Pale Oak Axle</td><td>`morered:pale_oak_axle`</td><td>`block.morered.pale_oak_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:spruce_axle'/> Spruce Axle</td><td>`morered:spruce_axle`</td><td>`block.morered.spruce_axle`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:warped_axle'/> Warped Axle</td><td>`morered:warped_axle`</td><td>`block.morered.warped_axle`</td></tr>
+	</tbody>
+</table>
+
+Crimson and warped axles are not flammable.
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `axis` | `{"x", "y", "z"}` | Axis along which the axle is oriented
+| `waterlogged` | `{false, true}` | Whether the block is waterlogged
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.21.8.8.0.0.0 | Added to More Red

@@ -1,0 +1,87 @@
+---
+title: Clutches
+id: morered:oak_clutch
+type: block
+---
+
+Clutches transfer mechanical power but only while powered with redstone power.
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shapeless Crafting</td>
+			<td style={{width: '30%'}}>
+				* 1x [<ModAsset width={32} height={32} location='morered:oak_gear'/> Gear](@morered:oak_gear)
+				* 1x [<ModAsset width={32} height={32} location='piston'/> Piston](@piston)
+			</td>
+			<td>
+				* 1x Clutch (of the same wood type)
+			</td>
+			<td>
+				<br/>
+				![Shapeless Crafting Recipe for Clutches](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/clutch_recipe.png)
+				<br/>
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Clutches can face in any of six directions.  While powered with redstone, they can connect to other mechanisms similarly to a [Gear](@morered:oak_gear).
+
+![Engaged Clutch](https://commoble.s3.us-east-1.amazonaws.com/images/morered/clutch_engaged.png)
+
+When not powered with redstone, clutches will not connect to anything.
+
+![Disengaged Clutch](https://commoble.s3.us-east-1.amazonaws.com/images/morered/clutch_disengaged.png)
+
+Like gears, clutches will jam if you try to rotate them in two different directions at once.
+
+## Data
+<table>
+	<thead><tr><th>Block</th><th>Block/Item ID</th><th>Localization Key</th></tr></thead>
+	<tbody>
+		<tr><td><ModAsset width={32} height={32} location='morered:acacia_clutch'/> Acacia Clutch</td><td>`morered:acacia_clutch`</td><td>`block.morered.acacia_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:birch_clutch'/> Birch Clutch</td><td>`morered:birch_clutch`</td><td>`block.morered.birch_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:cherry_clutch'/> Cherry Clutch</td><td>`morered:cherry_clutch`</td><td>`block.morered.cherry_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:crimson_clutch'/> Crimson Clutch</td><td>`morered:crimson_clutch`</td><td>`block.morered.crimson_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:dark_oak_clutch'/> Dark Oak Clutch</td><td>`morered:dark_oak_clutch`</td><td>`block.morered.dark_oak_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:jungle_clutch'/> Jungle Clutch</td><td>`morered:jungle_clutch`</td><td>`block.morered.jungle_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:mangrove_clutch'/> Mangrove Clutch</td><td>`morered:mangrove_clutch`</td><td>`block.morered.mangrove_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:oak_clutch'/> Oak Clutch</td><td>`morered:oak_clutch`</td><td>`block.morered.oak_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:pale_oak_clutch'/> Pale Oak Clutch</td><td>`morered:pale_oak_clutch`</td><td>`block.morered.pale_oak_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:spruce_clutch'/> Spruce Clutch</td><td>`morered:spruce_clutch`</td><td>`block.morered.spruce_clutch`</td></tr>
+		<tr><td><ModAsset width={32} height={32} location='morered:warped_clutch'/> Warped Clutch</td><td>`morered:warped_clutch`</td><td>`block.morered.warped_clutch`</td></tr>
+	</tbody>
+</table>
+
+| Blockstate Properties | Values | Description
+| --- | - | -
+| `extended` | `{false, true}` | Whether the block is powered
+| `facing` | `{"down", "up", "north", "south", "west", "east"}` | Direction to the neighbor block the gear faces
+
+## History
+
+| Version | Changelog
+| --- | -
+| 1.21.8.8.0.0.0 | Added to More Red

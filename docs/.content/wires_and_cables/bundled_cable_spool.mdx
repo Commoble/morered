@@ -1,0 +1,78 @@
+---
+title: Bundled Cable Spool
+id: morered:bundled_cable_spool
+type: item
+---
+
+Bundled Cable Spools are items used to connect [Cable Junctions](@morered:cable_junction)
+and [Cable Relays](@morered:cable_relay).
+
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Recipes](#recipes)
+		2. [Usage](#usage)
+		3. [Data](#data)
+		4. [History](#history)
+	</td></tr></tbody>
+</table>
+
+## Recipes
+<table>
+	<thead>
+		<tr>
+			<th>Recipe Type</th>
+			<th>Ingredients</th>
+			<th>Output</th>
+			<th>Example</th>
+		</tr>
+	</thead>
+	<tbody>
+		<tr>
+			<td>Shaped Crafting</td>
+			<td style={{width: '30%'}}>
+				* 4x [<ModAsset width={32} height={32} location='iron_ingot'/> Iron Ingot](https://minecraft.wiki/Iron_Ingot)
+				* 3x [<ModAsset width={32} height={32} location='morered:bundled_cable'/> Bundled Cable](@morered:bundled_cable)
+				* 4x [<ModAsset width={32} height={32} location='stick'/> Stick](https://minecraft.wiki/Stick)
+			</td>
+			<td>
+				* 1x Bundled Cable Spool
+			</td>
+			<td>
+				![Shaped Crafting Recipe for Bundled Cable Spool](https://commoble.s3.us-east-1.amazonaws.com/images/morered/recipes/bundled_cable_spool_recipe.png)
+			</td>
+		</tr>
+	</tbody>
+</table>
+
+## Usage
+
+Using a Bundled Cable Spool on a block of the appropriate type will store the block's position in the spool;
+using the spool on a second post block of the appropriate type will connect the two blocks.
+
+| ![Image of different types of post blocks attached by spools](https://commoble.s3.us-east-1.amazonaws.com/images/morered/posts_attached_by_spools.png)
+| ---
+| [Bundled Cable Posts](@morered:cable_junction) (left) and [Redwire Posts](@morered:redwire_post) (right) that have been connected by wire spools
+
+Players cannot place blocks where the hanging wires are, and the hanging wires cannot be placed where blocks are.
+
+There is a maximum distance at which wire posts can be connected to each other;
+attempting to connect blocks farther apart than this distance will fail,
+and half-formed connections will be cancelled if the player holding the item moves too far away from the wire post.
+This distance can be set in the [Server Config](/en/mod/morered/docs/configuration/server_config).
+
+## Data
+
+| Item Properties | Value
+| --- | -
+| Stack Limit | 1
+| Durability | 64
+
+## History
+<table>
+	<thead><tr><th>Version</th><th>Changelog</th></tr></thead>
+	<tbody>
+		<tr><td>1.21-6.0.0.0</td><td>The connected block position is no longer stored in a `last_post_pos` itemstack nbt tag; it is instead stored in a transient datacomponent which is not saved to disk when unloaded</td></tr>
+		<tr><td>1.16.5-2.1.0.0</td><td>Added to game</td></tr>
+	</tbody>
+</table>

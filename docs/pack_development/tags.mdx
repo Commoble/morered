@@ -3,6 +3,16 @@ title: Tags
 hide_meta: true
 ---
 
+<table>
+	<thead><tr><th>Contents</th></tr></thead>
+	<tbody><tr><td>
+		1. [Block Tags](#block_tags)
+		2. [Dimension Type Tags](#dimension_type_tags)
+		3. [Item Tags](#item_tags)
+	</td></tr></tbody>
+</table>
+
+
 ## Block Tags
 
 <table>
@@ -19,15 +29,75 @@ hide_meta: true
 			<td>Keeps the streams from crossing</td>
 		</tr>
 		<tr>
+			<td>exmachina:no_automatic_mechanical_updates</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:alternator'/> morered:alternator](@morered:alternator)</li>
+				</ul>
+			</td>
+			<td>Prevents block from updating mechanical graphs when its own blockstate updates</td>
+		</tr>
+		<tr>
+			<td>exmachina:wirable/cube</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:redstone_tube'/> morered:redstone_tube](@morered:redstone_tube)</li>
+				</ul>
+			</td>
+			<td>Allows cables to connect to the block as if it were a solid cube</td>
+		</tr>
+		<tr>
+			<td>minecraft:mineable/axe</td>
+			<td>
+				<ul>
+					<li>#morered:wooden_axles</li>
+					<li>#morered:wooden_gears</li>
+					<li>#morered:wooden_gearshifters</li>
+					<li>#morered:windcatchers</li>
+					<li>[<ModAsset width={32} height={32} location='morered:extractor'/> morered:extractor](@morered:extractor)</li>
+					<li>[morered:gear](@morered:oak_gear) (a technical block)</li>
+				</ul>
+			</td>
+			<td>Blocks which can be mined faster with axes</td>
+		</tr>
+		<tr>
+			<td>minecraft:mineable/pickaxe</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:cable_relay'/> morered:cable_relay](@morered:cable_relay)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cable_junction'/> morered:cable_junction](@morered:cable_junction)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:hexidecrubrometer'/> morered:hexidecrubrometer](@morered:hexidecrubrometer)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redwire_post'/> morered:redwire_post](@morered:redwire_post)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redwire_relay'/> morered:redwire_relay](@morered:redwire_relay)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redwire_junction'/> morered:redwire_junction](@morered:redwire_junction)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:soldering_table'/> morered:soldering_table](@morered:soldering_table)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:stone_plate'/> morered:stone_plate](@morered:stone_plate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:tube'/> morered:tube](@morered:tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redstone_tube'/> morered:redstone_tube](@morered:redstone_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:distributor'/> morered:distributor](@morered:distributor)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:extractor'/> morered:extractor](@morered:extractor)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:shunt'/> morered:shunt](@morered:shunt)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:filter'/> morered:filter](@morered:filter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:multifilter'/> morered:multifilter](@morered:multifilter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:loader'/> morered:loader](@morered:loader)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:osmosis_filter'/> morered:osmosis_filter](@morered:osmosis_filter)</li>
+					<li>#morered:colored_tubes</li>
+					<li>#morered:clutches</li>
+					<li>[<ModAsset width={32} height={32} location='morered:stonemill'/> morered:stonemill](@morered:stonemill)</li>
+				</ul>
+			</td>
+			<td>Blocks which can be mined faster with pickaxes</td>
+		</tr>
+		<tr>
 			<td>morered:bitwise_gates</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:bitwise_and_gate'/> morered:bitwise_and_gate](/en/mod/morered/docs/content/redstone_logic/bitwise_and_gate)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:bitwise_diode'/> morered:bitwise_diode](/en/mod/morered/docs/content/redstone_logic/bitwise_diode)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:bitwise_not_gate'/> morered:bitwise_not_gate](/en/mod/morered/docs/content/redstone_logic/bitwise_not_gate)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:bitwise_or_gate'/> morered:bitwise_or_gate](/en/mod/morered/docs/content/redstone_logic/bitwise_or_gate)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:bitwise_xnor_gate'/> morered:bitwise_xnor_gate](/en/mod/morered/docs/content/redstone_logic/bitwise_xnor_gate)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:bitwise_xor_gate'/> morered:bitwise_xor_gate](/en/mod/morered/docs/content/redstone_logic/bitwise_xor_gate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bitwise_and_gate'/> morered:bitwise_and_gate](@morered:bitwise_and_gate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bitwise_diode'/> morered:bitwise_diode](@morered:bitwise_diode)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bitwise_not_gate'/> morered:bitwise_not_gate](@morered:bitwise_not_gate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bitwise_or_gate'/> morered:bitwise_or_gate](@morered:bitwise_or_gate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bitwise_xnor_gate'/> morered:bitwise_xnor_gate](@morered:bitwise_xnor_gate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bitwise_xor_gate'/> morered:bitwise_xor_gate](@morered:bitwise_xor_gate)</li>
 				</ul>
 			</td>
 			<td></td>
@@ -36,32 +106,51 @@ hide_meta: true
 			<td>morered:cable_posts</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:cable_junction'/> morered:cable_junction](/en/mod/morered/docs/content/wires_and_cables/cable_junction)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:cable_relay'/> morered:cable_relay](/en/mod/morered/docs/content/wires_and_cables/cable_relay)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cable_junction'/> morered:cable_junction](@morered:cable_junction)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cable_relay'/> morered:cable_relay](@morered:cable_relay)</li>
 				</ul>
 			</td>
-			<td>Defines which blocks a [Bundled Cable Spool](/en/mod/morered/docs/content/wires_and_cables/bundled_cable_spool) can connect</td>
+			<td>Defines which blocks a [Bundled Cable Spool](@morered:bundled_cable_spool) can connect</td>
 		</tr>
 		<tr>
 			<td>morered:colored_cables</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:white_cable'/> morered:white_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:orange_cable'/> morered:orange_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:magenta_cable'/> morered:magenta_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_blue_cable'/> morered:light_blue_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:yellow_cable'/> morered:yellow_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:lime_cable'/> morered:lime_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:pink_cable'/> morered:pink_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:gray_cable'/> morered:gray_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_gray_cable'/> morered:light_gray_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:cyan_cable'/> morered:cyan_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:purple_cable'/> morered:purple_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:blue_cable'/> morered:blue_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:brown_cable'/> morered:brown_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:green_cable'/> morered:green_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:red_cable'/> morered:red_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:black_cable'/> morered:black_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:white_cable'/> morered:white_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:orange_cable'/> morered:orange_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:magenta_cable'/> morered:magenta_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_blue_cable'/> morered:light_blue_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:yellow_cable'/> morered:yellow_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:lime_cable'/> morered:lime_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pink_cable'/> morered:pink_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:gray_cable'/> morered:gray_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_gray_cable'/> morered:light_gray_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cyan_cable'/> morered:cyan_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:purple_cable'/> morered:purple_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:blue_cable'/> morered:blue_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:brown_cable'/> morered:brown_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:green_cable'/> morered:green_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:red_cable'/> morered:red_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:black_cable'/> morered:black_cable](@morered:orange_cable)</li>
+				</ul>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>morered:clutches</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_clutch'/> morered:acacia_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_clutch'/> morered:birch_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_clutch'/> morered:cherry_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_clutch'/> morered:crimson_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_clutch'/> morered:dark_oak_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_clutch'/> morered:jungle_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_clutch'/> morered:mangrove_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_clutch'/> morered:oak_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_clutch'/> morered:pale_oak_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_clutch'/> morered:spruce_clutch](@morered:oak_clutch)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_clutch'/> morered:warped_clutch](@morered:oak_clutch)</li>
 				</ul>
 			</td>
 			<td></td>
@@ -70,22 +159,22 @@ hide_meta: true
 			<td>morered:colored_tubes</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:white_tube'/> morered:white_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:orange_tube'/> morered:orange_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:magenta_tube'/> morered:magenta_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_blue_tube'/> morered:light_blue_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:yellow_tube'/> morered:yellow_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:lime_tube'/> morered:lime_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:pink_tube'/> morered:pink_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:gray_tube'/> morered:gray_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_gray_tube'/> morered:light_gray_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:cyan_tube'/> morered:cyan_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:purple_tube'/> morered:purple_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:blue_tube'/> morered:blue_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:brown_tube'/> morered:brown_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:green_tube'/> morered:green_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:red_tube'/> morered:red_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:black_tube'/> morered:black_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:white_tube'/> morered:white_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:orange_tube'/> morered:orange_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:magenta_tube'/> morered:magenta_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_blue_tube'/> morered:light_blue_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:yellow_tube'/> morered:yellow_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:lime_tube'/> morered:lime_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pink_tube'/> morered:pink_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:gray_tube'/> morered:gray_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_gray_tube'/> morered:light_gray_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cyan_tube'/> morered:cyan_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:purple_tube'/> morered:purple_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:blue_tube'/> morered:blue_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:brown_tube'/> morered:brown_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:green_tube'/> morered:green_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:red_tube'/> morered:red_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:black_tube'/> morered:black_tube](@morered:red_tube)</li>
 				</ul>
 			</td>
 			<td></td>
@@ -94,19 +183,19 @@ hide_meta: true
 			<td>morered:redwire_posts</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:redwire_junction'/> morered:redwire_junction](/en/mod/morered/docs/content/wires_and_cables/redwire_junction)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:redwire_post'/> morered:redwire_post](/en/mod/morered/docs/content/wires_and_cables/redwire_post)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:redwire_relay'/> morered:redwire_relay](/en/mod/morered/docs/content/wires_and_cables/redwire_relay)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redwire_junction'/> morered:redwire_junction](@morered:redwire_junction)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redwire_post'/> morered:redwire_post](@morered:redwire_post)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redwire_relay'/> morered:redwire_relay](@morered:redwire_relay)</li>
 				</ul>
 			</td>
-			<td>Defines which blocks a [Redwire Spool](/en/mod/morered/docs/content/wires_and_cables/redwire_spool) can connect</td>
+			<td>Defines which blocks a [Redwire Spool](@morered:redwire_spool) can connect</td>
 		</tr>
 		<tr>
 			<td>morered:tubes</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:redstone_tube'/> morered:redstone_tube](/en/mod/morered/docs/content/transportation/redstone_tube)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:tube'/> morered:tube](/en/mod/morered/docs/content/transportation/tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redstone_tube'/> morered:redstone_tube](@morered:redstone_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:tube'/> morered:tube](@morered:tube)</li>
 					<li>#morered:colored_tubes</li>
 				</ul>
 			</td>
@@ -135,28 +224,106 @@ hide_meta: true
 			<td>morered:wirable/wires</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:red_alloy_wire'/> morered:red_alloy_wire](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:red_alloy_wire'/> morered:red_alloy_wire](@morered:red_alloy_wire)</li>
 					<li>#morered:colored_cables</li>
-					<li>[<ModAsset width={32} height={32} location='morered:bundled_cable'/> morered:bundled_cable](/en/mod/morered/docs/content/wires_and_cables/bundled_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:bundled_cable'/> morered:bundled_cable](@morered:bundled_cable)</li>
 				</ul>
 			</td>
 			<td>Makes wires connectable to wires</td>
 		</tr>
 		<tr>
-			<td>minecraft:mineable/pickaxe</td>
+			<td>morered:wooden_axles</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:cable_relay'/> morered:cable_relay](/en/mod/morered/docs/content/wires_and_cables/scable_relayone_plate)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:cable_junction'/> morered:cable_junction](/en/mod/morered/docs/content/wires_and_cables/cable_junction)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:hexidecrubrometer'/> morered:hexidecrubrometer](/en/mod/morered/docs/content/redstone_logic/hexidecrubrometer)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:redwire_post'/> morered:redwire_post](/en/mod/morered/docs/content/wires_and_cables/redwire_post)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:redwire_relay'/> morered:redwire_relay](/en/mod/morered/docs/content/wires_and_cables/redwire_relay)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:redwire_junction'/> morered:redwire_junction](/en/mod/morered/docs/content/wires_and_cables/redwire_junction)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:soldering_table'/> morered:soldering_table](/en/mod/morered/docs/content/building_and_crafting/soldering_table)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:stone_plate'/> morered:stone_plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_axle'/> morered:acacia_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_axle'/> morered:birch_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_axle'/> morered:cherry_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_axle'/> morered:crimson_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_axle'/> morered:dark_oak_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_axle'/> morered:jungle_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_axle'/> morered:mangrove_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_axle'/> morered:oak_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_axle'/> morered:pale_oak_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_axle'/> morered:spruce_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_axle'/> morered:warped_axle](@morered:oak_axle)</li>
 				</ul>
 			</td>
-			<td>Blocks which can be mined faster with pickaxes</td>
+			<td>Axles which are made of wood</td>
+		</tr>
+		<tr>
+			<td>morered:wooden_gears</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_gear'/> morered:acacia_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_gear'/> morered:birch_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_gear'/> morered:cherry_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_gear'/> morered:crimson_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_gear'/> morered:dark_oak_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_gear'/> morered:jungle_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_gear'/> morered:mangrove_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_gear'/> morered:oak_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_gear'/> morered:pale_oak_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_gear'/> morered:spruce_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_gear'/> morered:warped_gear](@morered:oak_gear)</li>
+				</ul>
+			</td>
+			<td>Gears which are made of wood</td>
+		</tr>
+		<tr>
+			<td>morered:wooden_gearshifters</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_gearshifter'/> morered:acacia_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_gearshifter'/> morered:birch_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_gearshifter'/> morered:cherry_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_gearshifter'/> morered:crimson_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_gearshifter'/> morered:dark_oak_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_gearshifter'/> morered:jungle_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_gearshifter'/> morered:mangrove_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_gearshifter'/> morered:oak_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_gearshifter'/> morered:pale_oak_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_gearshifter'/> morered:spruce_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_gearshifter'/> morered:warped_gearshifter](@morered:oak_gearshifter)</li>
+				</ul>
+			</td>
+			<td>Gearshifters which are made of wood</td>
+		</tr>
+		<tr>
+			<td>morered:windcatchers</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_windcatcher'/> morered:acacia_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_windcatcher'/> morered:birch_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_windcatcher'/> morered:cherry_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_windcatcher'/> morered:crimson_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_windcatcher'/> morered:dark_oak_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_windcatcher'/> morered:jungle_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_windcatcher'/> morered:mangrove_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_windcatcher'/> morered:oak_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_windcatcher'/> morered:pale_oak_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_windcatcher'/> morered:spruce_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_windcatcher'/> morered:warped_windcatcher](@morered:oak_windcatcher)</li>
+				</ul>
+			</td>
+			<td></td>
+		</tr>
+	</tbody>
+</table>
+
+## Dimension Type Tags
+
+<table>
+	<thead><tr><th>Tag ID</th><th style={{width: '40%'}}>Values</th><th>Description</th></tr></thead>
+	<tbody>
+		<tr>
+			<td>morered:overworld_wind</td>
+			<td><ul><li>minecraft:overworld</li></ul></td>
+			<td>Windcatchers placed in dimensions with dimensiontypes in this tag will have a wind level that scales with height from y=63 to y=150</td>
+		</tr>
+		<tr>
+			<td>morered:end_wind</td>
+			<td><ul><li>minecraft:the_end</li></ul></td>
+			<td>Windcatchers placed in dimensions with dimensiontypes in this tag will have a base wind level of 2 at all y-levels</td>
 		</tr>
 	</tbody>
 </table>
@@ -168,144 +335,144 @@ hide_meta: true
 	<tbody>
 		<tr>
 			<td>c:smooth_stone</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='smooth_stone'/> minecraft:smooth_stone](https://minecraft.wiki/Smooth_Stone)</li></ul></td>
-			<td>Ingredient for crafting [Stone Plates](/en/mod/morered/docs/content/building_and_crafting/stone_plate)</td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='smooth_stone'/> minecraft:smooth_stone](@smooth_stone)</li></ul></td>
+			<td>Ingredient for crafting [Stone Plates](@morered:stone_plate)</td>
 		</tr>
 		<tr>
 			<td>c:dyed/black</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:black_cable'/> morered:black_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:black_tube'/> morered:black_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:black_cable'/> morered:black_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:black_tube'/> morered:black_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/blue</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:blue_cable'/> morered:blue_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:blue_tube'/> morered:blue_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:blue_cable'/> morered:blue_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:blue_tube'/> morered:blue_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/brown</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:brown_cable'/> morered:brown_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:brown_tube'/> morered:brown_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:brown_cable'/> morered:brown_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:brown_tube'/> morered:brown_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/cyan</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:cyan_cable'/> morered:cyan_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:cyan_tube'/> morered:cyan_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:cyan_cable'/> morered:cyan_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:cyan_tube'/> morered:cyan_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/gray</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:gray_cable'/> morered:gray_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:gray_tube'/> morered:gray_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:gray_cable'/> morered:gray_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:gray_tube'/> morered:gray_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/green</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:green_cable'/> morered:green_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:green_tube'/> morered:green_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:green_cable'/> morered:green_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:green_tube'/> morered:green_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/light_blue</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:light_blue_cable'/> morered:light_blue_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:light_blue_tube'/> morered:light_blue_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:light_blue_cable'/> morered:light_blue_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:light_blue_tube'/> morered:light_blue_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/light_gray</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:light_gray_cable'/> morered:light_gray_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:light_gray_tube'/> morered:light_gray_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:light_gray_cable'/> morered:light_gray_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:light_gray_tube'/> morered:light_gray_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/lime</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:lime_cable'/> morered:lime_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:lime_tube'/> morered:lime_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:lime_cable'/> morered:lime_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:lime_tube'/> morered:lime_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/magenta</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:magenta_cable'/> morered:magenta_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:magenta_tube'/> morered:magenta_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:magenta_cable'/> morered:magenta_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:magenta_tube'/> morered:magenta_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/orange</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:orange_cable'/> morered:orange_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:orange_tube'/> morered:orange_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:orange_cable'/> morered:orange_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:orange_tube'/> morered:orange_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/pink</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:pink_cable'/> morered:pink_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:pink_tube'/> morered:pink_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:pink_cable'/> morered:pink_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:pink_tube'/> morered:pink_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/purple</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:purple_cable'/> morered:purple_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:purple_tube'/> morered:purple_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:purple_cable'/> morered:purple_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:purple_tube'/> morered:purple_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/red</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:red_cable'/> morered:red_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:red_tube'/> morered:red_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:red_cable'/> morered:red_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:red_tube'/> morered:red_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/white</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:white_cable'/> morered:white_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:white_tube'/> morered:white_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:white_cable'/> morered:white_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:white_tube'/> morered:white_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:dyed/yellow</td>
 			<td><ul>
-				<li>[<ModAsset width={32} height={32} location='morered:yellow_cable'/> morered:yellow_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-				<li>[<ModAsset width={32} height={32} location='morered:yellow_tube'/> morered:yellow_tube](/en/mod/morered/docs/content/wires_and_cables/colored_tube)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:yellow_cable'/> morered:yellow_cable](@morered:orange_cable)</li>
+				<li>[<ModAsset width={32} height={32} location='morered:yellow_tube'/> morered:yellow_tube](@morered:colored_tube)</li>
 			</ul></td>
 		<td></td></tr>
 		<tr>
 			<td>c:ingots/redstone_alloy</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='morered:red_alloy_ingot'/> morered:red_alloy_ingot](/en/mod/morered/docs/content/building_and_crafting/red_alloy_ingot)</li></ul></td>
-			<td>Ingredient for crafting [Red Alloy Wires](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire) and similar blocks</td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='morered:red_alloy_ingot'/> morered:red_alloy_ingot](@morered:red_alloy_ingot)</li></ul></td>
+			<td>Ingredient for crafting [Red Alloy Wires](@morered:red_alloy_wire) and similar blocks</td>
 		</tr>
 		<tr>
 			<td>c:quarter_slabs/smooth_stone</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='morered:stone_plate'/> morered:stone_plate](/en/mod/morered/docs/content/building_and_crafting/stone_plate)</li></ul></td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='morered:stone_plate'/> morered:stone_plate](@morered:stone_plate)</li></ul></td>
 			<td>Ingredient for crafting logic gates</td>
 		</tr>
 		<tr>
 			<td>c:slabs/smooth_stone</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='smooth_stone_slab'/> minecraft:smooth_stone_slab](https://minecraft.wiki/Smooth_Stone_Slab)</li></ul></td>
-			<td>Ingredient for crafting [Stone Plates](/en/mod/morered/docs/content/building_and_crafting/stone_plate)</td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='smooth_stone_slab'/> minecraft:smooth_stone_slab](@smooth_stone_slab)</li></ul></td>
+			<td>Ingredient for crafting [Stone Plates](@morered:stone_plate)</td>
 		</tr>
 		<tr>
 			<td>c:tools/wrench</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='morered:pliers'/> morered:pliers](/en/mod/morered/docs/content/transportation/pliers)</li></ul></td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='morered:pliers'/> morered:pliers](@morered:pliers)</li></ul></td>
 			<td>Using wrenchlike items on certain blocks can rotate them or cause other effects.</td>
 		</tr>
 		<tr>
 			<td>morered:bundled_cables</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='morered:bundled_cable'/> morered:bundled_cable](/en/mod/morered/docs/content/wires_and_cables/bundled_cable)</li></ul></td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='morered:bundled_cable'/> morered:bundled_cable](@morered:bundled_cable)</li></ul></td>
 			<td>Recipes which require a bundled cable will accept items in this tag</td>
 		</tr>
 		<tr>
@@ -317,73 +484,175 @@ hide_meta: true
 			<td></td>
 		</tr>
 		<tr>
+			<td>morered:axles</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_axle'/> morered:acacia_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_axle'/> morered:birch_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_axle'/> morered:cherry_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_axle'/> morered:crimson_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_axle'/> morered:dark_oak_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_axle'/> morered:jungle_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_axle'/> morered:mangrove_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_axle'/> morered:oak_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_axle'/> morered:pale_oak_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_axle'/> morered:spruce_axle](@morered:oak_axle)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_axle'/> morered:warped_axle](@morered:oak_axle)</li>
+				</ul>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
 			<td>morered:colored_cables</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:white_cable'/> morered:white_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:orange_cable'/> morered:orange_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:magenta_cable'/> morered:magenta_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_blue_cable'/> morered:light_blue_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:yellow_cable'/> morered:yellow_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:lime_cable'/> morered:lime_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:pink_cable'/> morered:pink_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:gray_cable'/> morered:gray_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_gray_cable'/> morered:light_gray_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:cyan_cable'/> morered:cyan_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:purple_cable'/> morered:purple_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:blue_cable'/> morered:blue_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:brown_cable'/> morered:brown_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:green_cable'/> morered:green_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:red_cable'/> morered:red_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:black_cable'/> morered:black_cable](/en/mod/morered/docs/content/wires_and_cables/colored_cables)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:white_cable'/> morered:white_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:orange_cable'/> morered:orange_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:magenta_cable'/> morered:magenta_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_blue_cable'/> morered:light_blue_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:yellow_cable'/> morered:yellow_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:lime_cable'/> morered:lime_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pink_cable'/> morered:pink_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:gray_cable'/> morered:gray_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_gray_cable'/> morered:light_gray_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cyan_cable'/> morered:cyan_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:purple_cable'/> morered:purple_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:blue_cable'/> morered:blue_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:brown_cable'/> morered:brown_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:green_cable'/> morered:green_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:red_cable'/> morered:red_cable](@morered:orange_cable)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:black_cable'/> morered:black_cable](@morered:orange_cable)</li>
 				</ul>
 			</td>
-			<td>Ingredients for crafting [Bundled Cables](/en/mod/morered/docs/content/wires_and_cables/bundled_cable)</td>
+			<td>Ingredients for crafting [Bundled Cables](@morered:bundled_cable)</td>
 		</tr>
 		<tr>
 			<td>morered:colored_tubes</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:white_tube'/> morered:white_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:orange_tube'/> morered:orange_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:magenta_tube'/> morered:magenta_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_blue_tube'/> morered:light_blue_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:yellow_tube'/> morered:yellow_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:lime_tube'/> morered:lime_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:pink_tube'/> morered:pink_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:gray_tube'/> morered:gray_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:light_gray_tube'/> morered:light_gray_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:cyan_tube'/> morered:cyan_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:purple_tube'/> morered:purple_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:blue_tube'/> morered:blue_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:brown_tube'/> morered:brown_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:green_tube'/> morered:green_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:red_tube'/> morered:red_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:black_tube'/> morered:black_tube](/en/mod/morered/docs/content/transportation/colored_tubes)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:white_tube'/> morered:white_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:orange_tube'/> morered:orange_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:magenta_tube'/> morered:magenta_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_blue_tube'/> morered:light_blue_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:yellow_tube'/> morered:yellow_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:lime_tube'/> morered:lime_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pink_tube'/> morered:pink_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:gray_tube'/> morered:gray_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:light_gray_tube'/> morered:light_gray_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cyan_tube'/> morered:cyan_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:purple_tube'/> morered:purple_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:blue_tube'/> morered:blue_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:brown_tube'/> morered:brown_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:green_tube'/> morered:green_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:red_tube'/> morered:red_tube](@morered:red_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:black_tube'/> morered:black_tube](@morered:red_tube)</li>
+				</ul>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>morered:dyeable_windcatchers</td>
+			<td>
+				<ul>
+					<li>#morered:windcatchers</li>
+				</ul>
+			</td>
+			<td>Windcatchers which can be redyed by the `morered:windcatcher_dye` recipe</td>
+		</tr>
+		<tr>
+			<td>morered:gears</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_gear'/> morered:acacia_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_gear'/> morered:birch_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_gear'/> morered:cherry_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_gear'/> morered:crimson_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_gear'/> morered:dark_oak_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_gear'/> morered:jungle_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_gear'/> morered:mangrove_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_gear'/> morered:oak_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_gear'/> morered:pale_oak_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_gear'/> morered:spruce_gear](@morered:oak_gear)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_gear'/> morered:warped_gear](@morered:oak_gear)</li>
+				</ul>
+			</td>
+			<td></td>
+		</tr>
+		<tr>
+			<td>morered:gearshifters</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_gearshifter'/> morered:acacia_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_gearshifter'/> morered:birch_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_gearshifter'/> morered:cherry_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_gearshifter'/> morered:crimson_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_gearshifter'/> morered:dark_oak_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_gearshifter'/> morered:jungle_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_gearshifter'/> morered:mangrove_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_gearshifter'/> morered:oak_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_gearshifter'/> morered:pale_oak_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_gearshifter'/> morered:spruce_gearshifter](@morered:oak_gearshifter)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_gearshifter'/> morered:warped_gearshifter](@morered:oak_gearshifter)</li>
 				</ul>
 			</td>
 			<td></td>
 		</tr>
 		<tr>
 			<td>morered:red_alloy_wires</td>
-			<td><ul><li>[<ModAsset width={32} height={32} location='morered:red_alloy_wire'/> morered:red_alloy_wire](/en/mod/morered/docs/content/wires_and_cables/red_alloy_wire)</li></ul></td>
+			<td><ul><li>[<ModAsset width={32} height={32} location='morered:red_alloy_wire'/> morered:red_alloy_wire](@morered:red_alloy_wire)</li></ul></td>
 			<td>Recipes which require a red alloy wire will accept items in this tag</td>
 		</tr>
 		<tr>
 			<td>morered:red_alloyable_ingots</td>
 			<td><ul><li>#c:ingots/copper</li></ul></td>
-			<td>Ingots used for crafting [Red Alloy Ingots](/en/mod/morered/docs/content/building_and_crafting/red_alloy_ingot)</td>
+			<td>Ingots used for crafting [Red Alloy Ingots](@morered:red_alloy_ingot)</td>
 		</tr>
+			<td>morered:supported_stripped_logs</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='stripped_acacia_log'/> stripped_acacia_log](@stripped_acacia_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_birch_log'/> stripped_birch_log](@stripped_birch_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_cherry_log'/> stripped_cherry_log](@stripped_cherry_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_crimson_stem'/> stripped_crimson_stem](@stripped_crimson_stem)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_dark_oak_log'/> stripped_dark_oak_log](@stripped_dark_oak_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_jungle_log'/> stripped_jungle_log](@stripped_jungle_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_mangrove_log'/> stripped_mangrove_log](@stripped_mangrove_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_oak_log'/> stripped_oak_log](@stripped_oak_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_pale_oak_log'/> stripped_pale_oak_log](@stripped_pale_oak_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_spruce_log'/> stripped_spruce_log](@stripped_spruce_log)</li>
+					<li>[<ModAsset width={32} height={32} location='stripped_warped_stem'/> stripped_warped_stem](@stripped_warped_stem)</li>
+				</ul>
+			</td>
+			<td>Indicates recipes exist for wooden mechanisms made from this log. Stripped logs not in this tag will be crafted into oak mechanisms.</td>
 		<tr>
 			<td>morered:tubes</td>
 			<td>
 				<ul>
-					<li>[<ModAsset width={32} height={32} location='morered:redstone_tube'/> morered:redstone_tube](/en/mod/morered/docs/content/transportation/redstone_tube)</li>
-					<li>[<ModAsset width={32} height={32} location='morered:tube'/> morered:tube](/en/mod/morered/docs/content/transportation/tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:redstone_tube'/> morered:redstone_tube](@morered:redstone_tube)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:tube'/> morered:tube](@morered:tube)</li>
 					<li>#morered:colored_tubes</li>
 				</ul>
 			</td>
 			<td>Ingredient for crafting items which accept a tube as an ingredient</td>
+		</tr>
+		<tr>
+			<td>morered:windcatchers</td>
+			<td>
+				<ul>
+					<li>[<ModAsset width={32} height={32} location='morered:acacia_windcatcher'/> morered:acacia_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:birch_windcatcher'/> morered:birch_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:cherry_windcatcher'/> morered:cherry_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:crimson_windcatcher'/> morered:crimson_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:dark_oak_windcatcher'/> morered:dark_oak_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:jungle_windcatcher'/> morered:jungle_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:mangrove_windcatcher'/> morered:mangrove_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:oak_windcatcher'/> morered:oak_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:pale_oak_windcatcher'/> morered:pale_oak_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:spruce_windcatcher'/> morered:spruce_windcatcher](@morered:oak_windcatcher)</li>
+					<li>[<ModAsset width={32} height={32} location='morered:warped_windcatcher'/> morered:warped_windcatcher](@morered:oak_windcatcher)</li>
+				</ul>
+			</td>
+			<td></td>
 		</tr>
 	</tbody>
 </table>
