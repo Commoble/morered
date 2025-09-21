@@ -77,7 +77,7 @@ public class RemoteConnection
 		
 		/**
 		 * Reads from nbt, denormalizing position and side
-		 * @param nbt ValueInput being read
+		 * @param input ValueInput being read
 		 * @param group OctahedralGroup of the tube being loaded, the tube's rotation from e.g. a structure piece.
 		 * Must rotate directions and blockspos to "denormalize" them.
 		 * @return Storage

@@ -19,6 +19,7 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.mechanisms.GearsBlock;
+import net.commoble.morered.mechanisms.StonemillMenu;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.transportation.FilterMenu;
@@ -215,10 +216,11 @@ public class ClientProxy
 	{
 		event.register(MoreRed.SOLDERING_MENU.get(), SolderingScreen::new);
 		event.register(MoreRed.LOADER_MENU.get(), LoaderScreen::new);
+		// explicit generics here to make javac happy (eclipsec can compile it fine)
 		event.<FilterMenu, SingleSlotMenuScreen<FilterMenu>>register(MoreRed.FILTER_MENU.get(), SingleSlotMenuScreen::new);
 		event.register(MoreRed.MULTI_FILTER_MENU.get(), StandardSizeContainerScreenFactory.of(
 			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.MULTI_FILTER_BLOCK.get().getDescriptionId()));
-		event.register(MoreRed.STONEMILL_MENU.get(), SingleSlotMenuScreen::new);
+		event.<StonemillMenu, SingleSlotMenuScreen<StonemillMenu>>register(MoreRed.STONEMILL_MENU.get(), SingleSlotMenuScreen::new);
 	}
 	
 	private static void onRegisterClientExtensions(RegisterClientExtensionsEvent event)
