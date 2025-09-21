@@ -1,0 +1,32 @@
+{
+  "parent": "morered:morered/root",
+  "criteria": {
+    "morered:tubes": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#morered:tubes"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.morered.morered.craft_tube.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "morered:tube"
+    },
+    "title": {
+      "translate": "advancements.morered.morered.craft_tube.title"
+    }
+  },
+  "requirements": [
+    [
+      "morered:tubes"
+    ]
+  ]
+}

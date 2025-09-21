@@ -35,6 +35,7 @@
   * #morered:end_wind (defaults to end)
 * Fix hexidecrubrometer 0 texture being slightly different than the others
 * Increased client config default preview placement opacity from 0.4 to 0.5 to make bitwise gate glyphs more visible
+* Added some advancements
 
 # 1.21.3-7.1.0.0
 * Updated to exmachina 0.8.0.2-beta

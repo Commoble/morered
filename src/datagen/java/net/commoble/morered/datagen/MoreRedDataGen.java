@@ -1021,6 +1021,7 @@ public class MoreRedDataGen
 		BlockStateBuilder.addDataProvider(event, blockStates);
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems));
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
+		MoreRedAdvancements.genAdvancements(event, lang);
 		generator.addProvider(true, lang);
 
 		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables));

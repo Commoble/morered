@@ -1,0 +1,37 @@
+{
+  "criteria": {
+    "c:dusts/redstone": {
+      "conditions": {
+        "items": [
+          {
+            "count": {
+              "min": 64
+            },
+            "items": "#c:dusts/redstone"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "announce_to_chat": false,
+    "background": "minecraft:block/polished_blackstone",
+    "description": {
+      "translate": "advancements.morered.morered.root.description"
+    },
+    "hidden": true,
+    "icon": {
+      "count": 1,
+      "id": "morered:red_alloy_ingot"
+    },
+    "title": {
+      "translate": "advancements.morered.morered.root.title"
+    }
+  },
+  "requirements": [
+    [
+      "c:dusts/redstone"
+    ]
+  ]
+}

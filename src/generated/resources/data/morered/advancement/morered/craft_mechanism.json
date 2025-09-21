@@ -1,0 +1,36 @@
+{
+  "parent": "morered:morered/craft_windcatcher",
+  "criteria": {
+    "items": {
+      "conditions": {
+        "items": [
+          {
+            "items": [
+              "morered:extractor",
+              "morered:alternator",
+              "morered:stonemill"
+            ]
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.morered.morered.craft_mechanism.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "morered:extractor"
+    },
+    "title": {
+      "translate": "advancements.morered.morered.craft_mechanism.title"
+    }
+  },
+  "requirements": [
+    [
+      "items"
+    ]
+  ]
+}

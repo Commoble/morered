@@ -63,7 +63,7 @@ tint different sections of their model to represent how much redstone power that
 ![Image displaying lit and unlit red alloy wire](https://commoble.s3.us-east-1.amazonaws.com/images/morered/red_alloy_wire_lit_unlit.png)
 
 As the wires' json models are used to generate many baked models in different orientations,
-the [Rotate Tints](/en/mod/morered/docs/pack_development/tintindexes#rotate-tints) model loader is used to denote which segment of the wire
+the [Rotate Tints model loader]($pack_development/model_loaders) is used to denote which segment of the wire
 the original model json's quads belong to (so that it can be determined which segment of the block entity to check the power of when tinting the block).
 
 For the block, if the tintindex of a quad is less than 0 or greater than 18, then no tinting is applied to the quad's colors. If the tintindex is 0 (the tintindex used for particles), then the quad's colors are multiplied by the RGB color `#560000`.

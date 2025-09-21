@@ -1,0 +1,32 @@
+{
+  "parent": "morered:morered/root",
+  "criteria": {
+    "morered:red_alloy_wire": {
+      "conditions": {
+        "items": [
+          {
+            "items": "morered:red_alloy_wire"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    }
+  },
+  "display": {
+    "description": {
+      "translate": "advancements.morered.morered.craft_red_alloy_wire.description"
+    },
+    "icon": {
+      "count": 1,
+      "id": "morered:red_alloy_wire"
+    },
+    "title": {
+      "translate": "advancements.morered.morered.craft_red_alloy_wire.title"
+    }
+  },
+  "requirements": [
+    [
+      "morered:red_alloy_wire"
+    ]
+  ]
+}
