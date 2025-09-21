@@ -17,7 +17,7 @@ tasks.named('wrapper', Wrapper).configure {
 }
 
 group = "net.commoble.${modid}"
-base { archivesName="${modid}-${mc_version}" }
+base { archivesName="${modid}" }
 version = "${mod_version}"
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
