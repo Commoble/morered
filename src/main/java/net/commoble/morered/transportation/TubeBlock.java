@@ -119,7 +119,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Deprecated
 	public void neighborChanged(BlockState state, Level level, BlockPos pos, Block blockIn, Orientation orientation, boolean isMoving)
 	{
-		if (!level.isClientSide && level.getBlockEntity(pos) instanceof TubeBlockEntity tube)
+		if (!level.isClientSide() && level.getBlockEntity(pos) instanceof TubeBlockEntity tube)
 		{
 			tube.onPossibleNetworkUpdateRequired();
 		}
@@ -132,7 +132,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	@Override
 	public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack)
 	{
-		if (!world.isClientSide && world.getBlockEntity(pos) instanceof TubeBlockEntity te)
+		if (!world.isClientSide() && world.getBlockEntity(pos) instanceof TubeBlockEntity te)
 		{
 			te.onPossibleNetworkUpdateRequired();
 		}

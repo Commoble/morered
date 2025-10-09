@@ -1,4 +1,9 @@
-# 1.21.8-8.0.0.0
+# 21.10.0
+* Updated to MC 1.21.10 / Neoforge 21.10.6-beta
+* If an old world is migrated from 1.21.8 to this version, some data will be lost due to the following data changes:
+  * Filter block entities now save their inventory in a "stacks" field
+
+# 21.8.0
 * Updated to 1.21.8
 * Updated to use exmachina 0.13.0.3-beta
 * Added new mechanical blocks:

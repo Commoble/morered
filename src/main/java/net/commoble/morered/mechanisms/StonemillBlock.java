@@ -138,7 +138,7 @@ public class StonemillBlock extends Block implements EntityBlock
 	@Nullable
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return level.isClientSide && type == MoreRed.STONEMILL_BLOCK_ENTITY.get() ? null : (BlockEntityTicker<T>) TICKER;
+		return level.isClientSide() && type == MoreRed.STONEMILL_BLOCK_ENTITY.get() ? null : (BlockEntityTicker<T>) TICKER;
 	}
 
 	public static final BlockEntityTicker<GenericBlockEntity> TICKER = StonemillBlock::serverTick;

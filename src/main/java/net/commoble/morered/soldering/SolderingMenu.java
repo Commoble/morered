@@ -157,7 +157,7 @@ public class SolderingMenu extends AbstractContainerMenu
 	
 	public void onPlayerChoseRecipe(ServerPlayer serverPlayer, ResourceKey<Recipe<?>> recipeID)
 	{
-		var recipe = getSolderingRecipe(serverPlayer.getServer().getRecipeManager(), recipeID);
+		var recipe = getSolderingRecipe(serverPlayer.level().getServer().getRecipeManager(), recipeID);
 		if (recipe == null)
 			return;
 		this.attemptRecipeAssembly(recipe.value());

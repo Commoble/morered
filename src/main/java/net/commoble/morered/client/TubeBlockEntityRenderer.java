@@ -1,76 +1,211 @@
 package net.commoble.morered.client;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.commoble.morered.MoreRed;
+import net.commoble.morered.client.TubeBlockEntityRenderer.TubeRenderState;
 import net.commoble.morered.transportation.ItemInTubeWrapper;
-import net.commoble.morered.transportation.PliersItem;
 import net.commoble.morered.transportation.RaytraceHelper;
 import net.commoble.morered.transportation.RemoteConnection;
 import net.commoble.morered.transportation.TubeBlock;
 import net.commoble.morered.transportation.TubeBlockEntity;
-import net.commoble.morered.util.BlockSide;
+import net.commoble.morered.transportation.TubeBlockEntity.TubeConnectionRenderInfo;
 import net.commoble.morered.util.DirectionTransformer;
-import net.minecraft.client.CameraType;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
-import net.minecraft.client.renderer.entity.ItemRenderer;
+import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.item.ItemStackRenderState;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.client.resources.model.MaterialSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
-import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEntity>
+public record TubeBlockEntityRenderer(ItemModelResolver resolver, MaterialSet materials) implements BlockEntityRenderer<TubeBlockEntity, TubeRenderState>
 {
-
-	public TubeBlockEntityRenderer(BlockEntityRendererProvider.Context context)
+	public static final Map<ResourceLocation,Material> MATERIALS = new HashMap<>();
+	@SuppressWarnings("deprecation")
+	public static Material getMaterial(ResourceLocation textureId)
 	{
+		return MATERIALS.computeIfAbsent(textureId, id -> new Material(TextureAtlas.LOCATION_BLOCKS, id));
+	}
+	
+	public static TubeBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
+	{
+		return new TubeBlockEntityRenderer(context.itemModelResolver(), context.materials());
+	}
+	
+	public static class TubeRenderState extends BlockEntityRenderState
+	{
+		public List<ItemInTubeRenderState> itemInTubeRenderStates = new ArrayList<>();
+		public Map<Direction, TubeConnectionRenderInfo> connections = new HashMap<>();
+		public int startLight = 0;
+		public Material material = getMaterial(MoreRed.TUBE_BLOCK.get().textureLocation);
+	}
+	
+	public static record ItemInTubeRenderState(
+		ItemStackRenderState itemState,
+		List<Vec3> itemGroupOffsets,
+		float scale
+		)
+	{
+		public static void addToListFromWrapper(List<ItemInTubeRenderState> list, ItemModelResolver resolver, TubeBlockEntity tube, ItemInTubeWrapper wrapper, float partialTicks)
+		{
+			Direction nextMove = wrapper.remainingMoves.peek();
+			if (nextMove == null)
+				return;
+			
+			int seed = (int) tube.getBlockPos().asLong();
+			Level level = tube.getLevel();
+			ItemStackRenderState itemState = new ItemStackRenderState();
+			resolver.updateForTopItem(itemState, wrapper.stack, ItemDisplayContext.GROUND, level, null, seed);
+			ItemStack itemstack = wrapper.stack;
+			
+			Item item = itemstack.getItem();
+			int renderSeed = itemstack.isEmpty() ? 187 : Item.getId(item) + itemstack.getDamageValue(); // the random is used to offset sub-items
+			RandomSource random = RandomSource.create(renderSeed);
+			
+			int renderedItemCount = getModelCount(itemstack);
+			float xStart, yStart, zStart, xEnd, yEnd, zEnd;
+			float lerpFactor = (wrapper.ticksElapsed + partialTicks) / wrapper.maximumDurationInTube;	// factor in range [0,1)
+			Vec3 renderOffset;
+			float remoteScale = 1F; // extra scaling if rendering in a narrow remote tube
+			if (wrapper.freshlyInserted)	// first move
+			{
+				xEnd = 0F;
+				yEnd = 0F;
+				zEnd = 0F;
+				xStart = xEnd - nextMove.getStepX();
+				yStart = yEnd - nextMove.getStepY();
+				zStart = zEnd - nextMove.getStepZ();
+				float xLerp = Mth.lerp(lerpFactor, xStart, xEnd);
+				float yLerp = Mth.lerp(lerpFactor, yStart, yEnd);
+				float zLerp = Mth.lerp(lerpFactor, zStart, zEnd);
+				renderOffset = new Vec3(xLerp, yLerp, zLerp);
+			}
+			else	// any other move
+			{
+				renderOffset = getItemRenderOffset(tube, nextMove, lerpFactor);
+				remoteScale = (float)getItemRenderScale(tube, nextMove, lerpFactor);
+			}
+			float scale = remoteScale * 0.5F;
+
+			List<Vec3> itemGroupOffsets = new ArrayList<>();
+			for (int currentModelIndex = 0; currentModelIndex < renderedItemCount; ++currentModelIndex)
+			{
+				float xAdjustment = 0F;
+				float yAdjustment = 0F;
+				float zAdjustment = 0F;
+				if (currentModelIndex > 0)
+				{
+					xAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
+					yAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
+					zAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
+				}
+				float xTranslate = (float) (renderOffset.x + xAdjustment + 0.5F);
+				float yTranslate = (float) (renderOffset.y + yAdjustment + 0.4375F);
+				float zTranslate = (float) (renderOffset.z + zAdjustment + 0.5F);
+				itemGroupOffsets.add(new Vec3(xTranslate, yTranslate, zTranslate));
+			}
+			
+			list.add(new ItemInTubeRenderState(
+				itemState,
+				itemGroupOffsets,
+				scale));
+		}
 	}
 
 	@Override
-	public void render(TubeBlockEntity tube, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int combinedLight, int combinedOverlay, Vec3 camera)
+	public TubeRenderState createRenderState()
 	{
+		return new TubeRenderState();
+	}
+
+	@Override
+	public void extractRenderState(TubeBlockEntity tube, TubeRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	{
+		BlockEntityRenderer.super.extractRenderState(tube, renderState, partialTicks, camera, overlay);
+		List<ItemInTubeRenderState> itemsInTube = new ArrayList<>();
 		// render tick happens independently of regular ticks and often more frequently
 		if (!tube.inventory.isEmpty())
 		{
 			for (ItemInTubeWrapper wrapper : tube.inventory)
 			{
-				this.renderWrapper(tube, wrapper, partialTicks, matrix, buffer, combinedLight);
+				ItemInTubeRenderState.addToListFromWrapper(itemsInTube, this.resolver, tube, wrapper, partialTicks);
 			}
 		}
 		if (!tube.incomingWrapperBuffer.isEmpty())
 		{
 			for (ItemInTubeWrapper wrapper : tube.incomingWrapperBuffer)
 			{
-				this.renderWrapper(tube, wrapper, partialTicks, matrix, buffer, combinedLight);
+				ItemInTubeRenderState.addToListFromWrapper(itemsInTube, this.resolver, tube, wrapper, partialTicks);
 			}
 		}
-		this.renderLongTubes(tube, partialTicks, matrix, buffer, combinedLight, combinedOverlay);
+		renderState.itemInTubeRenderStates = itemsInTube;
+		if (tube.getBlockState().getBlock() instanceof TubeBlock tubeBlock)
+		{
+			renderState.material = getMaterial(tubeBlock.textureLocation);
+		}
+		else
+		{
+			renderState.material = getMaterial(MoreRed.TUBE_BLOCK.get().textureLocation);
+		}
+		renderState.connections = tube.getConnectionRenderInfos();
+		for (TubeConnectionRenderInfo info : renderState.connections.values())
+		{
+			info.update(tube.getLevel());
+		}
+		Level level = tube.getLevel();
+		BlockPos startPos = tube.getBlockPos();
+		int blockLight = level.getBrightness(LightLayer.BLOCK, startPos);
+		int skyLight = level.getBrightness(LightLayer.SKY, startPos);
+		renderState.startLight = LightTexture.pack(blockLight, skyLight);
+	}
+
+	@Override
+	public void submit(TubeRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera)
+	{
+		// render tick happens independently of regular ticks and often more frequently
+		for (ItemInTubeRenderState itemInTubeRenderState : renderState.itemInTubeRenderStates)
+		{
+			this.renderWrapper(renderState, itemInTubeRenderState, poseStack, collector);
+		}
+		TextureAtlasSprite sprite = this.materials.get(renderState.material);
+		for (var entry : renderState.connections.entrySet())
+		{
+			TubeQuadRenderer.renderQuads(renderState, entry.getValue(), entry.getKey(), sprite, poseStack, collector);
+		}
 	}
 
 	// ** copied from entity ItemRenderer **//
 
-	protected int getModelCount(ItemStack stack)
+	public static int getModelCount(ItemStack stack)
 	{
 		int i = 1;
 		if (stack.getCount() > 48)
@@ -96,73 +231,22 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 	/**
 	 * Renders an itemstack
 	 */
-	public void renderWrapper(TubeBlockEntity tube, ItemInTubeWrapper wrapper, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA)
+	public void renderWrapper(TubeRenderState renderState, ItemInTubeRenderState itemInTubeState, PoseStack poseStack, SubmitNodeCollector collector)
 	{
-		Direction nextMove = wrapper.remainingMoves.peek();
-		if (nextMove == null)
-			return;
-		ItemStack itemstack = wrapper.stack;
-		ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer(); // itemrenderer knows how to render items
+		poseStack.pushPose();
 		
-		@SuppressWarnings("resource")
-		RandomSource random = tube.getLevel().random;
-		
-		Item item = itemstack.getItem();
-		int renderSeed = itemstack.isEmpty() ? 187 : Item.getId(item) + itemstack.getDamageValue(); // the random is used to offset sub-items
-		random.setSeed(renderSeed);
-		
+		for (Vec3 offset : itemInTubeState.itemGroupOffsets)
+		{
+			poseStack.pushPose();
+			poseStack.translate(offset.x, offset.y, offset.z);// aggregate is centered
+			float scale = itemInTubeState.scale;
+			poseStack.scale(scale, scale, scale);
 
-		matrix.pushPose();
-		int renderedItemCount = this.getModelCount(itemstack);
-		float xStart, yStart, zStart, xEnd, yEnd, zEnd;
-		float lerpFactor = (wrapper.ticksElapsed + partialTicks) / wrapper.maximumDurationInTube;	// factor in range [0,1)
-		Vec3 renderOffset;
-		float remoteScale = 1F; // extra scaling if rendering in a narrow remote tube
-		if (wrapper.freshlyInserted)	// first move
-		{
-			xEnd = 0F;
-			yEnd = 0F;
-			zEnd = 0F;
-			xStart = xEnd - nextMove.getStepX();
-			yStart = yEnd - nextMove.getStepY();
-			zStart = zEnd - nextMove.getStepZ();
-			float xLerp = Mth.lerp(lerpFactor, xStart, xEnd);
-			float yLerp = Mth.lerp(lerpFactor, yStart, yEnd);
-			float zLerp = Mth.lerp(lerpFactor, zStart, zEnd);
-			renderOffset = new Vec3(xLerp, yLerp, zLerp);
-		}
-		else	// any other move
-		{
-			renderOffset = getItemRenderOffset(tube, nextMove, lerpFactor);
-			remoteScale = (float)getItemRenderScale(tube, nextMove, lerpFactor);
+			itemInTubeState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+			poseStack.popPose();
 		}
 
-//		itemRenderer.blitOffset -= 50F;
-		for (int currentModelIndex = 0; currentModelIndex < renderedItemCount; ++currentModelIndex)
-		{
-			matrix.pushPose();
-			float xAdjustment = 0F;
-			float yAdjustment = 0F;
-			float zAdjustment = 0F;
-			if (currentModelIndex > 0)
-			{
-				xAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
-				yAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
-				zAdjustment = (random.nextFloat() * 2.0F - 1.0F) * 0.01F;
-			}
-			float xTranslate = (float) (renderOffset.x + xAdjustment + 0.5F);
-			float yTranslate = (float) (renderOffset.y + yAdjustment + 0.4375F);
-			float zTranslate = (float) (renderOffset.z + zAdjustment + 0.5F);
-			matrix.translate(xTranslate, yTranslate, zTranslate);// aggregate is centered
-			float scale = remoteScale * 0.5F;
-			matrix.scale(scale, scale, scale);
-			
-			itemRenderer.renderStatic(itemstack, ItemDisplayContext.GROUND, intA, OverlayTexture.NO_OVERLAY, matrix, buffer, tube.getLevel(), renderSeed);
-			matrix.popPose();
-		}
-//		itemRenderer.blitOffset += 50F;
-
-		matrix.popPose();
+		poseStack.popPose();
 	}
 	
 	/**
@@ -291,101 +375,6 @@ public class TubeBlockEntityRenderer implements BlockEntityRenderer<TubeBlockEnt
 		double yLerp = Mth.lerp(lerpFactor, 0, yEnd);
 		double zLerp = Mth.lerp(lerpFactor, 0, zEnd);
 		return new Vec3(xLerp, yLerp, zLerp);
-	}
-	
-
-	public void renderLongTubes(TubeBlockEntity tube, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int combinedLight, int combinedOverlay)
-	{
-		Level world = tube.getLevel();
-		BlockPos startPos = tube.getBlockPos();
-		Block block = tube.getBlockState().getBlock();
-		if (block instanceof TubeBlock tubeBlock)
-		{
-			for (Map.Entry<Direction, RemoteConnection> entry : tube.getRemoteConnections().entrySet())
-			{
-				RemoteConnection connection = entry.getValue();
-				// connections are stored in both tubes but only one tube should render each connection
-				if (connection.isPrimary)
-				{
-
-					BlockPos endPos = connection.toPos;
-					Direction startFace = entry.getKey();
-					Direction endFace = connection.toSide;
-					
-					TubeQuadRenderer.renderQuads(world, partialTicks, startPos, endPos, startFace, endFace, matrix, buffer, tubeBlock);
-				
-				}
-			}
-			
-			@SuppressWarnings("resource")
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null)
-			{
-				for (InteractionHand hand : InteractionHand.values())
-				{
-					ItemStack stack = player.getItemInHand(hand);
-					if (stack.getItem() instanceof PliersItem)
-					{
-						@Nullable BlockSide plieredTube = PliersItem.getPlieredTube(stack);
-						if (plieredTube != null)
-						{
-							BlockPos posOfLastTubeOfPlayer = plieredTube.pos();
-							Direction sideOfLastTubeOfPlayer = plieredTube.direction();
-							if (posOfLastTubeOfPlayer.equals(tube.getBlockPos()))
-							{
-
-								EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
-								int handSideID = -(hand == InteractionHand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1);
-
-								float swingProgress = player.getAttackAnim(partialTicks);
-								float swingZ = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
-								float playerAngle = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
-								double playerAngleX = Mth.sin(playerAngle);
-								double playerAngleZ = Mth.cos(playerAngle);
-								double handOffset = handSideID * 0.35D;
-								double handX;
-								double handY;
-								double handZ;
-								float eyeHeight;
-								
-								// first person
-								if ((renderManager.options == null || renderManager.options.getCameraType() == CameraType.FIRST_PERSON))
-								{
-									double fov = renderManager.options.fov().get().doubleValue();
-									fov = fov / 100.0D;
-									Vec3 handVector = new Vec3(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
-									handVector = handVector.xRot(-Mth.lerp(partialTicks, player.xRotO, player.getXRot()) * ((float) Math.PI / 180F));
-									handVector = handVector.yRot(-Mth.lerp(partialTicks, player.yHeadRotO, player.yHeadRot) * ((float) Math.PI / 180F));
-									handVector = handVector.yRot(swingZ * 0.5F);
-									handVector = handVector.xRot(-swingZ * 0.7F);
-									handX = Mth.lerp(partialTicks, player.xo, player.getX()) + handVector.x;
-									handY = Mth.lerp(partialTicks, player.yo, player.getY()) + handVector.y + 0.0F;
-									handZ = Mth.lerp(partialTicks, player.zo, player.getZ()) + handVector.z;
-									eyeHeight = player.getEyeHeight();
-								}
-								
-								// third person
-								else
-								{
-									handX = Mth.lerp(partialTicks, player.xo, player.getX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
-									handY = -0.2 + player.yo + player.getEyeHeight() + (player.getY() - player.yo) * partialTicks - 0.45D;
-									handZ = Mth.lerp(partialTicks, player.zo, player.getZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
-									eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
-								}
-								Vec3 renderPlayerVec = new Vec3(handX, handY + eyeHeight, handZ);
-								Vec3 startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
-								Vec3 endVec = renderPlayerVec;
-								Vec3[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
-								for (Vec3 point : points)
-								{
-									world.addParticle(ParticleTypes.CURRENT_DOWN, point.x, point.y, point.z, 0D, 0D, 0D);
-								}
-							}
-						}
-					}
-				}
-			}
-		}
 	}
 
 	@Override

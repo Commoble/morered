@@ -1,51 +1,67 @@
 package net.commoble.morered.client;
 
+import java.util.function.Supplier;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.client.FilterBlockEntityRenderer.FilterBlockEntityRenderState;
+import net.commoble.morered.client.OsmosisFilterBlockEntityRenderer.OsmosisFilterRenderState;
 import net.commoble.morered.transportation.FilterBlockEntity;
 import net.commoble.morered.transportation.OsmosisFilterBlock;
 import net.commoble.morered.transportation.OsmosisSlimeBlock;
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.BlockPos;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
+import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
+public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer<OsmosisFilterRenderState>
 {	
-	public OsmosisFilterBlockEntityRenderer(BlockEntityRendererProvider.Context context)
+	public OsmosisFilterBlockEntityRenderer(BlockEntityRendererProvider.Context context, Supplier<OsmosisFilterRenderState> stateFactory)
 	{
-		super(context);
+		super(context, stateFactory);
 	}
+
+	public static OsmosisFilterBlockEntityRenderer createOsmosisFilterrRenderer(BlockEntityRendererProvider.Context context)
+	{
+		return new OsmosisFilterBlockEntityRenderer(context, OsmosisFilterRenderState::new);
+	}
+	
+	public static class OsmosisFilterRenderState extends FilterBlockEntityRenderState
+	{
+		public double lengthScale = 0;
+	}
+	
+	@Override
+	public void extractRenderState(FilterBlockEntity filter, OsmosisFilterRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	{
+		super.extractRenderState(filter, renderState, partialTicks, camera, overlay);
+
+		long transferhash = filter.getBlockPos().hashCode();
+		double time = (double)filter.getLevel().getGameTime() + (double)transferhash + (double)partialTicks; // casting to doubles fixes a weird rounding error that was causing choppy animation
+
+		int rate = MoreRed.SERVERCONFIG.osmosisFilterTransferRate().get();
+		double minScale = 0.25D;
+		renderState.lengthScale = minScale + (filter.getBlockState().getValue(OsmosisFilterBlock.TRANSFERRING_ITEMS)
+			? (-Math.cos(2 * Math.PI * time / rate) + 1D) * 0.25D
+			: 0D);
+	}
+
+
 
 	@Override
-	public void render(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB, Vec3 camera)
+	public void submit(OsmosisFilterRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera)
 	{
-		super.render(filter, partialTicks, matrix, buffer, intA, intB, camera);
-		this.renderSlime(filter, partialTicks, matrix, buffer, intA, intB, camera);
-	}
-
-	private void renderSlime(FilterBlockEntity filter, float partialTicks, PoseStack matrix, MultiBufferSource buffer, int intA, int intB, Vec3 camera)
-	{
-		BlockPos blockpos = filter.getBlockPos();
-		BlockState filterState = filter.getBlockState();
+		super.submit(renderState, poseStack, collector, camera);
+		BlockState filterState = renderState.blockState;
 		Direction dir = filterState.getValue(OsmosisFilterBlock.FACING);
-		BlockState renderState = MoreRed.OSMOSIS_SLIME_BLOCK.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
-		long transferhash = blockpos.hashCode();
-		int rate = MoreRed.SERVERCONFIG.osmosisFilterTransferRate().get();
-		double ticks = (double)filter.getLevel().getGameTime() + (double)transferhash + (double)partialTicks; // casting to doubles fixes a weird rounding error that was causing choppy animation
-		double minScale = 0.25D;
-		double lengthScale = minScale + (filter.getBlockState().getValue(OsmosisFilterBlock.TRANSFERRING_ITEMS)
-			? (-Math.cos(2 * Math.PI * ticks / rate) + 1D) * 0.25D
-			: 0D);
+		BlockState slimeState = MoreRed.OSMOSIS_SLIME_BLOCK.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
+		double lengthScale = renderState.lengthScale;
 		double lengthTranslateFactor = 1D - lengthScale;
-		
-		
-		
-		
 
 		double zFightFix = 0.9999D;
 		
@@ -69,13 +85,11 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer
 		double translateY = translateFactorY * (tY * lengthTranslateFactor + 0.125D*dirOffsetY);
 		double translateZ = translateFactorZ * (tZ * lengthTranslateFactor + 0.125D*dirOffsetZ);
 		
-		matrix.pushPose();
-		matrix.translate(translateX, translateY, translateZ);
-		matrix.scale(scaleX, scaleY, scaleZ);
+		poseStack.pushPose();
+		poseStack.translate(translateX, translateY, translateZ);
+		poseStack.scale(scaleX, scaleY, scaleZ);
 		
-		Minecraft mc = Minecraft.getInstance();
-		var blockRenderer = mc.getBlockRenderer();
-		blockRenderer.renderSingleBlock(renderState,matrix,buffer,intA,intB,filter.getLevel(),blockpos);
-		matrix.popPose();
+		collector.submitBlock(poseStack, slimeState, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+		poseStack.popPose();
 	}
 }

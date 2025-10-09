@@ -76,7 +76,7 @@ public class PlateBlock extends TwentyFourBlock implements SimpleWaterloggedBloc
 		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
 		
 		// rotate the block when the player pokes it with a wrench
-		if (isPlayerHoldingWrench && !level.isClientSide)
+		if (isPlayerHoldingWrench && !level.isClientSide())
 		{
 			level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
 				0.1F + level.random.nextFloat()*0.1F,

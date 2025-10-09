@@ -115,7 +115,7 @@ public class HexidecrubrometerBlock extends Block
 	{
 		BlockPos neighborPos = pos.relative(direction);
 		BlockState neighborState = world.getBlockState(neighborPos);
-		int comparatorPower = neighborState.getAnalogOutputSignal(world, neighborPos);
+		int comparatorPower = neighborState.getAnalogOutputSignal(world, neighborPos, direction);
 		int canonicalRedstonePower = world.getSignal(neighborPos, direction);
 		int redstonePower = canonicalRedstonePower > 0 ? canonicalRedstonePower
 			: neighborState.getBlock() instanceof RedStoneWireBlock ? neighborState.getValue(BlockStateProperties.POWER)

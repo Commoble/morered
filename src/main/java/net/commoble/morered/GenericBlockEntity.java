@@ -126,7 +126,7 @@ public class GenericBlockEntity extends BlockEntity
 		{
 			// data is changing, mark for updating
 			this.data.put(type, TypedDataComponent.createUnchecked(type, value));
-			if (!this.level.isClientSide)
+			if (!this.level.isClientSide())
 			{
 				if (this.serverDataComponents.contains(type))
 				{

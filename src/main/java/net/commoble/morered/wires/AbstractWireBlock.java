@@ -360,7 +360,7 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 	@Override
 	public void setPlacedBy(Level worldIn, BlockPos pos, BlockState state, LivingEntity placer, ItemStack stack)
 	{
-		if (!worldIn.isClientSide)
+		if (!worldIn.isClientSide())
 		{
 			for (Direction directionToNeighbor : Direction.values())
 			{

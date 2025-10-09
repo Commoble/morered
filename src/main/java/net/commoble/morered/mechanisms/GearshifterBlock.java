@@ -220,7 +220,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
 		
 		// rotate the block when the player pokes it with a wrench
-		if (isPlayerHoldingWrench && !level.isClientSide)
+		if (isPlayerHoldingWrench && !level.isClientSide())
 		{
 			BlockState newState;
 			level.playSound(null, pos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS,
@@ -264,7 +264,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 	@Override
 	public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
 	{
-		return state.getValue(WATERLOGGED) || !state.ignitedByLava()
+		return state.getValue(WATERLOGGED) || !state.ignitedByLava(level, pos, direction)
 			? 0
 			: 5; // same as stripped logs
 	}
@@ -272,7 +272,7 @@ public class GearshifterBlock extends TwentyFourBlock implements EntityBlock, Si
 	@Override
 	public int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
 	{
-		return state.getValue(WATERLOGGED) || !state.ignitedByLava()
+		return state.getValue(WATERLOGGED) || !state.ignitedByLava(level, pos, direction)
 			? 0
 			: 5; // same as stripped logs
 	}

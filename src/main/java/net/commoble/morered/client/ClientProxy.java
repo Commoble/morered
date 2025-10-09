@@ -23,8 +23,10 @@ import net.commoble.morered.mechanisms.StonemillMenu;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.transportation.FilterMenu;
+import net.commoble.morered.transportation.PliersItem;
 import net.commoble.morered.transportation.RaytraceHelper;
 import net.commoble.morered.transportation.TubeBreakPacket;
+import net.commoble.morered.util.BlockSide;
 import net.commoble.morered.util.BlockStateUtil;
 import net.commoble.morered.util.ConfigHelper;
 import net.commoble.morered.wire_post.SlackInterpolator;
@@ -32,6 +34,7 @@ import net.commoble.morered.wire_post.WireBreakPacket;
 import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.VoxelCache;
 import net.commoble.morered.wires.WireUpdatePacket;
+import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
@@ -40,17 +43,21 @@ import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.client.resources.sounds.SoundInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -77,6 +84,7 @@ import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
+import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
@@ -85,7 +93,6 @@ import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.neoforged.neoforge.client.event.RegisterSpecialBlockModelRendererEvent;
-import net.neoforged.neoforge.client.event.RenderHighlightEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -276,12 +283,12 @@ public class ClientProxy
 	{
 		event.registerBlockEntityRenderer(MoreRed.ALTERNATOR_BLOCK_ENTITY.get(), AlternatorBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.WIRE_POST_BLOCK_ENTITY.get(), WirePostRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.CABLE_POST_BLOCK_ENTITY.get(), BundledCablePostRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.TUBE_BLOCK_ENTITY.get(), TubeBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.REDSTONE_TUBE_BLOCK_ENTITY.get(), TubeBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.CABLE_POST_BLOCK_ENTITY.get(), BundledCablePostRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.TUBE_BLOCK_ENTITY.get(), TubeBlockEntityRenderer::create);
+		event.registerBlockEntityRenderer(MoreRed.REDSTONE_TUBE_BLOCK_ENTITY.get(), TubeBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.EXTRACTOR_BLOCK_ENTITY.get(), ExtractorBlockEntityRenderer::create);
-		event.registerBlockEntityRenderer(MoreRed.FILTER_BLOCK_ENTITY.get(), FilterBlockEntityRenderer::new);
-		event.registerBlockEntityRenderer(MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get(), OsmosisFilterBlockEntityRenderer::new);
+		event.registerBlockEntityRenderer(MoreRed.FILTER_BLOCK_ENTITY.get(), FilterBlockEntityRenderer::createFilterRenderer);
+		event.registerBlockEntityRenderer(MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get(), OsmosisFilterBlockEntityRenderer::createOsmosisFilterrRenderer);
 		event.registerBlockEntityRenderer(MoreRed.AXLE_BLOCK_ENTITY.get(), AxleBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.GEAR_BLOCK_ENTITY.get(), GearBlockEntityRenderer::create);
 		event.registerBlockEntityRenderer(MoreRed.GEARS_BLOCK_ENTITY.get(), GearsBlockEntityRenderer::create);
@@ -317,7 +324,7 @@ public class ClientProxy
 		clear();
 	}
 
-	static void onHighlightBlock(RenderHighlightEvent.Block event)
+	static void onHighlightBlock(ExtractBlockOutlineRenderStateEvent event)
 	{
 		if (ClientProxy.CLIENTCONFIG.showPlacementPreview().get())
 		{
@@ -335,7 +342,7 @@ public class ClientProxy
 					if (block instanceof TwentyFourBlock twentyFourBlock)
 					{
 						Level world = player.level();
-						BlockHitResult rayTrace = event.getTarget();
+						BlockHitResult rayTrace = event.getHitResult();
 						Direction directionAwayFromTargetedBlock = rayTrace.getDirection();
 						BlockPos placePos = rayTrace.getBlockPos().relative(directionAwayFromTargetedBlock);
 						
@@ -354,11 +361,11 @@ public class ClientProxy
 							
 							if (twentyFourBlock.hasBlockStateModelsForPlacementPreview(state))
 							{
-								BlockPreviewRenderer.renderBlockPreview(placePos, state, world, event.getCamera().getPosition(), event.getPoseStack(), event.getMultiBufferSource());							
+								event.addCustomRenderer(BlockPreviewRenderer.extractBlockPreview(world, placePos, state));							
 							}
 							else
 							{
-								BlockPreviewRenderer.renderHeldItemAsBlockPreview(placePos, stack, state, world, event.getCamera().getPosition(), event.getPoseStack(), event.getMultiBufferSource());
+								event.addCustomRenderer(BlockPreviewRenderer.extractHeldItemPreview(world, placePos, state, stack, player));
 							}
 							
 						}
@@ -374,12 +381,17 @@ public class ClientProxy
 		
 		if (mc.player != null)
 		{
+			// handle sprint holding
 			boolean sprintIsDown = mc.options.keySprint.isDown();
 			boolean sprintWasDown = ClientProxy.getWasSprinting();
 			if (sprintWasDown != sprintIsDown)	// change in sprint key detected
 			{
 				ClientProxy.setIsSprintingAndNotifyServer(sprintIsDown);
 			}
+			
+			// handle pliers particles, if targeting a block
+			float partialTicks = mc.getDeltaTracker().getGameTimeDeltaPartialTick(false);
+			handlePliersParticles(mc.player, partialTicks);
 		}
 	}
 	
@@ -578,6 +590,71 @@ public class ClientProxy
 				manager.add(
 					new TerrainParticle(level, point.x, point.y, point.z, 0.0D, 0.0D, 0.0D, state)
 						.setPower(0.2F).scale(0.6F));
+			}
+		}
+	}
+	
+	private static void handlePliersParticles(LocalPlayer player, float partialTicks)
+	{
+		for (InteractionHand hand : InteractionHand.values())
+		{
+			ItemStack stack = player.getItemInHand(hand);
+			if (stack.getItem() instanceof PliersItem)
+			{
+				@Nullable BlockSide plieredTube = PliersItem.getPlieredTube(stack);
+				if (plieredTube != null)
+				{
+					BlockPos posOfLastTubeOfPlayer = plieredTube.pos();
+					Direction sideOfLastTubeOfPlayer = plieredTube.direction();
+					Level level = player.level();
+
+					EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
+					int handSideID = -(hand == InteractionHand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1);
+
+					float swingProgress = player.getAttackAnim(partialTicks);
+					float swingZ = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
+					float playerAngle = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
+					double playerAngleX = Mth.sin(playerAngle);
+					double playerAngleZ = Mth.cos(playerAngle);
+					double handOffset = handSideID * 0.35D;
+					double handX;
+					double handY;
+					double handZ;
+					float eyeHeight;
+					
+					// first person
+					if ((renderManager.options == null || renderManager.options.getCameraType() == CameraType.FIRST_PERSON))
+					{
+						double fov = renderManager.options.fov().get().doubleValue();
+						fov = fov / 100.0D;
+						Vec3 handVector = new Vec3(-0.14 + handSideID * -0.36D * fov, -0.12 + -0.045D * fov, 0.4D);
+						handVector = handVector.xRot(-Mth.lerp(partialTicks, player.xRotO, player.getXRot()) * ((float) Math.PI / 180F));
+						handVector = handVector.yRot(-Mth.lerp(partialTicks, player.yHeadRotO, player.yHeadRot) * ((float) Math.PI / 180F));
+						handVector = handVector.yRot(swingZ * 0.5F);
+						handVector = handVector.xRot(-swingZ * 0.7F);
+						handX = Mth.lerp(partialTicks, player.xo, player.getX()) + handVector.x;
+						handY = Mth.lerp(partialTicks, player.yo, player.getY()) + handVector.y + 0.0F;
+						handZ = Mth.lerp(partialTicks, player.zo, player.getZ()) + handVector.z;
+						eyeHeight = player.getEyeHeight();
+					}
+					
+					// third person
+					else
+					{
+						handX = Mth.lerp(partialTicks, player.xo, player.getX()) - playerAngleZ * handOffset - playerAngleX * 0.8D;
+						handY = -0.2 + player.yo + player.getEyeHeight() + (player.getY() - player.yo) * partialTicks - 0.45D;
+						handZ = Mth.lerp(partialTicks, player.zo, player.getZ()) - playerAngleX * handOffset + playerAngleZ * 0.8D;
+						eyeHeight = player.isCrouching() ? -0.1875F : 0.0F;
+					}
+					Vec3 renderPlayerVec = new Vec3(handX, handY + eyeHeight, handZ);
+					Vec3 startVec = RaytraceHelper.getTubeSideCenter(posOfLastTubeOfPlayer, sideOfLastTubeOfPlayer);
+					Vec3 endVec = renderPlayerVec;
+					Vec3[] points = RaytraceHelper.getInterpolatedPoints(startVec, endVec);
+					for (Vec3 point : points)
+					{
+						level.addParticle(ParticleTypes.CURRENT_DOWN, point.x, point.y, point.z, 0D, 0D, 0D);
+					}
+				}
 			}
 		}
 	}

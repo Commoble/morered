@@ -99,7 +99,7 @@ public class AlternatorBlock extends PlateBlock implements EntityBlock
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return (!level.isClientSide) && type == MoreRed.ALTERNATOR_BLOCK_ENTITY.get()
+		return (!level.isClientSide()) && type == MoreRed.ALTERNATOR_BLOCK_ENTITY.get()
 			? (BlockEntityTicker<T>)TICKER
 			: null;
 	}

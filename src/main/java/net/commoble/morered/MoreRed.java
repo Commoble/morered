@@ -335,7 +335,7 @@ public class MoreRed
 	
 	// wires and cables
 	public static final DeferredHolder<Block, PoweredWireBlock> RED_ALLOY_WIRE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.RED_ALLOY_WIRE, 
-		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollision().instabreak(),
 		PoweredWireBlock::createRedAlloyWireBlock,
 		Item.Properties::new,
 		WireBlockItem::new);
@@ -343,14 +343,14 @@ public class MoreRed
 		for (DyeColor color : DyeColor.values())
 		{
 			map.put(color, registerBlockItem(BLOCKS, ITEMS, Names.COLORED_CABLES_BY_COLOR[color.ordinal()],
-				() -> BlockBehaviour.Properties.of().mapColor(color).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
+				() -> BlockBehaviour.Properties.of().mapColor(color).pushReaction(PushReaction.DESTROY).noCollision().instabreak(),
 				properties -> PoweredWireBlock.createColoredCableBlock(properties, color),
 				Item.Properties::new,
 				WireBlockItem::new));
 		}
 	});
 	public static final DeferredHolder<Block, BundledCableBlock> BUNDLED_CABLE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.BUNDLED_CABLE,
-		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollission().instabreak(),
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollision().instabreak(),
 		BundledCableBlock::new,
 		Item.Properties::new,
 		WireBlockItem::new);
@@ -435,7 +435,7 @@ public class MoreRed
 	// mechanisms
 	public static final DeferredHolder<Block, AirFoilBlock> AIRFOIL_BLOCK = registerBlock(BLOCKS, Names.AIRFOIL, () -> Block.Properties.of()
 		.air()
-		.noCollission()
+		.noCollision()
 		.noOcclusion()
 		.noLootTable()
 		.isSuffocating(NEVER_STATE_PREDICATE),
@@ -804,7 +804,7 @@ public class MoreRed
 										serverPlayer.connection.send(new ClientboundSetEquipmentPacket(serverPlayer.getId(), ImmutableList.of(Pair.of(EquipmentSlot.MAINHAND, serverPlayer.getItemInHand(InteractionHand.MAIN_HAND)))));
 										serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 									}
-									else if (level.isClientSide)
+									else if (level.isClientSide())
 									{
 										level.addParticle(DustParticleOptions.REDSTONE, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
 									}
@@ -840,7 +840,7 @@ public class MoreRed
 									serverPlayer.connection.send(new ClientboundSetEquipmentPacket(serverPlayer.getId(), ImmutableList.of(Pair.of(EquipmentSlot.MAINHAND, serverPlayer.getItemInHand(InteractionHand.MAIN_HAND)))));
 									serverLevel.sendParticles(serverPlayer, DustParticleOptions.REDSTONE, false, false, hit.x, hit.y, hit.z, 5, .05, .05, .05, 0);
 								}
-								else if (level.isClientSide)
+								else if (level.isClientSide())
 								{
 									level.addParticle(DustParticleOptions.REDSTONE, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
 								}

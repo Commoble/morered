@@ -21,6 +21,7 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.routing.Route;
 import net.commoble.morered.routing.RoutingNetwork;
 import net.commoble.morered.util.WorldHelper;
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
@@ -31,7 +32,9 @@ import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -64,6 +67,7 @@ public class TubeBlockEntity extends BlockEntity
 	private boolean isConnectionSyncDirty = false; // if true, sync to clients in update packet (always sync in update tag)
 	
 	public AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
+	private Map<Direction, TubeConnectionRenderInfo> connectionRenderInfos = null;
 	
 	@Nonnull
 	public Queue<ItemInTubeWrapper> inventory = new LinkedList<ItemInTubeWrapper>();
@@ -317,7 +321,7 @@ public class TubeBlockEntity extends BlockEntity
 		this.mergeBuffer();
 		if (!this.inventory.isEmpty())	// if inventory is empty, skip the tick
 		{
-			if (!this.level.isClientSide)	// block has changes that need to be saved (serverside)
+			if (!this.level.isClientSide())	// block has changes that need to be saved (serverside)
 			{
 				this.setChanged();
 			}
@@ -346,7 +350,7 @@ public class TubeBlockEntity extends BlockEntity
 			}
 			this.inventory = remainingWrappers;
 		}
-		if (!this.level.isClientSide && this.inventory.size() > MoreRed.SERVERCONFIG.maxItemsInTube().get())
+		if (!this.level.isClientSide() && this.inventory.size() > MoreRed.SERVERCONFIG.maxItemsInTube().get())
 		{
 			this.level.removeBlock(this.worldPosition, false);
 		}
@@ -378,7 +382,7 @@ public class TubeBlockEntity extends BlockEntity
 					(nextTube).enqueueItemStack(wrapper.stack, wrapper.remainingMoves, wrapper.maximumDurationInTube);
 				}
 			}
-			else if (!this.level.isClientSide)
+			else if (!this.level.isClientSide())
 			{
 				IItemHandler nextHandler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, nextPos, dir.getOpposite());
 				if (nextHandler != null)	// te exists but is not a tube
@@ -397,7 +401,7 @@ public class TubeBlockEntity extends BlockEntity
 				}
 			}
 		}
-		else if (!this.level.isClientSide)	// wrapper has no remaining moves -- this isn't expected, eject the item
+		else if (!this.level.isClientSide())	// wrapper has no remaining moves -- this isn't expected, eject the item
 		{
 			WorldHelper.ejectItemstack(this.level, this.worldPosition, null, wrapper.stack);
 		}
@@ -551,6 +555,7 @@ public class TubeBlockEntity extends BlockEntity
 			this.remoteConnections.values().stream()
 				.map(connection -> connection.toPos)
 				.collect(Collectors.toSet()));
+		this.connectionRenderInfos = null;
 	}
 
 	@Override	// write entire inventory by default (for server -> hard disk purposes this is what is called)
@@ -657,5 +662,46 @@ public class TubeBlockEntity extends BlockEntity
 	public void setConnectionsRaw(Map<Direction, RemoteConnection> newConnections)
 	{
 		this.remoteConnections = newConnections;
+	}
+
+	public static class TubeConnectionRenderInfo
+	{
+		public final BlockPos endPos;
+		public final Direction endFace;
+		public int endLight = 0;
+		
+		public TubeConnectionRenderInfo(BlockPos endPos, Direction endFace)
+		{
+			this.endPos = endPos;
+			this.endFace = endFace;
+		}
+
+		public void update(Level level)
+		{
+			int blockLight = level.getBrightness(LightLayer.BLOCK, this.endPos);
+			int skyLight = level.getBrightness(LightLayer.SKY, this.endPos);
+			this.endLight = LightTexture.pack(blockLight, skyLight);
+		}
+	}
+	
+	public Map<Direction, TubeConnectionRenderInfo> getConnectionRenderInfos()
+	{
+		Map<Direction, TubeConnectionRenderInfo> results = this.connectionRenderInfos;
+		if (results == null)
+		{
+			results = new HashMap<>();
+			for (var entry : this.remoteConnections.entrySet())
+			{
+				RemoteConnection connection = entry.getValue();
+				if (connection.isPrimary)
+				{
+					results.put(entry.getKey(), new TubeConnectionRenderInfo(connection.toPos, connection.toSide));	
+				}
+			}
+			
+			this.connectionRenderInfos = results;
+		}
+		
+		return results;
 	}
 }

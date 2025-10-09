@@ -115,7 +115,7 @@ public class GearBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 	@Override
 	public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
 	{
-		return state.getValue(WATERLOGGED) || !state.ignitedByLava()
+		return state.getValue(WATERLOGGED) || !state.ignitedByLava(level, pos, direction)
 			? 0
 			: 5; // same as stripped logs
 	}
@@ -123,7 +123,7 @@ public class GearBlock extends Block implements EntityBlock, SimpleWaterloggedBl
 	@Override
 	public int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
 	{
-		return state.getValue(WATERLOGGED) || !state.ignitedByLava()
+		return state.getValue(WATERLOGGED) || !state.ignitedByLava(level, pos, direction)
 			? 0
 			: 5; // same as stripped logs
 	}

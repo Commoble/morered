@@ -41,7 +41,7 @@ public class WindCatcherBlockItem extends BlockItem
 		if (!success)
 			return false;
 		Level level = context.getLevel();
-		if (!level.isClientSide)
+		if (!level.isClientSide())
 		{
 			BlockPos corePos = context.getClickedPos();
 			for (int segment=0; segment<8; segment++)

@@ -50,7 +50,7 @@ public class WindcatcherBlock extends Block implements EntityBlock
 		Level level = context.getLevel();
 		BlockState state = this.defaultBlockState();
 		// state desync doesn't matter, the block has no clientside visuals dependent on the placed state
-		return level.isClientSide ? state : state.setValue(WIND, getWind(context.getLevel(), context.getClickedPos()));
+		return level.isClientSide() ? state : state.setValue(WIND, getWind(context.getLevel(), context.getClickedPos()));
 	}
 	
 	@Override
@@ -132,7 +132,7 @@ public class WindcatcherBlock extends Block implements EntityBlock
 	@Override
 	public int getFireSpreadSpeed(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
 	{
-		return !state.ignitedByLava()
+		return !state.ignitedByLava(level, pos, direction)
 			? 0
 			: 5; // same as stripped logs
 	}
@@ -140,7 +140,7 @@ public class WindcatcherBlock extends Block implements EntityBlock
 	@Override
 	public int getFlammability(BlockState state, BlockGetter level, BlockPos pos, Direction direction)
 	{
-		return !state.ignitedByLava()
+		return !state.ignitedByLava(level, pos, direction)
 			? 0
 			: 5; // same as stripped logs
 	}

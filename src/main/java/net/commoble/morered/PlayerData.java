@@ -44,7 +44,7 @@ public class PlayerData
 	@SuppressWarnings("resource")
 	public static boolean getCommonInteractionSprinting(Player player)
 	{
-		if (player.level().isClientSide)
+		if (player.level().isClientSide())
 		{
 			return ClientProxy.getSprintingIfClientPlayer(player);
 		}

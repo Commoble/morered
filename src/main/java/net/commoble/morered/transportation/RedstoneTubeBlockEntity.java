@@ -28,7 +28,7 @@ public class RedstoneTubeBlockEntity extends TubeBlockEntity
 		// change state when contents of inventory change from nothing to something or
 		// from something to nothing
 		super.tick();
-		if (!this.level.isClientSide)
+		if (!this.level.isClientSide())
 		{
 			boolean hasItems = this.inventory.size() > 0;
 			boolean isPowered = this.getBlockState().getValue(RedstoneTubeBlock.POWERED);

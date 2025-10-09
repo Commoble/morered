@@ -70,7 +70,7 @@ public interface FaceSegmentBlock
 			// add player stats and spawn drops
 			removedBlock.playerDestroy(world, player, pos, removedState, world.getBlockEntity(pos), player.getMainHandItem().copy());
 		}
-		if (world.isClientSide)
+		if (world.isClientSide())
 		{
 			// level event 2001 plays break sound and makes break particles
 			// on the server world, onBlockHarvested will play the break effects for each player except the player given

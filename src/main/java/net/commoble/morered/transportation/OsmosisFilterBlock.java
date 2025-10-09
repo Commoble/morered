@@ -50,7 +50,7 @@ public class OsmosisFilterBlock extends FilterBlock
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		if (!level.isClientSide && type == MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get())
+		if (!level.isClientSide() && type == MoreRed.OSMOSIS_FILTER_BLOCK_ENTITY.get())
 		{
 			return (BlockEntityTicker<T>) OsmosisFilterBlockEntity.SERVER_TICKER;
 		}

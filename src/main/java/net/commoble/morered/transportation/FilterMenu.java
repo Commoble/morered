@@ -129,7 +129,7 @@ public class FilterMenu extends AbstractContainerMenu
 		@Override
 		public void clearContent()
 		{
-			this.filter.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
+			this.filter.saveAndSync(ItemStack.EMPTY);
 		}
 
 		@Override
@@ -154,7 +154,7 @@ public class FilterMenu extends AbstractContainerMenu
 		public ItemStack removeItem(int index, int count)
 		{
 			ItemStack newStack = this.filter.filterStack.split(count);
-			this.filter.setFilterStackAndSaveAndSync(this.filter.filterStack);
+			this.filter.saveAndSync(this.filter.filterStack);
 			return newStack;
 		}
 
@@ -162,14 +162,14 @@ public class FilterMenu extends AbstractContainerMenu
 		public ItemStack removeItemNoUpdate(int index)
 		{
 			ItemStack stack = this.filter.filterStack.copy();
-			this.filter.setFilterStackAndSaveAndSync(ItemStack.EMPTY);
+			this.filter.saveAndSync(ItemStack.EMPTY);
 			return stack;
 		}
 
 		@Override
 		public void setItem(int index, ItemStack stack)
 		{
-			this.filter.setFilterStackAndSaveAndSync(stack);
+			this.filter.saveAndSync(stack);
 		}
 
 		@Override

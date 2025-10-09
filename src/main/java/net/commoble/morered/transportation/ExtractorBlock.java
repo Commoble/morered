@@ -44,7 +44,7 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 		boolean isPlayerHoldingWrench = stack.is(Tags.Items.TOOLS_WRENCH);
 		
 		// rotate the block when the player pokes it with a wrench
-		if (isPlayerHoldingWrench && !level.isClientSide)
+		if (isPlayerHoldingWrench && !level.isClientSide())
 		{
 			BlockState newState;
 			level.playSound(null, pos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS,
@@ -144,7 +144,7 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 	@Override
 	public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState state, BlockEntityType<T> type)
 	{
-		return (!level.isClientSide) && type == MoreRed.EXTRACTOR_BLOCK_ENTITY.get()
+		return (!level.isClientSide()) && type == MoreRed.EXTRACTOR_BLOCK_ENTITY.get()
 			? (BlockEntityTicker<T>)TICKER
 			: null;
 	}

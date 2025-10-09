@@ -28,7 +28,7 @@ import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringRepresentable;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -88,7 +88,7 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 			ItemModelResolver resolver,
 			ItemDisplayContext displayContext,
 			ClientLevel level,
-			LivingEntity entity,
+			ItemOwner entity,
 			int seed)
 		{
 			renderState.ensureCapacity(9); // 1 + 4 + 4

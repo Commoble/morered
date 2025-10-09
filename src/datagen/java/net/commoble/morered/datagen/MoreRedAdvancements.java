@@ -20,7 +20,7 @@ import net.minecraft.advancements.critereon.DataComponentMatchers;
 import net.minecraft.advancements.critereon.InventoryChangeTrigger;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
-import net.minecraft.core.ClientAsset;
+import net.minecraft.core.ClientAsset.ResourceTexture;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -258,7 +258,7 @@ public class MoreRedAdvancements
 		private final String titleKey;
 		private final String descriptionKey;
 		private final AdvancementType type;
-		private Optional<ClientAsset> background = Optional.empty();
+		private Optional<ResourceTexture> background = Optional.empty();
 		private boolean showToast = true;
 		private boolean announceToChat = true;
 		private boolean hidden = false; 
@@ -278,7 +278,7 @@ public class MoreRedAdvancements
 		
 		public DisplayBuilder background(ResourceLocation id)
 		{
-			this.background = Optional.of(new ClientAsset(id));
+			this.background = Optional.of(new ResourceTexture(id));
 			return this;
 		}
 		

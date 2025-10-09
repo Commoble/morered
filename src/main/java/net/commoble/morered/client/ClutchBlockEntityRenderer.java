@@ -11,27 +11,35 @@ import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.client.renderer.entity.ItemRenderer;
-import net.minecraft.core.BlockPos;
+import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
+import net.minecraft.client.renderer.item.ItemModelResolver;
+import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public record ClutchBlockEntityRenderer(ItemRenderer itemRenderer) implements BlockEntityRenderer<GenericBlockEntity>
+public record ClutchBlockEntityRenderer(ItemModelResolver resolver) implements BlockEntityRenderer<GenericBlockEntity, MechanicalItemBlockEntityRenderState>
 {
 	public static ClutchBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		return new ClutchBlockEntityRenderer(context.getItemRenderer());
+		return new ClutchBlockEntityRenderer(context.itemModelResolver());
 	}
 
 	@Override
-	public void render(GenericBlockEntity be, float partialTicks, PoseStack poseStack, MultiBufferSource bufferSource, int packedLight, int overlay, Vec3 Camera)
+	public MechanicalItemBlockEntityRenderState createRenderState()
 	{
+		return new MechanicalItemBlockEntityRenderState();
+	}
+
+	@Override
+	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	{
+		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
 		BlockState state = be.getBlockState();
 		if (state.getBlock() instanceof ClutchBlock clutchBlock)
 		{
@@ -45,16 +53,26 @@ public record ClutchBlockEntityRenderer(ItemRenderer itemRenderer) implements Bl
 			int gameTimeTicks = MechanicalState.getMachineTicks(level);
 			float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 			float radians = radiansPerSecond * seconds;
-			BlockPos pos = be.getBlockPos();
-			poseStack.pushPose();
-			if (!state.getValue(ClutchBlock.EXTENDED))
-			{
-				double offset = -0.3125D; // 5/16ths
-				poseStack.translate(offset * facing.getStepX(), offset * facing.getStepY(), offset * facing.getStepZ());
-			}
-			GearBlockEntityRenderer.renderGear(this.itemRenderer, level, pos, stack, facing, radians, poseStack, bufferSource, packedLight, overlay);
-			poseStack.popPose();
+			renderState.update(resolver, level, stack, radians);
 		}
+		else
+		{
+			renderState.clear();
+		}
+	}
+
+	@Override
+	public void submit(MechanicalItemBlockEntityRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera)
+	{
+		Direction facing = renderState.blockState.getValue(ClutchBlock.FACING);
+		poseStack.pushPose();
+		if (!renderState.blockState.getValue(ClutchBlock.EXTENDED))
+		{
+			double offset = -0.3125D; // 5/16ths
+			poseStack.translate(offset * facing.getStepX(), offset * facing.getStepY(), offset * facing.getStepZ());
+		}
+		GearBlockEntityRenderer.renderGear(renderState.itemState, poseStack, collector, renderState.lightCoords, renderState.blockPos, facing, renderState.radians);
+		poseStack.popPose();
 	}
 
 }

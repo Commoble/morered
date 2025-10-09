@@ -15,6 +15,9 @@ import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.client.input.CharacterEvent;
+import net.minecraft.client.input.KeyEvent;
+import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
@@ -73,17 +76,17 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	}
 
 	@Override
-	public boolean charTyped(char c, int modifier)
+	public boolean charTyped(CharacterEvent event)
 	{
-		return this.searchBox.charTyped(c,modifier);
+		return this.searchBox.charTyped(event);
 	}
 
 	@Override
-	public boolean keyPressed(int keyCode, int scanCode, int uhh)
+	public boolean keyPressed(KeyEvent event)
 	{
-		return this.searchBox.keyPressed(keyCode, scanCode, uhh)
-			|| (this.searchBox.isFocused() && keyCode != 256)
-			|| super.keyPressed(keyCode, scanCode, uhh);
+		return this.searchBox.keyPressed(event)
+			|| (this.searchBox.isFocused() && event.key() != 256)
+			|| super.keyPressed(event);
 	}
 
 	@Override
@@ -159,10 +162,10 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	}
 
 	@Override
-	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY)
+	public boolean mouseDragged(MouseButtonEvent event, double dx, double dy)
 	{
 		// ContainerScreen doesn't delegate the mouse-dragged event to its children by default, so we need to do it here
-		return (this.scrollPanel.mouseDragged(mouseX, mouseY, button, deltaX, deltaY) || super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY));
+		return (this.scrollPanel.mouseDragged(event,dx,dy) || super.mouseDragged(event,dx,dy));
 	}
 
 	@Override
@@ -200,7 +203,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		}
 
 		@Override
-		public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY)
+		public boolean mouseDragged(MouseButtonEvent event, double dx, double dy)
 		{
 			return false;
 		}
@@ -354,9 +357,9 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		}
 
 		@Override
-		public boolean mouseClicked(double mouseX, double mouseY, int button)
+		public boolean mouseClicked(MouseButtonEvent event, boolean jellybiscuits)
 		{
-			return super.mouseClicked(mouseX, mouseY, button);
+			return super.mouseClicked(event, jellybiscuits);
 		}
 
 		@Override

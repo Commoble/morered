@@ -153,7 +153,7 @@ public class PliersItem extends Item
 	public void inventoryTick(ItemStack stack, ServerLevel level, Entity entity, EquipmentSlot slot)
 	{
 		super.inventoryTick(stack, level, entity, slot);
-		if (!level.isClientSide)
+		if (!level.isClientSide())
 		{
 			@Nullable BlockSide plieredTube = getPlieredTube(stack);
 			if (plieredTube != null)

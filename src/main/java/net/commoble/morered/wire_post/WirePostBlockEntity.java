@@ -17,6 +17,7 @@ import com.mojang.serialization.Codec;
 import net.commoble.exmachina.api.Channel;
 import net.commoble.exmachina.api.TransmissionNode;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.client.ColorHandlers;
 import net.commoble.morered.util.EightGroup;
 import net.commoble.morered.util.NestedBoundingBox;
 import net.minecraft.core.BlockPos;
@@ -25,10 +26,12 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -49,6 +52,8 @@ public class WirePostBlockEntity extends BlockEntity
 	private Map<BlockPos, NestedBoundingBox> remoteConnections = new HashMap<>();
 	
 	private AABB renderAABB = EMPTY_AABB; // used by client, updated whenever NBT is read
+	private List<WirePostConnectionRenderInfo> connectionRenderInfos = new ArrayList<>();
+	
 	protected Map<Channel, Collection<TransmissionNode>> transmissionNodes = null;
 	
 	public static final Codec<List<BlockPos>> BLOCKPOS_LISTER = BlockPos.CODEC.listOf();
@@ -204,6 +209,7 @@ public class WirePostBlockEntity extends BlockEntity
 	
 	protected void readCommonData(ValueInput input)
 	{
+		this.connectionRenderInfos = null;
 		input.read(CONNECTIONS, BLOCKPOS_LISTER).ifPresent(normalizedPositions -> {
 			List<BlockPos> absolutePositions = new ArrayList<>();
 			for (BlockPos normalPos : normalizedPositions)
@@ -287,7 +293,7 @@ public class WirePostBlockEntity extends BlockEntity
 
 	public Collection<TransmissionNode> getTransmissionNodes(ResourceKey<Level> levelKey, BlockGetter level, BlockPos pos, BlockState state, Channel channel, Supplier<Map<Channel,Collection<TransmissionNode>>> nodeFactory)
 	{
-		if (this.level.isClientSide)
+		if (this.level.isClientSide())
 			return List.of();
 		if (this.transmissionNodes == null)
 		{
@@ -307,5 +313,76 @@ public class WirePostBlockEntity extends BlockEntity
 	{
 		this.clearRemoteConnections();
 		AbstractPostBlock.updatePostSet(this.level, pos, Set<BlockPos>::remove);
+	}
+	
+	public List<WirePostConnectionRenderInfo> getConnectionRenderInfos()
+	{
+		var results = this.connectionRenderInfos;
+		if (results == null)
+		{
+			results = new ArrayList<>();
+			BlockPos startPos = this.getBlockPos();
+			int startY = this.getBlockPos().getY();
+			for (BlockPos endPos : this.remoteConnections.keySet())
+			{
+				int endY = endPos.getY();
+				// ensure that for each pair of connections, only one cable is rendered (from the lower post if possible)
+				if (startY < endY || (startY == endY && startPos.hashCode() < endPos.hashCode()))
+				{
+					results.add(new WirePostConnectionRenderInfo(Vec3.atCenterOf(endPos)));
+				}
+			}
+			this.connectionRenderInfos = results;
+		}
+		return results;
+	}
+
+	// only used clientside, for rendering
+	public static class WirePostConnectionRenderInfo
+	{
+		public final Vec3 endVec;
+		public int endBlockLight = 0;
+		public int endSkyLight = 0;
+		public int red = 0;
+		
+		public WirePostConnectionRenderInfo(Vec3 endVec)
+		{
+			this.endVec = endVec;
+		}
+		
+		public void updateForBlockLight(Level level)
+		{
+			BlockPos endPos = BlockPos.containing(this.endVec);
+			this.endBlockLight = level.getBrightness(LightLayer.BLOCK, endPos);
+			this.endSkyLight = level.getBrightness(LightLayer.SKY, endPos);
+		}
+		
+		public void updateForRed(Level level, float partialTicks)
+		{
+			BlockPos endPos = BlockPos.containing(this.endVec);
+			this.red = getRed(level, endPos, level.getBlockState(endPos), partialTicks); 
+		}
+	}
+
+	
+	public static int getRed(Level world, BlockPos pos, BlockState state, float partialTicks)
+	{
+		int power = state.hasProperty(AbstractPoweredWirePostBlock.POWER) ? state.getValue(AbstractPoweredWirePostBlock.POWER) : 0;
+		double lerpFactor = power / 16D;
+		int rr = (int)Mth.lerp(lerpFactor, ColorHandlers.UNLIT_RED & 0xFF, ColorHandlers.LIT_RED & 0xFF);
+		// apply lighting too
+		int light = world.getMaxLocalRawBrightness(pos);
+		float celestialAngle = world.getSunAngle(partialTicks);
+		if (light > 0)
+		{
+			float offset = celestialAngle < (float) Math.PI ? 0.0F : ((float) Math.PI * 2F);
+			celestialAngle = celestialAngle + (offset - celestialAngle) * 0.2F;
+			light = Math.round(light * Mth.cos(celestialAngle));
+		}
+
+		light = Math.max(light, world.getBrightness(LightLayer.BLOCK, pos));
+		light = Mth.clamp(light, 0, 15);
+		rr = (int) (rr * Mth.lerp(light/15D, 0.15, 1));
+		return rr;
 	}
 }
