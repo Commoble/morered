@@ -1,95 +1,106 @@
 package net.commoble.morered;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
+
+import net.commoble.morered.util.SnapshotStack;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.component.DataComponentType;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.component.ItemContainerContents;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.neoforged.neoforge.transfer.IndexModifier;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public record ExtractOnlyGenericItemHandler(GenericBlockEntity be, DataComponentType<ItemContainerContents> type, int slots) implements IItemHandler, IItemHandlerModifiable
-{
-	private ItemContainerContents getInventory()
+public record ExtractOnlyGenericItemHandler(GenericBlockEntity be, DataComponentType<ItemContainerContents> type, int size, SnapshotStack<ItemContainerContents> inventoryStack) implements ResourceHandler<ItemResource>, IndexModifier<ItemResource>
+{	
+	public static ExtractOnlyGenericItemHandler of(GenericBlockEntity be, DataComponentType<ItemContainerContents> type, int size)
 	{
-		return be.getOrDefault(type, ItemContainerContents.EMPTY);
+		return new ExtractOnlyGenericItemHandler(
+			be,
+			type,
+			size,
+			SnapshotStack.of(
+				be.getOrDefault(type, ItemContainerContents.EMPTY),
+				UnaryOperator.identity(), // ItemContainerContents is immutable, don't need to deep-copy
+				(oldContents,newContents) -> be.set(type, newContents)));
 	}
 
 	@Override
-	public void setStackInSlot(int slot, ItemStack stack)
+	public ItemResource getResource(int index)
 	{
-		ItemContainerContents inventory = this.getInventory();
-		if (slot >= inventory.getSlots())
-			return;
-        NonNullList<ItemStack> list = NonNullList.withSize(inventory.getSlots(), ItemStack.EMPTY);
-        inventory.copyInto(list);
-        list.set(slot, stack);
-		be.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(list));
-	}
-	
-	@Override
-	public int getSlots()
-	{
-		return slots;
+		ItemContainerContents inventory = this.inventoryStack.get();
+		return index < inventory.getSlots()
+			? ItemResource.of(inventory.getStackInSlot(index))
+			: ItemResource.EMPTY;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot)
+	public long getAmountAsLong(int index)
 	{
-		var inventory = getInventory();
-		return slot < inventory.getSlots()
-			? inventory.getStackInSlot(slot)
-			: ItemStack.EMPTY;
-	}
-
-	@Override
-	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
-	{
-		return stack;
-	}
-
-	@Override
-	public ItemStack extractItem(int slot, int amount, boolean simulate)
-	{
-		ItemContainerContents oldInventory = getInventory();
-		if (slot >= oldInventory.getSlots())
-			return ItemStack.EMPTY;
-		ItemStack stackInSlot = oldInventory.getStackInSlot(slot);
-		int oldCount = stackInSlot.getCount();
-		if (oldCount >= amount)
-		{
-			// return the entire stack
-			if (!simulate)
-			{
-				setStackInSlot(slot, ItemStack.EMPTY);
-			}
-			return stackInSlot;
-		}
-		else
-		{
-			// return the requested portion of the stack
-			ItemStack out = stackInSlot.copyWithCount(amount);
-			if (!simulate)
-			{
-				ItemStack remainder = stackInSlot.copyWithCount(oldCount - amount);
-				setStackInSlot(slot, remainder);
-			}
-			return out;
-		}
-	}
-
-	@Override
-	public int getSlotLimit(int slot)
-	{
-		ItemContainerContents inventory = getInventory();
-		return slot < inventory.getSlots()
-			? inventory.getStackInSlot(slot).getMaxStackSize()
+		ItemContainerContents inventory = this.inventoryStack.get();
+		return index < inventory.getSlots()
+			? inventory.getStackInSlot(index).getCount()
 			: 0;
 	}
 
 	@Override
-	public boolean isItemValid(int slot, ItemStack stack)
+	public long getCapacityAsLong(int index, ItemResource resource)
+	{
+		ItemResource existing = this.getResource(index);
+		return existing.isEmpty()
+			? resource.getMaxStackSize()
+			: existing.getMaxStackSize();
+	}
+
+	@Override
+	public boolean isValid(int index, ItemResource resource)
 	{
 		return false;
+	}
+
+	@Override
+	public int insert(int index, ItemResource resource, int amount, TransactionContext transaction)
+	{
+		return 0; // can't insert
+	}
+
+	@Override
+	public int extract(int index, ItemResource resource, int amount, TransactionContext transaction)
+	{
+		ItemContainerContents oldInventory = this.inventoryStack.get();
+		if (index >= oldInventory.getSlots())
+			return 0;
+		
+		ItemStack stackInSlot = oldInventory.getStackInSlot(index);
+		int oldCount = stackInSlot.getCount();
+		int extracted = Math.min(amount, oldCount);
+		int newCount = oldCount - extracted;
+		ItemStack newStack = newCount > 0
+			? stackInSlot.copyWithCount(newCount)
+			: ItemStack.EMPTY;
+		
+		// ItemContainerContents#stream copies itemstacks
+		List<ItemStack> newList = oldInventory.stream().collect(Collectors.toCollection(ArrayList::new));
+		newList.set(index, newStack);
+		ItemContainerContents newInventory = ItemContainerContents.fromItems(newList);
+		this.inventoryStack.setAndTakeSnapshot(newInventory, transaction);
+		return extracted;
+	}
+
+	@Override
+	public void set(int index, ItemResource resource, int amount)
+	{
+		ItemContainerContents inventory = this.inventoryStack.get();
+		if (index >= inventory.getSlots())
+			return;
+        NonNullList<ItemStack> list = NonNullList.withSize(inventory.getSlots(), ItemStack.EMPTY);
+        inventory.copyInto(list);
+        list.set(index, resource.toStack(amount));
+		be.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(list));
 	}
 }

@@ -14,7 +14,9 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.IndexModifier;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class MultiFilterMenu extends AbstractContainerMenu
 {
@@ -50,7 +52,7 @@ public class MultiFilterMenu extends AbstractContainerMenu
 				int index = row*cols + col;
 				int x = col*18 + 8;
 				int y = row*18 + 18;
-				this.addSlot(new MultiFilterSlot(filterInventory, index, x, y));
+				this.addSlot(new MultiFilterSlot(filterInventory, filterInventory::set, index, x, y));
 			}
 		}
 		
@@ -113,13 +115,13 @@ public class MultiFilterMenu extends AbstractContainerMenu
 		return copyStack;
 	}
 	
-	class MultiFilterSlot extends SlotItemHandler
+	class MultiFilterSlot extends ResourceHandlerSlot
 	{
 		private final SetItemHandler setItemHandler;
 
-		public MultiFilterSlot(SetItemHandler setItemHandler, int index, int xPosition, int yPosition)
+		public MultiFilterSlot(SetItemHandler setItemHandler, IndexModifier<ItemResource> indexModifier, int index, int xPosition, int yPosition)
 		{
-			super(setItemHandler, index, xPosition, yPosition);
+			super(setItemHandler, indexModifier, index, xPosition, yPosition);
 			this.setItemHandler = setItemHandler;
 		}
 

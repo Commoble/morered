@@ -1,7 +1,7 @@
 package net.commoble.morered.transportation;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -24,8 +24,6 @@ public abstract class AbstractFilterBlockEntity extends BlockEntity
 		this.dropItems();
 	}
 
-
-
-	public abstract boolean canItemPassThroughFilter(ItemStack stack);
+	public abstract boolean canItemPassThroughFilter(Item item);
 	public abstract void dropItems();
 }

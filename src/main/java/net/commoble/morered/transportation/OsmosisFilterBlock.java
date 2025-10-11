@@ -21,7 +21,8 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class OsmosisFilterBlock extends FilterBlock
 {
@@ -81,7 +82,7 @@ public class OsmosisFilterBlock extends FilterBlock
 				
 				if (!checkedItemsThisTick)
 				{
-					IItemHandler neighborHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.relative(inputDirection), outputDirection);
+					ResourceHandler<ItemResource> neighborHandler = level.getCapability(Capabilities.Item.BLOCK, pos.relative(inputDirection), outputDirection);
 					boolean canExtractItems = neighborHandler != null
 						&& WorldHelper.doesItemHandlerHaveAnyExtractableItems(neighborHandler, filter::canItemPassThroughFilter);
 					

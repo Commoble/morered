@@ -173,7 +173,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		if (newBlock instanceof AbstractFilterBlock && state.getValue(AbstractFilterBlock.FACING).equals(face.getOpposite()))
 			return true;
 
-		if (level instanceof Level l && l.getCapability(Capabilities.ItemHandler.BLOCK, newPos, face.getOpposite()) != null)
+		if (level instanceof Level l && l.getCapability(Capabilities.Item.BLOCK, newPos, face.getOpposite()) != null)
 		{
 			return true;
 		}

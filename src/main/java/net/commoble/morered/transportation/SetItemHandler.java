@@ -3,19 +3,23 @@ package net.commoble.morered.transportation;
 import java.util.HashSet;
 import java.util.Set;
 
-import org.jetbrains.annotations.NotNull;
-
+import net.commoble.morered.util.SnapshotStack;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.ItemStackHandler;
+import net.minecraft.world.level.storage.ValueInput;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /**
  * Itemhandler that acts as a Set of items.
  * All slots have a max stack size of 1, and it can store at most one stack of any given Item.
  */
-public class SetItemHandler extends ItemStackHandler
+public class SetItemHandler extends ItemStacksResourceHandler
 {
-	private Set<Item> cachedSet = null;
+	private final SnapshotStack<Set<Item>> setStack = SnapshotStack.of(
+		new HashSet<>(),
+		HashSet::new);
 	
 	public SetItemHandler(int size)
 	{
@@ -23,45 +27,69 @@ public class SetItemHandler extends ItemStackHandler
 	}
 
 	@Override
-	public int getSlotLimit(int slot)
+	public int getCapacity(int slot, ItemResource resource)
 	{
 		return 1;
 	}
 
 	@Override
-	public ItemStack insertItem(int slot, @NotNull ItemStack stack, boolean simulate)
+	public int extract(int index, ItemResource resource, int amount, TransactionContext transaction)
 	{
-		// we allow at most one stack of a given item to be in the inventory
-		if (this.getSet().contains(stack.getItem()))
+		int extracted = super.extract(index, resource, amount, transaction);
+		if (extracted > 0)
 		{
-			return stack;
+			this.setStack.applyAndTakeSnapshot(set -> set.remove(resource.getItem()), transaction);
 		}
-		return super.insertItem(slot, stack, simulate);
-	}
-	
-	public Set<Item> getSet()
-	{
-		if (this.cachedSet == null)
-		{
-			Set<Item> items = new HashSet<>();
-			int slots = this.getSlots();
-			for (int i=0; i<slots; i++)
-			{
-				ItemStack stack = this.getStackInSlot(i);
-				if (!stack.isEmpty())
-				{
-					items.add(stack.getItem());
-				}
-			}
-			this.cachedSet = Set.copyOf(items);
-		}
-		return this.cachedSet;
+		return extracted;
 	}
 
 	@Override
-	protected void onContentsChanged(int slot)
+	public int insert(int index, ItemResource resource, int amount, TransactionContext transaction)
 	{
-		super.onContentsChanged(slot);
-		this.cachedSet = null;
+		// we allow at most one stack of a given item to be in the inventory
+		if (this.setStack.get().contains(resource.getItem()))
+		{
+			return 0;
+		}
+		int inserted = super.insert(index, resource, amount, transaction);
+		if (inserted > 0)
+		{
+			this.setStack.applyAndTakeSnapshot(set -> set.add(resource.getItem()), transaction);
+		}
+		return inserted;
+	}
+
+	@Override
+	public void deserialize(ValueInput input)
+	{
+		super.deserialize(input);
+		Set<Item> newSet = new HashSet<>();
+		for (ItemStack stack : this.stacks)
+		{
+			if (!stack.isEmpty())
+			{
+				newSet.add(stack.getItem());
+			}
+		}
+		this.setStack.set(newSet);
+	}
+
+	@Override
+	public void set(int index, ItemResource resource, int amount)
+	{
+		super.set(index, resource, amount);
+		this.setStack.apply(set -> set.add(resource.getItem()));
+	}
+
+	@Override
+	public boolean isValid(int index, ItemResource resource)
+	{
+		return super.isValid(index, resource)
+			&& !this.setStack.get().contains(resource.getItem());
+	}
+
+	public Set<Item> getSet()
+	{
+		return this.setStack.get();
 	}
 }

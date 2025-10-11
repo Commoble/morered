@@ -1,5 +1,6 @@
 package net.commoble.morered.util;
 
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -15,5 +16,10 @@ public class Lambdas
 	public static <T> Function<?, T> ignoreInput(Supplier<T> supplier)
 	{
 		return object -> supplier.get();
+	}
+	
+	public static <A,B> BiConsumer<A,B> emptyBiConsumer()
+	{
+		return ($,$$) -> {};
 	}
 }

@@ -47,8 +47,12 @@ import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.network.PacketDistributor;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class TubeBlockEntity extends BlockEntity
 {
@@ -190,9 +194,9 @@ public class TubeBlockEntity extends BlockEntity
 	}
 	
 	// insertionSide is the side of this block the item was inserted from
-	public Route getBestRoute(Direction insertionSide, ItemStack stack)
+	public Route getBestRoute(Direction insertionSide, ItemStack stack, TransactionContext context)
 	{
-		return this.getNetwork().getBestRoute(this.level, this.worldPosition, insertionSide, stack);
+		return this.getNetwork().getBestRoute(this.level, this.worldPosition, insertionSide, stack, context);
 	}
 	
 	public Map<Direction, RemoteConnection> getRemoteConnections()
@@ -384,15 +388,27 @@ public class TubeBlockEntity extends BlockEntity
 			}
 			else if (!this.level.isClientSide())
 			{
-				IItemHandler nextHandler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, nextPos, dir.getOpposite());
+				ResourceHandler<ItemResource> nextHandler = this.level.getCapability(Capabilities.Item.BLOCK, nextPos, dir.getOpposite());
 				if (nextHandler != null)	// te exists but is not a tube
 				{
-					ItemStack remaining = WorldHelper.disperseItemToHandler(wrapper.stack, nextHandler);
-						
-					if (!remaining.isEmpty())	// target inventory filled up unexpectedly
+					ItemStack stackInWrapper = wrapper.stack;
+					int toInsert = stackInWrapper.getCount();
+					int inserted = ResourceHandlerUtil.insertStacking(nextHandler, ItemResource.of(stackInWrapper), toInsert, null);
+					int remaining = toInsert = inserted;
+					if (remaining > 0)	// target inventory filled up unexpectedly
 					{
-						ItemStack unenqueueableItems = this.enqueueItemStack(remaining, dir, false); // attempt to re-enqueue the item on that side
-						WorldHelper.ejectItemstack(this.level, this.worldPosition, dir, unenqueueableItems);	// eject items if we can't
+						ItemStack remainingStack = stackInWrapper.copyWithCount(remaining);
+						@Nullable Route nextRoute = this.getBestRoute(dir, remainingStack, Transaction.openRoot());
+						if (nextRoute == null)
+						{
+							// if we can't reenqueue item, just eject them
+							WorldHelper.ejectItemstack(this.level, this.worldPosition, dir, remainingStack);
+						}
+						else
+						{
+							// if we can reenqueue item, do so
+							this.enqueueItemStack(remainingStack, dir, nextRoute);
+						}
 					}
 				}
 				else	// no TE -- eject stack
@@ -416,39 +432,34 @@ public class TubeBlockEntity extends BlockEntity
 	/**** Inventory handling ****/
 
 	@Nullable
-	public IItemHandler getItemHandler(@Nullable Direction side)
+	public ResourceHandler<ItemResource> getItemHandler(@Nullable Direction side)
 	{
 		return side == null ? null : this.inventoryHandlers[side.ordinal()];
 	}
-
-	// insert a new itemstack into the tube network from a direction
-	// and determine a route for it
-	public ItemStack enqueueItemStack(ItemStack stack, Direction face, boolean simulate)
+	
+	public @Nullable Route getRouteForStack(ItemStack stack, Direction face, TransactionContext context)
 	{
-		Route route = this.getNetwork().getBestRoute(this.level, this.worldPosition, face, stack);
-		if (route == null || route.sequenceOfMoves.isEmpty())
-			return stack.copy();
-			
-		if (simulate)
-			return ItemStack.EMPTY;
+		return this.getNetwork().getBestRoute(this.level, this.worldPosition, face, stack, context);
+	}
 		
+	public void enqueueItemStack(ItemStack stack, Direction face, Route route)
+	{
 		int ticks_per_tube = this.getNetwork().getTicksPerTube();
 		this.wrappersToSendToClient.add(new ItemInTubeWrapper(stack, route.sequenceOfMoves, ticks_per_tube, face.getOpposite()));
 
 		this.level.sendBlockUpdated(this.worldPosition, this.getBlockState(), this.getBlockState(), 2);
 		
-		return this.enqueueItemStack(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10, face.getOpposite()));
+		this.enqueueItemStack(new ItemInTubeWrapper(stack, route.sequenceOfMoves, 10, face.getOpposite()));
 	}
 	
-	public ItemStack enqueueItemStack(ItemInTubeWrapper wrapper)
+	public void enqueueItemStack(ItemInTubeWrapper wrapper)
 	{
 		this.incomingWrapperBuffer.add(wrapper);
-		return ItemStack.EMPTY;
 	}
 
-	public ItemStack enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves, int ticksPerTube)
+	public void enqueueItemStack(ItemStack stack, Queue<Direction> remainingMoves, int ticksPerTube)
 	{
-		return this.enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, ticksPerTube));
+		this.enqueueItemStack(new ItemInTubeWrapper(stack, remainingMoves, ticksPerTube));
 	}
 	
 	public void mergeBuffer()
@@ -477,33 +488,6 @@ public class TubeBlockEntity extends BlockEntity
 			}
 			this.clearRemoteConnections();
 		}
-	}
-
-	public static boolean isSpaceForAnythingInItemHandler(IItemHandler handler)
-	{
-		return true;
-	}
-
-	public boolean isAnyInventoryAdjacent()
-	{
-		for (Direction face : Direction.values())
-		{
-			BlockPos neighborPos = this.worldPosition.relative(face);
-			BlockEntity te = this.level.getBlockEntity(neighborPos);
-			if (!(te instanceof TubeBlockEntity))
-			{
-				IItemHandler handler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, neighborPos, face.getOpposite());
-				// if a nearby inventory that is not a tube exists
-				if (handler != null)
-				{
-					if (TubeBlockEntity.isSpaceForAnythingInItemHandler(handler))
-					{
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	@Override

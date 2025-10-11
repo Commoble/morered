@@ -15,10 +15,11 @@ import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemStackHandler;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.neoforged.neoforge.transfer.IndexModifier;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class StonemillMenu extends AbstractContainerMenu
 {
@@ -33,31 +34,34 @@ public class StonemillMenu extends AbstractContainerMenu
 	
 	public static StonemillMenu clientMenu(int id, Inventory playerInventory)
 	{
-		return new StonemillMenu(MoreRed.STONEMILL_MENU.get(), playerInventory, id , new ItemStackHandler(1), ContainerLevelAccess.NULL);
+		ItemStacksResourceHandler handler = new ItemStacksResourceHandler(1);
+		return new StonemillMenu(MoreRed.STONEMILL_MENU.get(), playerInventory, id , handler, handler::set, ContainerLevelAccess.NULL);
 	}
 	
 	public static MenuProvider serverMenuProvider(GenericBlockEntity be)
 	{
 		Level level = be.getLevel();
 		BlockPos pos = be.getBlockPos(); 
+		var handler = StonemillBlock.getItemHandler(level, pos, be.getBlockState(), be, Direction.DOWN);
 		return new SimpleMenuProvider(
 			(id, playerInventory, serverPlayer) -> new StonemillMenu(
 				MoreRed.STONEMILL_MENU.get(),
 				playerInventory,
 				id,
-				level.getCapability(Capabilities.ItemHandler.BLOCK, pos, Direction.DOWN),
+				handler,
+				handler,
 				ContainerLevelAccess.create(level, pos)
 			),
 			Component.translatable(be.getBlockState().getBlock().getDescriptionId()));
 	}
 
-	protected StonemillMenu(MenuType<?> type, Inventory playerInventory, int id, IItemHandler itemHandler, ContainerLevelAccess positionInWorld)
+	protected StonemillMenu(MenuType<?> type, Inventory playerInventory, int id, ResourceHandler<ItemResource> itemHandler, IndexModifier<ItemResource> indexModifier, ContainerLevelAccess positionInWorld)
 	{
 		super(type, id);
 		this.positionInWorld = positionInWorld;
 
 		// add input slot
-		this.addSlot(new SlotItemHandler(itemHandler, 0, 80, 35));
+		this.addSlot(new ResourceHandlerSlot(itemHandler, indexModifier, 0, 80, 35));
 
 		// add player inventory
 		for (int backpackRow = 0; backpackRow < 3; ++backpackRow)

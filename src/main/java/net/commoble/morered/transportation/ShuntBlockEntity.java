@@ -8,7 +8,8 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class ShuntBlockEntity extends BlockEntity
 {
@@ -25,7 +26,7 @@ public class ShuntBlockEntity extends BlockEntity
 		this(MoreRed.SHUNT_BLOCK_ENTITY.get(), pos, state);
 	}
 	
-	public IItemHandler getItemHandler(@Nullable Direction side)
+	public ResourceHandler<ItemResource> getItemHandler(@Nullable Direction side)
 	{
 		Direction output_dir = this.getBlockState().getValue(ShuntBlock.FACING);
 		return side == output_dir ? this.outputHandler : this.inputHandler;

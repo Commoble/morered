@@ -24,7 +24,8 @@ import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class LoaderBlock extends Block
 {
@@ -55,10 +56,10 @@ public class LoaderBlock extends Block
 		// check if it can insert the item
 		Direction outputDir = state.getValue(FACING);
 		BlockPos outputPos = pos.relative(outputDir);
-		IItemHandler outputHandler = world.getCapability(Capabilities.ItemHandler.BLOCK, outputPos, outputDir.getOpposite());
+		ResourceHandler<ItemResource> outputHandler = world.getCapability(Capabilities.Item.BLOCK, outputPos, outputDir.getOpposite());
 		ItemStack remaining = outputHandler == null
 			? stack.copy()
-			: WorldHelper.disperseItemToHandler(stack, outputHandler);
+			: WorldHelper.insertItemStackedImmediate(outputHandler, stack);
 
 		if (remaining.getCount() > 0) // we have remaining items
 		{

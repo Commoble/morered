@@ -735,15 +735,15 @@ public class MoreRed
 	
 	private void onRegisterCapabilities(RegisterCapabilitiesEvent event)
 	{
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, DISTRIBUTOR_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, FILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, MULTIFILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, OSMOSIS_FILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, REDSTONE_TUBE_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, SHUNT_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
-		event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, TUBE_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, DISTRIBUTOR_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, FILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, MULTIFILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, OSMOSIS_FILTER_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, REDSTONE_TUBE_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, SHUNT_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
+		event.registerBlockEntity(Capabilities.Item.BLOCK, TUBE_BLOCK_ENTITY.get(), (be,side) -> be.getItemHandler(side));
 		
-		event.registerBlock(Capabilities.ItemHandler.BLOCK, StonemillBlock::getItemHandler, STONEMILL_BLOCK.get());
+		event.registerBlock(Capabilities.Item.BLOCK, StonemillBlock::getItemHandler, STONEMILL_BLOCK.get());
 	}
 	
 	private void onRegisterDataMapTypes(RegisterDataMapTypesEvent event) {

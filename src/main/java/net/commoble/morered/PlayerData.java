@@ -41,7 +41,6 @@ public class PlayerData
 	 * @param player Player
 	 * @return true if the player is a sprinting server player, or is the client's player and sprinting (never returns true for RemotePlayer)
 	 */
-	@SuppressWarnings("resource")
 	public static boolean getCommonInteractionSprinting(Player player)
 	{
 		if (player.level().isClientSide())

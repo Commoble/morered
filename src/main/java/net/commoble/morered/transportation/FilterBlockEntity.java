@@ -11,16 +11,18 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.Containers;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemUtil;
 
 public class FilterBlockEntity extends AbstractFilterBlockEntity
 {
-	public ItemStack filterStack = ItemStack.EMPTY;
 	public FilterShuntingItemHandler shuntingHandler = new FilterShuntingItemHandler(this);
 	public FilterStorageItemHandler storageHandler = new FilterStorageItemHandler(this);
 	
@@ -34,22 +36,24 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 		this(MoreRed.FILTER_BLOCK_ENTITY.get(), pos, state);
 	}
 	
-	@Override
-	public boolean canItemPassThroughFilter(ItemStack stack)
+	public ItemStack filterStack()
 	{
-		if (stack.getCount() <= 0)
-		{
-			return false;
-		}
-		if (this.filterStack.getCount() <= 0)
+		return ItemUtil.getStack(this.storageHandler, 0);
+	}
+	
+	@Override
+	public boolean canItemPassThroughFilter(Item item)
+	{
+		ItemStack filterStack = this.filterStack();
+		if (filterStack.getCount() <= 0)
 		{
 			return true;
 		}
 		
-		return this.filterStack.getItem().equals(stack.getItem());
+		return filterStack.getItem() == item;
 	}
 
-	public IItemHandler getItemHandler(@Nullable Direction side)
+	public ResourceHandler<ItemResource> getItemHandler(@Nullable Direction side)
 	{
 		Direction output_dir = this.getBlockState().getValue(ShuntBlock.FACING);
 		if (side == output_dir.getOpposite())
@@ -63,9 +67,8 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 		return null;
 	}
 	
-	public void setFilterStackAndSaveAndSync(ItemStack filterStack)
+	public void saveAndSync()
 	{
-		this.filterStack = filterStack;
 		this.setChanged();
 		BlockState state = this.getBlockState();
 		this.getLevel().sendBlockUpdated(this.getBlockPos(), state, state, 2);
@@ -74,8 +77,12 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	
 	public void dropItems()
 	{
-		BlockPos thisPos = this.getBlockPos();
-		Containers.dropItemStack(this.getLevel(), thisPos.getX(), thisPos.getY(), thisPos.getZ(), this.filterStack);
+		ItemStack filterStack = this.filterStack();
+		if (!filterStack.isEmpty())
+		{
+			BlockPos thisPos = this.getBlockPos();
+			Containers.dropItemStack(this.getLevel(), thisPos.getX(), thisPos.getY(), thisPos.getZ(), filterStack);	
+		}
 	}
 	
 	////// NBT and syncing
@@ -84,7 +91,7 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	public void saveAdditional(ValueOutput output)
 	{
 		super.saveAdditional(output);
-		output.store(INV_KEY, ItemStack.OPTIONAL_CODEC, this.filterStack);
+		this.storageHandler.serialize(output);
 	}
 	
 	@Override
@@ -92,7 +99,7 @@ public class FilterBlockEntity extends AbstractFilterBlockEntity
 	public void loadAdditional(ValueInput input)
 	{
 		super.loadAdditional(input);
-		this.filterStack = input.read(INV_KEY, ItemStack.OPTIONAL_CODEC).orElse(ItemStack.EMPTY);
+		this.storageHandler.deserialize(input);
 	}
 	
 	@Override

@@ -1,20 +1,21 @@
 package net.commoble.morered.transportation;
 
-import java.util.stream.IntStream;
-
-import com.mojang.datafixers.util.Pair;
+import com.google.common.base.Predicates;
 
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.resource.ResourceStack;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 
 public class OsmosisFilterBlockEntity extends FilterBlockEntity
 {
@@ -49,9 +50,9 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 			{
 				Direction filterOutputDirection = this.getBlockState().getValue(FilterBlock.FACING);
 				Direction filterInputDirection = filterOutputDirection.getOpposite();
-				IItemHandler extractableHandler = this.level.getCapability(Capabilities.ItemHandler.BLOCK, this.worldPosition.relative(filterInputDirection), filterOutputDirection);
+				ResourceHandler<ItemResource> extractableHandler = this.level.getCapability(Capabilities.Item.BLOCK, this.worldPosition.relative(filterInputDirection), filterOutputDirection);
 				boolean successfulTransfer = extractableHandler != null
-					&& this.attemptExtractionAndReturnSuccess(this.getFirstValidItem(extractableHandler));
+					&& this.attemptExtractionAndReturnSuccess(extractableHandler);
 				if (!successfulTransfer)
 				{	// set dormant if no items were found
 					this.level.setBlockAndUpdate(this.worldPosition, this.getBlockState().setValue(OsmosisFilterBlock.TRANSFERRING_ITEMS, false));
@@ -66,19 +67,20 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 		}
 	}
 
-	private boolean attemptExtractionAndReturnSuccess(ItemStack stack)
+	private boolean attemptExtractionAndReturnSuccess(ResourceHandler<ItemResource> extractableHandler)
 	{
-		if (stack.getCount() > 0)
+		boolean inserted = false;
+		try(Transaction t = Transaction.openRoot())
 		{
-			this.shuntingHandler.insertItem(0, stack, false);
-			return true;
+			ResourceStack<ItemResource> resourceStack = ResourceHandlerUtil.extractFirst(extractableHandler, Predicates.alwaysTrue(), 1, t);
+			int amount = resourceStack.amount();
+			if (amount > 0)
+			{
+				this.shuntingHandler.insert(resourceStack.resource(), amount, t);
+				inserted = true;
+			}
+			t.commit();
 		}
-		return false;
-	}
-
-	public ItemStack getFirstValidItem(IItemHandler inventory)
-	{
-		return IntStream.range(0, inventory.getSlots()).mapToObj(slotIndex -> Pair.of(slotIndex, inventory.getStackInSlot(slotIndex)))
-			.filter(slot -> this.canItemPassThroughFilter(slot.getSecond())).findFirst().map(slot -> inventory.extractItem(slot.getFirst(), 1, false)).orElse(ItemStack.EMPTY);
+		return inserted;
 	}
 }

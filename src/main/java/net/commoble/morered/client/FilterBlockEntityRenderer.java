@@ -53,7 +53,7 @@ public class FilterBlockEntityRenderer<S extends FilterBlockEntityRenderState> i
 	public void extractRenderState(FilterBlockEntity filter, S renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(filter, renderState, partialTicks, camera, overlay);
-		this.resolver.updateForTopItem(renderState.itemState, filter.filterStack, ItemDisplayContext.FIXED, filter.getLevel(), null, (int)filter.getBlockPos().asLong());
+		this.resolver.updateForTopItem(renderState.itemState, filter.filterStack(), ItemDisplayContext.FIXED, filter.getLevel(), null, (int)filter.getBlockPos().asLong());
 		renderState.facing = filter.getBlockState().getValue(FilterBlock.FACING);
 	}
 

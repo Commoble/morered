@@ -14,6 +14,7 @@ import net.commoble.exmachina.api.NodeShape;
 import net.commoble.morered.ExtractOnlyGenericItemHandler;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -47,8 +48,6 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.items.IItemHandler;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 
 public class StonemillBlock extends Block implements EntityBlock
 {
@@ -185,10 +184,10 @@ public class StonemillBlock extends Block implements EntityBlock
 			// if cobblestone is full, try to push stack into inventory below
 			if (newStack.getCount() == newStack.getMaxStackSize())
 			{
-				var inventoryBelow = level.getCapability(Capabilities.ItemHandler.BLOCK, pos.below(), Direction.UP);
+				var inventoryBelow = level.getCapability(Capabilities.Item.BLOCK, pos.below(), Direction.UP);
 				if (inventoryBelow != null)
 				{
-					newStack = ItemHandlerHelper.insertItemStacked(inventoryBelow, newStack, false);
+					newStack = WorldHelper.insertItemStacked(inventoryBelow, newStack, null);
 				}
 			}
 			// then add a cobblestone to the inventory if possible
@@ -223,11 +222,11 @@ public class StonemillBlock extends Block implements EntityBlock
 		level.invalidateCapabilities(pos);
 	}
 	
-	public static IItemHandler getItemHandler(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, Direction context)
+	public static ExtractOnlyGenericItemHandler getItemHandler(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, Direction context)
 	{
 		if (level.getBlockEntity(pos) instanceof GenericBlockEntity be)
 		{
-			return new ExtractOnlyGenericItemHandler(be, DataComponents.CONTAINER, 1);
+			return ExtractOnlyGenericItemHandler.of(be, DataComponents.CONTAINER, 1);
 		}
 		return null;
 	}

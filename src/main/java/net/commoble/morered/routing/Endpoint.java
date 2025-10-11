@@ -5,7 +5,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class Endpoint
 {	
@@ -52,23 +54,25 @@ public class Endpoint
 	 * @param stack The stack to attempt to insert
 	 * @return true or false as described above
 	 */
-	public boolean canInsertItem(Level level, ItemStack stack)
+	public boolean canInsertItem(Level level, ItemStack stack, TransactionContext context)
 	{
-		IItemHandler handler = level.getCapability(Capabilities.ItemHandler.BLOCK, this.pos, this.face);
-		return handler != null && canInsertItem(handler, stack);
+		ResourceHandler<ItemResource> handler = level.getCapability(Capabilities.Item.BLOCK, this.pos, this.face);
+		return handler != null && canInsertItem(handler, stack, context);
 	}
 	
 	// helper function used for the above method
 	// the itemstack is the one passed into the above method, the item handler is assumed to exist
-	public static boolean canInsertItem(IItemHandler handler, ItemStack stack)
+	public static boolean canInsertItem(ResourceHandler<ItemResource> handler, ItemStack stack, TransactionContext context)
 	{
-		for (int i=0; i<handler.getSlots(); i++)
+		int slots = handler.size();
+		ItemResource resource = ItemResource.of(stack);
+		for (int i=0; i<slots; i++)
 		{
 			// for each slot, if the itemstack can be inserted into the slot
 				// (i.e. if the type of that item is valid for that slot AND
 				// if there is room to put at least part of that stack into the slot)
 			// then the inventory at this endpoint can receive the stack, so return true
-			if (handler.isItemValid(i, stack) && handler.insertItem(i, stack, true).getCount() < stack.getCount())
+			if (handler.isValid(i, resource) && handler.insert(i, resource, stack.getCount(), context) > 0)
 			{
 				return true;
 			}
@@ -89,20 +93,4 @@ public class Endpoint
 	{
 		return this.pos + ";    " + this.face;
 	}
-	
-	// returns the slot index of the first available slot in the endpoint block's inventory,
-	// or -1 if no slot is valid for the stack
-	// handler is assumed to exist!
-	public int getFirstValidSlot(ItemStack stack, IItemHandler handler)
-	{
-
-		for (int i=0; i<handler.getSlots();i++)
-		{
-			if (handler.isItemValid(i, stack))
-				return i;
-		}
-		return -1;
-	}
-	
-	
 }

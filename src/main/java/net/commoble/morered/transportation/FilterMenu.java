@@ -1,40 +1,38 @@
 package net.commoble.morered.transportation;
 
 import net.commoble.morered.MoreRed;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.Container;
-import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class FilterMenu extends AbstractContainerMenu
 {
-	public final Container inventory;
-
+	private final ContainerLevelAccess stillValid;
+	
 	// called on Client-side when packet received	
 	public static FilterMenu createClientMenu(int id, Inventory playerInventory)
 	{
-		return new FilterMenu(id, playerInventory, new SimpleContainer(1));
+		return new FilterMenu(id, playerInventory, new ItemStacksResourceHandler(1), ContainerLevelAccess.NULL);
 	}
 	
 	public static MenuConstructor createServerMenuConstructor(FilterBlockEntity filter)
 	{
-		return (id, playerInventory, theServerPlayer) -> new FilterMenu(id, playerInventory, new FilterInventory(filter));
+		return (id, playerInventory, theServerPlayer) -> new FilterMenu(id, playerInventory, filter.storageHandler, ContainerLevelAccess.create(filter.getLevel(), filter.getBlockPos()));
 	}
 
-	private FilterMenu(int id, Inventory playerInventory, Container filterInventory)
+	private FilterMenu(int id, Inventory playerInventory, ItemStacksResourceHandler filterInventory, ContainerLevelAccess stillValid)
 	{
 		super(MoreRed.FILTER_MENU.get(), id);
-		this.inventory = filterInventory;
+		this.stillValid = stillValid;
 
 		// add filter slot
-		this.addSlot(new FilterSlot(filterInventory, 0, 80, 35));
+		this.addSlot(new ResourceHandlerSlot(filterInventory, filterInventory::set, 0, 80, 35));
 
 		for (int backpackRow = 0; backpackRow < 3; ++backpackRow)
 		{
@@ -54,8 +52,7 @@ public class FilterMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player playerIn)
 	{
-		return this.inventory.stillValid(playerIn);
-
+		return AbstractContainerMenu.stillValid(this.stillValid, playerIn, MoreRed.FILTER_BLOCK.get());
 	}
 
 	/**
@@ -101,92 +98,6 @@ public class FilterMenu extends AbstractContainerMenu
 		}
 
 		return copiedStack;
-	}
-	
-	static class FilterSlot extends Slot
-	{
-		public FilterSlot(Container inventoryIn, int index, int xPosition, int yPosition)
-		{
-			super(inventoryIn, index, xPosition, yPosition);
-		}
-
-		@Override
-		public int getMaxStackSize()
-		{
-			return 1;
-		}
-	}
-	
-	static class FilterInventory implements Container
-	{
-		private final FilterBlockEntity filter;
-		
-		public FilterInventory(FilterBlockEntity filter)
-		{
-			this.filter = filter;
-		}
-		
-		@Override
-		public void clearContent()
-		{
-			this.filter.saveAndSync(ItemStack.EMPTY);
-		}
-
-		@Override
-		public int getContainerSize()
-		{
-			return 1;
-		}
-
-		@Override
-		public boolean isEmpty()
-		{
-			return this.filter.filterStack.isEmpty();
-		}
-
-		@Override
-		public ItemStack getItem(int index)
-		{
-			return this.filter.filterStack;
-		}
-
-		@Override
-		public ItemStack removeItem(int index, int count)
-		{
-			ItemStack newStack = this.filter.filterStack.split(count);
-			this.filter.saveAndSync(this.filter.filterStack);
-			return newStack;
-		}
-
-		@Override
-		public ItemStack removeItemNoUpdate(int index)
-		{
-			ItemStack stack = this.filter.filterStack.copy();
-			this.filter.saveAndSync(ItemStack.EMPTY);
-			return stack;
-		}
-
-		@Override
-		public void setItem(int index, ItemStack stack)
-		{
-			this.filter.saveAndSync(stack);
-		}
-
-		@Override
-		public void setChanged()
-		{
-			this.filter.setChanged();
-		}
-
-		@Override
-		public boolean stillValid(Player player)
-		{
-			Level level = this.filter.getLevel();
-			BlockPos pos = this.filter.getBlockPos();
-			Block block = this.filter.getBlockState().getBlock();
-			return level.getBlockState(pos).getBlock() != block ? false : player.distanceToSqr(pos.getX() + 0.5D, pos.getY() + 0.5D, pos.getZ() + 0.5D) <= 64.0D;
-		}
-		
 	}
 
 }

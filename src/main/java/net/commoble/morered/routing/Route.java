@@ -3,10 +3,11 @@ package net.commoble.morered.routing;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.core.Direction;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 /** This class has a natural ordering that is inconsistent with equals() **/
 public class Route implements Comparable<Route>
@@ -27,7 +28,7 @@ public class Route implements Comparable<Route>
 	// given the position of the tube the item was inserted into,
 	// the side of that tube the item was inserted into,
 	// and the item itself?
-	public boolean isRouteDestinationValid(Level world, BlockPos startPos, Direction insertionSide, ItemStack stack)
+	public boolean isRouteDestinationValid(Level world, BlockPos startPos, Direction insertionSide, ItemStack stack, TransactionContext context)
 	{
 		// if the route's endpoint was the position/face the item was inserted from, this route is not valid
 		if (this.destination.pos.equals(startPos.relative(insertionSide)) && this.destination.face.getOpposite().equals(insertionSide))
@@ -36,7 +37,7 @@ public class Route implements Comparable<Route>
 		}
 		
 		// otherwise, return whether the item is valid for the route's endpoint
-		return this.destination.canInsertItem(world, stack);
+		return this.destination.canInsertItem(world, stack, context);
 	}
 
 	@Override

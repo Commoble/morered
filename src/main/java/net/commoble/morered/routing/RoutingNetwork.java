@@ -16,7 +16,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class RoutingNetwork
 {
@@ -116,7 +118,7 @@ public class RoutingNetwork
 		if (te instanceof TubeBlockEntity)
 			return true;
 		
-		return world.getCapability(Capabilities.ItemHandler.BLOCK, pos, face) != null;
+		return world.getCapability(Capabilities.Item.BLOCK, pos, face) != null;
 	}
 	
 	public int getSize()
@@ -128,7 +130,7 @@ public class RoutingNetwork
 	// and the side of that tube that the item was inserted into
 	// returns NULL if there are no valid routes
 	@Nullable
-	public Route getBestRoute(Level world, BlockPos startPos, Direction insertionSide, ItemStack stack)
+	public Route getBestRoute(Level world, BlockPos startPos, Direction insertionSide, ItemStack stack, TransactionContext context)
 	{
 		if (stack.getCount() <= 0)
 			return null;	// can't fit round pegs in square holes
@@ -149,7 +151,7 @@ public class RoutingNetwork
 		for(Route route : routes)
 		{
 			// ignore the block the item was inserted from, all else are valid
-			if (route.isRouteDestinationValid(world, startPos, insertionSide, stack))
+			if (route.isRouteDestinationValid(world, startPos, insertionSide, stack, context))
 			{
 				return route;
 			}
@@ -179,7 +181,7 @@ public class RoutingNetwork
 				// if the te has an item handler on this face, add an endpoint (representing that face) to the network
 				if (network.tubes.contains(endPos.relative(face)))
 				{
-					IItemHandler handler = world.getCapability(Capabilities.ItemHandler.BLOCK, endPos, face);
+					ResourceHandler<ItemResource> handler = world.getCapability(Capabilities.Item.BLOCK, endPos, face);
 					if (handler != null)
 					{
 						network.endpoints.add(new Endpoint(endPos, face));

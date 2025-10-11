@@ -6,25 +6,28 @@ import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Containers;
+import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemUtil;
 
 public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 {
 	public final SetItemHandler inventory = new SetItemHandler(27) {
 		@Override
-		protected void onContentsChanged(int slot)
+		protected void onContentsChanged(int slot, ItemStack oldStack)
 		{
-			super.onContentsChanged(slot);
+			super.onContentsChanged(slot, oldStack);
 			MultiFilterBlockEntity.this.setChanged();
 		}
 	};
-	public final IItemHandler shuntingHandler = new FilterShuntingItemHandler(this); 
+	public final ResourceHandler<ItemResource> shuntingHandler = new FilterShuntingItemHandler(this); 
 	
 	public MultiFilterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
 	{
@@ -37,7 +40,7 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 	}
 
 	@Nullable
-	public IItemHandler getItemHandler(@Nullable Direction side)
+	public ResourceHandler<ItemResource> getItemHandler(@Nullable Direction side)
 	{
 		if (this.getBlockState().hasProperty(DirectionalBlock.FACING))
 		{
@@ -51,19 +54,19 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 	}
 
 	@Override
-	public boolean canItemPassThroughFilter(ItemStack stack)
+	public boolean canItemPassThroughFilter(Item item)
 	{
-		return this.inventory.getSet().contains(stack.getItem());
+		return this.inventory.getSet().contains(item);
 	}
 
 	@Override
 	public void dropItems()
 	{
-		int slots = this.inventory.getSlots();
+		int slots = this.inventory.size();
 		BlockPos pos = this.getBlockPos();
 		for (int i=0; i<slots; i++)
 		{
-			Containers.dropItemStack(this.level, pos.getX(), pos.getY(), pos.getZ(), this.inventory.getStackInSlot(i));
+			Containers.dropItemStack(this.level, pos.getX(), pos.getY(), pos.getZ(), ItemUtil.getStack(this.inventory, i));
 		}
 	}
 

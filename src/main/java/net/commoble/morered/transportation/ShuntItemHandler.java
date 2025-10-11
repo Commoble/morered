@@ -1,18 +1,28 @@
 package net.commoble.morered.transportation;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import net.commoble.morered.util.SnapshotStack;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public class ShuntItemHandler implements IItemHandler
+public class ShuntItemHandler implements ResourceHandler<ItemResource>
 {
 	public final ShuntBlockEntity shunt;
 	public final boolean canTakeItems;
 	private boolean shunting = false; // prevent infinite loops
+	private final SnapshotStack<List<ItemStack>> ejector = SnapshotStack.of(
+		new ArrayList<>(),
+		ArrayList::new,
+		(oldList, newList) -> this.ejectItems(newList));
 
 	public ShuntItemHandler(ShuntBlockEntity shunt, boolean canTakeItems)
 	{
@@ -21,76 +31,94 @@ public class ShuntItemHandler implements IItemHandler
 	}
 
 	@Override
-	public int getSlots()
+	public int size()
 	{
-		// TODO Auto-generated method stub
 		return 1;
 	}
 
 	@Override
-	public ItemStack getStackInSlot(int slot)
+	public ItemResource getResource(int index)
 	{
-		// TODO Auto-generated method stub
-		return ItemStack.EMPTY;
+		return ItemResource.EMPTY;
 	}
 
 	@Override
-	public ItemStack insertItem(int slot, ItemStack stack, boolean simulate)
+	public long getAmountAsLong(int index)
 	{
-		if (!this.canTakeItems)
-		{
-			return stack.copy();
-		}
-		
-		if (!simulate) // actually inserting an item
-		{
-			BlockPos shuntPos = this.shunt.getBlockPos();
-			Direction outputDir = this.shunt.getBlockState().getValue(ShuntBlock.FACING);
-			BlockPos outputPos = shuntPos.relative(outputDir);
-			
-			if (!this.shunting)
-			{
-				// attempt to insert item
-				this.shunting = true;
-				IItemHandler outputHandler = this.shunt.getLevel().getCapability(Capabilities.ItemHandler.BLOCK, outputPos, outputDir.getOpposite());
-				ItemStack remaining = outputHandler == null
-					? stack.copy()
-					: WorldHelper.disperseItemToHandler(stack, outputHandler);
-				this.shunting = false;
-				
-				if (remaining.getCount() > 0) // we have remaining items
-				{
-					WorldHelper.ejectItemstack(this.shunt.getLevel(), shuntPos, outputDir, remaining);
-				}
-			}
-			else
-			{
-				WorldHelper.ejectItemstack(this.shunt.getLevel(), shuntPos, outputDir, stack.copy());
-			}
-		}
-		
-		return ItemStack.EMPTY;
+		return 0;
 	}
 
 	@Override
-	public ItemStack extractItem(int slot, int amount, boolean simulate)
+	public long getCapacityAsLong(int index, ItemResource resource)
 	{
-		// TODO Auto-generated method stub
-		return ItemStack.EMPTY;
+		return resource.getMaxStackSize();
 	}
 
 	@Override
-	public int getSlotLimit(int slot)
-	{
-		return 64; // same as generic handler
-	}
-
-	@Override
-	public boolean isItemValid(int slot, ItemStack stack)
+	public boolean isValid(int index, ItemResource resource)
 	{
 		Level world = this.shunt.getLevel();
 		BlockPos pos = this.shunt.getBlockPos();
 		return this.canTakeItems && !world.hasNeighborSignal(pos);
+	}
+
+	@Override
+	public int insert(int index, ItemResource resource, int amount, TransactionContext transaction)
+	{
+		if (!this.canTakeItems)
+		{
+			return 0;
+		}
+		
+		// make sure we don't flood the world with Integer.MAX_VALUE items
+		amount = Math.min(resource.getMaxStackSize(), amount);
+
+		BlockPos shuntPos = this.shunt.getBlockPos();
+		Direction outputDir = this.shunt.getBlockState().getValue(ShuntBlock.FACING);
+		BlockPos outputPos = shuntPos.relative(outputDir);
+		
+		if (!this.shunting)
+		{
+			// attempt to insert item
+			this.shunting = true;
+			ResourceHandler<ItemResource> outputHandler = this.shunt.getLevel().getCapability(Capabilities.Item.BLOCK, outputPos, outputDir.getOpposite());
+			int inserted = outputHandler == null
+				? 0
+				: outputHandler.insert(resource, amount, transaction);
+			this.shunting = false;
+			
+			int remainingAmount = amount - inserted;
+			
+			if (remainingAmount > 0) // we have remaining items
+			{
+				this.ejector.updateAndTakeSnapshot(list -> list.add(resource.toStack(remainingAmount)), transaction);
+			}
+		}
+		else
+		{
+			int ejectedAmount = amount;
+			this.ejector.updateAndTakeSnapshot(list -> list.add(resource.toStack(ejectedAmount)), transaction);
+		}
+		
+		return amount;
+	}
+
+	@Override
+	public int extract(int index, ItemResource resource, int amount, TransactionContext transaction)
+	{
+		return 0;
+	}
+
+	private void ejectItems(List<ItemStack> newList)
+	{
+		Level level = this.shunt.getLevel();
+		BlockPos shuntPos = this.shunt.getBlockPos();
+		Direction outputDir = this.shunt.getBlockState().getValue(ShuntBlock.FACING);
+		for (ItemStack stack : newList)
+		{
+			WorldHelper.ejectItemstack(level, shuntPos, outputDir, stack);
+		}
+		this.ejector.set(new ArrayList<>());
 	}
 
 }

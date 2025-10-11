@@ -29,7 +29,10 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
+import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 {
@@ -86,51 +89,50 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 		Direction inputDir = outputDir.getOpposite();
 		BlockPos inputPos = pos.relative(inputDir);
 
-		IItemHandler inputHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, inputPos, outputDir);
+		ResourceHandler<ItemResource> inputHandler = level.getCapability(Capabilities.Item.BLOCK, inputPos, outputDir);
 		if (inputHandler != null)
 		{
-			IItemHandler outputHandler = level.getCapability(Capabilities.ItemHandler.BLOCK, outputPos, inputDir);
+			ResourceHandler<ItemResource> outputHandler = level.getCapability(Capabilities.Item.BLOCK, outputPos, inputDir);
 			
 			// if the input handler exists and either the output handler exists or we have room to eject the item
 			if (outputHandler != null || !level.getBlockState(outputPos).isCollisionShapeFullBlock(level, outputPos))
 			{
-				ItemStack stack = extractNextStack(inputHandler);
-				if (stack.getCount() > 0)
+				try(Transaction t = Transaction.openRoot())
 				{
-					ItemStack remaining = outputHandler == null ? stack : putStackInHandler(stack, outputHandler);
-					WorldHelper.ejectItemstack(level, pos, outputDir, remaining);
+					ItemStack stack = extractNextStack(inputHandler, t);
+					if (stack.getCount() > 0)
+					{
+						ItemStack remaining = outputHandler == null ? stack : putStackInHandler(stack, outputHandler, t);
+						WorldHelper.ejectItemstack(level, pos, outputDir, remaining);
+					}
+					t.commit();
 				}
 			}
 		}
 	}
 	
-	private static ItemStack extractNextStack(IItemHandler handler)
+	private static ItemStack extractNextStack(ResourceHandler<ItemResource> handler, TransactionContext context)
 	{
-		int slots = handler.getSlots();
+		int slots = handler.size();
 		for (int i=0; i<slots; i++)
 		{
-			ItemStack stack = handler.extractItem(i, 64, false);
-			if (stack.getCount() > 0)
+			ItemResource resource = handler.getResource(i);
+			if (!resource.isEmpty())
 			{
-				return stack.copy();
+				int toExtract = Math.min(handler.getAmountAsInt(i), resource.getMaxStackSize());
+				int extracted = handler.extract(i, resource, toExtract, context);
+				if (extracted > 0)
+				{
+					return resource.toStack(extracted);
+				}
 			}
 		}
 		return ItemStack.EMPTY;
 	}
 	
-	private static ItemStack putStackInHandler(ItemStack stack, IItemHandler handler)
+	private static ItemStack putStackInHandler(ItemStack stack, ResourceHandler<ItemResource> handler, TransactionContext context)
 	{
-		ItemStack remaining = stack.copy();
-		int slots = handler.getSlots();
-		for (int i=0; i<slots; i++)
-		{
-			remaining = handler.insertItem(i, remaining, false);
-			if (remaining.getCount() <= 0)
-			{
-				return ItemStack.EMPTY;
-			}
-		}
-		return remaining;
+		return WorldHelper.insertItemStacked(handler, stack, context);
 	}
 
 	@Override

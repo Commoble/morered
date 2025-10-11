@@ -12,7 +12,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 
 public class DistributorBlockEntity extends BlockEntity
 {
@@ -36,7 +37,7 @@ public class DistributorBlockEntity extends BlockEntity
 		this(MoreRed.DISTRIBUTOR_BLOCK_ENTITY.get(), pos, state);
 	}
 	
-	public IItemHandler getItemHandler(@Nullable Direction side)
+	public ResourceHandler<ItemResource> getItemHandler(@Nullable Direction side)
 	{
 		return side == null ? null : this.handlers[side.ordinal()];
 	}
