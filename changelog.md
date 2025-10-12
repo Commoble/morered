@@ -1,7 +1,7 @@
 # 21.10.0
 * Updated to MC 1.21.10 / Neoforge 21.10.6-beta
 * If an old world is migrated from 1.21.8 to this version, some data will be lost due to the following data changes:
-  * Filter block entities now save their inventory in a "stacks" field
+  * Filter, Osmosis Filter, Multifilter, and Stonemill block entities now save their inventory under "inventory" -> "stacks"
 
 # 21.8.0
 * Updated to 1.21.8
