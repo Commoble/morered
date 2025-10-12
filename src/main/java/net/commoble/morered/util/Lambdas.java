@@ -13,7 +13,7 @@ public class Lambdas
 	 * @param supplier Supplier of the thing
 	 * @return Function which accepts any input and runs the supplier instead
 	 */
-	public static <T> Function<?, T> ignoreInput(Supplier<T> supplier)
+	public static <O,T> Function<O, T> ignoreInput(Supplier<T> supplier)
 	{
 		return object -> supplier.get();
 	}
