@@ -2,8 +2,6 @@ package net.commoble.morered.transportation;
 
 import java.util.function.Predicate;
 
-import org.jetbrains.annotations.NotNull;
-
 import com.google.common.base.Predicates;
 
 import net.commoble.morered.MoreRed;
@@ -14,8 +12,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.transfer.IndexModifier;
-import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class MultiFilterMenu extends AbstractContainerMenu
@@ -52,7 +48,7 @@ public class MultiFilterMenu extends AbstractContainerMenu
 				int index = row*cols + col;
 				int x = col*18 + 8;
 				int y = row*18 + 18;
-				this.addSlot(new MultiFilterSlot(filterInventory, filterInventory::set, index, x, y));
+				this.addSlot(new ResourceHandlerSlot(filterInventory, filterInventory::set, index, x, y));
 			}
 		}
 		
@@ -113,23 +109,5 @@ public class MultiFilterMenu extends AbstractContainerMenu
 		}
 
 		return copyStack;
-	}
-	
-	class MultiFilterSlot extends ResourceHandlerSlot
-	{
-		private final SetItemHandler setItemHandler;
-
-		public MultiFilterSlot(SetItemHandler setItemHandler, IndexModifier<ItemResource> indexModifier, int index, int xPosition, int yPosition)
-		{
-			super(setItemHandler, indexModifier, index, xPosition, yPosition);
-			this.setItemHandler = setItemHandler;
-		}
-
-		@Override
-		public boolean mayPlace(@NotNull ItemStack stack)
-		{
-			return !this.setItemHandler.getSet().contains(stack.getItem());
-		}
-		
 	}
 }

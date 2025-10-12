@@ -8,28 +8,39 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.inventory.MenuConstructor;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
 import net.neoforged.neoforge.transfer.item.ResourceHandlerSlot;
 
 public class FilterMenu extends AbstractContainerMenu
 {
 	private final ContainerLevelAccess stillValid;
+	private final Block block;
 	
 	// called on Client-side when packet received	
 	public static FilterMenu createClientMenu(int id, Inventory playerInventory)
 	{
-		return new FilterMenu(id, playerInventory, new ItemStacksResourceHandler(1), ContainerLevelAccess.NULL);
+		return new FilterMenu(id, playerInventory, new ItemStacksResourceHandler(1) {
+			@Override
+			protected int getCapacity(int index, ItemResource resource)
+			{
+				return 1;
+			}
+		}, ContainerLevelAccess.NULL, Blocks.AIR);
 	}
 	
 	public static MenuConstructor createServerMenuConstructor(FilterBlockEntity filter)
 	{
-		return (id, playerInventory, theServerPlayer) -> new FilterMenu(id, playerInventory, filter.storageHandler, ContainerLevelAccess.create(filter.getLevel(), filter.getBlockPos()));
+		return (id, playerInventory, theServerPlayer) -> new FilterMenu(id, playerInventory, filter.storageHandler, ContainerLevelAccess.create(filter.getLevel(), filter.getBlockPos()), filter.getBlockState().getBlock());
 	}
 
-	private FilterMenu(int id, Inventory playerInventory, ItemStacksResourceHandler filterInventory, ContainerLevelAccess stillValid)
+	private FilterMenu(int id, Inventory playerInventory, ItemStacksResourceHandler filterInventory, ContainerLevelAccess stillValid, Block block)
 	{
 		super(MoreRed.FILTER_MENU.get(), id);
 		this.stillValid = stillValid;
+		this.block = block;
 
 		// add filter slot
 		this.addSlot(new ResourceHandlerSlot(filterInventory, filterInventory::set, 0, 80, 35));
@@ -52,7 +63,7 @@ public class FilterMenu extends AbstractContainerMenu
 	@Override
 	public boolean stillValid(Player playerIn)
 	{
-		return AbstractContainerMenu.stillValid(this.stillValid, playerIn, MoreRed.FILTER_BLOCK.get());
+		return AbstractContainerMenu.stillValid(this.stillValid, playerIn, this.block);
 	}
 
 	/**

@@ -91,13 +91,15 @@ public class ShuntItemHandler implements ResourceHandler<ItemResource>
 			
 			if (remainingAmount > 0) // we have remaining items
 			{
-				this.ejector.updateAndTakeSnapshot(list -> list.add(resource.toStack(remainingAmount)), transaction);
+				ItemStack remainingStack = resource.toStack(remainingAmount);
+				this.ejector.updateAndTakeSnapshot(list -> list.add(remainingStack), transaction);
 			}
 		}
 		else
 		{
 			int ejectedAmount = amount;
-			this.ejector.updateAndTakeSnapshot(list -> list.add(resource.toStack(ejectedAmount)), transaction);
+			ItemStack ejectedStack = resource.toStack(ejectedAmount);
+			this.ejector.updateAndTakeSnapshot(list -> list.add(ejectedStack), transaction);
 		}
 		
 		return amount;

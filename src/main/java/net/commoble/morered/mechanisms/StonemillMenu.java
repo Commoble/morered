@@ -1,9 +1,11 @@
 package net.commoble.morered.mechanisms;
 
+import org.jetbrains.annotations.Nullable;
+
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.transportation.ExtractOnlyItemStacksResourceHandler;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.SimpleMenuProvider;
@@ -34,7 +36,7 @@ public class StonemillMenu extends AbstractContainerMenu
 	
 	public static StonemillMenu clientMenu(int id, Inventory playerInventory)
 	{
-		ItemStacksResourceHandler handler = new ItemStacksResourceHandler(1);
+		ItemStacksResourceHandler handler = new ExtractOnlyItemStacksResourceHandler(1);
 		return new StonemillMenu(MoreRed.STONEMILL_MENU.get(), playerInventory, id , handler, handler::set, ContainerLevelAccess.NULL);
 	}
 	
@@ -42,14 +44,17 @@ public class StonemillMenu extends AbstractContainerMenu
 	{
 		Level level = be.getLevel();
 		BlockPos pos = be.getBlockPos(); 
-		var handler = StonemillBlock.getItemHandler(level, pos, be.getBlockState(), be, Direction.DOWN);
+		@Nullable ItemStacksResourceHandler inventory = be.getInventory(StonemillBlock.INVENTORY);
+		ItemStacksResourceHandler handler = inventory == null
+			? new ExtractOnlyItemStacksResourceHandler(1)
+			: inventory;
 		return new SimpleMenuProvider(
 			(id, playerInventory, serverPlayer) -> new StonemillMenu(
 				MoreRed.STONEMILL_MENU.get(),
 				playerInventory,
 				id,
 				handler,
-				handler,
+				handler::set,
 				ContainerLevelAccess.create(level, pos)
 			),
 			Component.translatable(be.getBlockState().getBlock().getDescriptionId()));

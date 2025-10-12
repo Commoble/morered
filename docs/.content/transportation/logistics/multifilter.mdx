@@ -58,33 +58,21 @@ Additionally, the multifilter allows no item to pass through while its filter in
 | --- | - | -
 | `facing` | `{"down", "up", "north", "south", "west", "east"}` | Output direction
 
-<table>
-	<thead><tr><th>BlockEntity Data</th><th>Format</th><th>Description</th></tr></thead>
-	<tbody>
-		<tr>
-			<td>`inventory`</td>
-			<td>
-				```json
-					{
-						"Size": 27,
-						"Items": [
-							{
-								"id": "item_id",
-								"count": 1,
-								"components": {},
-								"Slot": number
-							}
-						]
-					}
-				```
-			</td>
-			<td>The inventory of the filter</td>
-		</tr>
-	</tbody>
-</table>
+Blockentity data has the following format:
 
+```json
+{
+	"inventory": {
+		"stacks": <list of itemstacks>
+	}
+}
+```
+| BlockEntity Data | Format | Description
+| --- | - | -
+| `stacks` | List of Itemstack objects | Each object has values "id", "count", and "data". Only the first slot is used.
 
 ## History
 | Version | Changelog
 | --- | -
+| 21.10.0 | Inventory is now serialized under inventory -> stacks
 | 1.21.3-7.0.0.0 | Added to More Red

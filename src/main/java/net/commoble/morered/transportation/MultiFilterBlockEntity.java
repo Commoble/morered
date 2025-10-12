@@ -56,7 +56,15 @@ public class MultiFilterBlockEntity extends AbstractFilterBlockEntity
 	@Override
 	public boolean canItemPassThroughFilter(Item item)
 	{
-		return this.inventory.getSet().contains(item);
+		int slots = this.inventory.size();
+		for (int i=0; i<slots; i++)
+		{
+			if (this.inventory.getResource(i).getItem() == item)
+			{
+				return true;
+			}
+		}
+		return false;
 	}
 
 	@Override

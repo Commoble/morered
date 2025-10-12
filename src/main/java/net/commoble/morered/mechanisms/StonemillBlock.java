@@ -1,6 +1,5 @@
 package net.commoble.morered.mechanisms;
 
-import java.util.List;
 import java.util.Map;
 
 import org.jetbrains.annotations.Nullable;
@@ -11,9 +10,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.commoble.exmachina.api.MechanicalNodeStates;
 import net.commoble.exmachina.api.MechanicalState;
 import net.commoble.exmachina.api.NodeShape;
-import net.commoble.morered.ExtractOnlyGenericItemHandler;
 import net.commoble.morered.GenericBlockEntity;
+import net.commoble.morered.GenericBlockEntity.InventoryKey;
 import net.commoble.morered.MoreRed;
+import net.commoble.morered.transportation.ExtractOnlyItemStacksResourceHandler;
 import net.commoble.morered.util.WorldHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -48,6 +48,10 @@ import net.minecraft.world.level.redstone.Orientation;
 import net.minecraft.world.phys.BlockHitResult;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.common.Tags;
+import net.neoforged.neoforge.transfer.ResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.item.ItemStacksResourceHandler;
+import net.neoforged.neoforge.transfer.item.ItemUtil;
 
 public class StonemillBlock extends Block implements EntityBlock
 {
@@ -57,6 +61,8 @@ public class StonemillBlock extends Block implements EntityBlock
 	public static final int LAVA_TICKS = 30;
 	/** Minimum angular velocity to "mine" cobblestone (radians/second) **/
 	public static final double MIN_VELOCITY = Math.TAU / 32D;
+	
+	public static final InventoryKey<ItemStack, ItemResource, ItemStacksResourceHandler> INVENTORY = new InventoryKey<>("inventory", () -> new ExtractOnlyItemStacksResourceHandler(1), false); 
 	
 	/**
 	 * X -> grates face west/east
@@ -178,8 +184,10 @@ public class StonemillBlock extends Block implements EntityBlock
 			int magicDestroyNumber = 2001; // see LevelEventHandler
 			level.levelEvent(magicDestroyNumber, pos, Block.getId(Blocks.COBBLESTONE.defaultBlockState()));
 			be.set(stonemillDataComponent, StonemillData.createNew(currentTick));
-			ItemContainerContents inventory = getInventory(be);
-			ItemStack oldStack = inventory.getSlots() > 0 ? inventory.getStackInSlot(0) : ItemStack.EMPTY;
+			@Nullable ItemStacksResourceHandler inventory = be.getInventory(INVENTORY);
+			if (inventory == null)
+				return;
+			ItemStack oldStack = inventory.size() > 0 ? ItemUtil.getStack(inventory,0) : ItemStack.EMPTY;
 			ItemStack newStack = oldStack.copy();
 			// if cobblestone is full, try to push stack into inventory below
 			if (newStack.getCount() == newStack.getMaxStackSize())
@@ -205,7 +213,7 @@ public class StonemillBlock extends Block implements EntityBlock
 			if (oldStack.getCount() != newStack.getCount()
 				|| !ItemStack.isSameItem(oldStack, newStack))
 			{
-				setInventory(be, newStack);
+				inventory.set(0, ItemResource.of(newStack), newStack.getCount());
 			}
 		}
 		else
@@ -222,14 +230,15 @@ public class StonemillBlock extends Block implements EntityBlock
 		level.invalidateCapabilities(pos);
 	}
 	
-	public static ExtractOnlyGenericItemHandler getItemHandler(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, Direction context)
+	public static ResourceHandler<ItemResource> getItemHandler(Level level, BlockPos pos, BlockState state, @Nullable BlockEntity blockEntity, Direction context)
 	{
 		if (level.getBlockEntity(pos) instanceof GenericBlockEntity be)
 		{
-			return ExtractOnlyGenericItemHandler.of(be, DataComponents.CONTAINER, 1);
+			return be.getInventory(INVENTORY);
 		}
 		return null;
 	}
+
 
 	public static void preRemoveSideEffects(BlockPos pos, BlockState state, GenericBlockEntity be)
 	{
@@ -247,16 +256,6 @@ public class StonemillBlock extends Block implements EntityBlock
 		FluidState fluidB = level.getFluidState(pos.relative(dirs[1]));
 		return ((fluidA.is(Tags.Fluids.WATER) && fluidB.is(Tags.Fluids.LAVA)) || (fluidA.is(Tags.Fluids.LAVA) && fluidB.is(Tags.Fluids.WATER)))
 			&& fluidA.getAmount() >= MIN_FLUID_REQUIRED && fluidB.getAmount() >= MIN_FLUID_REQUIRED;
-	}
-	
-	private static ItemContainerContents getInventory(GenericBlockEntity be)
-	{
-		return be.getOrDefault(DataComponents.CONTAINER, ItemContainerContents.EMPTY);
-	}
-	
-	private static void setInventory(GenericBlockEntity be, ItemStack stack)
-	{
-		be.set(DataComponents.CONTAINER, ItemContainerContents.fromItems(List.of(stack)));
 	}
 	
 	public static record StonemillData(long genTimestamp, int progress)

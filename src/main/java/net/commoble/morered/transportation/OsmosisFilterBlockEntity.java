@@ -1,5 +1,7 @@
 package net.commoble.morered.transportation;
 
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.base.Predicates;
 
 import net.commoble.morered.MoreRed;
@@ -72,9 +74,9 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 		boolean inserted = false;
 		try(Transaction t = Transaction.openRoot())
 		{
-			ResourceStack<ItemResource> resourceStack = ResourceHandlerUtil.extractFirst(extractableHandler, Predicates.alwaysTrue(), 1, t);
-			int amount = resourceStack.amount();
-			if (amount > 0)
+			@Nullable ResourceStack<ItemResource> resourceStack = ResourceHandlerUtil.extractFirst(extractableHandler, Predicates.alwaysTrue(), 1, t);
+			int amount = resourceStack == null ? 0 : resourceStack.amount();
+			if (amount > 0 && resourceStack != null)
 			{
 				this.shuntingHandler.insert(resourceStack.resource(), amount, t);
 				inserted = true;

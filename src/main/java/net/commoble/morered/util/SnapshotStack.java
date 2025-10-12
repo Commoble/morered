@@ -53,21 +53,21 @@ public class SnapshotStack<T> extends SnapshotJournal<T>
 	
 	public void setAndTakeSnapshot(T value, TransactionContext context)
 	{
-		this.set(value);
 		this.updateSnapshots(context);
+		this.set(value);
 	}
 	
 	public <R> R applyAndTakeSnapshot(Function<T,R> function, TransactionContext context)
 	{
-		R result = this.apply(function);
 		this.updateSnapshots(context);
+		R result = this.apply(function);
 		return result;
 	}
 	
 	public void updateAndTakeSnapshot(Consumer<T> consumer, TransactionContext context)
 	{
-		this.update(consumer);
 		this.updateSnapshots(context);
+		this.update(consumer);
 	}
 	
 	@Override

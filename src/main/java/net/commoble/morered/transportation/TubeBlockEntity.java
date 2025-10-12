@@ -394,14 +394,19 @@ public class TubeBlockEntity extends BlockEntity
 					ItemStack stackInWrapper = wrapper.stack;
 					int toInsert = stackInWrapper.getCount();
 					int inserted = ResourceHandlerUtil.insertStacking(nextHandler, ItemResource.of(stackInWrapper), toInsert, null);
-					int remaining = toInsert = inserted;
+					int remaining = toInsert - inserted;
 					if (remaining > 0)	// target inventory filled up unexpectedly
 					{
 						ItemStack remainingStack = stackInWrapper.copyWithCount(remaining);
-						@Nullable Route nextRoute = this.getBestRoute(dir, remainingStack, Transaction.openRoot());
+						@Nullable Route nextRoute = null;
+						try(Transaction t = Transaction.openRoot())
+						{
+							nextRoute = this.getBestRoute(dir, remainingStack, t);
+						}
 						if (nextRoute == null)
 						{
 							// if we can't reenqueue item, just eject them
+							System.out.println("Ejecting to " + dir + " from " + this.worldPosition + " due to can't reenqueue - " + remainingStack);
 							WorldHelper.ejectItemstack(this.level, this.worldPosition, dir, remainingStack);
 						}
 						else

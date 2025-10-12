@@ -7,6 +7,7 @@ import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.item.ItemResource;
+import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
 public class Endpoint
@@ -64,22 +65,25 @@ public class Endpoint
 	// the itemstack is the one passed into the above method, the item handler is assumed to exist
 	public static boolean canInsertItem(ResourceHandler<ItemResource> handler, ItemStack stack, TransactionContext context)
 	{
-		int slots = handler.size();
-		ItemResource resource = ItemResource.of(stack);
-		for (int i=0; i<slots; i++)
+		try(Transaction simulator = Transaction.open(context))
 		{
-			// for each slot, if the itemstack can be inserted into the slot
-				// (i.e. if the type of that item is valid for that slot AND
-				// if there is room to put at least part of that stack into the slot)
-			// then the inventory at this endpoint can receive the stack, so return true
-			if (handler.isValid(i, resource) && handler.insert(i, resource, stack.getCount(), context) > 0)
+			int slots = handler.size();
+			ItemResource resource = ItemResource.of(stack);
+			for (int i=0; i<slots; i++)
 			{
-				return true;
+				// for each slot, if the itemstack can be inserted into the slot
+					// (i.e. if the type of that item is valid for that slot AND
+					// if there is room to put at least part of that stack into the slot)
+				// then the inventory at this endpoint can receive the stack, so return true
+				if (handler.isValid(i, resource) && handler.insert(i, resource, stack.getCount(), simulator) > 0)
+				{
+					return true;
+				}
 			}
+			
+			// return false if no acceptable slot is found
+			return false;
 		}
-		
-		// return false if no acceptable slot is found
-		return false;
 	}
 	
 	@Override

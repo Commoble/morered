@@ -85,16 +85,19 @@ Blockentity data has the following format:
 		"progress": <int>,
 		"gen_timestamp": <long>
 	},
-	"minecraft:container": <container>
+	"inventory": {
+		"stacks": <list of itemstacks>
+	}
 }
 ```
 | BlockEntity Data | Format | Description
 | --- | - | -
 | `progress` | integer | Value in the range [0, 63]. How much progress the stonemill has accumulated to the next cobblestone.
 | `gen_timestamp` | long | Timestamp (in game time ticks) of when the last cobblestone was generated. Cobblestone begins generating again 30 ticks after this timestamp.
-| `minecraft:container` | List of Itemstacks | See [vanilla container datacomponent](https://minecraft.wiki/w/Data_component_format#container). Only the first slot is used.
+| `stacks` | List of Itemstack objects | Has values "id", "count", and "data". Only the first slot is used.
 
 ## History
 | Version | Changelog
 | --- | -
+| 21.10.0 | Inventory is now serialized under inventory -> stacks
 | 1.21.8-8.0.0.0 | Added to More Red

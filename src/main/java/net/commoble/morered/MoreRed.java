@@ -118,7 +118,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
 import net.minecraft.core.component.DataComponentType;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.particles.DustParticleOptions;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -565,10 +564,9 @@ public class MoreRed
 			.filter(block -> block instanceof SingleInputBitwiseGateBlock)
 			.collect(Collectors.toSet())));
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> STONEMILL_BLOCK_ENTITY = GenericBlockEntity.builder()
-		.serverData(
-			STONEMILL_DATA_COMPONENT,	// holds the progress counters
-			() -> DataComponents.CONTAINER) // holds the inventory
+		.serverData(STONEMILL_DATA_COMPONENT) // holds the progress counters
 		.preRemoveSideEffects(StonemillBlock::preRemoveSideEffects)
+		.inventory(StonemillBlock.INVENTORY)
 		.register(BLOCK_ENTITY_TYPES, Names.STONEMILL, STONEMILL_BLOCK);
 	public static final DeferredHolder<BlockEntityType<?>, BlockEntityType<ThreeInputBitwiseGateBlockEntity>> THREE_INPUT_BITWISE_GATE_BLOCK_ENTITY = BLOCK_ENTITY_TYPES.register(Names.THREE_INPUT_BITWISE_GATE,
 		() -> new BlockEntityType<>(ThreeInputBitwiseGateBlockEntity::create, BITWISE_LOGIC_PLATES.values().stream()

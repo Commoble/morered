@@ -1,20 +1,25 @@
 package net.commoble.morered;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiFunction;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.mutable.MutableObject;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
+import com.mojang.logging.LogUtils;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 
@@ -30,27 +35,29 @@ import net.minecraft.core.component.TypedDataComponent;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtOps;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.TagValueOutput;
 import net.minecraft.world.level.storage.ValueInput;
 import net.minecraft.world.level.storage.ValueOutput;
 import net.neoforged.neoforge.attachment.AttachmentType;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.transfer.StacksResourceHandler;
+import net.neoforged.neoforge.transfer.resource.Resource;
 
 public class GenericBlockEntity extends BlockEntity
 {
+	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String ATTACHMENTS = "attachments";
 	
 	private final Set<DataComponentType<?>> serverDataComponents;
@@ -59,6 +66,7 @@ public class GenericBlockEntity extends BlockEntity
 	private final Map<DataComponentType<?>, DataTransformer<?>> dataTransformers;
 	private final Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers;
 	private final PreRemoveSideEffects preRemoveSideEffects;
+	private final Map<InventoryKey<?,?,?>, ? extends StacksResourceHandler<?,?>> inventories;
 	
 	private Map<DataComponentType<?>, TypedDataComponent<?>> data = new HashMap<>();
 
@@ -68,7 +76,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<DataComponentType<?>> itemDataComponents,
 		Map<DataComponentType<?>, DataTransformer<?>> dataTransformers,
 		Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers,
-		PreRemoveSideEffects preRemoveSideEffects)
+		PreRemoveSideEffects preRemoveSideEffects,
+		Map<InventoryKey<?,?,?>, ? extends StacksResourceHandler<?,?>> inventories)
 	{
 		super(type,pos,state);
 		this.serverDataComponents = serverDataComponents;
@@ -77,6 +86,7 @@ public class GenericBlockEntity extends BlockEntity
 		this.dataTransformers = dataTransformers;
 		this.attachmentTransformers = attachmentTransformers;
 		this.preRemoveSideEffects = preRemoveSideEffects;
+		this.inventories = inventories;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -138,6 +148,13 @@ public class GenericBlockEntity extends BlockEntity
 				}
 			}
 		}
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Nullable
+	public <S, T extends Resource, I extends StacksResourceHandler<S,T>> I getInventory(InventoryKey<S,T,I> key)
+	{
+		return (@Nullable I) this.inventories.get(key);
 	}
 	
 	private <T> @Nullable TypedDataComponent<T> getTypedDataForSave(DataComponentType<T> type, BlockState state)
@@ -205,6 +222,12 @@ public class GenericBlockEntity extends BlockEntity
 				storeDataComponent(output, serializableValue);
 			}
 		}
+		for (var entry : this.inventories.entrySet())
+		{
+			String name = entry.getKey().key();
+			StacksResourceHandler<?,?> inventory = entry.getValue();
+			inventory.serialize(output.child(name));
+		}
 	}
 	
 	private static <T> void storeDataComponent(ValueOutput dataTag, TypedDataComponent<T> typedData)
@@ -229,26 +252,52 @@ public class GenericBlockEntity extends BlockEntity
 			input.read(key, codec)
 				.ifPresent(value -> this.data.put(type, this.getTypedDataForLoad(TypedDataComponent.createUnchecked(type,value), this.getBlockState())));
 		}
+		for (var entry : this.inventories.entrySet())
+		{
+			String name = entry.getKey().key();
+			StacksResourceHandler<?,?> inventory = entry.getValue();
+			input.child(name).ifPresent(inventory::deserialize);
+		}
+	}
+	
+	private static <T> void writeDataComponent(TypedDataComponent<T> holder, ValueOutput output)
+	{
+		if (holder.value() != null)
+		{
+			output.store(
+				BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(holder.type()).toString(),
+				holder.type().codec(),
+				holder.value());	
+		}
 	}
 
 	@Override
 	public CompoundTag getUpdateTag(Provider provider)
 	{
-		var tag = super.getUpdateTag(provider);	// empty tag
-		RegistryOps<Tag> ops = provider.createSerializationContext(NbtOps.INSTANCE);
-		
-		for (DataComponentType<?> type : this.syncedDataComponents)
-		{
-			var holder = this.data.get(type);
-			if (holder != null && holder.value() != null)
-			{
-				holder.encodeValue(ops)
-					.result()
-					.ifPresent(valueTag -> tag.put(BuiltInRegistries.DATA_COMPONENT_TYPE.getKey(holder.type()).toString(), valueTag));
-			}
-		}
-		
-		return tag;
+        try (ProblemReporter.ScopedCollector problemCollector = new ProblemReporter.ScopedCollector(this.problemPath(), LOGGER)) {
+        	
+            TagValueOutput output = TagValueOutput.createWithContext(problemCollector, provider);
+    		for (DataComponentType<?> type : this.syncedDataComponents)
+    		{
+    			var holder = this.data.get(type);
+    			if (holder != null)
+    			{
+    				writeDataComponent(holder, output);
+    			}
+    		}
+    		for (var entry : this.inventories.entrySet())
+    		{
+    			InventoryKey<?,?,?> key = entry.getKey();
+    			if (key.sync())
+    			{
+    				String name = key.key();
+    				StacksResourceHandler<?,?> inventory = entry.getValue();
+    				inventory.serialize(output.child(name));	
+    			}
+    		}
+            
+            return output.buildResult();
+        }
 	}
 
 	@Override
@@ -261,7 +310,17 @@ public class GenericBlockEntity extends BlockEntity
 			input.read(key, type.codec())
 				.ifPresent(value -> data.put(type, TypedDataComponent.createUnchecked(type, value)));
 		}
-		this.data = data;		
+		this.data = data;
+		for (var entry : this.inventories.entrySet())
+		{
+			var key = entry.getKey();
+			if (key.sync())
+			{
+				String name = key.key();
+				StacksResourceHandler<?,?> inventory = entry.getValue();
+				input.child(name).ifPresent(inventory::deserialize);
+			}
+		}
 	}
 
 	@Override
@@ -331,7 +390,8 @@ public class GenericBlockEntity extends BlockEntity
 			new HashSet<>(),
 			new HashMap<>(),
 			new Reference2ObjectOpenHashMap<>(),
-			new MutableObject<>(PreRemoveSideEffects.NONE)
+			new MutableObject<>(PreRemoveSideEffects.NONE),
+			new ArrayList<>()
 		);
 	}
 	
@@ -341,7 +401,8 @@ public class GenericBlockEntity extends BlockEntity
 		Set<Supplier<? extends DataComponentType<?>>> itemDataComponents,
 		Map<Supplier<? extends DataComponentType<?>>, DataTransformer<?>> dataTransformers,
 		Map<MapCodec<?>, AttachmentTransformer<?>> attachmentTransformers,
-		MutableObject<PreRemoveSideEffects> preRemoveSideEffects
+		MutableObject<PreRemoveSideEffects> preRemoveSideEffects,
+		List<InventoryKey<?,?,?>> inventoryKeys
 	)
 	{
 		/**
@@ -426,6 +487,12 @@ public class GenericBlockEntity extends BlockEntity
 			this.preRemoveSideEffects.setValue(effects);
 			return this;
 		}
+		
+		public <S,T extends Resource,I extends StacksResourceHandler<S,T>> GenericBlockEntityBuilder inventory(InventoryKey<S,T,I> key)
+		{
+			this.inventoryKeys.add(key);
+			return this;
+		}
 
 		@SuppressWarnings("unchecked")
 		public DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> register(
@@ -460,7 +527,10 @@ public class GenericBlockEntity extends BlockEntity
 								entry -> entry.getKey().get(),
 								Map.Entry::getValue)),
 							attachmentTransformers,
-							this.preRemoveSideEffects.getValue()),
+							this.preRemoveSideEffects.getValue(),
+							this.inventoryKeys.stream().collect(Collectors.toMap(
+								Function.identity(),
+								key -> key.inventoryFactory.get()))),
 						Arrays.stream(blocks).map(Supplier::get).toArray(Block[]::new))
 				);
 			return holder;
@@ -540,4 +610,14 @@ public class GenericBlockEntity extends BlockEntity
 			}
 		}
 	}
+	
+	/**
+	 * @param key Name of the child tag to save this inventory under
+	 * @param inventoryFactory Supplier to create the inventory on blockentity construction.
+	 * When loading, this will run first, then StacksItemHandler#deserialize will run afterward.
+	 * @param sync If true, will be synced to clients (not necessary for menus but would be needed for blockentity renderers)
+	 */
+	public static record InventoryKey<S, T extends Resource, I extends StacksResourceHandler<S,T>>(String key, Supplier<I> inventoryFactory, boolean sync) {}
+	
+	
 }
