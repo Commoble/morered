@@ -14,14 +14,14 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 {
 	public static final IRecipeType<SolderingRecipe> TYPE = IRecipeType.create(MoreRed.MODID, Names.SOLDERING_RECIPE, SolderingRecipe.class);
-	public static final ResourceLocation CRAFTING_TEXTURE = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
+	public static final Identifier CRAFTING_TEXTURE = Identifier.withDefaultNamespace("textures/gui/container/crafting_table.png");
 	public static final String TITLE = "gui.morered.category.soldering";
 	
 	private final IDrawable background;

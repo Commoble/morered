@@ -27,6 +27,7 @@ import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.attribute.EnvironmentAttributes;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
@@ -372,7 +373,7 @@ public class WirePostBlockEntity extends BlockEntity
 		int rr = (int)Mth.lerp(lerpFactor, ColorHandlers.UNLIT_RED & 0xFF, ColorHandlers.LIT_RED & 0xFF);
 		// apply lighting too
 		int light = world.getMaxLocalRawBrightness(pos);
-		float celestialAngle = world.getSunAngle(partialTicks);
+		float celestialAngle = world.environmentAttributes().getValue(EnvironmentAttributes.SUN_ANGLE,pos);
 		if (light > 0)
 		{
 			float offset = celestialAngle < (float) Math.PI ? 0.0F : ((float) Math.PI * 2F);

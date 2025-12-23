@@ -1,6 +1,6 @@
 package net.commoble.morered.client.emi;
 
-//public record SolderingEmiRecipe(ResourceLocation id, List<EmiIngredient> inputs, List<EmiStack> outputs) implements EmiRecipe
+//public record SolderingEmiRecipe(Identifier id, List<EmiIngredient> inputs, List<EmiStack> outputs) implements EmiRecipe
 public record SolderingEmiRecipe()
 {
 //	public static SolderingEmiRecipe create(RecipeHolder<SolderingRecipe> recipe)
@@ -17,7 +17,7 @@ public record SolderingEmiRecipe()
 //	}
 //
 //	@Override
-//	public @Nullable ResourceLocation getId()
+//	public @Nullable Identifier getId()
 //	{
 //		return id;
 //	}

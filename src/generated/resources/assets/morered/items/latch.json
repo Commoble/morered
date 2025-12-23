@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "morered:logic_gate",
-    "model": "morered:item/latch"
+    "model": "morered:block/latch"
   }
 }

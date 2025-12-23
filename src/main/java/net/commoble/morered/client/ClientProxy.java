@@ -17,7 +17,6 @@ import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.IsWasSprintPacket;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
-import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.mechanisms.GearsBlock;
 import net.commoble.morered.mechanisms.StonemillMenu;
 import net.commoble.morered.mixin.MultiPlayerGameModeAccess;
@@ -27,8 +26,6 @@ import net.commoble.morered.transportation.PliersItem;
 import net.commoble.morered.transportation.RaytraceHelper;
 import net.commoble.morered.transportation.TubeBreakPacket;
 import net.commoble.morered.util.BlockSide;
-import net.commoble.morered.util.BlockStateUtil;
-import net.commoble.morered.util.ConfigHelper;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.WireBreakPacket;
 import net.commoble.morered.wires.AbstractWireBlock;
@@ -52,17 +49,14 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Holder;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
 import net.minecraft.util.TriState;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.HumanoidArm;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.item.crafting.RecipeMap;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameType;
@@ -79,12 +73,10 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.config.ModConfig;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
-import net.neoforged.neoforge.client.event.ExtractBlockOutlineRenderStateEvent;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
@@ -101,9 +93,7 @@ import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 
 @Mod(value=MoreRed.MODID, dist=Dist.CLIENT)
 public class ClientProxy
-{
-	public static final ClientConfig CLIENTCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.CLIENT, ClientConfig::create);
-	
+{	
 	// block positions are in absolute world coordinates, not local chunk coords
 	private static Map<ChunkPos, Set<BlockPos>> clientPostsInChunk = new HashMap<>();
 	private static Map<ChunkPos, Set<BlockPos>> clientTubesInChunk = new HashMap<>();
@@ -127,7 +117,6 @@ public class ClientProxy
 		
 		gameBus.addListener(ClientProxy::onClientLogIn);
 		gameBus.addListener(ClientProxy::onClientLogOut);
-		gameBus.addListener(ClientProxy::onHighlightBlock);
 		gameBus.addListener(ClientProxy::onInteract);
 		gameBus.addListener(ClientProxy::onClientTick);
 		gameBus.addListener(ClientProxy::onRecipesReceived);
@@ -144,7 +133,6 @@ public class ClientProxy
 	
 	public static void updatePostsInChunk(ChunkPos pos, Set<BlockPos> posts)
 	{
-		@SuppressWarnings("resource")
 		Level level = Minecraft.getInstance().level;
 		if (level == null)
 			return;
@@ -162,7 +150,6 @@ public class ClientProxy
 		return clientPostsInChunk.getOrDefault(pos, Set.of());
 	}
 	
-	@SuppressWarnings("resource")
 	public static boolean getSprintingIfClientPlayer(Player player)
 	{
 		if (player == Minecraft.getInstance().player)
@@ -226,7 +213,7 @@ public class ClientProxy
 		// explicit generics here to make javac happy (eclipsec can compile it fine)
 		event.<FilterMenu, SingleSlotMenuScreen<FilterMenu>>register(MoreRed.FILTER_MENU.get(), SingleSlotMenuScreen::new);
 		event.register(MoreRed.MULTI_FILTER_MENU.get(), StandardSizeContainerScreenFactory.of(
-			ResourceLocation.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.MULTI_FILTER_BLOCK.get().getDescriptionId()));
+			Identifier.withDefaultNamespace("textures/gui/container/shulker_box.png"), MoreRed.MULTI_FILTER_BLOCK.get().getDescriptionId()));
 		event.<StonemillMenu, SingleSlotMenuScreen<StonemillMenu>>register(MoreRed.STONEMILL_MENU.get(), SingleSlotMenuScreen::new);
 	}
 	
@@ -264,7 +251,6 @@ public class ClientProxy
 	public static void onRegisterBlockStateModels(RegisterBlockStateModels event)
 	{
 		event.registerModel(MoreRed.id(Names.WIRE_PARTS), UnbakedWirePartBlockStateModel.CODEC);
-		event.registerModel(MoreRed.id(Names.XYZ), UnbakedXyzBlockStateModel.CODEC);
 	}
 
 	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
@@ -323,57 +309,6 @@ public class ClientProxy
 		// clean up static data on the client
 		clear();
 	}
-
-	static void onHighlightBlock(ExtractBlockOutlineRenderStateEvent event)
-	{
-		if (ClientProxy.CLIENTCONFIG.showPlacementPreview().get())
-		{
-			@SuppressWarnings("resource")
-			LocalPlayer player = Minecraft.getInstance().player;
-			if (player != null && player.level() != null)
-			{
-				InteractionHand hand = player.getUsedItemHand();
-				hand = hand == null ? InteractionHand.MAIN_HAND : hand;
-				ItemStack stack = player.getItemInHand(hand);
-				Item item = stack.getItem();
-				if (item instanceof BlockItem blockItem)
-				{
-					Block block = blockItem.getBlock();
-					if (block instanceof TwentyFourBlock twentyFourBlock)
-					{
-						Level world = player.level();
-						BlockHitResult rayTrace = event.getHitResult();
-						Direction directionAwayFromTargetedBlock = rayTrace.getDirection();
-						BlockPos placePos = rayTrace.getBlockPos().relative(directionAwayFromTargetedBlock);
-						
-						BlockState existingState = world.getBlockState(placePos);
-						if (existingState.isAir() || existingState.canBeReplaced())
-						{
-							// only render the preview if we know it would make sense for the block to be placed where we expect it to be
-							Vec3 hitVec = rayTrace.getLocation();
-							
-							Direction attachmentDirection = directionAwayFromTargetedBlock.getOpposite();
-							Vec3 relativeHitVec = hitVec.subtract(Vec3.atLowerCornerOf(placePos));
-							
-							Direction outputDirection = BlockStateUtil.getOutputDirectionFromRelativeHitVec(relativeHitVec, attachmentDirection);
-							BlockStateUtil.getRotationIndexForDirection(attachmentDirection, outputDirection);
-							BlockState state = twentyFourBlock.getStateForPlacement(new BlockPlaceContext(player, hand, stack, rayTrace));
-							
-							if (twentyFourBlock.hasBlockStateModelsForPlacementPreview(state))
-							{
-								event.addCustomRenderer(BlockPreviewRenderer.extractBlockPreview(world, placePos, state));							
-							}
-							else
-							{
-								event.addCustomRenderer(BlockPreviewRenderer.extractHeldItemPreview(world, placePos, state, stack, player));
-							}
-							
-						}
-					}
-				}
-			}
-		}
-	}
 	
 	private static void onClientTick(ClientTickEvent.Post event)
 	{
@@ -402,7 +337,7 @@ public class ClientProxy
 		RecipeMap recipeMap = event.getRecipeMap();
 		solderingRecipes = recipeMap.byType(MoreRed.SOLDERING_RECIPE_TYPE.get())
 			.stream()
-			.map(recipeHolder -> new SolderingRecipeHolder(recipeHolder.id().location(), recipeHolder.value()))
+			.map(recipeHolder -> new SolderingRecipeHolder(recipeHolder.id().identifier(), recipeHolder.value()))
 			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().getItem().getDescriptionId())))
 			.toList();
 		ClientProxy.recipeMap = recipeMap;
@@ -566,7 +501,6 @@ public class ClientProxy
 
 	public static void onWireUpdatePacket(WireUpdatePacket packet)
 	{
-		@SuppressWarnings("resource")
 		ClientLevel world = Minecraft.getInstance().level;
 		if (world != null)
 		{

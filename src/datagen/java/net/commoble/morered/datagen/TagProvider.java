@@ -11,7 +11,7 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.tags.KeyTagProvider;
 import net.minecraft.data.tags.TagAppender;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
 import net.neoforged.fml.ModLoadingContext;
@@ -23,7 +23,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 public class TagProvider<T> extends KeyTagProvider<T>
 {	
 	// mojang clears the map for some reason so we have to maintain our own
-	protected final Map<ResourceLocation, TagBuilder> subclassBuilders = Maps.newLinkedHashMap();
+	protected final Map<Identifier, TagBuilder> subclassBuilders = Maps.newLinkedHashMap();
 	public static <T> TagProvider<T> create(GatherDataEvent event, ResourceKey<Registry<T>> registry, CompletableFuture<HolderLookup.Provider> holders)
 	{
 		return new TagProvider<>(event.getGenerator(), registry, holders, ModLoadingContext.get().getActiveContainer().getModId());

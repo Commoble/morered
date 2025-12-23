@@ -1,0 +1,7 @@
+{
+  "loader": "preview_placement:placement_preview",
+  "model": {
+    "parent": "morered:item/oak_gearshifter_gear",
+    "render_type": "minecraft:translucent"
+  }
+}

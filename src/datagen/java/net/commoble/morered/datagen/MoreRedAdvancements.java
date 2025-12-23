@@ -16,17 +16,17 @@ import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.advancements.critereon.DataComponentMatchers;
-import net.minecraft.advancements.critereon.InventoryChangeTrigger;
-import net.minecraft.advancements.critereon.ItemPredicate;
-import net.minecraft.advancements.critereon.MinMaxBounds;
+import net.minecraft.advancements.criterion.DataComponentMatchers;
+import net.minecraft.advancements.criterion.InventoryChangeTrigger;
+import net.minecraft.advancements.criterion.ItemPredicate;
+import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.core.ClientAsset.ResourceTexture;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.data.advancements.AdvancementProvider;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
@@ -56,7 +56,7 @@ public class MoreRedAdvancements
 				"There's a lot of redstone in your pockets",
 				(title, description) -> AdvancementBuilder.root()
 					.display(DisplayBuilder.of(MoreRed.RED_ALLOY_INGOT_ITEM.get(), title, description, AdvancementType.TASK)
-						.background(ResourceLocation.withDefaultNamespace("block/polished_blackstone"))
+						.background(Identifier.withDefaultNamespace("block/polished_blackstone"))
 						.visibility(true, false, true))
 					.tagStackCriterion(Tags.Items.DUSTS_REDSTONE, 64)));
 						
@@ -142,7 +142,7 @@ public class MoreRedAdvancements
 		String key = String.format("advancements.%s.%s.%s", namespace, tab, path);
 		String titleKey = key + ".title";
 		String descriptionKey = key + ".description";
-		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace, tab + "/" + path);
+		Identifier id = Identifier.fromNamespaceAndPath(namespace, tab + "/" + path);
 		lang.add(titleKey, title);
 		lang.add(descriptionKey, description);
 		return advancement.apply(titleKey, descriptionKey).build(id);
@@ -153,7 +153,7 @@ public class MoreRedAdvancements
 	private static class AdvancementBuilder
 	{
 		AdvancementRequirements.Strategy strategy = AdvancementRequirements.Strategy.AND;
-		Optional<ResourceLocation> parent = Optional.empty();
+		Optional<Identifier> parent = Optional.empty();
 		Optional<DisplayInfo> display = Optional.empty();
 		Map<String, Criterion<?>> criteria = new HashMap<>();
 		
@@ -162,7 +162,7 @@ public class MoreRedAdvancements
 			return new AdvancementBuilder();
 		}
 		
-		static AdvancementBuilder parented(ResourceLocation parent)
+		static AdvancementBuilder parented(Identifier parent)
 		{
 			AdvancementBuilder builder = new AdvancementBuilder();
 			builder.parent = Optional.of(parent);
@@ -240,7 +240,7 @@ public class MoreRedAdvancements
 			return this;
 		}
 		
-		AdvancementHolder build(ResourceLocation id)
+		AdvancementHolder build(Identifier id)
 		{
 			return new AdvancementHolder(id, new Advancement(
 				this.parent,
@@ -276,7 +276,7 @@ public class MoreRedAdvancements
 			return new DisplayBuilder(new ItemStack(itemLike), titleKey, descriptionKey, type);
 		}
 		
-		public DisplayBuilder background(ResourceLocation id)
+		public DisplayBuilder background(Identifier id)
 		{
 			this.background = Optional.of(new ResourceTexture(id));
 			return this;

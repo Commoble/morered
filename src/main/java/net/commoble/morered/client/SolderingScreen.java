@@ -8,7 +8,7 @@ import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -23,7 +23,7 @@ import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -33,8 +33,8 @@ import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
 public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 {
-	public static final ResourceLocation TRADING_SCREEN = ResourceLocation.withDefaultNamespace("textures/gui/container/villager.png");
-	public static final ResourceLocation CRAFTING_SCREEN = ResourceLocation.withDefaultNamespace("textures/gui/container/crafting_table.png");
+	public static final Identifier TRADING_SCREEN = Identifier.withDefaultNamespace("textures/gui/container/villager.png");
+	public static final Identifier CRAFTING_SCREEN = Identifier.withDefaultNamespace("textures/gui/container/crafting_table.png");
 	
 	public static final int SEARCHBOX_X = 4;
 	public static final int SEARCHBOX_Y = 17;
@@ -212,7 +212,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	     * Draws this button to the screen.
 	     */
 	    @Override
-	    public void renderWidget(GuiGraphics graphics, int mouseX, int mouseY, float partial)
+	    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partial)
 	    {
 	    	this.tooltipItem = ItemStack.EMPTY;
 	        if (this.visible)

@@ -40,7 +40,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -512,7 +512,7 @@ public class GenericBlockEntity extends BlockEntity
 			DeferredHolder<BlockEntityType<?>, BlockEntityType<GenericBlockEntity>> holder = DeferredHolder.create(
 				ResourceKey.create(
 					Registries.BLOCK_ENTITY_TYPE,
-					ResourceLocation.fromNamespaceAndPath(
+					Identifier.fromNamespaceAndPath(
 						blockEntities.getNamespace(),
 						name)));
 			blockEntities.register(
@@ -527,7 +527,7 @@ public class GenericBlockEntity extends BlockEntity
 								entry -> entry.getKey().get(),
 								Map.Entry::getValue)),
 							attachmentTransformers,
-							this.preRemoveSideEffects.getValue(),
+							this.preRemoveSideEffects.get(),
 							this.inventoryKeys.stream().collect(Collectors.toMap(
 								Function.identity(),
 								key -> key.inventoryFactory.get()))),

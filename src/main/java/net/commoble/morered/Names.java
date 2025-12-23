@@ -2,7 +2,7 @@ package net.commoble.morered;
 
 import java.util.Arrays;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
 
 public class Names
@@ -128,7 +128,7 @@ public class Names
 	
 	// model loaders
 	public static final String WIRE_PARTS = "wire_parts";
-	public static final String XYZ = "xyz";
 	public static final String ROTATE_TINTS = "rotate_tints";
 	public static final String LOGIC_GATE = "logic_gate";
+	public static final String PLACEMENT_PREVIEW = "placement_preview";
 }

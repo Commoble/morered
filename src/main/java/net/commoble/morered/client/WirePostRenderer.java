@@ -5,11 +5,12 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.WirePostBlockEntity;
 import net.commoble.morered.wire_post.WirePostBlockEntity.WirePostConnectionRenderInfo;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
+import net.minecraft.client.renderer.rendertype.RenderTypes;
 import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
@@ -94,6 +95,7 @@ public class WirePostRenderer implements BlockEntityRenderer<WirePostBlockEntity
 			int points = pointList.length;
 			int lines = points - 1;
 			float maxLerpFactor = lines;
+			float lineWidth = Minecraft.getInstance().getWindow().getAppropriateLineWidth();
 			
 			poseStack.pushPose();
 			for (int line = 0; line < lines; line++)
@@ -102,13 +104,15 @@ public class WirePostRenderer implements BlockEntityRenderer<WirePostBlockEntity
 				int red = Mth.lerpDiscrete(lerpFactor, startRed, endRed);
 				Vec3 firstPoint = pointList[line];
 				Vec3 secondPoint = pointList[line+1];
-				collector.submitCustomGeometry(poseStack, RenderType.lines(), (pose, vertexBuilder) -> {
+				collector.submitCustomGeometry(poseStack, RenderTypes.LINES, (pose, vertexBuilder) -> {
 					vertexBuilder.addVertex(pose, (float)firstPoint.x(), (float)firstPoint.y(), (float)firstPoint.z())
 						.setColor(red, 0, 0, 255)
-						.setNormal((float)firstPoint.x(), (float)firstPoint.y(), (float)firstPoint.z());
+						.setNormal((float)firstPoint.x(), (float)firstPoint.y(), (float)firstPoint.z())
+						.setLineWidth(lineWidth);
 					vertexBuilder.addVertex(pose, (float)secondPoint.x(), (float)secondPoint.y(), (float)secondPoint.z())
 						.setColor(red, 0, 0, 255)
-						.setNormal((float)secondPoint.x(), (float)secondPoint.y(), (float)secondPoint.z());
+						.setNormal((float)secondPoint.x(), (float)secondPoint.y(), (float)secondPoint.z())
+						.setLineWidth(lineWidth);
 				});
 			}
 			poseStack.popPose();

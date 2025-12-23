@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
@@ -29,8 +29,8 @@ public record StonemillBlockEntityRenderer(ItemModelResolver resolver, ItemStack
 {
 	public static StonemillBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		ResourceLocation blockId = MoreRed.STONEMILL_BLOCK.getId();
-		ResourceLocation axleModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
+		Identifier blockId = MoreRed.STONEMILL_BLOCK.getId();
+		Identifier axleModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
 		ItemStack axle = new ItemStack(Items.STICK);
 		axle.set(DataComponents.ITEM_MODEL, axleModel);
 		return new StonemillBlockEntityRenderer(context.itemModelResolver(), axle);

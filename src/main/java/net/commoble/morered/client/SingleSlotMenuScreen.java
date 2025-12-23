@@ -4,13 +4,13 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class SingleSlotMenuScreen<MENU extends AbstractContainerMenu> extends AbstractContainerScreen<MENU>
 {
-	public static final ResourceLocation DISPENSER_GUI = ResourceLocation.withDefaultNamespace("textures/gui/container/dispenser.png");
+	public static final Identifier DISPENSER_GUI = Identifier.withDefaultNamespace("textures/gui/container/dispenser.png");
 	
 	public SingleSlotMenuScreen(MENU screenContainer, Inventory inv, Component titleIn)
 	{

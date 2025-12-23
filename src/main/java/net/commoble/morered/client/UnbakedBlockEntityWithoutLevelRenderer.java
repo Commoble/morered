@@ -1,8 +1,8 @@
 package net.commoble.morered.client;
 
-import java.util.Set;
+import java.util.function.Consumer;
 
-import org.joml.Vector3f;
+import org.joml.Vector3fc;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.serialization.MapCodec;
@@ -47,7 +47,6 @@ public record UnbakedBlockEntityWithoutLevelRenderer(Block block, BlockEntityTyp
 	public static record ItemRenderingSpecialModelRenderer(BlockEntity blockEntity) implements SpecialModelRenderer<Void>
 	{
 
-		@SuppressWarnings("resource")
 		@Override
 		public void submit(Void no, ItemDisplayContext itemDisplayContext, PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int overlay, boolean foil, int outlineColor)
 		{
@@ -78,7 +77,7 @@ public record UnbakedBlockEntityWithoutLevelRenderer(Block block, BlockEntityTyp
 		}
 
 		@Override
-		public void getExtents(Set<Vector3f> points)
+		public void getExtents(Consumer<Vector3fc> points)
 		{
 			// *pretty* sure this isn't used when rendering blocks
 		}

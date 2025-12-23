@@ -113,7 +113,6 @@ import net.commoble.morered.wires.WireCountLootFunction;
 import net.commoble.morered.wires.WirePostSignalComponent;
 import net.commoble.morered.wires.WireSignalComponent;
 import net.commoble.morered.wires.WireUpdatePacket;
-import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Registry;
@@ -123,14 +122,14 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.protocol.game.ClientboundSetEquipmentPacket;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -193,9 +192,9 @@ public class MoreRed
 {
 	public static final String MODID = "morered";
 	
-	public static ResourceLocation id(String name)
+	public static Identifier id(String name)
 	{
-		return ResourceLocation.fromNamespaceAndPath(MODID, name);
+		return Identifier.fromNamespaceAndPath(MODID, name);
 	}
 	
 	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
@@ -215,8 +214,8 @@ public class MoreRed
 	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = defreg(Registries.DATA_COMPONENT_TYPE);
 	private static final DeferredRegister<MapCodec<? extends SignalComponent>> SIGNAL_COMPONENT_TYPES = defreg(ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
 	
-	public static final Map<ResourceLocation, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> LOGIC_PLATES = new HashMap<>();
-	public static final Map<ResourceLocation, DeferredHolder<Block, ? extends BitwiseGateBlock>> BITWISE_LOGIC_PLATES = new HashMap<>();
+	public static final Map<Identifier, DeferredHolder<Block, ? extends LogicFunctionPlateBlock>> LOGIC_PLATES = new HashMap<>();
+	public static final Map<Identifier, DeferredHolder<Block, ? extends BitwiseGateBlock>> BITWISE_LOGIC_PLATES = new HashMap<>();
 		
 	// data component types
 	public static final DeferredHolder<DataComponentType<?>, DataComponentType<Map<Direction,ItemStack>>> GEARS_DATA_COMPONENT = DATA_COMPONENT_TYPES.register(Names.GEARS, () -> DataComponentType.<Map<Direction,ItemStack>>builder()
@@ -642,7 +641,7 @@ public class MoreRed
 	//signal components
 	static
 	{
-		BiConsumer<ResourceKey<MapCodec<? extends SignalComponent>>, MapCodec<? extends SignalComponent>> registerSignalComponent = (key,codec) -> SIGNAL_COMPONENT_TYPES.register(key.location().getPath(), () -> codec);
+		BiConsumer<ResourceKey<MapCodec<? extends SignalComponent>>, MapCodec<? extends SignalComponent>> registerSignalComponent = (key,codec) -> SIGNAL_COMPONENT_TYPES.register(key.identifier().getPath(), () -> codec);
 		registerSignalComponent.accept(WireSignalComponent.RESOURCE_KEY, WireSignalComponent.CODEC);
 		registerSignalComponent.accept(WirePostSignalComponent.RESOURCE_KEY, WirePostSignalComponent.CODEC);
 		registerSignalComponent.accept(BitwiseGateSignalComponent.RESOURCE_KEY, BitwiseGateSignalComponent.CODEC);
@@ -805,11 +804,10 @@ public class MoreRed
 									else if (level.isClientSide())
 									{
 										level.addParticle(DustParticleOptions.REDSTONE, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
-									}
-									
-									if (player != null)
-									{
-										player.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
+										if (player != null)
+										{
+											player.playSound(SoundEvents.WANDERING_TRADER_HURT, 0.5F, 2F);	
+										}
 									}
 									event.cancelWithResult(InteractionResult.SUCCESS);
 									return;
@@ -829,7 +827,6 @@ public class MoreRed
 						if (level.getBlockEntity(tubePos) instanceof TubeBlockEntity tube)
 						{
 							Vec3 hit = RaytraceHelper.doesBlockStateIntersectTubeConnections(tube.getBlockPos(), placePos, new FakeStateLevel(level, placePos, placementState), placementState, checkedTubePositions, tube.getRemoteConnections());
-//							Vec3 hit = RaytraceHelper.doesBlockStateIntersectTubeConnections(tube.getBlockPos(), placePos, level, placementState, checkedTubePositions, tube.getRemoteConnections());
 							if (hit != null)
 							{
 								Player player = placeContext.getPlayer();
@@ -841,11 +838,10 @@ public class MoreRed
 								else if (level.isClientSide())
 								{
 									level.addParticle(DustParticleOptions.REDSTONE, hit.x, hit.y, hit.z, 0.05D, 0.05D, 0.05D);
-								}
-								
-								if (player != null)
-								{
-									player.playNotifySound(SoundEvents.WANDERING_TRADER_HURT, SoundSource.BLOCKS, 0.5F, 2F);
+									if (player != null)
+									{
+										player.playSound(SoundEvents.WANDERING_TRADER_HURT, 0.5F, 2F);
+									}
 								}
 								event.cancelWithResult(InteractionResult.SUCCESS);
 								return;
@@ -902,7 +898,7 @@ public class MoreRed
 		Supplier<BlockBehaviour.Properties> blockProperties,
 		Function<BlockBehaviour.Properties, ? extends BLOCK> blockFactory)
 	{
-		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(blocks.getNamespace(), name);
+		Identifier id = Identifier.fromNamespaceAndPath(blocks.getNamespace(), name);
 		return blocks.register(name, () -> blockFactory.apply(blockProperties.get().setId(ResourceKey.create(Registries.BLOCK, id))));
 	}
 	
@@ -912,7 +908,7 @@ public class MoreRed
 		Supplier<Item.Properties> itemProperties,
 		Function<Item.Properties, ? extends ITEM> itemFactory)
 	{
-		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(items.getNamespace(), name);
+		Identifier id = Identifier.fromNamespaceAndPath(items.getNamespace(), name);
 		return items.register(name,  () -> itemFactory.apply(itemProperties.get().setId(ResourceKey.create(Registries.ITEM, id))));
 	}
 	
@@ -925,7 +921,7 @@ public class MoreRed
 		Supplier<Item.Properties> itemProperties,
 		BiFunction<? super BLOCK, Item.Properties, ? extends ITEM> itemFactory)
 	{
-		ResourceLocation id = ResourceLocation.fromNamespaceAndPath(blocks.getNamespace(), name);
+		Identifier id = Identifier.fromNamespaceAndPath(blocks.getNamespace(), name);
 		DeferredHolder<Block, BLOCK> block = blocks.register(name, () -> blockFactory.apply(blockProperties.get().setId(ResourceKey.create(Registries.BLOCK, id))));;
 		items.register(name, () -> itemFactory.apply(block.get(), itemProperties.get().setId(ResourceKey.create(Registries.ITEM, id)).useBlockDescriptionPrefix()));
 		return block;

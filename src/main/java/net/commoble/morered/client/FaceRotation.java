@@ -1,7 +1,7 @@
 package net.commoble.morered.client;
 
 import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 
 import org.joml.Quaternionf;
 import org.joml.Vector3f;

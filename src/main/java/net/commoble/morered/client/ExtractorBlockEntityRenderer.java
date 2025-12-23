@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.state.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -52,10 +52,10 @@ public record ExtractorBlockEntityRenderer(
 	
 	public static ExtractorBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		ResourceLocation blockId = MoreRed.EXTRACTOR_BLOCK.getId();
-		ResourceLocation pumpModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_pump");
-		ResourceLocation axleModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
-		ResourceLocation bagModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_bag");
+		Identifier blockId = MoreRed.EXTRACTOR_BLOCK.getId();
+		Identifier pumpModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_pump");
+		Identifier axleModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
+		Identifier bagModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_bag");
 		ItemStack pump = new ItemStack(Items.STICK);
 		pump.set(DataComponents.ITEM_MODEL, pumpModel);
 		ItemStack axle = new ItemStack(Items.STICK);
@@ -85,7 +85,6 @@ public record ExtractorBlockEntityRenderer(
 		float inputRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(inputDir), MechanicalState.ZERO).angularVelocity();
 		float axleRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(axleDir), MechanicalState.ZERO).angularVelocity();
 		float reverseAxleRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(reverseAxleDir), MechanicalState.ZERO).angularVelocity();
-		@SuppressWarnings("resource")
 		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds

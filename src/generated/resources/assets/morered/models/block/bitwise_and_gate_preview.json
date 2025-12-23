@@ -1,0 +1,7 @@
+{
+  "loader": "preview_placement:placement_preview",
+  "model": {
+    "parent": "morered:block/bitwise_and_gate",
+    "render_type": "minecraft:translucent"
+  }
+}

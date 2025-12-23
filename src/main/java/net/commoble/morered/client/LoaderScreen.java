@@ -4,12 +4,12 @@ import net.commoble.morered.transportation.LoaderMenu;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 
 public class LoaderScreen extends SingleSlotMenuScreen<LoaderMenu>
 {
-	public static final ResourceLocation DROPPER_SLOT = ResourceLocation.withDefaultNamespace("textures/block/dropper_front_vertical.png");
+	public static final Identifier DROPPER_SLOT = Identifier.withDefaultNamespace("textures/block/dropper_front_vertical.png");
 
 	public LoaderScreen(LoaderMenu screenContainer, Inventory inv, Component titleIn)
 	{

@@ -41,13 +41,11 @@
       "y": 90
     },
     "facing=east,rotation=1,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "y": 180,
       "z": 270
     },
     "facing=east,rotation=1,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "y": 180,
       "z": 270
@@ -63,12 +61,10 @@
       "y": 270
     },
     "facing=east,rotation=3,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "z": 270
     },
     "facing=east,rotation=3,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "z": 270
     },
@@ -81,13 +77,11 @@
       "x": 270
     },
     "facing=north,rotation=1,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "x": 270,
       "z": 90
     },
     "facing=north,rotation=1,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "x": 270,
       "z": 90
@@ -103,13 +97,11 @@
       "y": 180
     },
     "facing=north,rotation=3,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "x": 270,
       "z": 270
     },
     "facing=north,rotation=3,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "x": 270,
       "z": 270
@@ -125,13 +117,11 @@
       "y": 180
     },
     "facing=south,rotation=1,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "x": 90,
       "z": 90
     },
     "facing=south,rotation=1,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "x": 90,
       "z": 90
@@ -145,13 +135,11 @@
       "x": 90
     },
     "facing=south,rotation=3,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "x": 90,
       "z": 270
     },
     "facing=south,rotation=3,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "x": 90,
       "z": 270
@@ -205,14 +193,12 @@
       "y": 270
     },
     "facing=west,rotation=1,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "x": 180,
       "y": 180,
       "z": 270
     },
     "facing=west,rotation=1,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "x": 180,
       "y": 180,
@@ -229,13 +215,11 @@
       "y": 90
     },
     "facing=west,rotation=3,input_b=false": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate",
       "y": 180,
       "z": 90
     },
     "facing=west,rotation=3,input_b=true": {
-      "type": "morered:xyz",
       "model": "morered:block/pulse_gate_switched",
       "y": 180,
       "z": 90

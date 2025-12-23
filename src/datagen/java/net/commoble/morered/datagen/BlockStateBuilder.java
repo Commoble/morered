@@ -47,9 +47,8 @@ import net.minecraft.client.renderer.block.model.multipart.KeyValueCondition;
 import net.minecraft.client.renderer.block.model.multipart.Selector;
 import net.minecraft.client.resources.model.WeightedVariants;
 import net.minecraft.core.Direction;
-import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.random.Weighted;
 import net.minecraft.util.random.WeightedList;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -78,10 +77,9 @@ public final class BlockStateBuilder
 	 * Use {@link BlockStateBuilder#singleVariant}, {@link BlockStateBuilder#variants}, or {@link BlockStateBuilder#multipart} to create
 	 * BlockModelDefinitions to add to this map, or {@link BlockStateBuilder#custom} for non-vanilla implementations
 	 */
-	public static void addDataProvider(GatherDataEvent event, Map<ResourceLocation, BlockModelDefinition> blockStates)
+	public static void addDataProvider(GatherDataEvent event, Map<Identifier, BlockModelDefinition> blockStates)
 	{
-		DataGenerator generator = event.getGenerator();
-		generator.addProvider(true, JsonDataProvider.create(event.getLookupProvider(), generator.getPackOutput(), generator, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockModelDefinition.CODEC, blockStates));
+		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockModelDefinition.CODEC, blockStates);
 	}
 	
 	/**
@@ -187,42 +185,68 @@ public final class BlockStateBuilder
 	
 	/**
 	 * {@return new Unbaked BlockStateModel with no rotation, no uvlock}
-	 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
+	 * @param model Identifier of a model, e.g. "minecraft:block/dirt"
 	 */
-	public static BlockStateModel.Unbaked model(ResourceLocation model)
+	public static BlockStateModel.Unbaked model(Identifier model)
 	{
 		return model(model, Quadrant.R0, Quadrant.R0);
 	}
 	
 	/**
 	 * {@return new Unbaked BlockStateModel with specified rotation and no uvlock}
-	 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
+	 * @param model Identifier of a model, e.g. "minecraft:block/dirt"
 	 * @param x x-rotation to apply to the model
 	 * @param y y-rotation to apply to the model
 	 */
-	public static BlockStateModel.Unbaked model(ResourceLocation model, Quadrant x, Quadrant y)
+	public static BlockStateModel.Unbaked model(Identifier model, Quadrant x, Quadrant y)
 	{
 		return model(model, x, y, false);
 	}
 	
 	/**
+	 * {@return new Unbaked BlockStateModel with specified rotation and no uvlock}
+	 * @param model Identifier of a model, e.g. "minecraft:block/dirt"
+	 * @param x x-rotation to apply to the model
+	 * @param y y-rotation to apply to the model
+	 * @param z z-rotation to apply to the model
+	 */
+	public static BlockStateModel.Unbaked model(Identifier model, Quadrant x, Quadrant y, Quadrant z)
+	{
+		return model(model, x, y, z, false);
+	}
+	
+	/**
 	 * {@return new Unbaked BlockStateModel with specified rotation and uvlock}
-	 * @param model ResourceLocation of a model, e.g. "minecraft:block/dirt"
+	 * @param model Identifier of a model, e.g. "minecraft:block/dirt"
 	 * @param x x-rotation to apply to the model
 	 * @param y y-rotation to apply to the model
 	 * @param uvLock whether to lock UVs
 	 */
-	public static BlockStateModel.Unbaked model(ResourceLocation model, Quadrant x, Quadrant y, boolean uvLock)
+	public static BlockStateModel.Unbaked model(Identifier model, Quadrant x, Quadrant y, boolean uvLock)
+	{
+		return model(model, x, y, Quadrant.R0, uvLock);
+	}
+	
+	/**
+	 * {@return new Unbaked BlockStateModel with specified rotation and uvlock}
+	 * @param model Identifier of a model, e.g. "minecraft:block/dirt"
+	 * @param x x-rotation to apply to the model
+	 * @param y y-rotation to apply to the model
+	 * @param z z-rotation to apply to the model
+	 * @param uvLock whether to lock UVs
+	 */
+	public static BlockStateModel.Unbaked model(Identifier model, Quadrant x, Quadrant y, Quadrant z, boolean uvLock)
 	{
 		return new SingleVariant.Unbaked(new Variant(model)
 			.withXRot(x)
 			.withYRot(y)
+			.withZRot(z)
 			.withUvLock(uvLock));
 	}
 	
 	/**
 	 * {@return new Unbaked BlockStateModel for random selection from a list of two or more Weighted models (e.g. like how stone is)}
-	 * @param firstModel Weighted BlockStateModel.Unbaked, e.g. new Weighted<>(BlockStateBuilder.model(ResourceLocation.fromNamespaceAndPath("foo","bar")), 1)
+	 * @param firstModel Weighted BlockStateModel.Unbaked, e.g. new Weighted<>(BlockStateBuilder.model(Identifier.fromNamespaceAndPath("foo","bar")), 1)
 	 * @param secondModel another weighted model
 	 * @param additionalModels more weighted models as needed
 	 */
@@ -255,11 +279,11 @@ public final class BlockStateBuilder
 	 * Represents a "variants" block in a blockstate json.
 	 * Can be used as a builder like so: {@snippet :
 	 * BlockStateBuilder.variants(variants -> variants
-	 *   .addVariant(BlockStateProperties.POWERED, false, BlockStateBuilder.model(ResourceLocation.fromNamespaceAndPath("foo, "bar")))
+	 *   .addVariant(BlockStateProperties.POWERED, false, BlockStateBuilder.model(Identifier.fromNamespaceAndPath("foo, "bar")))
 	 *   .addVariant(propertyValues -> propertyValues
 	 *     .addPropertyValue(BlockStateProperties.POWERED, true)
 	 *     .addPropertyValue(BlockStateProperties.LIT, false),
-	 *     BlockStateBuilder.model(ResourceLocation.fromNamespaceAndPath("foo, "bar_powered"))));
+	 *     BlockStateBuilder.model(Identifier.fromNamespaceAndPath("foo, "bar_powered"))));
 	 * }
 	 * Which results in the blockstate json {@snippet :
 	 * {
@@ -355,9 +379,9 @@ public final class BlockStateBuilder
 	 * 
 	 * Can be used as a builder like so: {@snippet :
 	 * BlockStateBuilder.multipart(multipart -> multipart
-	 *   .apply(BlockStateBuilder.model(ResourceLocation.fromNamespaceAndPath("foo", "bar")))
-	 *   .applyWhen(BlockStateBuilder.model(ResourceLocation.fromNamespaceAndPath("foo", "bar_powered")), BlockStateProperties.POWERED, true)
-	 *   .applyWhenAll(BlockStateBuilder.model(ResourceLocation.fromNamespaceAndPath("foo", "bar_lit")), when -> when
+	 *   .apply(BlockStateBuilder.model(Identifier.fromNamespaceAndPath("foo", "bar")))
+	 *   .applyWhen(BlockStateBuilder.model(Identifier.fromNamespaceAndPath("foo", "bar_powered")), BlockStateProperties.POWERED, true)
+	 *   .applyWhenAll(BlockStateBuilder.model(Identifier.fromNamespaceAndPath("foo", "bar_lit")), when -> when
 	 *     .addCondition(BlockStateProperties.POWERED, false)
 	 *     .addCondition(BlockStateProperties.LIT, true)));
 	 * }

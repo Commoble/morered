@@ -5,7 +5,7 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import net.commoble.morered.MoreRed;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.RandomSource;

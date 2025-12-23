@@ -7,7 +7,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import net.commoble.exmachina.api.Channel;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
 
 public record ChannelSet(Collection<Channel> channels, Collection<Channel> compatibleChannels)

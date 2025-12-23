@@ -12,7 +12,7 @@ import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingInput;
@@ -38,9 +38,9 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 		SolderingRecipe::new);
 	
 	// can't deal with RecipeHolder generics
-	public record SolderingRecipeHolder(ResourceLocation id, SolderingRecipe recipe) {
+	public record SolderingRecipeHolder(Identifier id, SolderingRecipe recipe) {
 		public static final StreamCodec<RegistryFriendlyByteBuf, SolderingRecipeHolder> STREAM_CODEC = StreamCodec.composite(
-			ResourceLocation.STREAM_CODEC, SolderingRecipeHolder::id,
+			Identifier.STREAM_CODEC, SolderingRecipeHolder::id,
 			SolderingRecipe.STREAM_CODEC, SolderingRecipeHolder::recipe,
 			SolderingRecipeHolder::new);
 	}

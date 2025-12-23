@@ -2,6 +2,8 @@ package net.commoble.morered.client;
 
 import org.joml.Matrix4fc;
 
+import com.mojang.math.OctahedralGroup;
+
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.wires.Edge;
 import net.minecraft.client.resources.model.BlockModelRotation;
@@ -14,20 +16,20 @@ public class EdgeRotation
 	 */
 	public static final BlockModelRotation[] EDGE_ROTATIONS =
 	{
-		BlockModelRotation.X0_Y90,
-		BlockModelRotation.X0_Y270,
-		BlockModelRotation.X0_Y0,
-		BlockModelRotation.X0_Y180,
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_90),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_270),
+		BlockModelRotation.IDENTITY,
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_180),
 		
-		BlockModelRotation.X180_Y90,
-		BlockModelRotation.X180_Y270,
-		BlockModelRotation.X180_Y0,
-		BlockModelRotation.X180_Y180,
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_90.compose(OctahedralGroup.BLOCK_ROT_Z_90)),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_270.compose(OctahedralGroup.BLOCK_ROT_Z_90)),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_X_180),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_X_180.compose(OctahedralGroup.BLOCK_ROT_Y_180)),
 		
-		BlockModelRotation.X90_Y90,
-		BlockModelRotation.X90_Y180,
-		BlockModelRotation.X90_Y0,
-		BlockModelRotation.X90_Y270
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_X_270),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_90.compose(OctahedralGroup.BLOCK_ROT_X_270)),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_X_90),
+		BlockModelRotation.get(OctahedralGroup.BLOCK_ROT_Y_270.compose(OctahedralGroup.BLOCK_ROT_X_90))
 	};
 	
 	public static Edge getRotatedEdge(Edge oldEdge, Matrix4fc rotation)

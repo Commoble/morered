@@ -1,0 +1,7 @@
+{
+  "loader": "preview_placement:placement_preview",
+  "model": {
+    "parent": "morered:item/mangrove_gearshifter_axle",
+    "render_type": "minecraft:translucent"
+  }
+}

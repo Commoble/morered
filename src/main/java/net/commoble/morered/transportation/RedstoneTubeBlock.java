@@ -3,7 +3,7 @@ package net.commoble.morered.transportation;
 import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -19,7 +19,7 @@ public class RedstoneTubeBlock extends TubeBlock
 {
 	public static final BooleanProperty POWERED = BlockStateProperties.POWERED;
 
-	public RedstoneTubeBlock(ResourceLocation textureLocation, Properties properties)
+	public RedstoneTubeBlock(Identifier textureLocation, Properties properties)
 	{
 		super(textureLocation, properties);
 		this.registerDefaultState(this.defaultBlockState()

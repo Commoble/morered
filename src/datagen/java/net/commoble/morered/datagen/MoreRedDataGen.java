@@ -32,7 +32,7 @@ import net.commoble.morered.client.ColorHandlers;
 import net.commoble.morered.client.UnbakedLogicGateModel;
 import net.commoble.morered.client.UnbakedWindcatcherModel;
 import net.commoble.morered.client.UnbakedWirePartBlockStateModel;
-import net.commoble.morered.client.UnbakedXyzBlockStateModel;
+import net.commoble.morered.datagen.SimpleModel.RenderTypes;
 import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.ClutchBlock;
 import net.commoble.morered.mechanisms.GearBlock;
@@ -53,10 +53,11 @@ import net.commoble.morered.transportation.TubeBlock;
 import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
-import net.minecraft.Util;
+import net.commoble.preview_placement.client.PlacementPreviewDefinition;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
+import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CompositeModel;
@@ -69,11 +70,12 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
+import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -111,10 +113,10 @@ import net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps;
 @EventBusSubscriber(modid=MoreRed.MODID, value=Dist.CLIENT)
 public class MoreRedDataGen
 {
-	static final TagKey<Item> SMOOTH_STONE = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "smooth_stone"));
-	static final TagKey<Item> SMOOTH_STONE_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "slabs/smooth_stone"));
-	static final TagKey<Item> SMOOTH_STONE_QUARTER_SLABS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "quarter_slabs/smooth_stone"));
-	static final TagKey<Item> REDSTONE_ALLOY_INGOTS = TagKey.create(Registries.ITEM, ResourceLocation.fromNamespaceAndPath("c", "ingots/redstone_alloy"));
+	static final TagKey<Item> SMOOTH_STONE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "smooth_stone"));
+	static final TagKey<Item> SMOOTH_STONE_SLABS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "slabs/smooth_stone"));
+	static final TagKey<Item> SMOOTH_STONE_QUARTER_SLABS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "quarter_slabs/smooth_stone"));
+	static final TagKey<Item> REDSTONE_ALLOY_INGOTS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/redstone_alloy"));
 
 	@SuppressWarnings("unchecked")
 	@SubscribeEvent
@@ -125,11 +127,13 @@ public class MoreRedDataGen
 		PackOutput output = generator.getPackOutput();
 		
 		RegistrySetBuilder registrySetBuilder = new RegistrySetBuilder();
-		Map<ResourceLocation, BlockModelDefinition> blockStates = new HashMap<>();
-		Map<ResourceLocation, ClientItem> clientItems = new HashMap<>();
-		Map<ResourceLocation, SimpleModel> models = new HashMap<>();
-		Map<ResourceLocation, Recipe<?>> recipes = new HashMap<>();
-		Map<ResourceLocation, LootTable> lootTables = new HashMap<>();
+		Map<Identifier, BlockModelDefinition> blockStates = new HashMap<>();
+		Map<Identifier, ClientItem> clientItems = new HashMap<>();
+		Map<Identifier, SimpleModel> models = new HashMap<>();
+		Map<Identifier, PreviewModel> previewModels = new HashMap<>();
+		Map<Identifier, Map<Block,Map<String,Variant>>> placementPreviews = new HashMap<>();
+		Map<Identifier, Recipe<?>> recipes = new HashMap<>();
+		Map<Identifier, LootTable> lootTables = new HashMap<>();
 		DataMapsProvider dataMaps = new DataMapsProvider(output, holders);
 		TagProvider<Block> blockTags = TagProvider.create(event, Registries.BLOCK, holders);
 		TagProvider<Item> itemTags = TagProvider.create(event, Registries.ITEM, holders);
@@ -139,9 +143,9 @@ public class MoreRedDataGen
 			protected void addTranslations()
 			{} // no
 		};
-		DataGenContext context = new DataGenContext(new HashMap<>(), blockStates, clientItems, models, recipes, lootTables, dataMaps, blockTags, itemTags, lang);
+		DataGenContext context = new DataGenContext(new HashMap<>(), blockStates, clientItems, models, previewModels, placementPreviews, recipes, lootTables, dataMaps, blockTags, itemTags, lang);
 		
-		ResourceLocation blockBlock = ResourceLocation.withDefaultNamespace("block/block");
+		Identifier blockBlock = Identifier.withDefaultNamespace("block/block");
 		
 		String fromSoldering = "%s_from_soldering";
 		
@@ -266,8 +270,8 @@ public class MoreRedDataGen
 					new SizedIngredient(ingredient(Tags.Items.DUSTS_REDSTONE), 5),
 					new SizedIngredient(ingredient(MoreRed.Tags.Items.AXLES), 1))));
 				// dummy item asset for the BER
-				ResourceLocation alternatorAxleId = mangle(helper.id(), "%s_axle");
-				ResourceLocation alternatorAxleModelId = itemModel(alternatorAxleId);
+				Identifier alternatorAxleId = mangle(helper.id(), "%s_axle");
+				Identifier alternatorAxleModelId = itemModel(alternatorAxleId);
 				clientItems.put(alternatorAxleId, new ClientItem(new BlockModelWrapper.Unbaked(alternatorAxleModelId, List.of()), ClientItem.Properties.DEFAULT)); 
 			});
 			
@@ -362,7 +366,7 @@ public class MoreRedDataGen
 				.tags(MoreRed.Tags.Items.TUBES));
 		tubeBlock(Names.REDSTONE_TUBE, "Redstone Tube", context, redstoneTubeBlockState(MoreRed.REDSTONE_TUBE_BLOCK.get()))
 			.model("block/%s_on", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
-				.addTexture("all", ResourceLocation.fromNamespaceAndPath(MoreRed.MODID, "block/redstone_tube_on")))
+				.addTexture("all", Identifier.fromNamespaceAndPath(MoreRed.MODID, "block/redstone_tube_on")))
 			.tags(MoreRed.Tags.Blocks.TUBES, BlockTags.MINEABLE_WITH_PICKAXE)
 			.simpleBlockItem()
 			.help(helper -> helper
@@ -421,12 +425,12 @@ public class MoreRedDataGen
 						'-', ingredient(MoreRed.Tags.Items.AXLES),
 						'G', ingredient(MoreRed.Tags.Items.GEARS),
 						'S', Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()))));
-				ResourceLocation pumpId = mangle(helper.id(), "%s_pump");
-				ResourceLocation pumpBlockModel = blockModel(pumpId);
-				ResourceLocation axleId = mangle(helper.id(), "%s_axle");
-				ResourceLocation axleBlockModel = blockModel(axleId);
-				ResourceLocation bagId = mangle(helper.id(), "%s_bag");
-				ResourceLocation bagBlockModel = blockModel(bagId);
+				Identifier pumpId = mangle(helper.id(), "%s_pump");
+				Identifier pumpBlockModel = blockModel(pumpId);
+				Identifier axleId = mangle(helper.id(), "%s_axle");
+				Identifier axleBlockModel = blockModel(axleId);
+				Identifier bagId = mangle(helper.id(), "%s_bag");
+				Identifier bagBlockModel = blockModel(bagId);
 				clientItems.put(pumpId, new ClientItem(new BlockModelWrapper.Unbaked(pumpBlockModel, List.of()), ClientItem.Properties.DEFAULT));
 				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
 				clientItems.put(bagId, new ClientItem(new BlockModelWrapper.Unbaked(bagBlockModel, List.of()), ClientItem.Properties.DEFAULT));
@@ -492,7 +496,7 @@ public class MoreRedDataGen
 		spool(Names.REDWIRE_SPOOL, "Redwire Spool", context, MoreRed.Tags.Items.RED_ALLOY_WIRES);
 		simpleItem(Names.RED_ALLOY_INGOT, "Red Alloy Ingot", context)
 			.tags(REDSTONE_ALLOY_INGOTS);
-		Util.make(MoreRed.TUBING_PLIERS.get(), pliers -> ItemDataHelper.create(pliers, context, SimpleModel.create(ResourceLocation.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
+		Util.make(MoreRed.TUBING_PLIERS.get(), pliers -> ItemDataHelper.create(pliers, context, SimpleModel.create(Identifier.withDefaultNamespace("item/handheld"), SimpleModel.RenderTypes.CUTOUT)
 			.addTexture("layer0", mangle(MoreRed.id(Names.PLIERS), "item/%s")))
 			.tags(Tags.Items.TOOLS_WRENCH)
 			.recipe(RecipeHelpers.shaped(pliers, 1, CraftingBookCategory.MISC,
@@ -535,7 +539,7 @@ public class MoreRedDataGen
 		lang.add("emi.category.morered.soldering", "Soldering");
 		lang.add("gui.morered.category.soldering", "Soldering");
 		
-		Map<DyeColor,ResourceLocation> airfoilSailDummyModels = Util.makeEnumMap(DyeColor.class,
+		Map<DyeColor,Identifier> airfoilSailDummyModels = Util.makeEnumMap(DyeColor.class,
 			color -> MoreRed.id(String.format("block/%s_airfoil_sail", color)));
 
 		// do stuff that has files for each color
@@ -543,7 +547,7 @@ public class MoreRedDataGen
 		{
 			final DyeColor color = DyeColor.values()[i];
 			final DeferredHolder<Block, PoweredWireBlock> wireBlockHolder = MoreRed.COLORED_CABLE_BLOCKS.get(color);
-			final ResourceLocation wireBlockId = wireBlockHolder.getId();
+			final Identifier wireBlockId = wireBlockHolder.getId();
 			final String modid = wireBlockId.getNamespace();
 			final String wireBlockPath = wireBlockId.getPath();
 			final PoweredWireBlock wireBlock = wireBlockHolder.get();
@@ -556,7 +560,7 @@ public class MoreRedDataGen
 				.blockItemWithoutItemModel()
 				.tags(MoreRed.Tags.Items.COLORED_CABLES, color.getDyedTag());
 			
-			ResourceLocation wireBlockTexture = mangle(wireBlockId, "block/%s");
+			Identifier wireBlockTexture = mangle(wireBlockId, "block/%s");
 			
 			// generate block models
 			// generate the simple models for the block
@@ -568,8 +572,8 @@ public class MoreRedDataGen
 
 			// generate item models
 			models.put(
-				ResourceLocation.fromNamespaceAndPath(wireBlockId.getNamespace(), String.format("item/%s", wireBlockId.getPath())),
-				SimpleModel.createWithoutRenderType(ResourceLocation.fromNamespaceAndPath(modid, "item/colored_cable_template"))
+				Identifier.fromNamespaceAndPath(wireBlockId.getNamespace(), String.format("item/%s", wireBlockId.getPath())),
+				SimpleModel.createWithoutRenderType(Identifier.fromNamespaceAndPath(modid, "item/colored_cable_template"))
 					.addTexture("wire", wireBlockTexture));	
 
 			// generate recipe
@@ -585,7 +589,7 @@ public class MoreRedDataGen
 			// color tubes
 			// capitalize each letter of each word in color name
 			final DeferredHolder<Block, ColoredTubeBlock> tubeBlockHolder = MoreRed.COLORED_TUBE_BLOCKS.get(color);
-			final ResourceLocation tubeBlockId = tubeBlockHolder.getId();
+			final Identifier tubeBlockId = tubeBlockHolder.getId();
 			final String tubeBlockPath = tubeBlockId.getPath();
 			
 			String tubeBlockName = WordUtils.capitalize(tubeBlockPath.replace("_", " "));
@@ -606,8 +610,8 @@ public class MoreRedDataGen
 					.tags(MoreRed.Tags.Items.COLORED_TUBES, color.getDyedTag()));
 			
 			// dummy models for rendering airfoil sails (by wool color)
-			ResourceLocation airfoilSailModelId = airfoilSailDummyModels.get(color);
-			ResourceLocation woolBlockId = ResourceLocation.withDefaultNamespace(String.format("block/%s_wool", color));
+			Identifier airfoilSailModelId = airfoilSailDummyModels.get(color);
+			Identifier woolBlockId = Identifier.withDefaultNamespace(String.format("block/%s_wool", color));
 			models.put(airfoilSailModelId, SimpleModel.createWithoutRenderType(MoreRed.id("block/airfoil_sail_template"))
 				.addTexture("foil", woolBlockId));
 		}
@@ -618,9 +622,9 @@ public class MoreRedDataGen
 			String woodName = entry.getKey();
 			WoodSet woodSet = entry.getValue();
 			Block strippedLog = woodSet.strippedLog();
-			ResourceLocation strippedLogId = BuiltInRegistries.BLOCK.getKey(strippedLog);
-			ResourceLocation strippedLogBlockModel = blockModel(strippedLogId);
-			ResourceLocation strippedLogTopTexture = mangle(strippedLogBlockModel, "%s_top");
+			Identifier strippedLogId = BuiltInRegistries.BLOCK.getKey(strippedLog);
+			Identifier strippedLogBlockModel = blockModel(strippedLogId);
+			Identifier strippedLogTopTexture = mangle(strippedLogBlockModel, "%s_top");
 			boolean isWoodSupported = !woodName.equals("oak");
 			if (isWoodSupported)
 			{
@@ -711,31 +715,77 @@ public class MoreRedDataGen
 			
 			VariantsMechanicalComponent gearshifterMechanicalComponent = VariantsMechanicalComponent.builder(true);
 			BlockState defaultGearshifterState = MoreRed.GEARSHIFTER_BLOCKS.get(woodName).get().defaultBlockState();
-			for (Direction bigDir : Direction.values())
-			{
-				for (int i=0; i<4; i++)
+			Block gearshifterBlock = MoreRed.GEARSHIFTER_BLOCKS.get(woodName).get();
+			Identifier gearshifterBlockId = MoreRed.GEARSHIFTER_BLOCKS.get(woodName).getId();
+			Identifier gearshifterPreviewId = gearshifterBlockId.withSuffix("_preview");
+			var gearshifterPreviews = PlacementPreviewDefinition.variants(previewBuilder -> {
+				for (Direction bigDir : Direction.values())
 				{
-					final int rotation = i;
-					BlockState state = defaultGearshifterState
-						.setValue(GearshifterBlock.ATTACHMENT_DIRECTION, bigDir)
-						.setValue(GearshifterBlock.ROTATION, rotation);
-					Direction smallDir = PlateBlockStateProperties.getOutputDirection(state);
-					Direction axleDir = smallDir.getOpposite();
-					gearshifterMechanicalComponent.addMultiPropertyVariant(builder -> builder
-						.add(GearshifterBlock.ATTACHMENT_DIRECTION, bigDir)
-						.add(GearshifterBlock.ROTATION, rotation),
-						new RawNode(NodeShape.ofSide(bigDir), 0D,0D,0D, 2D, List.of(
-							new RawConnection(Optional.of(bigDir), NodeShape.ofSide(bigDir.getOpposite()), Parity.POSITIVE, 0),
-							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.inversion(bigDir, smallDir), 16))),
-						new RawNode(NodeShape.ofSide(smallDir), 0D,0D,0D, 0.5D, List.of(
-							new RawConnection(Optional.of(smallDir), NodeShape.ofSide(smallDir.getOpposite()), Parity.POSITIVE,0),
-							new RawConnection(Optional.empty(), NodeShape.ofSide(bigDir), Parity.inversion(bigDir, smallDir), 8),
-							new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.POSITIVE, 0))),
-						new RawNode(NodeShape.ofSide(axleDir), 0D,0D,0D, 0.02D, List.of(
-							new RawConnection(Optional.of(axleDir), NodeShape.ofSide(axleDir.getOpposite()), Parity.POSITIVE,0),
-							new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.POSITIVE, 0))));
+					for (int i=0; i<4; i++)
+					{
+						final int rotation = i;
+						BlockState state = defaultGearshifterState
+							.setValue(GearshifterBlock.ATTACHMENT_DIRECTION, bigDir)
+							.setValue(GearshifterBlock.ROTATION, rotation);
+						Direction smallDir = PlateBlockStateProperties.getOutputDirection(state);
+						Direction axleDir = smallDir.getOpposite();
+						gearshifterMechanicalComponent.addMultiPropertyVariant(builder -> builder
+							.add(GearshifterBlock.ATTACHMENT_DIRECTION, bigDir)
+							.add(GearshifterBlock.ROTATION, rotation),
+							new RawNode(NodeShape.ofSide(bigDir), 0D,0D,0D, 2D, List.of(
+								new RawConnection(Optional.of(bigDir), NodeShape.ofSide(bigDir.getOpposite()), Parity.POSITIVE, 0),
+								new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.inversion(bigDir, smallDir), 16))),
+							new RawNode(NodeShape.ofSide(smallDir), 0D,0D,0D, 0.5D, List.of(
+								new RawConnection(Optional.of(smallDir), NodeShape.ofSide(smallDir.getOpposite()), Parity.POSITIVE,0),
+								new RawConnection(Optional.empty(), NodeShape.ofSide(bigDir), Parity.inversion(bigDir, smallDir), 8),
+								new RawConnection(Optional.empty(), NodeShape.ofSide(axleDir), Parity.POSITIVE, 0))),
+							new RawNode(NodeShape.ofSide(axleDir), 0D,0D,0D, 0.02D, List.of(
+								new RawConnection(Optional.of(axleDir), NodeShape.ofSide(axleDir.getOpposite()), Parity.POSITIVE,0),
+								new RawConnection(Optional.empty(), NodeShape.ofSide(smallDir), Parity.POSITIVE, 0))));
+						
+
+						if (bigDir.getAxis() == Direction.Axis.Y || rotation % 2 == 0)
+						{
+							int x = bigDir == Direction.DOWN ? 0
+								: bigDir == Direction.UP ? 180
+								: 270 - 90*rotation;
+							// don't look too closely at the magic numbers
+							int y = switch(bigDir) {
+								case DOWN -> 90 * rotation;
+								case UP -> new int[] {180,90,0,270}[rotation];
+								case NORTH -> new int[] {0,270,180,270}[rotation];
+								case SOUTH -> new int[] {180,90,0,90}[rotation];
+								case WEST -> new int[] {270,180,90,180}[rotation];
+								case EAST -> new int[] {90,0,270,0}[rotation];
+							};
+							Quadrant qx = Quadrant.parseJson(x);
+							Quadrant qy = Quadrant.parseJson(y);
+							previewBuilder.addMultiPropertyVariant(variant -> variant
+								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, bigDir)
+								.addPropertyValue(PlateBlock.ROTATION, rotation),
+								PlacementPreviewDefinition.variant(gearshifterPreviewId, qx, qy));
+						}
+						else // need a z-rotation
+						{
+							Quadrant qx = bigDir == Direction.NORTH ? Quadrant.R270
+								: bigDir == Direction.SOUTH ? Quadrant.R90
+								: (bigDir == Direction.WEST && rotation == 1) ? Quadrant.R180
+								: Quadrant.R0;
+							Quadrant qy = bigDir == Direction.WEST || (bigDir == Direction.EAST && rotation == 1)
+								? Quadrant.R180 : Quadrant.R0;
+							Quadrant qz = (bigDir == Direction.NORTH && rotation == 1)
+								|| (bigDir == Direction.SOUTH && rotation == 1)
+								|| (bigDir == Direction.WEST && rotation == 3)
+								? Quadrant.R90 : Quadrant.R270;
+							previewBuilder.addMultiPropertyVariant(variant -> variant
+								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, bigDir)
+								.addPropertyValue(PlateBlock.ROTATION, rotation),
+								PlacementPreviewDefinition.variant(gearshifterPreviewId, qx, qy, qz));
+						}
+					}
 				}
-			}
+			});
+			placementPreviews.put(gearshifterBlockId, Map.of(gearshifterBlock, gearshifterPreviews));
 			BlockDataHelper.create(MoreRed.GEARSHIFTER_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
 				(id,block) -> simpleLoot(block))
@@ -751,18 +801,27 @@ public class MoreRedDataGen
 					ClientItem.Properties.DEFAULT))
 				.tags(MoreRed.Tags.Items.GEARSHIFTERS)
 				.help(helper -> {
-					ResourceLocation gearId = mangle(helper.id(), "%s_gear");
-					ResourceLocation axleId = mangle(helper.id(), "%s_axle");
-					ResourceLocation gearItemModelId = mangle(itemModel(helper.id()), "%s_gear");
-					ResourceLocation axleItemModelId = mangle(itemModel(helper.id()), "%s_axle");
+					Identifier gearId = mangle(helper.id(), "%s_gear");
+					Identifier axleId = mangle(helper.id(), "%s_axle");
+					Identifier gearItemModelId = mangle(itemModel(helper.id()), "%s_gear");
+					Identifier axleItemModelId = mangle(itemModel(helper.id()), "%s_axle");
+					Identifier gearPreviewModelId = gearItemModelId.withSuffix("_preview");
+					Identifier axlePreviewModelId = axleItemModelId.withSuffix("_preview");
 					models.put(gearItemModelId, SimpleModel.createWithoutRenderType(MoreRed.id("item/gearshifter_gear_template"))
 						.addTexture("side", strippedLogBlockModel)
 						.addTexture("top", strippedLogTopTexture));
 					models.put(axleItemModelId, SimpleModel.createWithoutRenderType(MoreRed.id("item/gearshifter_axle_template"))
 						.addTexture("side", strippedLogBlockModel)
 						.addTexture("top", strippedLogTopTexture));
+					previewModels.put(gearPreviewModelId, new PreviewModel(SimpleModel.create(gearItemModelId, RenderTypes.TRANSLUCENT)));
+					previewModels.put(axlePreviewModelId, new PreviewModel(SimpleModel.create(axleItemModelId, RenderTypes.TRANSLUCENT)));
 					clientItems.put(gearId, new ClientItem(new BlockModelWrapper.Unbaked(gearItemModelId, List.of()), ClientItem.Properties.DEFAULT));
 					clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleItemModelId, List.of()), ClientItem.Properties.DEFAULT));
+					clientItems.put(gearshifterPreviewId, new ClientItem(
+						new CompositeModel.Unbaked(List.of(
+							new BlockModelWrapper.Unbaked(gearPreviewModelId, List.of()),
+							new BlockModelWrapper.Unbaked(axlePreviewModelId, List.of()))),
+						ClientItem.Properties.DEFAULT));
 
 					helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
 						"-G",
@@ -802,8 +861,8 @@ public class MoreRedDataGen
 				}, new RawNode(NodeShape.ofSide(facing), 0D,0D,0D, 2D, List.of()));
 			}
 			
-			ResourceLocation clutchBlockModel = MoreRed.id("block/clutch");
-			ResourceLocation clutchBlockModelExtended = MoreRed.id("block/clutch_extended");
+			Identifier clutchBlockModel = MoreRed.id("block/clutch");
+			Identifier clutchBlockModelExtended = MoreRed.id("block/clutch_extended");
 			BlockDataHelper.create(MoreRed.CLUTCH_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.variants(clutchVariants -> {
 					for (Direction facing : Direction.values())
@@ -842,8 +901,8 @@ public class MoreRedDataGen
 			
 			
 			// make some dummy models for the windcatcher
-			ResourceLocation windcatcherAxleDummyModel = blockModel(MoreRed.id(woodName + "_windcatcher_axle"));
-			ResourceLocation airfoilDummyModel = blockModel(MoreRed.id(woodName + "_" + Names.AIRFOIL));
+			Identifier windcatcherAxleDummyModel = blockModel(MoreRed.id(woodName + "_windcatcher_axle"));
+			Identifier airfoilDummyModel = blockModel(MoreRed.id(woodName + "_" + Names.AIRFOIL));
 			models.put(windcatcherAxleDummyModel, SimpleModel.createWithoutRenderType(MoreRed.id("block/windcatcher_axle_template"))
 				.addTexture("side", strippedLogBlockModel)
 				.addTexture("top", strippedLogTopTexture));
@@ -934,7 +993,7 @@ public class MoreRedDataGen
 				.build())
 			.localize()
 			.tags(BlockTags.MINEABLE_WITH_AXE)
-			.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", ResourceLocation.withDefaultNamespace("block/stripped_oak_log_top")))
+			.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", Identifier.withDefaultNamespace("block/stripped_oak_log_top")))
 			.mechanicalComponent(gearsMechanicalComponent);
 		
 		BlockDataHelper.create(MoreRed.STONEMILL_BLOCK.get(), context,
@@ -979,8 +1038,8 @@ public class MoreRedDataGen
 						'H', Ingredient.of(Items.HOPPER),
 						'#', Ingredient.of(Items.OBSIDIAN))));
 
-				ResourceLocation axleId = mangle(helper.id(), "%s_axle");
-				ResourceLocation axleBlockModel = blockModel(axleId);
+				Identifier axleId = mangle(helper.id(), "%s_axle");
+				Identifier axleBlockModel = blockModel(axleId);
 				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
 			});
 			
@@ -1020,13 +1079,15 @@ public class MoreRedDataGen
 					component)));
 		
 		BlockStateBuilder.addDataProvider(event, blockStates);
-		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems));
-		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models));
+		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems);
+		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models);
+		PreviewModel.addDataProvider(event, previewModels);
+		PlacementPreviewDefinition.addDataProvider(event, placementPreviews);
 		MoreRedAdvancements.genAdvancements(event, lang);
 		generator.addProvider(true, lang);
 
-		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables));
-		generator.addProvider(true, JsonDataProvider.create(holders, output, generator, PackOutput.Target.DATA_PACK, "recipe", Recipe.CODEC, recipes));
+		JsonDataProvider.addProvider(event, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables);
+		JsonDataProvider.addProvider(event, PackOutput.Target.DATA_PACK, "recipe", Recipe.CODEC, recipes);
 		generator.addProvider(true, dataMaps);
 		generator.addProvider(true, blockTags);
 		generator.addProvider(true, itemTags);
@@ -1036,61 +1097,75 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		ResourceLocation model = mangle(blockId, "block/%s");
+		Identifier model = mangle(blockId, "block/%s");
+		Identifier previewId = blockId.withSuffix("_preview");
 		
 		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
-			for (Direction dir : Direction.values())
-			{
-				for (int i = 0; i < 4; i++)
+			Map<String, Variant> previewVariants = PlacementPreviewDefinition.variants(previewBuilder -> {
+				for (Direction dir : Direction.values())
 				{
-					final int rotationIndex = i;
-					if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+					for (int i = 0; i < 4; i++)
 					{
-						int x = dir == Direction.DOWN ? 0
-							: dir == Direction.UP ? 180
-							: 270 - 90*rotationIndex;
-						// don't look too closely at the magic numbers
-						int y = switch(dir) {
-							case DOWN -> 90 * rotationIndex;
-							case UP -> new int[] {180,90,0,270}[rotationIndex];
-							case NORTH -> new int[] {0,270,180,270}[rotationIndex];
-							case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
-							case WEST -> new int[] {270,180,90,180}[rotationIndex];
-							case EAST -> new int[] {90,0,270,0}[rotationIndex];
-						};
-						Quadrant qx = Quadrant.parseJson(x);
-						Quadrant qy = Quadrant.parseJson(y);
-						variantBuilder.addMultiPropertyVariant(variant -> variant
+						final int rotationIndex = i;
+						if (dir.getAxis() == Direction.Axis.Y || rotationIndex % 2 == 0)
+						{
+							int x = dir == Direction.DOWN ? 0
+								: dir == Direction.UP ? 180
+								: 270 - 90*rotationIndex;
+							// don't look too closely at the magic numbers
+							int y = switch(dir) {
+								case DOWN -> 90 * rotationIndex;
+								case UP -> new int[] {180,90,0,270}[rotationIndex];
+								case NORTH -> new int[] {0,270,180,270}[rotationIndex];
+								case SOUTH -> new int[] {180,90,0,90}[rotationIndex];
+								case WEST -> new int[] {270,180,90,180}[rotationIndex];
+								case EAST -> new int[] {90,0,270,0}[rotationIndex];
+							};
+							Quadrant qx = Quadrant.parseJson(x);
+							Quadrant qy = Quadrant.parseJson(y);
+							variantBuilder.addMultiPropertyVariant(variant -> variant
+									.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+									.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
+									BlockStateBuilder.model(model, qx, qy)
+								);
+							previewBuilder.addMultiPropertyVariant(variant -> variant
 								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
 								.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
-								BlockStateBuilder.model(model, qx, qy)
-							);
-					}
-					else // need a z-rotation
-					{
-						Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
-							: dir == Direction.SOUTH ? Quadrant.R90
-							: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
-							: Quadrant.R0;
-						Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
-							? Quadrant.R180 : Quadrant.R0;
-						Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
-							|| (dir == Direction.SOUTH && rotationIndex == 1)
-							|| (dir == Direction.WEST && rotationIndex == 3)
-							? Quadrant.R90 : Quadrant.R270;
-						variantBuilder.addMultiPropertyVariant(variant -> variant
-							.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
-							.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
-							new UnbakedXyzBlockStateModel(model, qx, qy, qz)
-						);
+								PlacementPreviewDefinition.variant(previewId, qx, qy));
+						}
+						else // need a z-rotation
+						{
+							Quadrant qx = dir == Direction.NORTH ? Quadrant.R270
+								: dir == Direction.SOUTH ? Quadrant.R90
+								: (dir == Direction.WEST && rotationIndex == 1) ? Quadrant.R180
+								: Quadrant.R0;
+							Quadrant qy = dir == Direction.WEST || (dir == Direction.EAST && rotationIndex == 1)
+								? Quadrant.R180 : Quadrant.R0;
+							Quadrant qz = (dir == Direction.NORTH && rotationIndex == 1)
+								|| (dir == Direction.SOUTH && rotationIndex == 1)
+								|| (dir == Direction.WEST && rotationIndex == 3)
+								? Quadrant.R90 : Quadrant.R270;
+							variantBuilder.addMultiPropertyVariant(variant -> variant
+								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+								.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
+								BlockStateBuilder.model(model, qx, qy, qz));
+							previewBuilder.addMultiPropertyVariant(variant -> variant
+								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
+								.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
+								PlacementPreviewDefinition.variant(previewId, qx, qy, qz));
+						}
 					}
 				}
-			}	
+			});
+			context.placementPreviews().put(blockId, Map.of(block, previewVariants));
 		});
 		LootTable lootTable = simpleLoot(block);
 		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
+		Identifier previewModel = previewId.withPrefix("block/");
+		context.clientItems().put(previewId, new ClientItem(new UnbakedLogicGateModel(previewModel), ClientItem.Properties.DEFAULT));
+		context.previewModels().put(previewModel, new PreviewModel(SimpleModel.create(model, RenderTypes.TRANSLUCENT)));
 		return blockHelper;
 	}
 	
@@ -1098,23 +1173,23 @@ public class MoreRedDataGen
 	{
 		var blockHelper = plateBlock(blockPath, name, context);
 		blockHelper
-			.simpleBlockItem(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT))
+			.blockItemUsingBlockModel(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT))
 			.help(helper -> plateRecipes(helper, context, redstone, recipePattern));
 		return blockHelper;
 	}
 	
 	static BlockDataHelper bitwisePlateBlock(String blockPath, String name, String symbolTexture, DataGenContext context)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		ResourceLocation parent = switch(block)
+		Identifier parent = switch(block)
 		{
 			case ThreeInputBitwiseGateBlock $$$ -> MoreRed.id("block/three_input_bitwise_logic_plate_template");
 			case TwoInputBitwiseGateBlock $$ -> MoreRed.id("block/two_input_bitwise_logic_plate_template");
 			default -> MoreRed.id("block/single_input_bitwise_logic_plate_template"); 
 		};
 
-		ResourceLocation symbolLocation = MoreRed.id("block/" + symbolTexture);
+		Identifier symbolLocation = MoreRed.id("block/" + symbolTexture);
 		
 		context.models().put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
 		BlockDataHelper helper = plateBlock(blockPath, name, context);
@@ -1129,9 +1204,9 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper postBlock(String blockPath, String name, DataGenContext context)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		ResourceLocation blockModel = blockModel(blockId);
+		Identifier blockModel = blockModel(blockId);
 		BlockModelDefinition blockState = BlockStateBuilder.variants(variants -> {
 			int[] xs = {0,180,270,90,90,90};
 			int[] ys = {0,0,0,0,90,270};
@@ -1160,22 +1235,22 @@ public class MoreRedDataGen
 			.build();
 	}
 	
-	static ResourceLocation mangle(ResourceLocation id, String pathFormatter)
+	static Identifier mangle(Identifier id, String pathFormatter)
 	{
-		return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(pathFormatter, id.getPath()));
+		return Identifier.fromNamespaceAndPath(id.getNamespace(), String.format(pathFormatter, id.getPath()));
 	}
 	
-	static ResourceLocation blockId(Block block)
+	static Identifier blockId(Block block)
 	{
-		return block.builtInRegistryHolder().key().location();
+		return block.builtInRegistryHolder().key().identifier();
 	}
 	
-	static ResourceLocation blockModel(ResourceLocation blockId)
+	static Identifier blockModel(Identifier blockId)
 	{
 		return mangle(blockId, "block/%s");
 	}
 	
-	static ResourceLocation itemModel(ResourceLocation itemId)
+	static Identifier itemModel(Identifier itemId)
 	{
 		return mangle(itemId, "item/%s");
 	}
@@ -1183,13 +1258,13 @@ public class MoreRedDataGen
 	static BlockDataHelper hexidecrubrometerBlock(DataGenContext context)
 	{
 		Block block = MoreRed.HEXIDECRUBROMETER_BLOCK.get();
-		ResourceLocation blockId = MoreRed.HEXIDECRUBROMETER_BLOCK.getId();
+		Identifier blockId = MoreRed.HEXIDECRUBROMETER_BLOCK.getId();
 		
 		var helper = BlockDataHelper.create(block, context, BlockStateBuilder.variants(variants -> {
 			for (int i=0; i<16; i++)
 			{
 				final int power = i; // lambdas!
-				ResourceLocation modelId = mangle(blockModel(blockId), "%s_" + String.valueOf(power));
+				Identifier modelId = mangle(blockModel(blockId), "%s_" + String.valueOf(power));
 				SimpleModel simpleModel = SimpleModel.createWithoutRenderType(MoreRed.id("block/hexidecrubrometer_template"))
 					.addTexture("display", modelId);
 				context.models().put(modelId, simpleModel);
@@ -1234,10 +1309,10 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper switchedPlateBlock(String blockPath, String blockName, DataGenContext context, int redstone, String... recipePattern)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		ResourceLocation model = mangle(blockId, "block/%s");
-		ResourceLocation switchedModel = mangle(blockId, "block/%s_switched");
+		Identifier model = mangle(blockId, "block/%s");
+		Identifier switchedModel = mangle(blockId, "block/%s_switched");
 		
 		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
 			for (Direction dir : Direction.values())
@@ -1278,8 +1353,8 @@ public class MoreRedDataGen
 							|| (dir == Direction.SOUTH && rotationIndex == 1)
 							|| (dir == Direction.WEST && rotationIndex == 3)
 							? Quadrant.R90 : Quadrant.R270;
-						unbakedModel = new UnbakedXyzBlockStateModel(model, qx, qy, qz);
-						unbakedSwitchedModel = new UnbakedXyzBlockStateModel(switchedModel, qx, qy, qz);
+						unbakedModel = BlockStateBuilder.model(model, qx, qy, qz);
+						unbakedSwitchedModel = BlockStateBuilder.model(switchedModel, qx, qy, qz);
 					}
 					
 					variantBuilder.addMultiPropertyVariant(variant -> variant
@@ -1305,7 +1380,7 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper wireBlock(String blockPath, String blockName, DataGenContext context)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		
 		Quadrant r0 = Quadrant.R0;
@@ -1314,10 +1389,10 @@ public class MoreRedDataGen
 		Quadrant r270 = Quadrant.R270;
 
 		// generate blockstate json
-		ResourceLocation nodeModel = mangle(blockId, "block/%s_node");
-		ResourceLocation elbowModel = mangle(blockId, "block/%s_elbow");
-		ResourceLocation lineModel = mangle(blockId, "block/%s_line");
-		ResourceLocation edgeModel = mangle(blockId, "block/%s_edge");
+		Identifier nodeModel = mangle(blockId, "block/%s_node");
+		Identifier elbowModel = mangle(blockId, "block/%s_elbow");
+		Identifier lineModel = mangle(blockId, "block/%s_line");
+		Identifier edgeModel = mangle(blockId, "block/%s_edge");
 		BlockModelDefinition blockState = BlockStateBuilder.multipart(multipart -> multipart
 			.apply(new UnbakedWirePartBlockStateModel(lineModel, edgeModel))
 			.applyWhen(BlockStateBuilder.model(nodeModel), AbstractWireBlock.DOWN, true)
@@ -1377,7 +1452,7 @@ public class MoreRedDataGen
 
 	static BlockDataHelper simpleBlock(String blockPath, String blockName, DataGenContext context)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		context.lang().add(block, blockName);
 		return BlockDataHelper.create(block, context,
@@ -1387,7 +1462,7 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper tubeBlock(String blockPath, String blockName, DataGenContext context, BlockModelDefinition blockState)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.baseModel(SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
@@ -1401,7 +1476,7 @@ public class MoreRedDataGen
 	
 	static BlockDataHelper sixWayBlock(String blockPath, String blockName, DataGenContext context)
 	{
-		ResourceLocation blockId = MoreRed.id(blockPath);
+		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		return BlockDataHelper.create(block, context, sixWayBlockState(block), simpleLoot(block))
 			.localize(blockName);
@@ -1451,10 +1526,10 @@ public class MoreRedDataGen
 	
 	static ItemDataHelper spool(String itemPath, String name, DataGenContext context, TagKey<Item> wireIngredientTag)
 	{
-		ResourceLocation itemId = MoreRed.id(itemPath);
+		Identifier itemId = MoreRed.id(itemPath);
 		Item item = BuiltInRegistries.ITEM.getValue(itemId);
-		return ItemDataHelper.create(item, context, SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("item/handheld"))
-				.addTexture("layer0", ResourceLocation.withDefaultNamespace("item/stick"))
+		return ItemDataHelper.create(item, context, SimpleModel.createWithoutRenderType(Identifier.withDefaultNamespace("item/handheld"))
+				.addTexture("layer0", Identifier.withDefaultNamespace("item/stick"))
 				.addTexture("layer1", mangle(itemId, "item/%s")))
 		.localize(name)
 		.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -1468,17 +1543,17 @@ public class MoreRedDataGen
 	
 	static ItemDataHelper simpleItem(String itemPath, String name, DataGenContext context)
 	{
-		ResourceLocation itemId = MoreRed.id(itemPath);
+		Identifier itemId = MoreRed.id(itemPath);
 		Item item = BuiltInRegistries.ITEM.getValue(itemId);
-		return ItemDataHelper.create(item, context, SimpleModel.createWithoutRenderType(ResourceLocation.withDefaultNamespace("item/generated"))
+		return ItemDataHelper.create(item, context, SimpleModel.createWithoutRenderType(Identifier.withDefaultNamespace("item/generated"))
 			.addTexture("layer0", mangle(itemId, "item/%s")))
 			.localize(name);
 	}
 	
 	private static BlockModelDefinition tubeBlockState(Block block)
 	{
-		ResourceLocation blockModel = BlockDataHelper.blockModel(block);
-		ResourceLocation extension = mangle(blockModel, "%s_extension");
+		Identifier blockModel = BlockDataHelper.blockModel(block);
+		Identifier extension = mangle(blockModel, "%s_extension");
 		return BlockStateBuilder.multipart(multipart -> multipart
 			.apply(BlockStateBuilder.model(blockModel))
 			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R90, Quadrant.R0, true), TubeBlock.DOWN, true)
@@ -1491,10 +1566,10 @@ public class MoreRedDataGen
 	
 	private static BlockModelDefinition redstoneTubeBlockState(Block block)
 	{
-		ResourceLocation blockModel = BlockDataHelper.blockModel(block);
-		ResourceLocation offModel = blockModel;
-		ResourceLocation onModel = mangle(blockModel, "%s_on");
-		ResourceLocation extension = MoreRed.id("block/tube_extension");
+		Identifier blockModel = BlockDataHelper.blockModel(block);
+		Identifier offModel = blockModel;
+		Identifier onModel = mangle(blockModel, "%s_on");
+		Identifier extension = MoreRed.id("block/tube_extension");
 		return BlockStateBuilder.multipart(multipart -> multipart
 			.applyWhen(BlockStateBuilder.model(offModel), RedstoneTubeBlock.POWERED, false)
 			.applyWhen(BlockStateBuilder.model(onModel), RedstoneTubeBlock.POWERED, true)
@@ -1509,7 +1584,7 @@ public class MoreRedDataGen
 	private static BlockModelDefinition sixWayBlockState(Block block)
 	{
 		return BlockStateBuilder.variants(builder -> {
-			ResourceLocation model = BlockDataHelper.blockModel(block);
+			Identifier model = BlockDataHelper.blockModel(block);
 			for (Direction facing : Direction.values())
 			{
 				Quadrant x = switch(facing) {

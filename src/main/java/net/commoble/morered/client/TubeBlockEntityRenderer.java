@@ -36,7 +36,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
@@ -49,9 +49,9 @@ import net.minecraft.world.phys.Vec3;
 
 public record TubeBlockEntityRenderer(ItemModelResolver resolver, MaterialSet materials) implements BlockEntityRenderer<TubeBlockEntity, TubeRenderState>
 {
-	public static final Map<ResourceLocation,Material> MATERIALS = new HashMap<>();
+	public static final Map<Identifier,Material> MATERIALS = new HashMap<>();
 	@SuppressWarnings("deprecation")
-	public static Material getMaterial(ResourceLocation textureId)
+	public static Material getMaterial(Identifier textureId)
 	{
 		return MATERIALS.computeIfAbsent(textureId, id -> new Material(TextureAtlas.LOCATION_BLOCKS, id));
 	}

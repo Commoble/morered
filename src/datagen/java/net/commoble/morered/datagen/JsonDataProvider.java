@@ -38,7 +38,8 @@ import net.minecraft.data.DataGenerator;
 import net.minecraft.data.DataProvider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.PathProvider;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
+import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
  * Generic data provider that uses DataFixerUpper Codecs to generate jsons from
@@ -61,18 +62,18 @@ import net.minecraft.resources.ResourceLocation;
  *			An ID-to-object map that defines the objects to generate jsons
  *			from and where the jsons will be generated.
  */
-public record JsonDataProvider<T>(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects, String uniqueName) implements DataProvider
+public record JsonDataProvider<T>(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<Identifier,T> objects, String uniqueName) implements DataProvider
 {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	
-	public static <T> JsonDataProvider<T> create(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects)
+	public static <T> void addProvider(GatherDataEvent event, PackOutput.Target target, String folder, Codec<T> codec, Map<Identifier,T> objects)
 	{
-		return named(registries, packOutput, generator, target, folder, codec, objects, folder);
+		addNamed(event, target, folder, codec, objects, folder);
 	}
 	
-	public static <T> JsonDataProvider<T> named(CompletableFuture<HolderLookup.Provider> registries, PackOutput packOutput, DataGenerator generator, PackOutput.Target target, String folder, Codec<T> codec, Map<ResourceLocation,T> objects, String uniqueName)
+	public static <T> void addNamed(GatherDataEvent event, PackOutput.Target target, String folder, Codec<T> codec, Map<Identifier,T> objects, String uniqueName)
 	{
-		return new JsonDataProvider<>(registries, packOutput, generator, target, folder, codec, objects, uniqueName);
+		event.addProvider(new JsonDataProvider<>(event.getLookupProvider(), event.getGenerator().getPackOutput(), event.getGenerator(), target, folder, codec, objects, uniqueName));
 	}
 	
 	@Override

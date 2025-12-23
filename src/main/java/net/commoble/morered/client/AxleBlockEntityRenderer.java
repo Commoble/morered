@@ -48,7 +48,6 @@ public record AxleBlockEntityRenderer(ItemModelResolver resolver, Map<Block, Ite
 		MechanicalState mechanicalState = states.getOrDefault(NodeShape.ofCube(), MechanicalState.ZERO);
 		float radiansPerSecond = (float)mechanicalState.angularVelocity();
 		ItemStack stack = this.stackCache.computeIfAbsent(be.getBlockState().getBlock(), ItemStack::new);
-		@SuppressWarnings("resource")
 		Level level = Minecraft.getInstance().level;
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds

@@ -26,19 +26,19 @@ import net.minecraft.client.renderer.item.ItemStackRenderState;
 import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.entity.ItemOwner;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation airfoil, Map<DyeColor,ResourceLocation> airfoilSails) implements ItemModel.Unbaked
+public record UnbakedWindcatcherModel(Identifier axle, Identifier airfoil, Map<DyeColor,Identifier> airfoilSails) implements ItemModel.Unbaked
 {
 	public static final MapCodec<UnbakedWindcatcherModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			ResourceLocation.CODEC.fieldOf("axle").forGetter(UnbakedWindcatcherModel::axle),
-			ResourceLocation.CODEC.fieldOf("airfoil").forGetter(UnbakedWindcatcherModel::airfoil),
-			Codec.simpleMap(DyeColor.CODEC, ResourceLocation.CODEC, StringRepresentable.keys(DyeColor.values())).codec().fieldOf("airfoil_sails").forGetter(UnbakedWindcatcherModel::airfoilSails)
+			Identifier.CODEC.fieldOf("axle").forGetter(UnbakedWindcatcherModel::axle),
+			Identifier.CODEC.fieldOf("airfoil").forGetter(UnbakedWindcatcherModel::airfoil),
+			Codec.simpleMap(DyeColor.CODEC, Identifier.CODEC, StringRepresentable.keys(DyeColor.values())).codec().fieldOf("airfoil_sails").forGetter(UnbakedWindcatcherModel::airfoilSails)
 		).apply(builder, UnbakedWindcatcherModel::new));
 
 	@Override
@@ -74,7 +74,7 @@ public record UnbakedWindcatcherModel(ResourceLocation axle, ResourceLocation ai
 					ModelUtil.wrapBlockModel(context, id, modelState, List.of())));
 		}
 		return new WindcatcherModel(
-			ModelUtil.wrapBlockModel(context, this.axle, BlockModelRotation.X0_Y0, List.of()),
+			ModelUtil.wrapBlockModel(context, this.axle, BlockModelRotation.IDENTITY, List.of()),
 			bakedFoils,
 			bakedSails);
 	}

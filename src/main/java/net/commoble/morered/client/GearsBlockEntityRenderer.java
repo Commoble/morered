@@ -15,7 +15,7 @@ import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.client.GearsBlockEntityRenderer.GearsRenderState;
 import net.commoble.morered.util.Lambdas;
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -95,7 +95,6 @@ public record GearsBlockEntityRenderer(ItemModelResolver resolver) implements Bl
 		{
 			Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 			BlockState state = be.getBlockState();
-			@SuppressWarnings("resource")
 			Level level = Minecraft.getInstance().level;
 			int gameTimeTicks = MechanicalState.getMachineTicks(level);
 			float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds

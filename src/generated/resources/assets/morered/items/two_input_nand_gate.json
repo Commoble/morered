@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "morered:logic_gate",
-    "model": "morered:item/two_input_nand_gate"
+    "model": "morered:block/two_input_nand_gate"
   }
 }

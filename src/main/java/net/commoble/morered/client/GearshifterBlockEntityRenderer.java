@@ -25,7 +25,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -45,9 +45,9 @@ public record GearshifterBlockEntityRenderer(ItemModelResolver resolver, Map<Blo
 	{
 		public static GearshifterModels of(Block block)
 		{
-			ResourceLocation blockId = BuiltInRegistries.BLOCK.getKey(block);
-			ResourceLocation gearModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_gear");
-			ResourceLocation axleModel = ResourceLocation.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
+			Identifier blockId = BuiltInRegistries.BLOCK.getKey(block);
+			Identifier gearModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_gear");
+			Identifier axleModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
 			ItemStack gear = new ItemStack(Items.STICK);
 			gear.set(DataComponents.ITEM_MODEL, gearModel);
 			ItemStack axle = new ItemStack(Items.STICK);

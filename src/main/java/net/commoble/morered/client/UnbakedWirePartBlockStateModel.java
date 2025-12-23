@@ -16,18 +16,18 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 
-public record UnbakedWirePartBlockStateModel(ResourceLocation line, ResourceLocation edge) implements CustomUnbakedBlockStateModel
+public record UnbakedWirePartBlockStateModel(Identifier line, Identifier edge) implements CustomUnbakedBlockStateModel
 {
 	public static final MapCodec<UnbakedWirePartBlockStateModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			ResourceLocation.CODEC.fieldOf("line").forGetter(UnbakedWirePartBlockStateModel::line),
-			ResourceLocation.CODEC.fieldOf("edge").forGetter(UnbakedWirePartBlockStateModel::edge)
+			Identifier.CODEC.fieldOf("line").forGetter(UnbakedWirePartBlockStateModel::line),
+			Identifier.CODEC.fieldOf("edge").forGetter(UnbakedWirePartBlockStateModel::edge)
 		).apply(builder, UnbakedWirePartBlockStateModel::new));
 	
 	@Override

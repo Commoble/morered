@@ -7,7 +7,7 @@ import net.commoble.morered.wire_post.SlackInterpolator;
 import net.commoble.morered.wire_post.WirePostBlockEntity;
 import net.commoble.morered.wire_post.WirePostBlockEntity.WirePostConnectionRenderInfo;
 import net.minecraft.client.renderer.LightTexture;
-import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.rendertype.RenderType;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;

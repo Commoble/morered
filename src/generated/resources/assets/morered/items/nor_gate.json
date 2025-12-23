@@ -1,6 +1,6 @@
 {
   "model": {
     "type": "morered:logic_gate",
-    "model": "morered:item/nor_gate"
+    "model": "morered:block/nor_gate"
   }
 }

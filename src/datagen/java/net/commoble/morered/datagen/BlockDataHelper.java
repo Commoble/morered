@@ -11,7 +11,7 @@ import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.storage.loot.LootTable;
@@ -20,21 +20,21 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public record BlockDataHelper(Block block, DataGenContext context)
 {
 	public static BlockDataHelper create(Block block, DataGenContext context,
-		BiFunction<ResourceLocation, Block, BlockModelDefinition> blockstate,
-		BiFunction<ResourceLocation, Block, LootTable> lootTable)
+		BiFunction<Identifier, Block, BlockModelDefinition> blockstate,
+		BiFunction<Identifier, Block, LootTable> lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
-		ResourceLocation id = helper.id();
+		Identifier id = helper.id();
 		context.blockStates().put(id, blockstate.apply(id,block));
-		context.lootTables().put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "blocks/" + id.getPath()), lootTable.apply(id,block));
+		context.lootTables().put(Identifier.fromNamespaceAndPath(id.getNamespace(), "blocks/" + id.getPath()), lootTable.apply(id,block));
 		return helper;
 	}
 	
 	public static BlockDataHelper createWithoutLoot(Block block, DataGenContext context,
-		BiFunction<ResourceLocation, Block, BlockModelDefinition> blockstate)
+		BiFunction<Identifier, Block, BlockModelDefinition> blockstate)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
-		ResourceLocation id = helper.id();
+		Identifier id = helper.id();
 		context.blockStates().put(id, blockstate.apply(id,block));
 		return helper;
 	}
@@ -50,7 +50,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		context.blockStates().put(helper.id(), blockstate);
-		context.lootTables().put(ResourceLocation.fromNamespaceAndPath(helper.id().getNamespace(), String.format("blocks/%s", helper.id().getPath())), lootTable);
+		context.lootTables().put(Identifier.fromNamespaceAndPath(helper.id().getNamespace(), String.format("blocks/%s", helper.id().getPath())), lootTable);
 		return helper;
 	}
 	
@@ -101,8 +101,8 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	 */
 	public BlockDataHelper model(String formatString, SimpleModel model)
 	{
-		ResourceLocation id = this.id();
-		context.models().put(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), String.format(formatString, id.getPath())), model);
+		Identifier id = this.id();
+		context.models().put(Identifier.fromNamespaceAndPath(id.getNamespace(), String.format(formatString, id.getPath())), model);
 		return this;
 	}
 	
@@ -112,19 +112,19 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return this;
 	}
 	
-	public ResourceLocation id()
+	public Identifier id()
 	{
 		return BuiltInRegistries.BLOCK.getKey(this.block);
 	}
 	
-	public static ResourceLocation blockModel(Block block)
+	public static Identifier blockModel(Block block)
 	{
 		return blockModel(BuiltInRegistries.BLOCK.getKey(block));
 	}
 	
-	public static ResourceLocation blockModel(ResourceLocation location)
+	public static Identifier blockModel(Identifier location)
 	{
-		return ResourceLocation.fromNamespaceAndPath(location.getNamespace(), "block/" + location.getPath());
+		return Identifier.fromNamespaceAndPath(location.getNamespace(), "block/" + location.getPath());
 	}
 	
 	public ItemDataHelper blockItemWithoutItemModel()
@@ -137,7 +137,12 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return ItemDataHelper.create(this.block.asItem(), context, new ClientItem(new BlockModelWrapper.Unbaked(blockModel(this.id()), List.of()), ClientItem.Properties.DEFAULT));
 	}
 	
-	public ItemDataHelper blockItemWithoutItemModel(Function<ResourceLocation, ClientItem> modelFactory)
+	public ItemDataHelper blockItemUsingBlockModel(Function<Identifier, ClientItem> modelFactory)
+	{
+		return ItemDataHelper.create(this.block.asItem(), context, modelFactory.apply(blockModel(this.id())));
+	}
+	
+	public ItemDataHelper blockItemWithoutItemModel(Function<Identifier, ClientItem> modelFactory)
 	{
 		return ItemDataHelper.create(this.block.asItem(), context, modelFactory.apply(ItemDataHelper.itemModel(this.id())));
 	}
@@ -147,7 +152,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return blockItem(SimpleModel.createWithoutRenderType(blockModel(this.id())));
 	}
 	
-	public ItemDataHelper simpleBlockItem(Function<ResourceLocation, ClientItem> modelFactory)
+	public ItemDataHelper simpleBlockItem(Function<Identifier, ClientItem> modelFactory)
 	{
 		return blockItem(modelFactory, SimpleModel.createWithoutRenderType(blockModel(this.id())));
 	}
@@ -157,7 +162,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return blockItem(modelId -> new ClientItem(new BlockModelWrapper.Unbaked(modelId, List.of()), ClientItem.Properties.DEFAULT), model);
 	}
 	
-	public ItemDataHelper blockItem(Function<ResourceLocation, ClientItem> modelFactory, SimpleModel model)
+	public ItemDataHelper blockItem(Function<Identifier, ClientItem> modelFactory, SimpleModel model)
 	{
 		return ItemDataHelper.create(this.block.asItem(), context, modelFactory.apply(ItemDataHelper.itemModel(id())), model);
 	}

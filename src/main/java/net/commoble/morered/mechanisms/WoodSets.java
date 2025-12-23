@@ -3,7 +3,7 @@ package net.commoble.morered.mechanisms;
 import java.util.Map;
 import java.util.TreeMap;
 
-import net.minecraft.Util;
+import net.minecraft.util.Util;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.SoundType;

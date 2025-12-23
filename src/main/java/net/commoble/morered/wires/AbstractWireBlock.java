@@ -780,7 +780,7 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 		event.setCanceled(true);
 		
 		// we still have to redo a few of the existing checks
-		if (!serverPlayer.canInteractWithBlock(pos, 1.0)
+		if (!serverPlayer.isWithinBlockInteractionRange(pos, 1.0)
 			|| (pos.getY() >= serverLevel.getMaxY() || pos.getY() < serverLevel.getMinY())
 			|| !serverLevel.mayInteract(serverPlayer, pos) // checks spawn protection and world border
 			|| CommonHooks.fireBlockBreak(serverLevel, serverPlayer.gameMode.getGameModeForPlayer(), serverPlayer, pos, state).isCanceled()

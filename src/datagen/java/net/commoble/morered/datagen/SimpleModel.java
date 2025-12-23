@@ -33,25 +33,25 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.neoforged.neoforge.client.NamedRenderTypeManager;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**
  * Represents a parented model file. The codec can be used for datagen via {@link #addDataProvider(GatherDataEvent, String, DynamicOps, Map)}.
- * @param parent ResourceLocation of the parent model
- * @param textures Map of String texture identifiers (specific to this model or its parent) to ResourceLocation ids of textures
- * @param renderType Optional ResourceLocation id of a render type group, see {@link NamedRenderTypeManager}.
+ * @param parent Identifier of the parent model
+ * @param textures Map of String texture identifiers (specific to this model or its parent) to Identifier ids of textures
+ * @param renderType Optional Identifier id of a render type group, see {@link NamedRenderTypeManager}.
  * If renderType is absent then the block renderer will check for a render type registered to the block,
  * or else use solid. Explicitly specifying a solid rendertype here is preferable as it averts a map lookup.
  */
-public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation> textures, Optional<ResourceLocation> renderType)
+public record SimpleModel(Identifier parent, Map<String, Identifier> textures, Optional<Identifier> renderType)
 {
 	/** codec **/
 	public static final Codec<SimpleModel> CODEC = RecordCodecBuilder.create(builder -> builder.group(
-			ResourceLocation.CODEC.fieldOf("parent").forGetter(SimpleModel::parent),
-			Codec.unboundedMap(Codec.STRING, ResourceLocation.CODEC).optionalFieldOf("textures", Map.of()).forGetter(SimpleModel::textures),
-			ResourceLocation.CODEC.optionalFieldOf("render_type").forGetter(SimpleModel::renderType)
+			Identifier.CODEC.fieldOf("parent").forGetter(SimpleModel::parent),
+			Codec.unboundedMap(Codec.STRING, Identifier.CODEC).optionalFieldOf("textures", Map.of()).forGetter(SimpleModel::textures),
+			Identifier.CODEC.optionalFieldOf("render_type").forGetter(SimpleModel::renderType)
 		).apply(builder, SimpleModel::new));
 	
 	/**
@@ -59,9 +59,9 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 	 * The model will inherit a render type from its parent if it has one,
 	 * baked block models will use the block rendertype lookup map if no parent has a render type.
 	 * @param parent Model id of the parent modek, e.g. "minecraft:block/cube_all"
-	 * @return Builder-like model that allows chaining via {@link SimpleModel#addTexture(String, ResourceLocation)}
+	 * @return Builder-like model that allows chaining via {@link SimpleModel#addTexture(String, Identifier)}
 	 */
-	public static SimpleModel createWithoutRenderType(ResourceLocation parent)
+	public static SimpleModel createWithoutRenderType(Identifier parent)
 	{
 		return new SimpleModel(parent, new HashMap<>(), Optional.empty());
 	}
@@ -69,9 +69,9 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 	/**
 	 * Creates a SimpleModel with specified parent and solid render type.
 	 * @param parent Model id of the parent modek, e.g. "minecraft:block/cube_all"
-	 * @return Builder-like model that allows chaining via {@link SimpleModel#addTexture(String, ResourceLocation)}
+	 * @return Builder-like model that allows chaining via {@link SimpleModel#addTexture(String, Identifier)}
 	 */
-	public static SimpleModel create(ResourceLocation parent)
+	public static SimpleModel create(Identifier parent)
 	{
 		return create(parent, RenderTypes.SOLID);
 	}
@@ -79,21 +79,21 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 	/**
 	 * Creates a SimpleModel with specified parent and render type.
 	 * @param parent Model id of the parent modek, e.g. "minecraft:block/cube_all"
-	 * @param renderType ResourceLocation 
-	 * @return Builder-like model that allows chaining via {@link SimpleModel#addTexture(String, ResourceLocation)}
+	 * @param renderType Identifier 
+	 * @return Builder-like model that allows chaining via {@link SimpleModel#addTexture(String, Identifier)}
 	 */
-	public static SimpleModel create(ResourceLocation parent, ResourceLocation renderType)
+	public static SimpleModel create(Identifier parent, Identifier renderType)
 	{
 		return new SimpleModel(parent, new HashMap<>(), Optional.of(renderType));
 	}
 	
 	/**
-	 * Chaining method for building a SimpleModel. Call on a SimpleModel created via {@link SimpleModel#create(ResourceLocation)}
+	 * Chaining method for building a SimpleModel. Call on a SimpleModel created via {@link SimpleModel#create(Identifier)}
 	 * @param textureName Texture key in the parent model, e.g. "texture" or "down" or "particle"
 	 * @param textureId e.g. "minecraft:block/cobblestone"
 	 * @return This SimpleModel, or crashes if this was called on a deserialized SimpleModel as the map will not be mutable
 	 */
-	public SimpleModel addTexture(String textureName, ResourceLocation textureId)
+	public SimpleModel addTexture(String textureName, Identifier textureId)
 	{
 		this.textures.put(textureName, textureId);
 		return this;
@@ -105,14 +105,14 @@ public record SimpleModel(ResourceLocation parent, Map<String, ResourceLocation>
 	public static class RenderTypes
 	{
 		/** Vanilla solid render type, no transparency **/
-		public static final ResourceLocation SOLID = ResourceLocation.withDefaultNamespace("solid");
+		public static final Identifier SOLID = Identifier.withDefaultNamespace("solid");
 		/** Vanilla cutout render type, all-or-nothing transparency **/
-		public static final ResourceLocation CUTOUT = ResourceLocation.withDefaultNamespace("cutout");
+		public static final Identifier CUTOUT = Identifier.withDefaultNamespace("cutout");
 		/** Vanilla cutout_mipped render type, all-or-nothing transparency and mipmapping **/ 
-		public static final ResourceLocation CUTOUT_MIPPED = ResourceLocation.withDefaultNamespace("cutout_mipped");
+		public static final Identifier CUTOUT_MIPPED = Identifier.withDefaultNamespace("cutout_mipped");
 		/** Vanilla translucent render type, allows partial transparency **/
-		public static final ResourceLocation TRANSLUCENT = ResourceLocation.withDefaultNamespace("translucent");
+		public static final Identifier TRANSLUCENT = Identifier.withDefaultNamespace("translucent");
 		/** Vanilla tripwire render type, similar to translucent but uses the tripwire shader **/
-		public static final ResourceLocation TRIPWIRE = ResourceLocation.withDefaultNamespace("tripwire");
+		public static final Identifier TRIPWIRE = Identifier.withDefaultNamespace("tripwire");
 	}
 }

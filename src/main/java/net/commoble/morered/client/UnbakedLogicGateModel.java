@@ -15,12 +15,12 @@ import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModel.BakingContext;
 import net.minecraft.client.renderer.item.ItemModel.Unbaked;
 import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 
-public record UnbakedLogicGateModel(ResourceLocation model) implements ItemModel.Unbaked
+public record UnbakedLogicGateModel(Identifier model) implements ItemModel.Unbaked
 {
 	public static final MapCodec<UnbakedLogicGateModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			ResourceLocation.CODEC.fieldOf("model").forGetter(UnbakedLogicGateModel::model)
+			Identifier.CODEC.fieldOf("model").forGetter(UnbakedLogicGateModel::model)
 		).apply(builder, UnbakedLogicGateModel::new));
 	
 	public static final Supplier<List<ItemTintSource>> TINTS = Suppliers.memoize(() -> {
@@ -50,7 +50,7 @@ public record UnbakedLogicGateModel(ResourceLocation model) implements ItemModel
 	@Override
 	public ItemModel bake(BakingContext context)
 	{
-		return ModelUtil.wrapBlockModel(context, model, BlockModelRotation.X0_Y0, TINTS.get());
+		return ModelUtil.wrapBlockModel(context, model, BlockModelRotation.IDENTITY, TINTS.get());
 	}
 
 }

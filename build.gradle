@@ -90,6 +90,7 @@ configurations {
 
 dependencies {
 	jarJar(implementation("net.commoble.exmachina:exmachina:${exmachina_version}"))
+	jarJar(implementation("net.commoble.preview_placement:preview_placement:${preview_placement_version}"))
 
 	compileOnly "mezz.jei:jei-${jei_mc_version}-common-api:${jei_version}"
 	compileOnly "mezz.jei:jei-${jei_mc_version}-neoforge-api:${jei_version}"

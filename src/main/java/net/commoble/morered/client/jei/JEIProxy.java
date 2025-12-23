@@ -12,18 +12,18 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.client.ClientProxy;
 import net.commoble.morered.mechanisms.WindcatcherRecipe;
 import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 
 @JeiPlugin
 public class JEIProxy implements IModPlugin
 {
-	public static final ResourceLocation ID = MoreRed.id(MoreRed.MODID);
+	public static final Identifier ID = MoreRed.id(MoreRed.MODID);
 	
 	private @Nullable SolderingCategory solderingCategory;
 
 	@Override
-	public ResourceLocation getPluginUid()
+	public Identifier getPluginUid()
 	{
 		return ID;
 	}

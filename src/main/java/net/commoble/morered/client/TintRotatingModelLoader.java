@@ -47,9 +47,18 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 	public BlockModel read(JsonObject modelContents, JsonDeserializationContext context)
 	{
 		// we use the vanilla model loader to parse everything
-        BlockModel proxy = context.deserialize(modelContents.get("model"), BlockModel.class);
-        TintRotatingModelGeometry geometry = new TintRotatingModelGeometry(proxy.geometry());
-        return ModelUtil.blockModelWithGeometry(proxy, geometry);
+        BlockModel baseModel = context.deserialize(modelContents.get("model"), BlockModel.class);
+        TintRotatingModelGeometry geometry = new TintRotatingModelGeometry(baseModel.geometry());
+        return new BlockModel(
+			geometry,
+			baseModel.guiLight(),
+			baseModel.ambientOcclusion(),
+			baseModel.transforms(),
+			baseModel.textureSlots(),
+			baseModel.parent(),
+			baseModel.rootTransform(),
+			baseModel.renderTypeGroup(),
+			baseModel.partVisibility());
 	}
 	
 	public static class TintRotatingModelGeometry implements ExtendedUnbakedGeometry
@@ -69,8 +78,7 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 
 			Matrix4fc rotation = modelState.transformation().getMatrix();
 			for (Direction dir : Direction.values())
-			{
-				// don't worry about deprecated getQuads, the basemodel doesn't use modeldata and we don't have modeldata in context anyway 
+			{ 
 				for (BakedQuad quad : baseQuads.getQuads(dir))
 				{
 					builder.addCulledFace(dir, getTintRotatedQuad(quad, rotation));
@@ -86,7 +94,23 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad, Matrix4fc rotation)
 		{
 			int newTint = this.rotateTint(baseQuad.tintIndex(), rotation);
-			return new BakedQuad(baseQuad.vertices(), newTint, baseQuad.direction(), baseQuad.sprite(), baseQuad.shade(), baseQuad.lightEmission(), baseQuad.hasAmbientOcclusion());
+			return new BakedQuad(
+				baseQuad.position0(),
+				baseQuad.position1(),
+				baseQuad.position2(),
+				baseQuad.position3(),
+				baseQuad.packedUV0(),
+				baseQuad.packedUV1(),
+				baseQuad.packedUV2(),
+				baseQuad.packedUV3(),
+				newTint,
+				baseQuad.direction(),
+				baseQuad.sprite(),
+				baseQuad.shade(),
+				baseQuad.lightEmission(),
+				baseQuad.bakedNormals(),
+				baseQuad.bakedColors(),
+				baseQuad.hasAmbientOcclusion());
 		}
 		
 		protected int rotateTint(int baseTint, Matrix4fc rotation)

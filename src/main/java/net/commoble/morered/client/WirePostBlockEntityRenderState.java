@@ -72,7 +72,6 @@ public class WirePostBlockEntityRenderState extends BlockEntityRenderState
 		this.connectionStates = post.getConnectionRenderInfos();
 		this.playerConnections.clear();
 
-		@SuppressWarnings("resource")
 		Player player = Minecraft.getInstance().player;
 		for (InteractionHand hand : InteractionHand.values())
 		{

@@ -14,7 +14,7 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.EightGroup;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -69,9 +69,9 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 	}
 
 	/** Texture location for rendering long tubes **/
-	public final ResourceLocation textureLocation;
+	public final Identifier textureLocation;
 
-	public TubeBlock(ResourceLocation textureLocation, Properties properties)
+	public TubeBlock(Identifier textureLocation, Properties properties)
 	{
 		super(properties);
 		this.registerDefaultState(this.stateDefinition.any()

@@ -1,0 +1,6 @@
+{
+  "model": {
+    "type": "morered:logic_gate",
+    "model": "morered:block/bitwise_xnor_gate_preview"
+  }
+}

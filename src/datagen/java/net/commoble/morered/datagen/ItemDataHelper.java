@@ -6,7 +6,7 @@ import java.util.function.Consumer;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Recipe;
@@ -40,7 +40,7 @@ public record ItemDataHelper(Item item, DataGenContext context)
 		return this.recipe(this.id(), recipe);
 	}
 	
-	public ItemDataHelper recipe(ResourceLocation recipeId, Recipe<?> recipe)
+	public ItemDataHelper recipe(Identifier recipeId, Recipe<?> recipe)
 	{
 		this.context.recipes().put(recipeId, recipe);
 		return this;
@@ -62,14 +62,14 @@ public record ItemDataHelper(Item item, DataGenContext context)
 		return this;
 	}
 	
-	public ResourceLocation id()
+	public Identifier id()
 	{
 		return BuiltInRegistries.ITEM.getKey(this.item);
 	}
 	
-	public static ResourceLocation itemModel(ResourceLocation id)
+	public static Identifier itemModel(Identifier id)
 	{
-		return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath());
+		return Identifier.fromNamespaceAndPath(id.getNamespace(), "item/" + id.getPath());
 	}
 	
 	public ItemDataHelper help(Consumer<ItemDataHelper> helperer)

@@ -5,23 +5,23 @@ import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class StandardSizeContainerScreenFactory<ContainerType extends AbstractContainerMenu> implements MenuScreens.ScreenConstructor<ContainerType, AbstractContainerScreen<ContainerType>>
 {
 	// location of GUI texture
-	private final ResourceLocation texture;
+	private final Identifier texture;
 	private final String windowTitleTranslationKey;
 
-	private StandardSizeContainerScreenFactory(ResourceLocation texture, String windowTitleTranslationKey)
+	private StandardSizeContainerScreenFactory(Identifier texture, String windowTitleTranslationKey)
 	{
 		this.texture = texture;
 		this.windowTitleTranslationKey = windowTitleTranslationKey;
 	}
 	
-	public static <ContainerType extends AbstractContainerMenu> StandardSizeContainerScreenFactory<ContainerType> of(ResourceLocation texture, String translationKey)
+	public static <ContainerType extends AbstractContainerMenu> StandardSizeContainerScreenFactory<ContainerType> of(Identifier texture, String translationKey)
 	{
 		return new StandardSizeContainerScreenFactory<>(texture, translationKey);
 	}
@@ -34,9 +34,9 @@ public class StandardSizeContainerScreenFactory<ContainerType extends AbstractCo
 	
 	static class StandardSizeContainerScreen<ContainerType extends AbstractContainerMenu> extends AbstractContainerScreen<ContainerType>
 	{
-		private final ResourceLocation texture;
+		private final Identifier texture;
 		
-		public StandardSizeContainerScreen(ContainerType screenContainer, Inventory inv, Component titleIn, ResourceLocation texture, String windowTitleTranslationKey)
+		public StandardSizeContainerScreen(ContainerType screenContainer, Inventory inv, Component titleIn, Identifier texture, String windowTitleTranslationKey)
 		{
 			super(screenContainer, inv, titleIn);
 			this.imageWidth = 176;
