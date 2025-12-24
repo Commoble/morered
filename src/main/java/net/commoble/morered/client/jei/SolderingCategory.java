@@ -5,6 +5,7 @@ import java.util.List;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeIngredientRole;
@@ -13,6 +14,7 @@ import mezz.jei.api.recipe.types.IRecipeType;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.commoble.morered.soldering.SolderingRecipe;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -46,12 +48,17 @@ public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 	{
 		return Component.translatable(TITLE);
 	}
-
-	@Override
-	public IDrawable getBackground()
+	
+	@Override 
+	public int getWidth()
 	{
-		
-		return this.background;
+		return 116;
+	}
+	
+	@Override
+	public int getHeight()
+	{
+		return 54;
 	}
 
 	@Override
@@ -90,4 +97,14 @@ public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 			}
 		}
 	}
+
+
+
+	@Override
+	public void draw(SolderingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY)
+	{
+		this.background.draw(guiGraphics);
+	}
+	
+	
 }

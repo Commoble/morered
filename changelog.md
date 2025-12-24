@@ -1,3 +1,6 @@
+# 21.11.1
+* Fix compatibility with JEI versions (JEI 27.0.x and 27.3.x should both work now)
+
 # 21.11.0
 * Updated to MC 1.21.11 / Neoforge 21.11.12-beta
 * Placement preview toggle and opacity config settings are now in preview_placement-client.toml instead of morered-client.toml
