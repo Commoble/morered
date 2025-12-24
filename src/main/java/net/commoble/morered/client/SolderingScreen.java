@@ -50,10 +50,8 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 
 	public SolderingScreen(SolderingMenu screenContainer, Inventory inv, Component titleIn)
 	{
-		super(screenContainer, inv, titleIn);
-		int vanillaImageWidth = this.imageWidth;
-		this.imageWidth = 276;
-		this.imageHeight = 166;
+		super(screenContainer, inv, titleIn, 276, 166);
+		int vanillaImageWidth = 176;
 		this.inventoryLabelX += (this.imageWidth - vanillaImageWidth);
 	}
 	

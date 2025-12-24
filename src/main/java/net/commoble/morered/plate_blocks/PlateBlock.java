@@ -79,8 +79,8 @@ public class PlateBlock extends TwentyFourBlock implements SimpleWaterloggedBloc
 		if (isPlayerHoldingWrench && !level.isClientSide())
 		{
 			level.playSound(null, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-				0.1F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
+				0.1F + level.getRandom().nextFloat()*0.1F,
+				0.7F + level.getRandom().nextFloat()*0.1F);
 			int newRotation = (state.getValue(ROTATION) + 1) % 4;
 			BlockState newState = state.setValue(ROTATION, newRotation);
 			level.setBlockAndUpdate(pos, newState);

@@ -106,8 +106,8 @@ public class WireSpoolItem extends Item
 				}
 			}
 			level.playSound(null, pos, SoundEvents.STONE_BUTTON_CLICK_ON, SoundSource.BLOCKS,
-				0.2F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
+				0.2F + level.getRandom().nextFloat()*0.1F,
+				0.7F + level.getRandom().nextFloat()*0.1F);
 		}
 		
 		return InteractionResult.SUCCESS;

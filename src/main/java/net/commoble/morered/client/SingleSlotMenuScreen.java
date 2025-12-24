@@ -15,8 +15,6 @@ public class SingleSlotMenuScreen<MENU extends AbstractContainerMenu> extends Ab
 	public SingleSlotMenuScreen(MENU screenContainer, Inventory inv, Component titleIn)
 	{
 		super(screenContainer, inv, titleIn);
-		this.imageWidth = 176;
-		this.imageHeight = 166;
 	}
 
 	@Override

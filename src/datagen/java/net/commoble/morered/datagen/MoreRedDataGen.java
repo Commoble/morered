@@ -1194,8 +1194,8 @@ public class MoreRedDataGen
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		Identifier parent = switch(block)
 		{
-			case ThreeInputBitwiseGateBlock $$$ -> MoreRed.id("block/three_input_bitwise_logic_plate_template");
-			case TwoInputBitwiseGateBlock $$ -> MoreRed.id("block/two_input_bitwise_logic_plate_template");
+			case ThreeInputBitwiseGateBlock _ -> MoreRed.id("block/three_input_bitwise_logic_plate_template");
+			case TwoInputBitwiseGateBlock _ -> MoreRed.id("block/two_input_bitwise_logic_plate_template");
 			default -> MoreRed.id("block/single_input_bitwise_logic_plate_template"); 
 		};
 

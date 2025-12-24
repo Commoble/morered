@@ -20,7 +20,7 @@ group = "net.commoble.${modid}"
 base { archivesName="${modid}" }
 version = "${mod_version}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of(25)
 
 sourceSets
 {

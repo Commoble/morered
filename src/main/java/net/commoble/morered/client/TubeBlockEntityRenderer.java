@@ -18,7 +18,6 @@ import net.commoble.morered.transportation.TubeBlock;
 import net.commoble.morered.transportation.TubeBlockEntity;
 import net.commoble.morered.transportation.TubeBlockEntity.TubeConnectionRenderInfo;
 import net.commoble.morered.util.DirectionTransformer;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
@@ -37,6 +36,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.Identifier;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
@@ -185,7 +185,7 @@ public record TubeBlockEntityRenderer(ItemModelResolver resolver, MaterialSet ma
 		BlockPos startPos = tube.getBlockPos();
 		int blockLight = level.getBrightness(LightLayer.BLOCK, startPos);
 		int skyLight = level.getBrightness(LightLayer.SKY, startPos);
-		renderState.startLight = LightTexture.pack(blockLight, skyLight);
+		renderState.startLight = LightCoordsUtil.pack(blockLight, skyLight);
 	}
 
 	@Override

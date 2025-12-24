@@ -64,12 +64,12 @@ public class LoaderBlock extends Block
 		if (remaining.getCount() > 0) // we have remaining items
 		{
 			WorldHelper.ejectItemstack(world, pos, outputDir, remaining);
-	        world.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3F, world.random.nextFloat() * 0.25F + 2F);
+	        world.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3F, world.getRandom().nextFloat() * 0.25F + 2F);
 			return ItemStack.EMPTY;
 		}
 		else	// item was accepted fully
 		{
-	        world.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3F, world.random.nextFloat() * 0.25F + 1F);
+	        world.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.3F, world.getRandom().nextFloat() * 0.25F + 1F);
 			return ItemStack.EMPTY;
 		}
 	}
@@ -107,8 +107,8 @@ public class LoaderBlock extends Block
 		if (stack.is(Tags.Items.TOOLS_WRENCH))
 		{
 			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-				0.1F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
+				0.1F + level.getRandom().nextFloat()*0.1F,
+				0.7F + level.getRandom().nextFloat()*0.1F);
 			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
 			return InteractionResult.SUCCESS;
 		}

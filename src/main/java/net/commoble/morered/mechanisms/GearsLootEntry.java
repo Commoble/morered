@@ -13,7 +13,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
@@ -54,7 +53,7 @@ public class GearsLootEntry extends LootPoolSingletonContainer
 	}
 
 	@Override
-	public LootPoolEntryType getType()
+	public MapCodec<? extends LootPoolSingletonContainer> codec()
 	{
 		return MoreRed.GEARS_LOOT_ENTRY.get();
 	}

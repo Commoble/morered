@@ -51,8 +51,8 @@ public class ExtractorBlock extends TwentyFourBlock implements EntityBlock
 		{
 			BlockState newState;
 			level.playSound(null, pos, SoundEvents.FENCE_GATE_CLOSE, SoundSource.BLOCKS,
-				0.9F + level.random.nextFloat()*0.1F,
-				0.95F + level.random.nextFloat()*0.1F);
+				0.9F + level.getRandom().nextFloat()*0.1F,
+				0.95F + level.getRandom().nextFloat()*0.1F);
 			if (PlayerData.getSprinting(player.getUUID()))
 			{
 				// rotate around small gear... weird math here

@@ -160,8 +160,8 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
+import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.EventPriority;
@@ -208,8 +208,8 @@ public class MoreRed
 	private static final DeferredRegister<MenuType<?>> MENU_TYPES = defreg(Registries.MENU);
 	private static final DeferredRegister<RecipeSerializer<?>> RECIPE_SERIALIZERS = defreg(Registries.RECIPE_SERIALIZER);
 	private static final DeferredRegister<RecipeType<?>> RECIPE_TYPES = defreg(Registries.RECIPE_TYPE);
-	private static final DeferredRegister<LootPoolEntryType> LOOT_ENTRIES = defreg(Registries.LOOT_POOL_ENTRY_TYPE);
-	private static final DeferredRegister<LootItemFunctionType<?>> LOOT_FUNCTIONS = defreg(Registries.LOOT_FUNCTION_TYPE);
+	private static final DeferredRegister<MapCodec<? extends LootPoolEntryContainer>> LOOT_ENTRIES = defreg(Registries.LOOT_POOL_ENTRY_TYPE);
+	private static final DeferredRegister<MapCodec<? extends LootItemFunction>> LOOT_FUNCTIONS = defreg(Registries.LOOT_FUNCTION_TYPE);
 	private static final DeferredRegister<AttachmentType<?>> ATTACHMENT_TYPES = defreg(NeoForgeRegistries.Keys.ATTACHMENT_TYPES);
 	private static final DeferredRegister<DataComponentType<?>> DATA_COMPONENT_TYPES = defreg(Registries.DATA_COMPONENT_TYPE);
 	private static final DeferredRegister<MapCodec<? extends SignalComponent>> SIGNAL_COMPONENT_TYPES = defreg(ExMachinaRegistries.SIGNAL_COMPONENT_TYPE);
@@ -618,8 +618,8 @@ public class MoreRed
 		() -> new SimpleRecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
 	
 	// loot things
-	public static final DeferredHolder<LootPoolEntryType, LootPoolEntryType> GEARS_LOOT_ENTRY = LOOT_ENTRIES.register(Names.GEARS, () -> new LootPoolEntryType(GearsLootEntry.CODEC));
-	public static final DeferredHolder<LootItemFunctionType<?>, LootItemFunctionType<WireCountLootFunction>> WIRE_COUNT_LOOT_FUNCTION = LOOT_FUNCTIONS.register(Names.WIRE_COUNT, () -> new LootItemFunctionType<>(WireCountLootFunction.CODEC));
+	public static final DeferredHolder<MapCodec<? extends LootPoolEntryContainer>, MapCodec<GearsLootEntry>> GEARS_LOOT_ENTRY = LOOT_ENTRIES.register(Names.GEARS, () -> GearsLootEntry.CODEC);
+	public static final DeferredHolder<MapCodec<? extends LootItemFunction>, MapCodec<WireCountLootFunction>> WIRE_COUNT_LOOT_FUNCTION = LOOT_FUNCTIONS.register(Names.WIRE_COUNT, () -> WireCountLootFunction.CODEC);
 
 	// creative tabs
 	public static final DeferredHolder<CreativeModeTab, CreativeModeTab> CREATIVE_TAB = TABS.register(MoreRed.MODID, () -> CreativeModeTab.builder()
@@ -948,7 +948,7 @@ public class MoreRed
 				.strength(0F)
 				.sound(SoundType.WOOD)
 				.forceSolidOn(),
-			properties -> factory.makeBlock(function, properties));
+			properties -> factory.makeBlock(properties, function));
 		LOGIC_PLATES.put(blockGetter.getId(), blockGetter);
 		return blockGetter;
 	}

@@ -109,12 +109,12 @@ public class ClutchBlock extends Block implements EntityBlock
 		if (hasSignal && !hadSignal)
 		{
 			level.setBlockAndUpdate(pos, state.setValue(EXTENDED, true));
-            level.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.25F + 0.6F);
+            level.playSound(null, pos, SoundEvents.PISTON_EXTEND, SoundSource.BLOCKS, 0.5F, level.getRandom().nextFloat() * 0.25F + 0.6F);
 		}
 		else if (!hasSignal && hadSignal)
 		{
 			level.setBlockAndUpdate(pos, state.setValue(EXTENDED, false));
-            level.playSound(null, pos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5F, level.random.nextFloat() * 0.15F + 0.6F);
+            level.playSound(null, pos, SoundEvents.PISTON_CONTRACT, SoundSource.BLOCKS, 0.5F, level.getRandom().nextFloat() * 0.15F + 0.6F);
 		}
 	}
 	
@@ -162,8 +162,8 @@ public class ClutchBlock extends Block implements EntityBlock
 		if (stack.is(Tags.Items.TOOLS_WRENCH))
 		{
 			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-				0.1F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
+				0.1F + level.getRandom().nextFloat()*0.1F,
+				0.7F + level.getRandom().nextFloat()*0.1F);
 			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
 			return InteractionResult.SUCCESS;
 		}

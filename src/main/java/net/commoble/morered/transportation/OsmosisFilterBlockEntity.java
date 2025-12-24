@@ -62,7 +62,7 @@ public class OsmosisFilterBlockEntity extends FilterBlockEntity
 				else
 				{
 					this.level.playSound(null, this.worldPosition, SoundEvents.SLIME_BLOCK_PLACE, SoundSource.BLOCKS,
-						this.level.random.nextFloat()*0.1F, this.level.random.nextFloat());//this.world.rand.nextFloat()*0.01f + 0.005f);
+						this.level.getRandom().nextFloat()*0.1F, this.level.getRandom().nextFloat());//this.world.rand.nextFloat()*0.01f + 0.005f);
 				}
 				
 			}

@@ -21,13 +21,13 @@ import net.commoble.morered.MoreRed;
 import net.commoble.morered.routing.Route;
 import net.commoble.morered.routing.RoutingNetwork;
 import net.commoble.morered.util.WorldHelper;
-import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.ProblemReporter;
 import net.minecraft.world.Containers;
 import net.minecraft.world.item.ItemStack;
@@ -669,7 +669,7 @@ public class TubeBlockEntity extends BlockEntity
 		{
 			int blockLight = level.getBrightness(LightLayer.BLOCK, this.endPos);
 			int skyLight = level.getBrightness(LightLayer.SKY, this.endPos);
-			this.endLight = LightTexture.pack(blockLight, skyLight);
+			this.endLight = LightCoordsUtil.pack(blockLight, skyLight);
 		}
 	}
 	

@@ -39,8 +39,6 @@ public class StandardSizeContainerScreenFactory<ContainerType extends AbstractCo
 		public StandardSizeContainerScreen(ContainerType screenContainer, Inventory inv, Component titleIn, Identifier texture, String windowTitleTranslationKey)
 		{
 			super(screenContainer, inv, titleIn);
-			this.imageWidth = 176;
-			this.imageHeight = 166;
 			this.texture = texture;
 		}
 
