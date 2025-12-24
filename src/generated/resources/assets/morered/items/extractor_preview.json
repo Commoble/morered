@@ -1,6 +1,6 @@
 {
   "model": {
-    "type": "morered:logic_gate",
+    "type": "minecraft:model",
     "model": "morered:block/extractor_preview"
   }
 }

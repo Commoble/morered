@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
 
 import org.apache.commons.lang3.text.WordUtils;
 
@@ -55,12 +56,14 @@ import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
 import net.commoble.preview_placement.client.PlacementPreviewDefinition;
 import net.minecraft.client.color.item.Constant;
+import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.renderer.block.model.BlockModelDefinition;
 import net.minecraft.client.renderer.block.model.BlockStateModel;
 import net.minecraft.client.renderer.block.model.Variant;
 import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CompositeModel;
+import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.core.HolderLookup;
@@ -245,18 +248,18 @@ public class MoreRedDataGen
 							0))));
 				
 		}
-		plateBlock(Names.ALTERNATOR, "Alternator", context, true)
+		List<ItemTintSource> alternatorTints = List.of(
+			new Constant(ColorHandlers.LIT),
+			new Constant(ColorHandlers.UNLIT),
+			new Constant(ColorHandlers.UNLIT),
+			new Constant(ColorHandlers.UNLIT));
+		plateBlock(Names.ALTERNATOR, "Alternator", context, true, previewModel -> new BlockModelWrapper.Unbaked(previewModel, alternatorTints))
 			.tags(ExMachinaTags.Blocks.NO_AUTOMATIC_MECHANICAL_UPDATES)
 			.mechanicalComponent(alternatorMachine)
 			.blockItemWithoutItemModel(id -> new ClientItem(
 				new BlockModelWrapper.Unbaked(
 					id,
-					List.of(
-						new Constant(ColorHandlers.LIT),
-						new Constant(ColorHandlers.UNLIT),
-						new Constant(ColorHandlers.UNLIT),
-						new Constant(ColorHandlers.UNLIT)))
-				, ClientItem.Properties.DEFAULT))
+					alternatorTints), ClientItem.Properties.DEFAULT))
 			.help(helper -> {
 				helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					"#t#",
@@ -411,7 +414,7 @@ public class MoreRedDataGen
 						new RawConnection(Optional.empty(), NodeShape.ofSide(pumpDir), Parity.inversion(pumpDir, reverseAxleDir), 0))));
 			}
 		}
-		plateBlock(Names.EXTRACTOR, "Extractor", context, true)
+		plateBlock(Names.EXTRACTOR, "Extractor", context, true, previewModel -> new BlockModelWrapper.Unbaked(previewModel, List.of()))
 			.mechanicalComponent(extractorMachine)
 			.tags(BlockTags.MINEABLE_WITH_AXE, BlockTags.MINEABLE_WITH_PICKAXE)
 			.blockItemWithoutItemModel()
@@ -1098,10 +1101,10 @@ public class MoreRedDataGen
 
 	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context)
 	{
-		return plateBlock(blockPath, name, context, false);
+		return plateBlock(blockPath, name, context, false, UnbakedLogicGateModel::new);
 	}
 	
-	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context, boolean placementPreviewUsesItemModel)
+	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context, boolean placementPreviewUsesItemModel, Function<Identifier, ItemModel.Unbaked> previewItemFactory)
 	{
 		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
@@ -1171,7 +1174,7 @@ public class MoreRedDataGen
 		LootTable lootTable = simpleLoot(block);
 		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
 		Identifier previewModel = previewId.withPrefix("block/");
-		context.clientItems().put(previewId, new ClientItem(new UnbakedLogicGateModel(previewModel), ClientItem.Properties.DEFAULT));
+		context.clientItems().put(previewId, new ClientItem(previewItemFactory.apply(previewModel), ClientItem.Properties.DEFAULT));
 		context.previewModels().put(previewModel, new PreviewModel(SimpleModel.create(placementPreviewUsesItemModel ? itemModel : blockModel, RenderTypes.TRANSLUCENT)));
 		return blockHelper;
 	}

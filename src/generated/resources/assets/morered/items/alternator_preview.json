@@ -1,6 +1,24 @@
 {
   "model": {
-    "type": "morered:logic_gate",
-    "model": "morered:block/alternator_preview"
+    "type": "minecraft:model",
+    "model": "morered:block/alternator_preview",
+    "tints": [
+      {
+        "type": "minecraft:constant",
+        "value": -1
+      },
+      {
+        "type": "minecraft:constant",
+        "value": -11141120
+      },
+      {
+        "type": "minecraft:constant",
+        "value": -11141120
+      },
+      {
+        "type": "minecraft:constant",
+        "value": -11141120
+      }
+    ]
   }
 }
