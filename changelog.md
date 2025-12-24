@@ -1,6 +1,7 @@
 # 21.11.1
 * Fix compatibility with JEI versions (JEI 27.0.x and 27.3.x should both work now)
 * Fix alternator model rendering lower than other logic gates in firstperson hand
+* Fix placement previews for extractors and alternators missing axles
 
 # 21.11.0
 * Updated to MC 1.21.11 / Neoforge 21.11.12-beta

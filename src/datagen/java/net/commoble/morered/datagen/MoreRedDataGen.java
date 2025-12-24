@@ -245,7 +245,7 @@ public class MoreRedDataGen
 							0))));
 				
 		}
-		plateBlock(Names.ALTERNATOR, "Alternator", context)
+		plateBlock(Names.ALTERNATOR, "Alternator", context, true)
 			.tags(ExMachinaTags.Blocks.NO_AUTOMATIC_MECHANICAL_UPDATES)
 			.mechanicalComponent(alternatorMachine)
 			.blockItemWithoutItemModel(id -> new ClientItem(
@@ -411,7 +411,7 @@ public class MoreRedDataGen
 						new RawConnection(Optional.empty(), NodeShape.ofSide(pumpDir), Parity.inversion(pumpDir, reverseAxleDir), 0))));
 			}
 		}
-		plateBlock(Names.EXTRACTOR, "Extractor", context)
+		plateBlock(Names.EXTRACTOR, "Extractor", context, true)
 			.mechanicalComponent(extractorMachine)
 			.tags(BlockTags.MINEABLE_WITH_AXE, BlockTags.MINEABLE_WITH_PICKAXE)
 			.blockItemWithoutItemModel()
@@ -1095,11 +1095,18 @@ public class MoreRedDataGen
 		event.createDatapackRegistryObjects(registrySetBuilder);
 	}
 	
+
 	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context)
+	{
+		return plateBlock(blockPath, name, context, false);
+	}
+	
+	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context, boolean placementPreviewUsesItemModel)
 	{
 		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		Identifier model = mangle(blockId, "block/%s");
+		Identifier blockModel = blockId.withPrefix("block/");
+		Identifier itemModel = blockId.withPrefix("item/");
 		Identifier previewId = blockId.withSuffix("_preview");
 		
 		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
@@ -1128,7 +1135,7 @@ public class MoreRedDataGen
 							variantBuilder.addMultiPropertyVariant(variant -> variant
 									.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
 									.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
-									BlockStateBuilder.model(model, qx, qy)
+									BlockStateBuilder.model(blockModel, qx, qy)
 								);
 							previewBuilder.addMultiPropertyVariant(variant -> variant
 								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
@@ -1150,7 +1157,7 @@ public class MoreRedDataGen
 							variantBuilder.addMultiPropertyVariant(variant -> variant
 								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
 								.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
-								BlockStateBuilder.model(model, qx, qy, qz));
+								BlockStateBuilder.model(blockModel, qx, qy, qz));
 							previewBuilder.addMultiPropertyVariant(variant -> variant
 								.addPropertyValue(PlateBlock.ATTACHMENT_DIRECTION, dir)
 								.addPropertyValue(PlateBlock.ROTATION, rotationIndex),
@@ -1165,7 +1172,7 @@ public class MoreRedDataGen
 		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
 		Identifier previewModel = previewId.withPrefix("block/");
 		context.clientItems().put(previewId, new ClientItem(new UnbakedLogicGateModel(previewModel), ClientItem.Properties.DEFAULT));
-		context.previewModels().put(previewModel, new PreviewModel(SimpleModel.create(model, RenderTypes.TRANSLUCENT)));
+		context.previewModels().put(previewModel, new PreviewModel(SimpleModel.create(placementPreviewUsesItemModel ? itemModel : blockModel, RenderTypes.TRANSLUCENT)));
 		return blockHelper;
 	}
 	
