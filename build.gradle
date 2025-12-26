@@ -20,7 +20,7 @@ group = "net.commoble.${modid}"
 base { archivesName="${modid}" }
 version = "${mod_version}"
 
-java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+java.toolchain.languageVersion = JavaLanguageVersion.of("${java_version}")
 
 sourceSets
 {
@@ -103,6 +103,19 @@ dependencies {
 	//localRuntime "org.sinytra:wiki-exporter-neoforge:${wiki_exporter_version}"
 }
 
+jar {
+    manifest {
+        attributes([
+            "Specification-Title": "${modid}",
+            "Specification-Vendor": "Commoble",
+            "Specification-Version": "${version}",
+            "Implementation-Title": project.name,
+            "Implementation-Version": "${version}",
+            "Implementation-Vendor" :"Commoble"
+        ])
+    }
+}
+
 java
 {
 	withSourcesJar()
@@ -118,17 +131,14 @@ artifacts {
 // run "gradlew build" to build the jars without mavening them
 publishing {
     publications {
-        mavenJava(MavenPublication) {
-			artifactId project.archivesBaseName
-            artifact jar
-			artifact sourcesJar
-			artifact javadocJar
+		register('mavenJava', MavenPublication) {
+			from components.java
         }
     }
     repositories {
         maven {
 			name="localMaven"
-            url "file:///${project.projectDir}/maven"
+			url = "./maven"
         }
     }
 }

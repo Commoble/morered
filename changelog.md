@@ -1,3 +1,6 @@
+# 21.11.2
+* Add missing jar manifest attributes (fixes version not displaying in mods list)
+
 # 21.11.1
 * Fix compatibility with JEI versions (JEI 27.0.x and 27.3.x should both work now)
 * Fix alternator model rendering lower than other logic gates in firstperson hand
