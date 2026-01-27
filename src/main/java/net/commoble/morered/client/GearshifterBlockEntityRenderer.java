@@ -3,6 +3,9 @@ package net.commoble.morered.client;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -34,7 +37,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public record GearshifterBlockEntityRenderer(ItemModelResolver resolver, Map<Block, GearshifterModels> modelCache) implements BlockEntityRenderer<GenericBlockEntity, GearshifterRenderState>
+public record GearshifterBlockEntityRenderer(ItemModelResolver resolver, Map<Block, GearshifterModels> modelCache) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull GearshifterRenderState>
 {
 	public static GearshifterBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
@@ -70,7 +73,7 @@ public record GearshifterBlockEntityRenderer(ItemModelResolver resolver, Map<Blo
 	}
 
 	@Override
-	public void extractRenderState(GenericBlockEntity be, GearshifterRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	public void extractRenderState(GenericBlockEntity be, GearshifterRenderState renderState, float partialTicks, Vec3 camera, @Nullable CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
 		int seed = (int)(be.getBlockPos().asLong());

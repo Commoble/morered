@@ -2,7 +2,8 @@ package net.commoble.morered.client;
 
 import java.util.Map;
 
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -15,7 +16,6 @@ import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.client.GearsBlockEntityRenderer.GearsRenderState;
 import net.commoble.morered.util.Lambdas;
-import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.SubmitNodeCollector;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -29,13 +29,14 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
+import net.minecraft.util.Util;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public record GearsBlockEntityRenderer(ItemModelResolver resolver) implements BlockEntityRenderer<GenericBlockEntity, GearsRenderState>
+public record GearsBlockEntityRenderer(ItemModelResolver resolver) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull GearsRenderState>
 {
 	
 	public static class GearsSideRenderState
@@ -78,7 +79,7 @@ public record GearsBlockEntityRenderer(ItemModelResolver resolver) implements Bl
 	}
 
 	@Override
-	public void extractRenderState(GenericBlockEntity be, GearsRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	public void extractRenderState(GenericBlockEntity be, GearsRenderState renderState, float partialTicks, Vec3 camera, @Nullable CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
 		@Nullable Map<Direction, ItemStack> items = be.get(MoreRed.GEARS_DATA_COMPONENT.get());

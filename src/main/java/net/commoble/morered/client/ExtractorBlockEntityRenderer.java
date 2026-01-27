@@ -2,6 +2,9 @@ package net.commoble.morered.client;
 
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -38,7 +41,7 @@ public record ExtractorBlockEntityRenderer(
 	ItemModelResolver resolver,
 	ItemStack pump,
 	ItemStack axle,
-	ItemStack bag) implements BlockEntityRenderer<GenericBlockEntity, ExtractorRenderState>
+	ItemStack bag) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull ExtractorRenderState>
 {
 	public static class ExtractorRenderState extends BlockEntityRenderState
 	{
@@ -72,7 +75,7 @@ public record ExtractorBlockEntityRenderer(
 	}
 
 	@Override
-	public void extractRenderState(GenericBlockEntity be, ExtractorRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	public void extractRenderState(GenericBlockEntity be, ExtractorRenderState renderState, float partialTicks, Vec3 camera, @Nullable CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
 

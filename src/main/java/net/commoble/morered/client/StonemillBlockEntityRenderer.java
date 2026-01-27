@@ -2,6 +2,9 @@ package net.commoble.morered.client;
 
 import java.util.Map;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -25,7 +28,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public record StonemillBlockEntityRenderer(ItemModelResolver resolver, ItemStack axle) implements BlockEntityRenderer<GenericBlockEntity, MechanicalItemBlockEntityRenderState>
+public record StonemillBlockEntityRenderer(ItemModelResolver resolver, ItemStack axle) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull MechanicalItemBlockEntityRenderState>
 {
 	public static StonemillBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
@@ -43,12 +46,14 @@ public record StonemillBlockEntityRenderer(ItemModelResolver resolver, ItemStack
 	}
 
 	@Override
-	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, @Nullable CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
+		Level level = be.getLevel();
+		if (level == null)
+			return;
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		float axleRadiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(Direction.UP), MechanicalState.ZERO).angularVelocity();
-		Level level = be.getLevel();
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = axleRadiansPerSecond * seconds;
