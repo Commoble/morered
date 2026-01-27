@@ -1,3 +1,6 @@
+# 21.11.3
+* Fix client crash when opening soldering screen
+
 # 21.11.2
 * Add missing jar manifest attributes (fixes version not displaying in mods list)
 
