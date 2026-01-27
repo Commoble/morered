@@ -217,7 +217,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	        {
 	        	int thisX = this.getX();
 	        	int thisY = this.getY();
-	            super.renderWidget(graphics, mouseX, mouseY, partial);
+	            super.renderContents(graphics, mouseX, mouseY, partial);
 	            List<SizedIngredient> ingredients = this.recipe.recipe().ingredients();
 	            int ingredientCount = ingredients.size();
 	            // render ingredients
