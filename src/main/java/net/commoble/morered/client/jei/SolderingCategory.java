@@ -14,7 +14,7 @@ import mezz.jei.api.recipe.types.IRecipeType;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.Names;
 import net.commoble.morered.soldering.SolderingRecipe;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
@@ -74,7 +74,7 @@ public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 		
 		// output slot
 		recipeLayout.addSlot(RecipeIngredientRole.OUTPUT, 95, 19)
-			.add(recipe.result());
+			.add(recipe.result().create());
 		
 		// input slots
 		List<SizedIngredient> ingredients = recipe.ingredients();
@@ -101,7 +101,7 @@ public class SolderingCategory implements IRecipeCategory<SolderingRecipe>
 
 
 	@Override
-	public void draw(SolderingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphics guiGraphics, double mouseX, double mouseY)
+	public void draw(SolderingRecipe recipe, IRecipeSlotsView recipeSlotsView, GuiGraphicsExtractor guiGraphics, double mouseX, double mouseY)
 	{
 		this.background.draw(guiGraphics);
 	}

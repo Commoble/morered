@@ -9,7 +9,6 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.mechanisms.WindcatcherRecipe.XY;
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
@@ -27,7 +26,7 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 {
 
 	public static final MapCodec<WindcatcherDyeRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			CraftingBookCategory.CODEC.optionalFieldOf("category", CraftingBookCategory.MISC).forGetter(WindcatcherDyeRecipe::category),
+			CraftingBookInfo.MAP_CODEC.forGetter(WindcatcherDyeRecipe::craftingBookInfo),
 			Ingredient.CODEC.fieldOf("ingredient").forGetter(WindcatcherDyeRecipe::ingredient),
 			XY.CODEC.optionalFieldOf("north", XY.NORTH).forGetter(WindcatcherDyeRecipe::north),
 			XY.CODEC.optionalFieldOf("south", XY.SOUTH).forGetter(WindcatcherDyeRecipe::south),
@@ -38,6 +37,7 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 	
 	public static final StreamCodec<RegistryFriendlyByteBuf, WindcatcherDyeRecipe> STREAM_CODEC = ByteBufCodecs.fromCodecWithRegistries(CODEC.codec());
 	
+	private final CraftingBookInfo craftingBookInfo; public CraftingBookInfo craftingBookInfo() { return this.craftingBookInfo; }
 	private final Ingredient ingredient; public Ingredient ingredient() { return this.ingredient; }
 	private final XY north; public XY north() { return this.north; }
 	private final XY south; public XY south() { return this.south; }
@@ -45,11 +45,13 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 	private final XY east; public XY east() { return this.east; }
 	private final XY windcatcher; public XY windcatcher() { return this.windcatcher; }
 	
-	public WindcatcherDyeRecipe(CraftingBookCategory category, Ingredient ingredient,
+	public WindcatcherDyeRecipe(CraftingBookInfo craftingBookInfo,
+		Ingredient ingredient,
 		XY north, XY south, XY west, XY east, XY windcatcher
 		)
 	{
-		super(category);
+		super();
+		this.craftingBookInfo = craftingBookInfo;
 		this.ingredient = ingredient;
 		this.north = north;
 		this.south = south;
@@ -61,7 +63,7 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 	public static WindcatcherDyeRecipe of(Ingredient ingredient)
 	{
 		return new WindcatcherDyeRecipe(
-			CraftingBookCategory.MISC,
+			new CraftingBookInfo(CraftingBookCategory.MISC, ""),
 			ingredient,
 			XY.NORTH,
 			XY.SOUTH,
@@ -85,7 +87,7 @@ public class WindcatcherDyeRecipe extends CustomRecipe
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, Provider provider)
+	public ItemStack assemble(CraftingInput input)
 	{
 		XY offset = findOffset(input);
 		XY actualWindcatcherCoord = this.windcatcher.add(offset);

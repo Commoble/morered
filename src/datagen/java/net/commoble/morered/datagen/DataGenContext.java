@@ -3,8 +3,8 @@ package net.commoble.morered.datagen;
 import java.util.Map;
 
 import net.commoble.exmachina.api.MechanicalComponent;
-import net.minecraft.client.renderer.block.model.BlockModelDefinition;
-import net.minecraft.client.renderer.block.model.Variant;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelDispatcher;
+import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.Item;
@@ -15,7 +15,7 @@ import net.neoforged.neoforge.common.data.LanguageProvider;
 
 public record DataGenContext(
 	Map<Identifier, MechanicalComponent> mechanicalComponents,
-	Map<Identifier, BlockModelDefinition> blockStates,
+	Map<Identifier, BlockStateModelDispatcher> blockStates,
 	Map<Identifier, ClientItem> clientItems,
 	Map<Identifier, SimpleModel> models,
 	Map<Identifier, PreviewModel> previewModels,

@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
+import org.joml.Matrix4fc;
+
 import com.google.common.base.Suppliers;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
@@ -11,10 +13,10 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.commoble.morered.plate_blocks.LogicFunctions;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModel.BakingContext;
 import net.minecraft.client.renderer.item.ItemModel.Unbaked;
-import net.minecraft.client.resources.model.BlockModelRotation;
 import net.minecraft.resources.Identifier;
 
 public record UnbakedLogicGateModel(Identifier model) implements ItemModel.Unbaked
@@ -48,9 +50,9 @@ public record UnbakedLogicGateModel(Identifier model) implements ItemModel.Unbak
 	}
 
 	@Override
-	public ItemModel bake(BakingContext context)
+	public ItemModel bake(BakingContext context, Matrix4fc transformMatrix)
 	{
-		return ModelUtil.wrapBlockModel(context, model, BlockModelRotation.IDENTITY, TINTS.get());
+		return ModelUtil.wrapBlockModel(context, model, BlockModelRotation.IDENTITY, transformMatrix, TINTS.get());
 	}
 
 }

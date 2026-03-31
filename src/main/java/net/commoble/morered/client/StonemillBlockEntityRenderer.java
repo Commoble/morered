@@ -1,6 +1,7 @@
 package net.commoble.morered.client;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -18,25 +19,21 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
 import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 
-public record StonemillBlockEntityRenderer(ItemModelResolver resolver, ItemStack axle) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull MechanicalItemBlockEntityRenderState>
+public record StonemillBlockEntityRenderer(ItemModelResolver resolver, Supplier<ItemStack> axle) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull MechanicalItemBlockEntityRenderState>
 {
 	public static StonemillBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
 		Identifier blockId = MoreRed.STONEMILL_BLOCK.getId();
 		Identifier axleModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
-		ItemStack axle = new ItemStack(Items.STICK);
-		axle.set(DataComponents.ITEM_MODEL, axleModel);
-		return new StonemillBlockEntityRenderer(context.itemModelResolver(), axle);
+		return new StonemillBlockEntityRenderer(context.itemModelResolver(), RenderHelper.memoizeStackModel(axleModel));
 	}
 
 	@Override
@@ -57,7 +54,7 @@ public record StonemillBlockEntityRenderer(ItemModelResolver resolver, ItemStack
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = axleRadiansPerSecond * seconds;
-		renderState.update(resolver, level, axle, radians);
+		renderState.update(resolver, level, axle.get(), radians);
 	}
 
 	@Override

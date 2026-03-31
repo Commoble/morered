@@ -1,7 +1,7 @@
 package net.commoble.morered.client;
 
 import net.commoble.morered.transportation.LoaderMenu;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
@@ -17,9 +17,9 @@ public class LoaderScreen extends SingleSlotMenuScreen<LoaderMenu>
 	}
 
 	@Override
-	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
 	{
-		super.renderBg(graphics, partialTicks, mouseX, mouseY);
+		super.extractBackground(graphics, mouseX, mouseY, partialTicks);
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		graphics.blit(RenderPipelines.GUI_TEXTURED, DROPPER_SLOT, xStart + 80, yStart + 35, 0, 0, 16, 16, 16, 16);

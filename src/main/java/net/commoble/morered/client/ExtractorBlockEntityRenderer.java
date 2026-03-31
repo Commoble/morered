@@ -1,6 +1,7 @@
 package net.commoble.morered.client;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -24,24 +25,22 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public record ExtractorBlockEntityRenderer(
 	ItemModelResolver resolver,
-	ItemStack pump,
-	ItemStack axle,
-	ItemStack bag) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull ExtractorRenderState>
+	Supplier<ItemStack> pump,
+	Supplier<ItemStack> axle,
+	Supplier<ItemStack> bag) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull ExtractorRenderState>
 {
 	public static class ExtractorRenderState extends BlockEntityRenderState
 	{
@@ -59,13 +58,11 @@ public record ExtractorBlockEntityRenderer(
 		Identifier pumpModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_pump");
 		Identifier axleModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_axle");
 		Identifier bagModel = Identifier.fromNamespaceAndPath(blockId.getNamespace(), blockId.getPath() + "_bag");
-		ItemStack pump = new ItemStack(Items.STICK);
-		pump.set(DataComponents.ITEM_MODEL, pumpModel);
-		ItemStack axle = new ItemStack(Items.STICK);
-		axle.set(DataComponents.ITEM_MODEL, axleModel);
-		ItemStack bag = new ItemStack(Items.STICK);
-		bag.set(DataComponents.ITEM_MODEL, bagModel);
-		return new ExtractorBlockEntityRenderer(context.itemModelResolver(), pump, axle, bag);
+		return new ExtractorBlockEntityRenderer(
+			context.itemModelResolver(),
+			RenderHelper.memoizeStackModel(pumpModel),
+			RenderHelper.memoizeStackModel(axleModel),
+			RenderHelper.memoizeStackModel(bagModel));
 	}
 
 	@Override
@@ -96,9 +93,9 @@ public record ExtractorBlockEntityRenderer(
 		renderState.reverseAxleRadians = reverseAxleRadiansPerSecond * seconds;
 		renderState.cosInputRadians = Mth.cos(inputRadians);
 		int renderSeed = (int)(be.getBlockPos().asLong());
-		resolver.updateForTopItem(renderState.pumpItemState, this.pump, ItemDisplayContext.NONE, level, null, renderSeed);
-		resolver.updateForTopItem(renderState.axleItemState, this.axle, ItemDisplayContext.NONE, level, null, renderSeed);
-		resolver.updateForTopItem(renderState.bagItemState, this.bag, ItemDisplayContext.NONE, level, null, renderSeed);
+		resolver.updateForTopItem(renderState.pumpItemState, this.pump.get(), ItemDisplayContext.NONE, level, null, renderSeed);
+		resolver.updateForTopItem(renderState.axleItemState, this.axle.get(), ItemDisplayContext.NONE, level, null, renderSeed);
+		resolver.updateForTopItem(renderState.bagItemState, this.bag.get(), ItemDisplayContext.NONE, level, null, renderSeed);
 	}
 
 	@Override

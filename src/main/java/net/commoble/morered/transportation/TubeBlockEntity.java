@@ -281,7 +281,7 @@ public class TubeBlockEntity extends BlockEntity
 			this.onPossibleNetworkUpdateRequired();
 			this.network.invalid = true;
 			this.level.setBlockAndUpdate(this.worldPosition, newState);
-			PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(this.worldPosition), new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
+			PacketDistributor.sendToPlayersTrackingChunk(serverLevel, ChunkPos.containing(this.worldPosition), new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
 		}
 		this.onDataUpdated();
 	}

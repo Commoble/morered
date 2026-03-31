@@ -25,12 +25,12 @@ import net.minecraft.client.renderer.blockentity.state.BlockEntityRenderState;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.MaterialSet;
+import net.minecraft.client.resources.model.sprite.SpriteGetter;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -47,26 +47,25 @@ import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public record TubeBlockEntityRenderer(ItemModelResolver resolver, MaterialSet materials) implements BlockEntityRenderer<TubeBlockEntity, TubeRenderState>
+public record TubeBlockEntityRenderer(ItemModelResolver resolver, SpriteGetter spriteGetter, Map<Identifier, TextureAtlasSprite> spriteCache) implements BlockEntityRenderer<TubeBlockEntity, TubeRenderState>
 {
-	public static final Map<Identifier,Material> MATERIALS = new HashMap<>();
 	@SuppressWarnings("deprecation")
-	public static Material getMaterial(Identifier textureId)
+	public TextureAtlasSprite getSprite(Identifier textureLocation)
 	{
-		return MATERIALS.computeIfAbsent(textureId, id -> new Material(TextureAtlas.LOCATION_BLOCKS, id));
+		return this.spriteCache.computeIfAbsent(textureLocation, id -> this.spriteGetter.get(new SpriteId(TextureAtlas.LOCATION_BLOCKS, id)));
 	}
 	
 	public static TubeBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		return new TubeBlockEntityRenderer(context.itemModelResolver(), context.materials());
+		return new TubeBlockEntityRenderer(context.itemModelResolver(), context.sprites(), new HashMap<>());
 	}
 	
-	public static class TubeRenderState extends BlockEntityRenderState
+	public class TubeRenderState extends BlockEntityRenderState
 	{
 		public List<ItemInTubeRenderState> itemInTubeRenderStates = new ArrayList<>();
 		public Map<Direction, TubeConnectionRenderInfo> connections = new HashMap<>();
 		public int startLight = 0;
-		public Material material = getMaterial(MoreRed.TUBE_BLOCK.get().textureLocation);
+		public TextureAtlasSprite sprite = TubeBlockEntityRenderer.this.getSprite(MoreRed.TUBE_BLOCK.get().textureLocation);
 	}
 	
 	public static record ItemInTubeRenderState(
@@ -170,11 +169,11 @@ public record TubeBlockEntityRenderer(ItemModelResolver resolver, MaterialSet ma
 		renderState.itemInTubeRenderStates = itemsInTube;
 		if (tube.getBlockState().getBlock() instanceof TubeBlock tubeBlock)
 		{
-			renderState.material = getMaterial(tubeBlock.textureLocation);
+			renderState.sprite = this.getSprite(tubeBlock.textureLocation);
 		}
 		else
 		{
-			renderState.material = getMaterial(MoreRed.TUBE_BLOCK.get().textureLocation);
+			renderState.sprite = this.getSprite(MoreRed.TUBE_BLOCK.get().textureLocation);
 		}
 		renderState.connections = tube.getConnectionRenderInfos();
 		for (TubeConnectionRenderInfo info : renderState.connections.values())
@@ -196,10 +195,9 @@ public record TubeBlockEntityRenderer(ItemModelResolver resolver, MaterialSet ma
 		{
 			this.renderWrapper(renderState, itemInTubeRenderState, poseStack, collector);
 		}
-		TextureAtlasSprite sprite = this.materials.get(renderState.material);
 		for (var entry : renderState.connections.entrySet())
 		{
-			TubeQuadRenderer.renderQuads(renderState, entry.getValue(), entry.getKey(), sprite, poseStack, collector);
+			TubeQuadRenderer.renderQuads(renderState, entry.getValue(), entry.getKey(), renderState.sprite, poseStack, collector);
 		}
 	}
 

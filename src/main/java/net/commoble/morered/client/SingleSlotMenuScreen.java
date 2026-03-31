@@ -1,6 +1,6 @@
 package net.commoble.morered.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
@@ -16,17 +16,11 @@ public class SingleSlotMenuScreen<MENU extends AbstractContainerMenu> extends Ab
 	{
 		super(screenContainer, inv, titleIn);
 	}
-
-	@Override
-	public void render(GuiGraphics graphics, int x, int y, float partialTicks)
-	{
-		super.render(graphics, x, y, partialTicks);
-		this.renderTooltip(graphics, x, y);
-	}
 	
 	@Override
-	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
+    public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
 	{
+		super.extractBackground(graphics, mouseX, mouseY, partialTicks);
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
 		// window start x/y, texture start x/y, size x/y

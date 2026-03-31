@@ -6,7 +6,7 @@ import com.mojang.math.OctahedralGroup;
 
 import net.commoble.morered.util.DirectionHelper;
 import net.commoble.morered.wires.Edge;
-import net.minecraft.client.resources.model.BlockModelRotation;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
 import net.minecraft.core.Direction;
 
 public class EdgeRotation

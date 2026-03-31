@@ -611,11 +611,11 @@ public class MoreRed
 	// recipe things
 	public static final DeferredHolder<RecipeType<?>, RecipeType<SolderingRecipe>> SOLDERING_RECIPE_TYPE = RECIPE_TYPES.register(Names.SOLDERING_RECIPE, () -> RecipeType.simple(id(Names.SOLDERING_RECIPE)));
 	public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<SolderingRecipe>> SOLDERING_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(Names.SOLDERING_RECIPE,
-		() -> new SimpleRecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
+		() -> new RecipeSerializer<SolderingRecipe>(SolderingRecipe.CODEC, SolderingRecipe.STREAM_CODEC));
 	public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherRecipe>> WINDCATCHER_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(Names.WINDCATCHER,
-		() -> new SimpleRecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
+		() -> new RecipeSerializer<WindcatcherRecipe>(WindcatcherRecipe.CODEC, WindcatcherRecipe.STREAM_CODEC));
 	public static final DeferredHolder<RecipeSerializer<?>, RecipeSerializer<WindcatcherDyeRecipe>> WINDCATCHER_DYE_RECIPE_SERIALIZER = RECIPE_SERIALIZERS.register(Names.WINDCATCHER_DYE,
-		() -> new SimpleRecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
+		() -> new RecipeSerializer<WindcatcherDyeRecipe>(WindcatcherDyeRecipe.CODEC, WindcatcherDyeRecipe.STREAM_CODEC));
 	
 	// loot things
 	public static final DeferredHolder<MapCodec<? extends LootPoolEntryContainer>, MapCodec<GearsLootEntry>> GEARS_LOOT_ENTRY = LOOT_ENTRIES.register(Names.GEARS, () -> GearsLootEntry.CODEC);
@@ -765,14 +765,14 @@ public class MoreRed
 			
 			// get relevant chunk positions near pos
 			double range = Mth.absMax(SERVERCONFIG.maxWirePostConnectionRange().getAsDouble(), SERVERCONFIG.maxTubeConnectionRange().getAsDouble());
-			ChunkPos nearbyChunkPos = new ChunkPos(placePos);
+			ChunkPos nearbyChunkPos = ChunkPos.containing(placePos);
 			int chunkRange = (int) Math.ceil(range/16D);
 			Set<ChunkPos> chunkPositions = new HashSet<>();
 			for (int xOff = -chunkRange; xOff <= chunkRange; xOff++)
 			{
 				for (int zOff = -chunkRange; zOff <= chunkRange; zOff++)
 				{
-					chunkPositions.add(new ChunkPos(nearbyChunkPos.x + xOff, nearbyChunkPos.z + zOff));
+					chunkPositions.add(new ChunkPos(nearbyChunkPos.x() + xOff, nearbyChunkPos.z() + zOff));
 				}
 			}
 			
@@ -780,7 +780,7 @@ public class MoreRed
 			{
 				if (level.hasChunkAt(chunkPos.getWorldPosition()))
 				{
-					LevelChunk chunk = level.getChunk(chunkPos.x, chunkPos.z);
+					LevelChunk chunk = level.getChunk(chunkPos.x(), chunkPos.z());
 					
 					// check wires blocking placement
 					Set<BlockPos> posts = chunk.getData(POSTS_IN_CHUNK_ATTACHMENT.get());

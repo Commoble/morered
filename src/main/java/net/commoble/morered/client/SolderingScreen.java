@@ -10,7 +10,7 @@ import net.commoble.morered.soldering.SolderingRecipe.SolderingRecipeHolder;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
 import net.minecraft.util.Util;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
@@ -88,42 +88,41 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	}
 
 	@Override
-	public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks)
+	public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
 	{
-		super.render(graphics, mouseX, mouseY, partialTicks);
+		super.extractContents(graphics, mouseX, mouseY, partialTicks);
 		if (this.searchBox != null)
 		{
 			graphics.pose().pushMatrix();
-			this.searchBox.render(graphics, mouseX, mouseY, 0);
+			this.searchBox.extractRenderState(graphics, mouseX, mouseY, 0);
 			graphics.pose().popMatrix();
 		}
 		if (this.scrollPanel != null)
 		{
 			graphics.pose().pushMatrix();
-			this.scrollPanel.render(graphics, mouseX, mouseY, 0);
+			this.scrollPanel.extractRenderState(graphics, mouseX, mouseY, 0);
 			graphics.pose().popMatrix();
 		}
 		// the scrollpanel messes with the rendering of the labels, so do those here instead
 		graphics.pose().pushMatrix();
 		graphics.pose().translate(this.leftPos, this.topPos);
-        graphics.drawString(this.font, this.title, this.titleLabelX, this.titleLabelY, 0xFF404040, false);
-        graphics.drawString(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0xFF404040, false);
+        graphics.text(this.font, this.title, this.titleLabelX, this.titleLabelY, 0xFF404040, false);
+        graphics.text(this.font, this.playerInventoryTitle, this.inventoryLabelX, this.inventoryLabelY, 0xFF404040, false);
 		graphics.pose().popMatrix();
 		this.renderTooltip(graphics, mouseX, mouseY);
 	}
 
     @Override
-    protected void renderLabels(GuiGraphics graphics, int mouseX, int mouseY) {
+    protected void extractLabels(GuiGraphicsExtractor graphics, int mouseX, int mouseY) {
     }
 	
-	public void renderItemStack(GuiGraphics graphics, ItemStack stack, int x, int y)
+	public void renderItemStack(GuiGraphicsExtractor graphics, ItemStack stack, int x, int y)
 	{
-        graphics.renderFakeItem(stack, x, y);
-        graphics.renderItemDecorations(this.font, stack, x, y);
+        graphics.fakeItem(stack, x, y);
+        graphics.itemDecorations(this.font, stack, x, y);
 	}
 
-	@Override
-	protected void renderTooltip(GuiGraphics graphics, int mouseX, int mouseY)
+	protected void renderTooltip(GuiGraphicsExtractor graphics, int mouseX, int mouseY)
 	{
 		if (this.menu.getCarried().isEmpty() && this.hoveredSlot != null && this.hoveredSlot.hasItem())
 		{
@@ -137,8 +136,9 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 	}
 
 	@Override
-	protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
+	public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
 	{
+		super.extractBackground(graphics, mouseX, mouseY, partialTicks);
 		// use the trading window as the main background
 		int xStart = (this.width - this.imageWidth) / 2;
 		int yStart = (this.height - this.imageHeight) / 2;
@@ -205,19 +205,16 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		{
 			return false;
 		}
-
-	    /**
-	     * Draws this button to the screen.
-	     */
+		
 	    @Override
-	    public void renderContents(GuiGraphics graphics, int mouseX, int mouseY, float partial)
+	    public void extractContents(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partial)
 	    {
 	    	this.tooltipItem = ItemStack.EMPTY;
 	        if (this.visible)
 	        {
 	        	int thisX = this.getX();
 	        	int thisY = this.getY();
-	            super.renderContents(graphics, mouseX, mouseY, partial);
+	            super.extractContents(graphics, mouseX, mouseY, partial);
 	            List<SizedIngredient> ingredients = this.recipe.recipe().ingredients();
 	            int ingredientCount = ingredients.size();
 	            // render ingredients
@@ -251,7 +248,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		            graphics.blit(RenderPipelines.GUI_TEXTURED, TRADING_SCREEN, arrowX, arrowY, arrowU, arrowV, arrowWidth, arrowHeight, 512, 256);
 		            
 		            // render the output item
-		            ItemStack outputStack = this.recipe.recipe().result();
+		            ItemStack outputStack = this.recipe.recipe().result().create();
 		            if (!outputStack.isEmpty())
 		            {
 			            int itemX = thisX + 2 + (18*4);
@@ -316,7 +313,7 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 			int totalButtonHeight = 0;
 			for (SolderingRecipeHolder recipe : ClientProxy.getAllSolderingRecipes())
 			{
-				if (I18n.get(recipe.recipe().result().getItem().getDescriptionId()).toUpperCase(Locale.ROOT).contains(upperSearchText))
+				if (I18n.get(recipe.recipe().result().item().value().getDescriptionId()).toUpperCase(Locale.ROOT).contains(upperSearchText))
 				{
 					RecipeButton recipeButton = new RecipeButton(SolderingScreen.this, recipe, left, top + totalButtonHeight, buttonWidth);
 					buttons.add(recipeButton);
@@ -340,13 +337,13 @@ public class SolderingScreen extends AbstractContainerScreen<SolderingMenu>
 		}
 
 		@Override
-		protected void drawPanel(GuiGraphics graphics, int entryRight, int relativeY, int mouseX, int mouseY)
+		protected void drawPanel(GuiGraphicsExtractor graphics, int entryRight, int relativeY, int mouseX, int mouseY)
 		{
 	    	this.tooltipItem = ItemStack.EMPTY;
 			for (RecipeButton button : this.buttons)
 			{
 				button.scrollButton((int) this.scrollDistance);
-				button.render(graphics, mouseX, mouseY, 0);
+				button.extractRenderState(graphics, mouseX, mouseY, 0);
 				if (!button.tooltipItem.isEmpty())
 				{
 					this.tooltipItem = button.tooltipItem;

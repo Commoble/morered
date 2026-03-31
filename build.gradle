@@ -97,8 +97,7 @@ dependencies {
 	// at runtime, use the full JEI jar for NeoForge
 	localRuntime "mezz.jei:jei-${jei_mc_version}-neoforge:${jei_version}"
 	
-	//compileOnly "dev.emi:emi-neoforge:${emi_version}:api"
-	//localRuntime "dev.emi:emi-neoforge:${emi_version}"
+	localRuntime "net.commoble.jumbofurnace:jumbofurnace:${jumbofurnace_version}"
 	
 	//localRuntime "org.sinytra:wiki-exporter-neoforge:${wiki_exporter_version}"
 }

@@ -11,22 +11,22 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
 import net.minecraft.client.renderer.rendertype.RenderType;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
-import net.minecraft.client.resources.model.Material;
-import net.minecraft.client.resources.model.MaterialSet;
+import net.minecraft.client.resources.model.sprite.SpriteGetter;
+import net.minecraft.client.resources.model.sprite.SpriteId;
 import net.minecraft.util.LightCoordsUtil;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public record BundledCablePostRenderer(MaterialSet materials) implements BlockEntityRenderer<WirePostBlockEntity, WirePostBlockEntityRenderState>
+public record BundledCablePostRenderer(SpriteGetter sprites) implements BlockEntityRenderer<WirePostBlockEntity, WirePostBlockEntityRenderState>
 {	
 	public static final RenderType CABLE_RENDER_TYPE = ExtraRenderTypes.CABLE_RENDER_TYPE;
 
 	@SuppressWarnings("deprecation")
-	public static final Material MATERIAL = new Material(TextureAtlas.LOCATION_BLOCKS,MoreRed.id("block/bundled_network_cable")); 
+	public static final SpriteId SPRITE = new SpriteId(TextureAtlas.LOCATION_BLOCKS,MoreRed.id("block/bundled_network_cable")); 
 
 	public static final float[] REDS = {0.71F, 0.31F, 0.19F};
 	public static final float[] GREENS = {0.19F, 0.48F, 0.29F};
@@ -34,7 +34,7 @@ public record BundledCablePostRenderer(MaterialSet materials) implements BlockEn
 	
 	public static BundledCablePostRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		return new BundledCablePostRenderer(context.materials());
+		return new BundledCablePostRenderer(context.sprites());
 	}
 
 	@Override
@@ -53,7 +53,7 @@ public record BundledCablePostRenderer(MaterialSet materials) implements BlockEn
 	@Override
 	public void submit(WirePostBlockEntityRenderState renderState, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState camera)
 	{
-		TextureAtlasSprite sprite = this.materials.get(MATERIAL);
+		TextureAtlasSprite sprite = this.sprites.get(SPRITE);
 		float totalMinU = sprite.getU0();
 		float totalMinV = sprite.getV0();
 		float totalMaxU = sprite.getU1();

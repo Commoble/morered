@@ -6,14 +6,15 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 
 import net.commoble.morered.wires.Edge;
-import net.minecraft.client.renderer.block.model.BakedQuad;
-import net.minecraft.client.renderer.block.model.BlockModel;
-import net.minecraft.client.renderer.block.model.TextureSlots;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelDebugName;
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.client.resources.model.QuadCollection;
-import net.minecraft.client.resources.model.UnbakedGeometry;
+import net.minecraft.client.resources.model.cuboid.CuboidModel;
+import net.minecraft.client.resources.model.geometry.BakedQuad;
+import net.minecraft.client.resources.model.geometry.BakedQuad.MaterialInfo;
+import net.minecraft.client.resources.model.geometry.QuadCollection;
+import net.minecraft.client.resources.model.geometry.UnbakedGeometry;
+import net.minecraft.client.resources.model.sprite.TextureSlots;
 import net.minecraft.core.Direction;
 import net.minecraft.util.context.ContextMap;
 import net.neoforged.neoforge.client.model.ExtendedUnbakedGeometry;
@@ -39,17 +40,17 @@ import net.neoforged.neoforge.client.model.UnbakedModelLoader;
  we will then sneakily replace the quads when we bake them, updating the tintindexes
  based on the model transform to more appropriate values
  */
-public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
+public class TintRotatingModelLoader implements UnbakedModelLoader<CuboidModel>
 {
 	public static final TintRotatingModelLoader INSTANCE = new TintRotatingModelLoader();
 
 	@Override
-	public BlockModel read(JsonObject modelContents, JsonDeserializationContext context)
+	public CuboidModel read(JsonObject modelContents, JsonDeserializationContext context)
 	{
 		// we use the vanilla model loader to parse everything
-        BlockModel baseModel = context.deserialize(modelContents.get("model"), BlockModel.class);
+		CuboidModel baseModel = context.deserialize(modelContents.get("model"), CuboidModel.class);
         TintRotatingModelGeometry geometry = new TintRotatingModelGeometry(baseModel.geometry());
-        return new BlockModel(
+        return new CuboidModel(
 			geometry,
 			baseModel.guiLight(),
 			baseModel.ambientOcclusion(),
@@ -57,7 +58,6 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 			baseModel.textureSlots(),
 			baseModel.parent(),
 			baseModel.rootTransform(),
-			baseModel.renderTypeGroup(),
 			baseModel.partVisibility());
 	}
 	
@@ -93,7 +93,16 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 
 		protected BakedQuad getTintRotatedQuad(BakedQuad baseQuad, Matrix4fc rotation)
 		{
-			int newTint = this.rotateTint(baseQuad.tintIndex(), rotation);
+			MaterialInfo baseMat = baseQuad.materialInfo();
+			int newTint = this.rotateTint(baseMat.tintIndex(), rotation);
+			MaterialInfo newMat = new MaterialInfo(
+				baseMat.sprite(),
+				baseMat.layer(),
+				baseMat.itemRenderType(),
+				newTint,
+				baseMat.shade(),
+				baseMat.lightEmission(),
+				baseMat.ambientOcclusion());
 			return new BakedQuad(
 				baseQuad.position0(),
 				baseQuad.position1(),
@@ -103,14 +112,10 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<BlockModel>
 				baseQuad.packedUV1(),
 				baseQuad.packedUV2(),
 				baseQuad.packedUV3(),
-				newTint,
 				baseQuad.direction(),
-				baseQuad.sprite(),
-				baseQuad.shade(),
-				baseQuad.lightEmission(),
+				newMat,
 				baseQuad.bakedNormals(),
-				baseQuad.bakedColors(),
-				baseQuad.hasAmbientOcclusion());
+				baseQuad.bakedColors());
 		}
 		
 		protected int rotateTint(int baseTint, Matrix4fc rotation)
