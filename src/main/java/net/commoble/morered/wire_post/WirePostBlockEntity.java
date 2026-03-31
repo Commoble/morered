@@ -170,7 +170,7 @@ public class WirePostBlockEntity extends BlockEntity
 			int otherY = otherPos.getY();
 			if (thisY < otherY || (thisY == otherY && this.worldPosition.hashCode() < otherPos.hashCode()))
 			{
-				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, new ChunkPos(this.worldPosition), new WireBreakPacket(Vec3.atCenterOf(worldPosition), Vec3.atCenterOf(otherPos)));
+				PacketDistributor.sendToPlayersTrackingChunk(serverLevel, ChunkPos.containing(this.worldPosition), new WireBreakPacket(Vec3.atCenterOf(worldPosition), Vec3.atCenterOf(otherPos)));
 			}
 		}
 		this.onCommonDataUpdated();

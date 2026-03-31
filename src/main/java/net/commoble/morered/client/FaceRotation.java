@@ -1,12 +1,12 @@
 package net.commoble.morered.client;
 
-import net.minecraft.client.resources.model.ModelState;
-import net.minecraft.util.Util;
-
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
 import com.mojang.math.Transformation;
+
+import net.minecraft.client.renderer.block.dispatch.ModelState;
+import net.minecraft.util.Util;
 
 // expanded rotations similar to ModelRotation but with 24 values instead of 16
 // rotations represent an "attachment face" and a "connection side"

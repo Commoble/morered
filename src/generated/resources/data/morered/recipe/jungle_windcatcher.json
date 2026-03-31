@@ -1,5 +1,6 @@
 {
   "type": "morered:windcatcher",
+  "category": "misc",
   "key": {
     "-": "#c:rods/wooden",
     "W": "#minecraft:wool",
@@ -11,7 +12,6 @@
     "-W-"
   ],
   "result": {
-    "count": 1,
     "id": "morered:jungle_windcatcher"
   }
 }

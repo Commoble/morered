@@ -8,13 +8,13 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.commoble.morered.MoreRed;
-import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.PlacementInfo;
 import net.minecraft.world.item.crafting.Recipe;
@@ -22,18 +22,19 @@ import net.minecraft.world.item.crafting.RecipeBookCategories;
 import net.minecraft.world.item.crafting.RecipeBookCategory;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.item.crafting.display.RecipeDisplay;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 
-public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredients) implements Recipe<CraftingInput>
+public record SolderingRecipe(ItemStackTemplate result, List<SizedIngredient> ingredients) implements Recipe<CraftingInput>
 {
 	public static final MapCodec<SolderingRecipe> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			ItemStack.CODEC.fieldOf("result").forGetter(SolderingRecipe::result),
+		ItemStackTemplate.CODEC.fieldOf("result").forGetter(SolderingRecipe::result),
 			SizedIngredient.NESTED_CODEC.listOf().fieldOf("ingredients").forGetter(SolderingRecipe::ingredients)
 		).apply(builder, SolderingRecipe::new));
 	
 	public static final StreamCodec<RegistryFriendlyByteBuf, SolderingRecipe> STREAM_CODEC = StreamCodec.composite(
-		ItemStack.STREAM_CODEC, SolderingRecipe::result,
+		ItemStackTemplate.STREAM_CODEC, SolderingRecipe::result,
 		SizedIngredient.STREAM_CODEC.apply(ByteBufCodecs.list()), SolderingRecipe::ingredients,
 		SolderingRecipe::new);
 	
@@ -90,9 +91,9 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 	}
 
 	@Override
-	public ItemStack assemble(CraftingInput input, Provider registries)
+	public ItemStack assemble(CraftingInput input)
 	{
-		return this.result.copy();
+		return this.result.create();
 	}
 
 	@Override
@@ -118,4 +119,18 @@ public record SolderingRecipe(ItemStack result, List<SizedIngredient> ingredient
 	{
 		return RecipeBookCategories.CRAFTING_MISC;
 	}
+
+	@Override
+	public String group()
+	{
+		return "";
+	}
+
+	@Override
+	public List<RecipeDisplay> display()
+	{
+        return List.of();
+	}
+	
+	
 }

@@ -35,13 +35,13 @@ public enum WindcatcherExtension implements ICraftingCategoryExtension<Windcatch
 	@Override
 	public int getWidth(RecipeHolder<WindcatcherRecipe> recipeHolder)
 	{
-		return recipeHolder.value().getWidth();
+		return recipeHolder.value().pattern().width();
 	}
 
 	@Override
 	public int getHeight(RecipeHolder<WindcatcherRecipe> recipeHolder)
 	{
-		return recipeHolder.value().getHeight();
+		return recipeHolder.value().pattern().height();
 	}
 
 	@Override

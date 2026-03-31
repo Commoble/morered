@@ -5,25 +5,32 @@ import java.util.function.Supplier;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.commoble.morered.MoreRed;
-import net.commoble.morered.client.FilterBlockEntityRenderer.FilterBlockEntityRenderState;
 import net.commoble.morered.client.OsmosisFilterBlockEntityRenderer.OsmosisFilterRenderState;
 import net.commoble.morered.transportation.FilterBlockEntity;
 import net.commoble.morered.transportation.OsmosisFilterBlock;
 import net.commoble.morered.transportation.OsmosisSlimeBlock;
 import net.minecraft.client.renderer.SubmitNodeCollector;
+import net.minecraft.client.renderer.block.BlockModelRenderState;
+import net.minecraft.client.renderer.block.BlockModelResolver;
+import net.minecraft.client.renderer.block.model.BlockDisplayContext;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
 public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer<OsmosisFilterRenderState>
-{	
+{
+	public static final BlockDisplayContext BLOCK_DISPLAY_CONTEXT = BlockDisplayContext.create();
+	
+	private final BlockModelResolver blockModelResolver;
+	
 	public OsmosisFilterBlockEntityRenderer(BlockEntityRendererProvider.Context context, Supplier<OsmosisFilterRenderState> stateFactory)
 	{
 		super(context, stateFactory);
+		this.blockModelResolver = context.blockModelResolver();
 	}
 
 	public static OsmosisFilterBlockEntityRenderer createOsmosisFilterrRenderer(BlockEntityRendererProvider.Context context)
@@ -31,9 +38,10 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer<
 		return new OsmosisFilterBlockEntityRenderer(context, OsmosisFilterRenderState::new);
 	}
 	
-	public static class OsmosisFilterRenderState extends FilterBlockEntityRenderState
+	public static class OsmosisFilterRenderState extends FilterBlockEntityRenderer.FilterBlockEntityRenderState
 	{
 		public double lengthScale = 0;
+		public BlockModelRenderState slime = new BlockModelRenderState();
 	}
 	
 	@Override
@@ -49,6 +57,10 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer<
 		renderState.lengthScale = minScale + (filter.getBlockState().getValue(OsmosisFilterBlock.TRANSFERRING_ITEMS)
 			? (-Math.cos(2 * Math.PI * time / rate) + 1D) * 0.25D
 			: 0D);
+		BlockState filterState = renderState.blockState;
+		Direction dir = filterState.getValue(OsmosisFilterBlock.FACING);
+		BlockState slimeState = MoreRed.OSMOSIS_SLIME_BLOCK.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
+		this.blockModelResolver.update(renderState.slime, slimeState, BLOCK_DISPLAY_CONTEXT);
 	}
 
 
@@ -59,7 +71,6 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer<
 		super.submit(renderState, poseStack, collector, camera);
 		BlockState filterState = renderState.blockState;
 		Direction dir = filterState.getValue(OsmosisFilterBlock.FACING);
-		BlockState slimeState = MoreRed.OSMOSIS_SLIME_BLOCK.get().defaultBlockState().setValue(OsmosisSlimeBlock.FACING, dir);
 		double lengthScale = renderState.lengthScale;
 		double lengthTranslateFactor = 1D - lengthScale;
 
@@ -88,8 +99,7 @@ public class OsmosisFilterBlockEntityRenderer extends FilterBlockEntityRenderer<
 		poseStack.pushPose();
 		poseStack.translate(translateX, translateY, translateZ);
 		poseStack.scale(scaleX, scaleY, scaleZ);
-		
-		collector.submitBlock(poseStack, slimeState, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
+		renderState.slime.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 	}
 }

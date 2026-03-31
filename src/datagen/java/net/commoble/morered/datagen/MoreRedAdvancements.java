@@ -30,7 +30,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.data.LanguageProvider;
@@ -172,7 +172,7 @@ public class MoreRedAdvancements
 		AdvancementBuilder display(ItemLike item, String titleKey, String descriptionKey, AdvancementType type)
 		{
 			this.display = Optional.of(new DisplayInfo(
-				new ItemStack(item),
+				new ItemStackTemplate(item.asItem()),
 				Component.translatable(titleKey),
 				Component.translatable(descriptionKey),
 				Optional.empty(),
@@ -254,7 +254,7 @@ public class MoreRedAdvancements
 	
 	static class DisplayBuilder
 	{
-		private final ItemStack itemStack;
+		private final ItemStackTemplate itemStack;
 		private final String titleKey;
 		private final String descriptionKey;
 		private final AdvancementType type;
@@ -263,7 +263,7 @@ public class MoreRedAdvancements
 		private boolean announceToChat = true;
 		private boolean hidden = false; 
 		
-		private DisplayBuilder(ItemStack itemStack, String titleKey, String descriptionKey, AdvancementType type)
+		private DisplayBuilder(ItemStackTemplate itemStack, String titleKey, String descriptionKey, AdvancementType type)
 		{
 			this.itemStack = itemStack;
 			this.titleKey = titleKey;
@@ -273,7 +273,7 @@ public class MoreRedAdvancements
 		
 		public static DisplayBuilder of(ItemLike itemLike, String titleKey, String descriptionKey, AdvancementType type)
 		{
-			return new DisplayBuilder(new ItemStack(itemLike), titleKey, descriptionKey, type);
+			return new DisplayBuilder(new ItemStackTemplate(itemLike.asItem()), titleKey, descriptionKey, type);
 		}
 		
 		public DisplayBuilder background(Identifier id)

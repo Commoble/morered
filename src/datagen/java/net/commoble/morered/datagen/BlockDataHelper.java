@@ -1,15 +1,16 @@
 package net.commoble.morered.datagen;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import org.apache.commons.lang3.text.WordUtils;
 
 import net.commoble.exmachina.api.MechanicalComponent;
-import net.minecraft.client.renderer.block.model.BlockModelDefinition;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelDispatcher;
 import net.minecraft.client.renderer.item.ClientItem;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -20,7 +21,7 @@ import net.minecraft.world.level.storage.loot.LootTable;
 public record BlockDataHelper(Block block, DataGenContext context)
 {
 	public static BlockDataHelper create(Block block, DataGenContext context,
-		BiFunction<Identifier, Block, BlockModelDefinition> blockstate,
+		BiFunction<Identifier, Block, BlockStateModelDispatcher> blockstate,
 		BiFunction<Identifier, Block, LootTable> lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
@@ -31,7 +32,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	}
 	
 	public static BlockDataHelper createWithoutLoot(Block block, DataGenContext context,
-		BiFunction<Identifier, Block, BlockModelDefinition> blockstate)
+		BiFunction<Identifier, Block, BlockStateModelDispatcher> blockstate)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		Identifier id = helper.id();
@@ -39,14 +40,14 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, BlockModelDefinition blockstate)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateModelDispatcher blockstate)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		context.blockStates().put(helper.id(), blockstate);
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, BlockModelDefinition blockstate, LootTable lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateModelDispatcher blockstate, LootTable lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		context.blockStates().put(helper.id(), blockstate);
@@ -54,7 +55,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockModelDefinition> blockstate, Function<Block, LootTable> lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockStateModelDispatcher> blockstate, Function<Block, LootTable> lootTable)
 	{
 		return create(block, context, blockstate.apply(block), lootTable.apply(block));
 	}
@@ -129,12 +130,12 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	
 	public ItemDataHelper blockItemWithoutItemModel()
 	{
-		return blockItemWithoutItemModel(id -> new ClientItem(new BlockModelWrapper.Unbaked(ItemDataHelper.itemModel(id()), List.of()), ClientItem.Properties.DEFAULT));
+		return blockItemWithoutItemModel(id -> new ClientItem(new CuboidItemModelWrapper.Unbaked(ItemDataHelper.itemModel(id()), Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
 	}
 	
 	public ItemDataHelper blockItemUsingBlockModel()
 	{
-		return ItemDataHelper.create(this.block.asItem(), context, new ClientItem(new BlockModelWrapper.Unbaked(blockModel(this.id()), List.of()), ClientItem.Properties.DEFAULT));
+		return ItemDataHelper.create(this.block.asItem(), context, new ClientItem(new CuboidItemModelWrapper.Unbaked(blockModel(this.id()), Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
 	}
 	
 	public ItemDataHelper blockItemUsingBlockModel(Function<Identifier, ClientItem> modelFactory)
@@ -159,7 +160,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	
 	public ItemDataHelper blockItem(SimpleModel model)
 	{
-		return blockItem(modelId -> new ClientItem(new BlockModelWrapper.Unbaked(modelId, List.of()), ClientItem.Properties.DEFAULT), model);
+		return blockItem(modelId -> new ClientItem(new CuboidItemModelWrapper.Unbaked(modelId, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT), model);
 	}
 	
 	public ItemDataHelper blockItem(Function<Identifier, ClientItem> modelFactory, SimpleModel model)

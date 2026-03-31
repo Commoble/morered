@@ -1,10 +1,11 @@
 package net.commoble.morered.datagen;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
-import net.minecraft.client.renderer.item.BlockModelWrapper;
 import net.minecraft.client.renderer.item.ClientItem;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -30,7 +31,7 @@ public record ItemDataHelper(Item item, DataGenContext context)
 	{
 		ItemDataHelper helper = new ItemDataHelper(item, context);
 		var itemModelId = itemModel(helper.id());
-		context.clientItems().put(helper.id(), new ClientItem(new BlockModelWrapper.Unbaked(itemModelId, List.of()), ClientItem.Properties.DEFAULT));
+		context.clientItems().put(helper.id(), new ClientItem(new CuboidItemModelWrapper.Unbaked(itemModelId, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
 		context.models().put(itemModelId, model);
 		return helper;		
 	}

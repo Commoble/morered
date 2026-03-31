@@ -80,7 +80,7 @@ public class TubeQuadRenderer
 			Vec3 normal = startVertexB.subtract(startVertexA).cross((endVertexA.subtract(startVertexA))).normalize();
 			Vec3 reverseNormal = normal.multiply(-1, -1, -1);
 
-			collector.submitCustomGeometry(poseStack, Sheets.solidBlockSheet(), (pose,vertexBuilder) -> {
+			collector.submitCustomGeometry(poseStack, Sheets.cutoutBlockItemSheet(), (pose,vertexBuilder) -> {
 				putVertex(pose, vertexBuilder, xA, yA, zA, minU, maxV, startLight, normal);
 				putVertex(pose, vertexBuilder, xB, yB, zB, maxU, maxV, startLight, normal);
 				putVertex(pose, vertexBuilder, xC, yC, zC, maxU, minV, endLight, normal);

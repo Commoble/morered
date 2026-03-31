@@ -37,15 +37,15 @@ import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Either;
 import com.mojang.math.Quadrant;
 
-import net.minecraft.client.renderer.block.model.BlockModelDefinition;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.SingleVariant;
-import net.minecraft.client.renderer.block.model.Variant;
-import net.minecraft.client.renderer.block.model.multipart.CombinedCondition;
-import net.minecraft.client.renderer.block.model.multipart.Condition;
-import net.minecraft.client.renderer.block.model.multipart.KeyValueCondition;
-import net.minecraft.client.renderer.block.model.multipart.Selector;
-import net.minecraft.client.resources.model.WeightedVariants;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelDispatcher;
+import net.minecraft.client.renderer.block.dispatch.SingleVariant;
+import net.minecraft.client.renderer.block.dispatch.Variant;
+import net.minecraft.client.renderer.block.dispatch.WeightedVariants;
+import net.minecraft.client.renderer.block.dispatch.multipart.CombinedCondition;
+import net.minecraft.client.renderer.block.dispatch.multipart.Condition;
+import net.minecraft.client.renderer.block.dispatch.multipart.KeyValueCondition;
+import net.minecraft.client.renderer.block.dispatch.multipart.Selector;
 import net.minecraft.core.Direction;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.Identifier;
@@ -77,9 +77,9 @@ public final class BlockStateBuilder
 	 * Use {@link BlockStateBuilder#singleVariant}, {@link BlockStateBuilder#variants}, or {@link BlockStateBuilder#multipart} to create
 	 * BlockModelDefinitions to add to this map, or {@link BlockStateBuilder#custom} for non-vanilla implementations
 	 */
-	public static void addDataProvider(GatherDataEvent event, Map<Identifier, BlockModelDefinition> blockStates)
+	public static void addDataProvider(GatherDataEvent event, Map<Identifier, BlockStateModelDispatcher> blockStates)
 	{
-		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockModelDefinition.CODEC, blockStates);
+		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "blockstates", BlockStateModelDispatcher.CODEC, blockStates);
 	}
 	
 	/**
@@ -100,7 +100,7 @@ public final class BlockStateBuilder
 	 * 	}
 	 * }
 	 */
-	public static BlockModelDefinition singleVariant(BlockStateModel.Unbaked model)
+	public static BlockStateModelDispatcher singleVariant(BlockStateModel.Unbaked model)
 	{
 		return variants(variant -> variant.addMultiPropertyVariant(propertyValues -> {}, model));
 	}
@@ -116,11 +116,11 @@ public final class BlockStateBuilder
 	 *  }
 	 * }
 	 */
-	public static BlockModelDefinition variants(Consumer<Variants> variantsBuilder)
+	public static BlockStateModelDispatcher variants(Consumer<Variants> variantsBuilder)
 	{
 		Variants variants = Variants.builder();
 		variantsBuilder.accept(variants);
-		return new BlockModelDefinition(Optional.of(bakeVariants(variants)), Optional.empty());
+		return new BlockStateModelDispatcher(Optional.of(bakeVariants(variants)), Optional.empty());
 	}
 	
 	/**
@@ -136,11 +136,11 @@ public final class BlockStateBuilder
 	 *   ]
 	 * } 
 	 */
-	public static BlockModelDefinition multipart(Consumer<Multipart> multipartBuilder)
+	public static BlockStateModelDispatcher multipart(Consumer<Multipart> multipartBuilder)
 	{
 		Multipart multipart = Multipart.builder();
 		multipartBuilder.accept(multipart);
-		return new BlockModelDefinition(Optional.empty(), Optional.of(bakeMultipart(multipart)));
+		return new BlockStateModelDispatcher(Optional.empty(), Optional.of(bakeMultipart(multipart)));
 	}
 	
 	/**
@@ -149,13 +149,13 @@ public final class BlockStateBuilder
 	 * @param multipartBuilder Multipart builder
 	 * @return BlockModelDefinition for a blockstate json which has both variants and multipart
 	 */
-	public static BlockModelDefinition variantsAndMultipart(Consumer<Variants> variantsBuilder, Consumer<Multipart> multipartBuilder)
+	public static BlockStateModelDispatcher variantsAndMultipart(Consumer<Variants> variantsBuilder, Consumer<Multipart> multipartBuilder)
 	{
 		Variants variants = Variants.builder();
 		variantsBuilder.accept(variants);
 		Multipart multipart = Multipart.builder();
 		multipartBuilder.accept(multipart);
-		return new BlockModelDefinition(Optional.of(bakeVariants(variants)), Optional.of(bakeMultipart(multipart)));		
+		return new BlockStateModelDispatcher(Optional.of(bakeVariants(variants)), Optional.of(bakeMultipart(multipart)));		
 	}
 	
 	/**
@@ -163,21 +163,21 @@ public final class BlockStateBuilder
 	 * @param customBlockModelDefinition CustomBlockModelDefinition (not variants or multipart)
 	 * @return BlockModelDefinition for blockstate json with non-vanilla format
 	 */
-	public static BlockModelDefinition custom(CustomBlockModelDefinition customBlockModelDefinition)
+	public static BlockStateModelDispatcher custom(CustomBlockModelDefinition customBlockModelDefinition)
 	{
-		return new BlockModelDefinition(customBlockModelDefinition);
+		return new BlockStateModelDispatcher(customBlockModelDefinition);
 	}
 	
-	private static BlockModelDefinition.SimpleModelSelectors bakeVariants(Variants variants)
+	private static BlockStateModelDispatcher.SimpleModelSelectors bakeVariants(Variants variants)
 	{
-		return new BlockModelDefinition.SimpleModelSelectors(variants.variants.entrySet().stream().collect(Collectors.toMap(
+		return new BlockStateModelDispatcher.SimpleModelSelectors(variants.variants.entrySet().stream().collect(Collectors.toMap(
 			entry -> String.join(",", entry.getKey().stream().map(PropertyValue::toString).toList()),
 			entry -> entry.getValue())));
 	}
 	
-	private static BlockModelDefinition.MultiPartDefinition bakeMultipart(Multipart multipart)
+	private static BlockStateModelDispatcher.MultiPartDefinition bakeMultipart(Multipart multipart)
 	{
-		return new BlockModelDefinition.MultiPartDefinition(multipart.cases.stream().map(whenApply -> new Selector(
+		return new BlockStateModelDispatcher.MultiPartDefinition(multipart.cases.stream().map(whenApply -> new Selector(
 			whenApply.when.map(BlockStateBuilder::vanillifyCondition),
 			whenApply.apply))
 			.toList());

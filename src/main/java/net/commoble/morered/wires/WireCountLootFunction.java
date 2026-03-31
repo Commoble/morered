@@ -12,7 +12,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 // loot function to set the count of a wire block's loot's dropped wire items
@@ -37,7 +36,7 @@ public class WireCountLootFunction implements LootItemFunction
 	}
 
 	@Override
-	public LootItemFunctionType<WireCountLootFunction> getType()
+	public MapCodec<? extends LootItemFunction> codec()
 	{
 		return MoreRed.WIRE_COUNT_LOOT_FUNCTION.get();
 	}

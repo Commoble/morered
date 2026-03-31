@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -33,13 +34,14 @@ import net.commoble.morered.wires.VoxelCache;
 import net.commoble.morered.wires.WireUpdatePacket;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.color.block.BlockTintSource;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.multiplayer.MultiPlayerGameMode;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.client.player.LocalPlayer;
-import net.minecraft.client.renderer.ItemBlockRenderTypes;
-import net.minecraft.client.renderer.chunk.ChunkSectionLayer;
+import net.minecraft.client.renderer.block.BuiltInBlockModels.ModelFactory;
+import net.minecraft.client.renderer.block.model.SpecialBlockModelWrapper;
 import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.resources.language.I18n;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
@@ -73,18 +75,17 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.Mod;
-import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent;
 import net.neoforged.neoforge.client.event.ClientTickEvent;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.neoforged.neoforge.client.event.InputEvent;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.neoforge.client.event.RecipesReceivedEvent;
+import net.neoforged.neoforge.client.event.RegisterBlockModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterBlockStateModels;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 import net.neoforged.neoforge.client.event.RegisterItemModelsEvent;
 import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
-import net.neoforged.neoforge.client.event.RegisterSpecialBlockModelRendererEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientBlockExtensions;
 import net.neoforged.neoforge.client.extensions.common.RegisterClientExtensionsEvent;
 import net.neoforged.neoforge.common.CommonHooks;
@@ -105,7 +106,6 @@ public class ClientProxy
 	{
 		IEventBus gameBus = NeoForge.EVENT_BUS;
 		
-		modBus.addListener(ClientProxy::onClientSetup);
 		modBus.addListener(ClientProxy::onRegisterModelLoaders);
 		modBus.addListener(ClientProxy::onRegisterBlockStateModels);
 		modBus.addListener(ClientProxy::onRegisterBlockColors);
@@ -137,7 +137,7 @@ public class ClientProxy
 		if (level == null)
 			return;
 		
-		LevelChunk chunk = level.getChunk(pos.x, pos.z);
+		LevelChunk chunk = level.getChunk(pos.x(), pos.z());
 		if (chunk == null)
 			return;
 		
@@ -188,23 +188,6 @@ public class ClientProxy
 	{
 		return solderingRecipes;
 	}
-
-	@SuppressWarnings("deprecation")
-	public static void onClientSetup(FMLClientSetupEvent event)
-	{
-		// render layer setting is synchronized, safe to do during multithreading
-		MoreRed.LOGIC_PLATES.values().forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
-		MoreRed.BITWISE_LOGIC_PLATES.values()
-			.forEach(rob -> ItemBlockRenderTypes.setRenderLayer(rob.get(), ChunkSectionLayer.CUTOUT));
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.ALTERNATOR_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.LATCH_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.PULSE_GATE_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.REDWIRE_RELAY_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.REDWIRE_JUNCTION_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.CABLE_JUNCTION_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.EXTRACTOR_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-		ItemBlockRenderTypes.setRenderLayer(MoreRed.STONEMILL_BLOCK.get(), ChunkSectionLayer.CUTOUT);
-	}
 	
 	static void onRegisterScreens(RegisterMenuScreensEvent event)
 	{
@@ -253,16 +236,17 @@ public class ClientProxy
 		event.registerModel(MoreRed.id(Names.WIRE_PARTS), UnbakedWirePartBlockStateModel.CODEC);
 	}
 
-	public static void onRegisterBlockColors(RegisterColorHandlersEvent.Block event)
+	public static void onRegisterBlockColors(RegisterColorHandlersEvent.BlockTintSources event)
 	{
-		MoreRed.LOGIC_PLATES.values().forEach(rob -> event.register(ColorHandlers::getLogicFunctionBlockTint, rob.get()));
-		event.register(ColorHandlers::getLatchBlockTint, MoreRed.LATCH_BLOCK.get());
-		event.register(ColorHandlers::getPulseGateBlockTint, MoreRed.PULSE_GATE_BLOCK.get());
-		event.register(ColorHandlers::getAlternatorBlockTint, MoreRed.ALTERNATOR_BLOCK.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.REDWIRE_POST_BLOCK.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.REDWIRE_RELAY_BLOCK.get());
-		event.register(ColorHandlers::getRedwirePostBlockTint, MoreRed.REDWIRE_JUNCTION_BLOCK.get());
-		event.register(ColorHandlers::getRedAlloyWireBlockTint, MoreRed.RED_ALLOY_WIRE_BLOCK.get());
+		List<BlockTintSource> logicGateTints = ColorHandlers.makeLogicGateTints();
+		MoreRed.LOGIC_PLATES.values().forEach(rob -> event.register(logicGateTints, rob.get()));
+		event.register(logicGateTints, MoreRed.LATCH_BLOCK.get(), MoreRed.PULSE_GATE_BLOCK.get());
+		event.register(ColorHandlers.makeAlternatorTintSources(), MoreRed.ALTERNATOR_BLOCK.get());
+		event.register(ColorHandlers.makeRedwirePostBlockTints(),
+			MoreRed.REDWIRE_POST_BLOCK.get(),
+			MoreRed.REDWIRE_RELAY_BLOCK.get(),
+			MoreRed.REDWIRE_JUNCTION_BLOCK.get());
+		event.register(ColorHandlers.makeRedAlloyWireBlockTints(), MoreRed.RED_ALLOY_WIRE_BLOCK.get());
 	}
 
 	static void onRegisterRenderers(RegisterRenderers event)
@@ -284,9 +268,16 @@ public class ClientProxy
 		event.registerBlockEntityRenderer(MoreRed.STONEMILL_BLOCK_ENTITY.get(), StonemillBlockEntityRenderer::create);
 	}
 
-	static void onRegisterSpecialBlockModelRenderers(RegisterSpecialBlockModelRendererEvent event)
+	static void onRegisterSpecialBlockModelRenderers(RegisterBlockModelsEvent event)
 	{
-		BiConsumer<Holder<? extends Block>, Holder<? extends BlockEntityType<?>>> renderBlockAsItem = (block,type) -> event.register(block.value(), new UnbakedBlockEntityWithoutLevelRenderer(block.value(), type.value()));
+		// TODO we could conceivably rotate blockstates correctly with the new system
+		BiConsumer<Holder<? extends Block>, Holder<? extends BlockEntityType<?>>> renderBlockAsItem = (block,type) -> event.register(
+			(ModelFactory)(colors,state) -> new SpecialBlockModelWrapper.Unbaked<>(
+				new UnbakedBlockEntityWithoutLevelRenderer(
+					state,
+					type.value()),
+				Optional.empty()),
+			block.value());
 		Function<Holder<? extends BlockEntityType<?>>, Consumer<Holder<? extends Block>>> renderBlock = type -> block -> renderBlockAsItem.accept(block, type);
 		MoreRed.AXLE_BLOCKS.values().forEach(renderBlock.apply(MoreRed.AXLE_BLOCK_ENTITY));
 		MoreRed.GEAR_BLOCKS.values().forEach(renderBlock.apply(MoreRed.GEAR_BLOCK_ENTITY));
@@ -338,7 +329,7 @@ public class ClientProxy
 		solderingRecipes = recipeMap.byType(MoreRed.SOLDERING_RECIPE_TYPE.get())
 			.stream()
 			.map(recipeHolder -> new SolderingRecipeHolder(recipeHolder.id().identifier(), recipeHolder.value()))
-			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().getItem().getDescriptionId())))
+			.sorted(Comparator.comparing(holder -> I18n.get(holder.recipe().result().item().value().getDescriptionId())))
 			.toList();
 		ClientProxy.recipeMap = recipeMap;
 	}

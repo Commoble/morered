@@ -4,6 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
@@ -18,7 +21,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
 import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -26,7 +29,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 
-public record WindcatcherBlockEntityRenderer(ItemModelResolver resolver, Map<WindcatcherKey, ItemStack> stackCache) implements BlockEntityRenderer<GenericBlockEntity, MechanicalItemBlockEntityRenderState>
+public record WindcatcherBlockEntityRenderer(ItemModelResolver resolver, Map<WindcatcherKey, ItemStack> stackCache) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull MechanicalItemBlockEntityRenderState>
 {
 	static record WindcatcherKey(Block block, WindcatcherColors colors) {}
 	
@@ -54,9 +57,12 @@ public record WindcatcherBlockEntityRenderer(ItemModelResolver resolver, Map<Win
 	}
 
 	@Override
-	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, @Nullable CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
+		Level level = be.getLevel();
+		if (level == null)
+			return;
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		MechanicalState mechanicalState = states.getOrDefault(NodeShape.ofCube(), MechanicalState.ZERO);
 		float radiansPerSecond = (float)mechanicalState.angularVelocity();
@@ -67,7 +73,6 @@ public record WindcatcherBlockEntityRenderer(ItemModelResolver resolver, Map<Win
 			newStack.set(colorsComponent, key.colors);
 			return newStack;
 		});
-		Level level = be.getLevel();
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;

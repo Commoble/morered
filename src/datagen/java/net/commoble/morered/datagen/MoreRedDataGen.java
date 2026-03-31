@@ -57,12 +57,12 @@ import net.commoble.morered.wires.WireCountLootFunction;
 import net.commoble.preview_placement.client.PlacementPreviewDefinition;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
-import net.minecraft.client.renderer.block.model.BlockModelDefinition;
-import net.minecraft.client.renderer.block.model.BlockStateModel;
-import net.minecraft.client.renderer.block.model.Variant;
-import net.minecraft.client.renderer.item.BlockModelWrapper;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
+import net.minecraft.client.renderer.block.dispatch.BlockStateModelDispatcher;
+import net.minecraft.client.renderer.block.dispatch.Variant;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CompositeModel;
+import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
@@ -81,7 +81,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.util.Util;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.Ingredient;
@@ -130,7 +130,7 @@ public class MoreRedDataGen
 		PackOutput output = generator.getPackOutput();
 		
 		RegistrySetBuilder registrySetBuilder = new RegistrySetBuilder();
-		Map<Identifier, BlockModelDefinition> blockStates = new HashMap<>();
+		Map<Identifier, BlockStateModelDispatcher> blockStates = new HashMap<>();
 		Map<Identifier, ClientItem> clientItems = new HashMap<>();
 		Map<Identifier, SimpleModel> models = new HashMap<>();
 		Map<Identifier, PreviewModel> previewModels = new HashMap<>();
@@ -174,7 +174,7 @@ public class MoreRedDataGen
 			.help(helper -> helper.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					ingredient(MoreRed.Tags.Items.BUNDLED_CABLES),
 					ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(MoreRed.Tags.Items.BUNDLED_CABLES,1),
 					sizedIngredient(Tags.Items.INGOTS_IRON,1)))));
 		postBlock(Names.CABLE_JUNCTION, "Cable Junction", context)
@@ -187,7 +187,7 @@ public class MoreRedDataGen
 					'#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 					'b', ingredient(MoreRed.Tags.Items.BUNDLED_CABLES),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 2),
 					sizedIngredient(Tags.Items.INGOTS_IRON, 1),
 					sizedIngredient(MoreRed.Tags.Items.BUNDLED_CABLES, 1)))));
@@ -253,12 +253,13 @@ public class MoreRedDataGen
 			new Constant(ColorHandlers.UNLIT),
 			new Constant(ColorHandlers.UNLIT),
 			new Constant(ColorHandlers.UNLIT));
-		plateBlock(Names.ALTERNATOR, "Alternator", context, true, previewModel -> new BlockModelWrapper.Unbaked(previewModel, alternatorTints))
+		plateBlock(Names.ALTERNATOR, "Alternator", context, true, previewModel -> new CuboidItemModelWrapper.Unbaked(previewModel, Optional.empty(), alternatorTints))
 			.tags(ExMachinaTags.Blocks.NO_AUTOMATIC_MECHANICAL_UPDATES)
 			.mechanicalComponent(alternatorMachine)
 			.blockItemWithoutItemModel(id -> new ClientItem(
-				new BlockModelWrapper.Unbaked(
+				new CuboidItemModelWrapper.Unbaked(
 					id,
+					Optional.empty(),
 					alternatorTints), ClientItem.Properties.DEFAULT))
 			.help(helper -> {
 				helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
@@ -268,35 +269,35 @@ public class MoreRedDataGen
 				    '#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 				    't', Ingredient.of(Items.REDSTONE_TORCH),
 				    'o', ingredient(MoreRed.Tags.Items.AXLES))));
-				helper.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				helper.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					new SizedIngredient(ingredient(SMOOTH_STONE_QUARTER_SLABS), 1),
 					new SizedIngredient(ingredient(Tags.Items.DUSTS_REDSTONE), 5),
 					new SizedIngredient(ingredient(MoreRed.Tags.Items.AXLES), 1))));
 				// dummy item asset for the BER
 				Identifier alternatorAxleId = mangle(helper.id(), "%s_axle");
 				Identifier alternatorAxleModelId = itemModel(alternatorAxleId);
-				clientItems.put(alternatorAxleId, new ClientItem(new BlockModelWrapper.Unbaked(alternatorAxleModelId, List.of()), ClientItem.Properties.DEFAULT)); 
+				clientItems.put(alternatorAxleId, new ClientItem(new CuboidItemModelWrapper.Unbaked(alternatorAxleModelId, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT)); 
 			});
 			
 		wireBlock(Names.RED_ALLOY_WIRE, "Red Alloy Wire", context)
-			.blockItemWithoutItemModel(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.blockItemWithoutItemModel(id -> new ClientItem(new CuboidItemModelWrapper.Unbaked(id, Optional.empty(), List.of(new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
 			.tags(MoreRed.Tags.Items.RED_ALLOY_WIRES)
 			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 12, CraftingBookCategory.REDSTONE, List.of("###"), Map.of('#', ingredient(REDSTONE_ALLOY_INGOTS)))));
 		postBlock(Names.REDWIRE_POST, "Redwire Post", context)
 			.tags(MoreRed.Tags.Blocks.REDWIRE_POSTS)
-			.simpleBlockItem(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.simpleBlockItem(id -> new ClientItem(new CuboidItemModelWrapper.Unbaked(id, Optional.empty(), List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
 			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					"F",
 					"R"), Map.of(
 					'R', ingredient(REDSTONE_ALLOY_INGOTS),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(Tags.Items.INGOTS_IRON,1),
 					sizedIngredient(REDSTONE_ALLOY_INGOTS,1)))));
 				
 		postBlock(Names.REDWIRE_RELAY, "Redwire Relay", context)
 			.tags(MoreRed.Tags.Blocks.REDWIRE_POSTS)
-			.simpleBlockItem(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.simpleBlockItem(id -> new ClientItem(new CuboidItemModelWrapper.Unbaked(id, Optional.empty(), List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
 			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					" F ",
 					" R ",
@@ -304,14 +305,14 @@ public class MoreRedDataGen
 					'#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 					'R', ingredient(REDSTONE_ALLOY_INGOTS),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS,1),
 					sizedIngredient(REDSTONE_ALLOY_INGOTS,1),
 					sizedIngredient(Tags.Items.INGOTS_IRON,1)))));
 				
 		postBlock(Names.REDWIRE_JUNCTION, "Redwire Junction", context)
 			.tags(MoreRed.Tags.Blocks.REDWIRE_POSTS)
-			.simpleBlockItem(id -> new ClientItem(new BlockModelWrapper.Unbaked(id, List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
+			.simpleBlockItem(id -> new ClientItem(new CuboidItemModelWrapper.Unbaked(id, Optional.empty(), List.of(new Constant(ColorHandlers.NO_TINT), new Constant(ColorHandlers.UNLIT))), ClientItem.Properties.DEFAULT))
 			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					" F ",
 					"rRr",
@@ -320,7 +321,7 @@ public class MoreRedDataGen
 					'r', ingredient(Tags.Items.DUSTS_REDSTONE),
 					'R', ingredient(REDSTONE_ALLOY_INGOTS),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStack(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS,1),
 					sizedIngredient(Tags.Items.DUSTS_REDSTONE,1),
 					sizedIngredient(REDSTONE_ALLOY_INGOTS,1),
@@ -343,9 +344,9 @@ public class MoreRedDataGen
 					List.of("###"),
 					Map.of('#', ingredient(SMOOTH_STONE_SLABS))))
 				.recipe(mangle(helper.id(), "%s_from_smooth_stone_slab_stonecutting"),
-					new StonecutterRecipe("", ingredient(SMOOTH_STONE_SLABS), new ItemStack(helper.item(), 4)))
+					new StonecutterRecipe(new Recipe.CommonInfo(true), ingredient(SMOOTH_STONE_SLABS), new ItemStackTemplate(helper.item(), 4)))
 				.recipe(mangle(helper.id(), "%s_from_smooth_stone_stonecutting"),
-					new StonecutterRecipe("", ingredient(SMOOTH_STONE), new ItemStack(helper.item(), 8))));				
+					new StonecutterRecipe(new Recipe.CommonInfo(true), ingredient(SMOOTH_STONE), new ItemStackTemplate(helper.item(), 8))));				
 		redstonePlateBlock(Names.XNOR_GATE, "XNOR Gate", context, 4,
 		    "#t#",
 		    "ttt",
@@ -414,7 +415,7 @@ public class MoreRedDataGen
 						new RawConnection(Optional.empty(), NodeShape.ofSide(pumpDir), Parity.inversion(pumpDir, reverseAxleDir), 0))));
 			}
 		}
-		plateBlock(Names.EXTRACTOR, "Extractor", context, true, previewModel -> new BlockModelWrapper.Unbaked(previewModel, List.of()))
+		plateBlock(Names.EXTRACTOR, "Extractor", context, true, previewModel -> new CuboidItemModelWrapper.Unbaked(previewModel, Optional.empty(), List.of()))
 			.mechanicalComponent(extractorMachine)
 			.tags(BlockTags.MINEABLE_WITH_AXE, BlockTags.MINEABLE_WITH_PICKAXE)
 			.blockItemWithoutItemModel()
@@ -434,9 +435,9 @@ public class MoreRedDataGen
 				Identifier axleBlockModel = blockModel(axleId);
 				Identifier bagId = mangle(helper.id(), "%s_bag");
 				Identifier bagBlockModel = blockModel(bagId);
-				clientItems.put(pumpId, new ClientItem(new BlockModelWrapper.Unbaked(pumpBlockModel, List.of()), ClientItem.Properties.DEFAULT));
-				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
-				clientItems.put(bagId, new ClientItem(new BlockModelWrapper.Unbaked(bagBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+				clientItems.put(pumpId, new ClientItem(new CuboidItemModelWrapper.Unbaked(pumpBlockModel, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
+				clientItems.put(axleId, new ClientItem(new CuboidItemModelWrapper.Unbaked(axleBlockModel, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
+				clientItems.put(bagId, new ClientItem(new CuboidItemModelWrapper.Unbaked(bagBlockModel, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
 			});
 			
 
@@ -799,8 +800,9 @@ public class MoreRedDataGen
 				.tags(MoreRed.Tags.Blocks.WOODEN_GEARSHIFTERS)
 				.blockItemWithoutItemModel(itemModelId -> new ClientItem(
 					new CompositeModel.Unbaked(List.of(
-						new BlockModelWrapper.Unbaked(mangle(itemModelId, "%s_gear"), List.of()),
-						new BlockModelWrapper.Unbaked(mangle(itemModelId, "%s_axle"), List.of()))),
+						new CuboidItemModelWrapper.Unbaked(mangle(itemModelId, "%s_gear"), Optional.empty(), List.of()),
+						new CuboidItemModelWrapper.Unbaked(mangle(itemModelId, "%s_axle"), Optional.empty(), List.of())),
+						Optional.empty()),
 					ClientItem.Properties.DEFAULT))
 				.tags(MoreRed.Tags.Items.GEARSHIFTERS)
 				.help(helper -> {
@@ -818,12 +820,13 @@ public class MoreRedDataGen
 						.addTexture("top", strippedLogTopTexture));
 					previewModels.put(gearPreviewModelId, new PreviewModel(SimpleModel.create(gearItemModelId, RenderTypes.TRANSLUCENT)));
 					previewModels.put(axlePreviewModelId, new PreviewModel(SimpleModel.create(axleItemModelId, RenderTypes.TRANSLUCENT)));
-					clientItems.put(gearId, new ClientItem(new BlockModelWrapper.Unbaked(gearItemModelId, List.of()), ClientItem.Properties.DEFAULT));
-					clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleItemModelId, List.of()), ClientItem.Properties.DEFAULT));
+					clientItems.put(gearId, new ClientItem(new CuboidItemModelWrapper.Unbaked(gearItemModelId, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
+					clientItems.put(axleId, new ClientItem(new CuboidItemModelWrapper.Unbaked(axleItemModelId, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
 					clientItems.put(gearshifterPreviewId, new ClientItem(
 						new CompositeModel.Unbaked(List.of(
-							new BlockModelWrapper.Unbaked(gearPreviewModelId, List.of()),
-							new BlockModelWrapper.Unbaked(axlePreviewModelId, List.of()))),
+							new CuboidItemModelWrapper.Unbaked(gearPreviewModelId, Optional.empty(), List.of()),
+							new CuboidItemModelWrapper.Unbaked(axlePreviewModelId, Optional.empty(), List.of())),
+							Optional.empty()),
 						ClientItem.Properties.DEFAULT));
 
 					helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING, List.of(
@@ -1043,7 +1046,7 @@ public class MoreRedDataGen
 
 				Identifier axleId = mangle(helper.id(), "%s_axle");
 				Identifier axleBlockModel = blockModel(axleId);
-				clientItems.put(axleId, new ClientItem(new BlockModelWrapper.Unbaked(axleBlockModel, List.of()), ClientItem.Properties.DEFAULT));
+				clientItems.put(axleId, new ClientItem(new CuboidItemModelWrapper.Unbaked(axleBlockModel, Optional.empty(), List.of()), ClientItem.Properties.DEFAULT));
 			});
 			
 		
@@ -1112,7 +1115,7 @@ public class MoreRedDataGen
 		Identifier itemModel = blockId.withPrefix("item/");
 		Identifier previewId = blockId.withSuffix("_preview");
 		
-		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
+		BlockStateModelDispatcher blockState = BlockStateBuilder.variants(variantBuilder -> {
 			Map<String, Variant> previewVariants = PlacementPreviewDefinition.variants(previewBuilder -> {
 				for (Direction dir : Direction.values())
 				{
@@ -1194,8 +1197,8 @@ public class MoreRedDataGen
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		Identifier parent = switch(block)
 		{
-			case ThreeInputBitwiseGateBlock $$$ -> MoreRed.id("block/three_input_bitwise_logic_plate_template");
-			case TwoInputBitwiseGateBlock $$ -> MoreRed.id("block/two_input_bitwise_logic_plate_template");
+			case ThreeInputBitwiseGateBlock _ -> MoreRed.id("block/three_input_bitwise_logic_plate_template");
+			case TwoInputBitwiseGateBlock _ -> MoreRed.id("block/two_input_bitwise_logic_plate_template");
 			default -> MoreRed.id("block/single_input_bitwise_logic_plate_template"); 
 		};
 
@@ -1204,7 +1207,7 @@ public class MoreRedDataGen
 		context.models().put(mangle(blockId, "block/%s"), SimpleModel.createWithoutRenderType(parent).addTexture("symbol", symbolLocation));
 		BlockDataHelper helper = plateBlock(blockPath, name, context);
 		helper.tags(MoreRed.Tags.Blocks.BITWISE_GATES);
-		helper.simpleBlockItem().help(h -> h.recipe(mangle(h.id(), "%s_from_soldering"), new SolderingRecipe(new ItemStack(h.item()), List.of(
+		helper.simpleBlockItem().help(h -> h.recipe(mangle(h.id(), "%s_from_soldering"), new SolderingRecipe(new ItemStackTemplate(h.item()), List.of(
 			sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 2),
 			sizedIngredient(Tags.Items.GEMS_QUARTZ, 1),
 			sizedIngredient(Tags.Items.DUSTS_REDSTONE, 1),
@@ -1217,7 +1220,7 @@ public class MoreRedDataGen
 		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
 		Identifier blockModel = blockModel(blockId);
-		BlockModelDefinition blockState = BlockStateBuilder.variants(variants -> {
+		BlockStateModelDispatcher blockState = BlockStateBuilder.variants(variants -> {
 			int[] xs = {0,180,270,90,90,90};
 			int[] ys = {0,0,0,0,90,270};
 			for (Direction dir : Direction.values())
@@ -1308,7 +1311,7 @@ public class MoreRedDataGen
 
 		helper.tags(BlockTags.MINEABLE_WITH_PICKAXE);
 		helper.blockItem(SimpleModel.createWithoutRenderType(mangle(blockId, "block/%s_0")))
-			.recipe(mangle(blockId, "%s_from_soldering"), new SolderingRecipe(new ItemStack(block.asItem()), List.of(
+			.recipe(mangle(blockId, "%s_from_soldering"), new SolderingRecipe(new ItemStackTemplate(block.asItem()), List.of(
 				sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 8),
 				sizedIngredient(Tags.Items.DUSTS_REDSTONE, 9),
 				sizedIngredient(Tags.Items.GEMS_QUARTZ, 4))));
@@ -1324,7 +1327,7 @@ public class MoreRedDataGen
 		Identifier model = mangle(blockId, "block/%s");
 		Identifier switchedModel = mangle(blockId, "block/%s_switched");
 		
-		BlockModelDefinition blockState = BlockStateBuilder.variants(variantBuilder -> {
+		BlockStateModelDispatcher blockState = BlockStateBuilder.variants(variantBuilder -> {
 			for (Direction dir : Direction.values())
 			{
 				for (int i = 0; i < 4; i++)
@@ -1403,7 +1406,7 @@ public class MoreRedDataGen
 		Identifier elbowModel = mangle(blockId, "block/%s_elbow");
 		Identifier lineModel = mangle(blockId, "block/%s_line");
 		Identifier edgeModel = mangle(blockId, "block/%s_edge");
-		BlockModelDefinition blockState = BlockStateBuilder.multipart(multipart -> multipart
+		BlockStateModelDispatcher blockState = BlockStateBuilder.multipart(multipart -> multipart
 			.apply(new UnbakedWirePartBlockStateModel(lineModel, edgeModel))
 			.applyWhen(BlockStateBuilder.model(nodeModel), AbstractWireBlock.DOWN, true)
 			.applyWhen(BlockStateBuilder.model(nodeModel, r180, r0), AbstractWireBlock.UP, true)
@@ -1470,7 +1473,7 @@ public class MoreRedDataGen
 			simpleLoot(block));
 	}
 	
-	static BlockDataHelper tubeBlock(String blockPath, String blockName, DataGenContext context, BlockModelDefinition blockState)
+	static BlockDataHelper tubeBlock(String blockPath, String blockName, DataGenContext context, BlockStateModelDispatcher blockState)
 	{
 		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
@@ -1511,7 +1514,7 @@ public class MoreRedDataGen
 			}
 		}
 		helper.recipe(mangle(helper.id(), "%s_from_soldering"), 
-			new SolderingRecipe(new ItemStack(helper.item()), List.of(
+			new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 				new SizedIngredient(ingredient(SMOOTH_STONE_QUARTER_SLABS), 1),
 				new SizedIngredient(ingredient(Tags.Items.DUSTS_REDSTONE), redstone))))
 		.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(pattern), patternKey));
@@ -1522,7 +1525,7 @@ public class MoreRedDataGen
 	static ItemDataHelper switchedPlateRecipes(ItemDataHelper helper, DataGenContext context, int redstone, String... recipePattern)
 	{
 		helper.recipe(mangle(helper.id(), "%s_from_soldering"), 
-			new SolderingRecipe(new ItemStack(helper.item()), List.of(
+			new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 				sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 1),
 				sizedIngredient(Tags.Items.DUSTS_REDSTONE, redstone),
 				sizedIngredient(Tags.Items.INGOTS_IRON, 1))))
@@ -1560,7 +1563,7 @@ public class MoreRedDataGen
 			.localize(name);
 	}
 	
-	private static BlockModelDefinition tubeBlockState(Block block)
+	private static BlockStateModelDispatcher tubeBlockState(Block block)
 	{
 		Identifier blockModel = BlockDataHelper.blockModel(block);
 		Identifier extension = mangle(blockModel, "%s_extension");
@@ -1574,7 +1577,7 @@ public class MoreRedDataGen
 			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R270, true), TubeBlock.WEST, true));
 	}
 	
-	private static BlockModelDefinition redstoneTubeBlockState(Block block)
+	private static BlockStateModelDispatcher redstoneTubeBlockState(Block block)
 	{
 		Identifier blockModel = BlockDataHelper.blockModel(block);
 		Identifier offModel = blockModel;
@@ -1591,7 +1594,7 @@ public class MoreRedDataGen
 			.applyWhen(BlockStateBuilder.model(extension, Quadrant.R0, Quadrant.R270, true), TubeBlock.WEST, true));
 	}
 	
-	private static BlockModelDefinition sixWayBlockState(Block block)
+	private static BlockStateModelDispatcher sixWayBlockState(Block block)
 	{
 		return BlockStateBuilder.variants(builder -> {
 			Identifier model = BlockDataHelper.blockModel(block);

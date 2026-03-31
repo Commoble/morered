@@ -1,6 +1,6 @@
 package net.commoble.morered.client;
 
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.client.renderer.RenderPipelines;
@@ -39,21 +39,13 @@ public class StandardSizeContainerScreenFactory<ContainerType extends AbstractCo
 		public StandardSizeContainerScreen(ContainerType screenContainer, Inventory inv, Component titleIn, Identifier texture, String windowTitleTranslationKey)
 		{
 			super(screenContainer, inv, titleIn);
-			this.imageWidth = 176;
-			this.imageHeight = 166;
 			this.texture = texture;
-		}
-
-		@Override
-		public void render(GuiGraphics graphics, int x, int y, float partialTicks)
-		{
-			super.render(graphics, x, y, partialTicks);
-			this.renderTooltip(graphics, x, y);
 		}
 		
 		@Override
-		protected void renderBg(GuiGraphics graphics, float partialTicks, int mouseX, int mouseY)
+		public void extractBackground(GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks)
 		{
+			super.extractBackground(graphics, mouseX, mouseY, partialTicks);
 			int xStart = (this.width - this.imageWidth) / 2;
 			int yStart = (this.height - this.imageHeight) / 2;
 			graphics.blit(RenderPipelines.GUI_TEXTURED, this.texture, xStart,  yStart, 0, 0, this.imageWidth, this.imageHeight, 256, 256);

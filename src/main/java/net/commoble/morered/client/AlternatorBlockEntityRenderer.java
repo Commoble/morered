@@ -1,6 +1,10 @@
 package net.commoble.morered.client;
 
 import java.util.Map;
+import java.util.function.Supplier;
+
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
@@ -16,24 +20,20 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.feature.ModelFeatureRenderer.CrumblingOverlay;
 import net.minecraft.client.renderer.item.ItemModelResolver;
-import net.minecraft.client.renderer.state.CameraRenderState;
+import net.minecraft.client.renderer.state.level.CameraRenderState;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.core.Direction;
-import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 
-public record AlternatorBlockEntityRenderer(ItemModelResolver resolver, ItemStack axleModel) implements BlockEntityRenderer<GenericBlockEntity, MechanicalItemBlockEntityRenderState>
+public record AlternatorBlockEntityRenderer(ItemModelResolver resolver, Supplier<ItemStack> axleModel) implements BlockEntityRenderer<@NonNull GenericBlockEntity, @NonNull MechanicalItemBlockEntityRenderState>
 {
 	
 	public static AlternatorBlockEntityRenderer create(BlockEntityRendererProvider.Context context)
 	{
-		ItemStack stack = new ItemStack(Items.STICK);
-		stack.set(DataComponents.ITEM_MODEL, MoreRed.id("alternator_axle"));
-		return new AlternatorBlockEntityRenderer(context.itemModelResolver(), stack);
+		return new AlternatorBlockEntityRenderer(context.itemModelResolver(), RenderHelper.memoizeStackModel(MoreRed.id("alternator_axle")));
 	}
 
 	@Override
@@ -43,18 +43,20 @@ public record AlternatorBlockEntityRenderer(ItemModelResolver resolver, ItemStac
 	}
 
 	@Override
-	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, CrumblingOverlay overlay)
+	public void extractRenderState(GenericBlockEntity be, MechanicalItemBlockEntityRenderState renderState, float partialTicks, Vec3 camera, @Nullable CrumblingOverlay overlay)
 	{
 		BlockEntityRenderer.super.extractRenderState(be, renderState, partialTicks, camera, overlay);
+		Level level = be.getLevel();
+		if (level == null)
+			return;
 		Map<NodeShape, MechanicalState> states = be.getData(MechanicalNodeStates.HOLDER.get());
 		BlockState state = be.getBlockState();
 		Direction attachDir = state.getValue(GearshifterBlock.ATTACHMENT_DIRECTION);
 		float radiansPerSecond = (float) states.getOrDefault(NodeShape.ofSide(attachDir), MechanicalState.ZERO).angularVelocity();
-		Level level = be.getLevel();
 		int gameTimeTicks = MechanicalState.getMachineTicks(level);
 		float seconds = (gameTimeTicks + partialTicks) * 0.05F; // in seconds
 		float radians = radiansPerSecond * seconds;
-		renderState.update(resolver, be.getLevel(), this.axleModel, radians);
+		renderState.update(resolver, level, this.axleModel.get(), radians);
 	}
 
 	@Override

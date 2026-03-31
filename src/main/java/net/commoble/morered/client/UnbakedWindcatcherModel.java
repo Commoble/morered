@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import org.joml.Matrix4fc;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 
@@ -18,13 +19,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.mechanisms.WindcatcherColors;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.renderer.block.dispatch.BlockModelRotation;
+import net.minecraft.client.renderer.block.dispatch.ModelState;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.client.renderer.item.ItemModel.BakingContext;
 import net.minecraft.client.renderer.item.ItemModel.Unbaked;
 import net.minecraft.client.renderer.item.ItemModelResolver;
 import net.minecraft.client.renderer.item.ItemStackRenderState;
-import net.minecraft.client.resources.model.BlockModelRotation;
-import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.Identifier;
 import net.minecraft.util.StringRepresentable;
@@ -56,7 +57,7 @@ public record UnbakedWindcatcherModel(Identifier axle, Identifier airfoil, Map<D
 	}
 
 	@Override
-	public ItemModel bake(BakingContext context)
+	public ItemModel bake(BakingContext context, Matrix4fc transformMatrix)
 	{
 		Map<SailKey,ItemModel> bakedSails = new HashMap<>();
 		List<ItemModel> bakedFoils = new ArrayList<>();
@@ -68,13 +69,13 @@ public record UnbakedWindcatcherModel(Identifier axle, Identifier airfoil, Map<D
 			int rotations = (i+2)%4; // north = 0, east = 1, etc
 			Quaternionf rotation = Axis.YN.rotationDegrees(90*rotations);
 			ModelState modelState = new TransformationModelState(new Transformation(new Vector3f(x,0,z),rotation,null,null));
-			bakedFoils.add(ModelUtil.wrapBlockModel(context, airfoil, modelState, List.of()));
+			bakedFoils.add(ModelUtil.wrapBlockModel(context, airfoil, modelState, transformMatrix, List.of()));
 			airfoilSails.forEach((color,id) ->
 				bakedSails.put(new SailKey(color,dir),
-					ModelUtil.wrapBlockModel(context, id, modelState, List.of())));
+					ModelUtil.wrapBlockModel(context, id, modelState, transformMatrix, List.of())));
 		}
 		return new WindcatcherModel(
-			ModelUtil.wrapBlockModel(context, this.axle, BlockModelRotation.IDENTITY, List.of()),
+			ModelUtil.wrapBlockModel(context, this.axle, BlockModelRotation.IDENTITY, transformMatrix, List.of()),
 			bakedFoils,
 			bakedSails);
 	}

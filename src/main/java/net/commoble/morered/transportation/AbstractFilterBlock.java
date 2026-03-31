@@ -63,8 +63,8 @@ public abstract class AbstractFilterBlock extends Block
 		if (stack.is(Tags.Items.TOOLS_WRENCH))
 		{
 			level.playSound(player, pos, SoundEvents.ANVIL_PLACE, SoundSource.BLOCKS,
-				0.1F + level.random.nextFloat()*0.1F,
-				0.7F + level.random.nextFloat()*0.1F);
+				0.1F + level.getRandom().nextFloat()*0.1F,
+				0.7F + level.getRandom().nextFloat()*0.1F);
 			level.setBlock(pos, state.cycle(FACING), UPDATE_ALL);
 			return InteractionResult.SUCCESS;
 		}

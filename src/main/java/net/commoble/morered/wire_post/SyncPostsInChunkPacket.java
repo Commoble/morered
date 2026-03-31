@@ -18,7 +18,7 @@ public record SyncPostsInChunkPacket(ChunkPos chunkPos, Set<BlockPos> postsInChu
 {
 	public static final CustomPacketPayload.Type<SyncPostsInChunkPacket> TYPE = new CustomPacketPayload.Type<>(MoreRed.id(Names.POSTS_IN_CHUNK));
 	public static final StreamCodec<ByteBuf, SyncPostsInChunkPacket> STREAM_CODEC = StreamCodec.composite(
-		ByteBufCodecs.VAR_LONG.map(ChunkPos::new, ChunkPos::toLong), SyncPostsInChunkPacket::chunkPos,
+		ByteBufCodecs.VAR_LONG.map(ChunkPos::unpack, ChunkPos::pack), SyncPostsInChunkPacket::chunkPos,
 		BlockPos.STREAM_CODEC.apply(ByteBufCodecs.list()).map(Set::copyOf,List::copyOf), SyncPostsInChunkPacket::postsInChunk,
 		SyncPostsInChunkPacket::new);
 	

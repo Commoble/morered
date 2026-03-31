@@ -34,7 +34,6 @@ import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import net.minecraft.resources.Identifier;
-import net.neoforged.neoforge.client.NamedRenderTypeManager;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 /**

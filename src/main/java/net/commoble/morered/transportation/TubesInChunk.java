@@ -31,14 +31,14 @@ public class TubesInChunk
 	public static Set<ChunkPos> getRelevantChunkPositionsNearPos(BlockPos pos)
 	{
 		double range = MoreRed.SERVERCONFIG.maxTubeConnectionRange().get();
-		ChunkPos chunkPos = new ChunkPos(pos);
+		ChunkPos chunkPos = ChunkPos.containing(pos);
 		int chunkRange = (int) Math.ceil(range/16D);
 		Set<ChunkPos> set = new HashSet<>();
 		for (int xOff = -chunkRange; xOff <= chunkRange; xOff++)
 		{
 			for (int zOff = -chunkRange; zOff <= chunkRange; zOff++)
 			{
-				set.add(new ChunkPos(chunkPos.x + xOff, chunkPos.z + zOff));
+				set.add(new ChunkPos(chunkPos.x() + xOff, chunkPos.z() + zOff));
 			}
 		}
 		
@@ -62,7 +62,7 @@ public class TubesInChunk
 		{
 			return ClientProxy.getTubesInChunk(chunkPos);
 		}
-		else if (level.getChunk(chunkPos.x, chunkPos.z, ChunkStatus.FULL, false) instanceof LevelChunk chunk)
+		else if (level.getChunk(chunkPos.x(), chunkPos.z(), ChunkStatus.FULL, false) instanceof LevelChunk chunk)
 		{
 			return getTubesInChunk(chunk);
 		}

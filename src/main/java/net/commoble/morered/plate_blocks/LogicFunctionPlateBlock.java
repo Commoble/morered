@@ -15,7 +15,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 
-public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
+public class LogicFunctionPlateBlock extends RedstonePlateBlock
 {
 	public static final EnumProperty<Direction> ATTACHMENT_DIRECTION = PlateBlockStateProperties.ATTACHMENT_DIRECTION;
 	public static final IntegerProperty ROTATION = PlateBlockStateProperties.ROTATION;
@@ -25,7 +25,7 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	@FunctionalInterface
 	public static interface LogicFunctionPlateBlockFactory
 	{	
-		public LogicFunctionPlateBlock makeBlock(LogicFunction function, BlockBehaviour.Properties properties);
+		public LogicFunctionPlateBlock makeBlock(BlockBehaviour.Properties properties, LogicFunction function);
 	}
 	
 	public static final LogicFunctionPlateBlockFactory THREE_INPUTS = getBlockFactory(InputSide.A, InputSide.B, InputSide.C);
@@ -35,27 +35,17 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 	
 	public static LogicFunctionPlateBlockFactory getBlockFactory(InputSide... inputs)
 	{
-		return (properties, function) -> new LogicFunctionPlateBlock(function, properties)
-		{
-			// fillStateContainer in LogicGatePlateBlock needs to know which blockstate properties to use
-			// but fillStateContainer gets called in the superconstructor, before any information about
-			// our block is available.
-			// The only safe way to handle this (aside from just making subclasses) is this
-			// cursed closure class
-			@Override
-			public InputSide[] getInputSides()
-			{
-				return inputs;
-			}
-		};
+		return (properties, function) -> new LogicFunctionPlateBlock(properties, function, inputs);
 	}
 	
+	private final InputSide[] inputs;
 	private final LogicFunction function;
 	
-	public LogicFunctionPlateBlock(Properties properties, LogicFunction function)
+	public LogicFunctionPlateBlock(Properties properties, LogicFunction function, InputSide[] inputs)
 	{
-		super(properties);
 		this.function = function;
+		this.inputs = inputs;
+		super(properties);
 		
 		BlockState baseState = this.defaultBlockState();
 		
@@ -67,15 +57,11 @@ public abstract class LogicFunctionPlateBlock extends RedstonePlateBlock
 		this.registerDefaultState(baseState);
 	}
 	
-	/**
-	 * We *have* to make this a method instead of a constructor arg,
-	 * because fillStateContainer gets called in the superconstructor
-	 * so we can't set any fields in this class before it gets called
-	 * 
-	 * @return The InputSides this block uses to get redstone input from
-	 */
 	@Override
-	public abstract InputSide[] getInputSides();
+	public InputSide[] getInputSides()
+	{
+		return this.inputs;
+	}
 
 	@Override
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)

@@ -180,7 +180,7 @@ public class SolderingMenu extends AbstractContainerMenu
 		}
 		else
 		{
-			this.craftResult.setItem(0, recipe.result().copy());
+			this.craftResult.setItem(0, recipe.result().create());
 		}
 	}
 }
