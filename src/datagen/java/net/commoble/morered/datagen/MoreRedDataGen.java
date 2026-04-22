@@ -512,7 +512,8 @@ public class MoreRedDataGen
 		
 		// data for vanilla things
 		recipes.put(MoreRed.id("smooth_stone_slab_from_stone_plate"), RecipeHelpers.shaped(Items.SMOOTH_STONE_SLAB, 1, CraftingBookCategory.BUILDING, List.of(
-				"###"), Map.of(
+				"##",
+				"##"), Map.of(
 				'#', Ingredient.of(MoreRed.STONE_PLATE_BLOCK.get()))));
 		
 		itemTags.tag(SMOOTH_STONE)

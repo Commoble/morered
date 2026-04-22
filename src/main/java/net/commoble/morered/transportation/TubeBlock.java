@@ -173,6 +173,7 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		if (newBlock instanceof AbstractFilterBlock && state.getValue(AbstractFilterBlock.FACING).equals(face.getOpposite()))
 			return true;
 
+		// otherwise check the level for the capability directly
 		if (level instanceof Level l && l.getCapability(Capabilities.Item.BLOCK, newPos, face.getOpposite()) != null)
 		{
 			return true;
@@ -238,7 +239,12 @@ public class TubeBlock extends Block implements SimpleWaterloggedBlock, EntityBl
 		{
 			ticker.scheduleTick(currentPos, Fluids.WATER, Fluids.WATER.getTickDelay(level));
 		}
-
+		if (level.getBlockEntity(currentPos) instanceof TubeBlockEntity tube)
+		{
+			// if we don't invalidate the itemhandler cache,,
+			// then *adding* an inventory next to the tube won't update it properly
+			tube.onInvalidate();
+		}
 		return thisState.setValue(PipeBlock.PROPERTY_BY_DIRECTION.get(facing), Boolean.valueOf(this.canConnectTo(level, currentPos, facing)));
 	}
 

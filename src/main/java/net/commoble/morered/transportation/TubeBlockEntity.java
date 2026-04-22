@@ -47,6 +47,7 @@ import net.minecraft.world.level.storage.ValueOutput.ValueOutputList;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.ICapabilityInvalidationListener;
 import net.neoforged.neoforge.network.PacketDistributor;
 import net.neoforged.neoforge.transfer.ResourceHandler;
 import net.neoforged.neoforge.transfer.ResourceHandlerUtil;
@@ -54,7 +55,7 @@ import net.neoforged.neoforge.transfer.item.ItemResource;
 import net.neoforged.neoforge.transfer.transaction.Transaction;
 import net.neoforged.neoforge.transfer.transaction.TransactionContext;
 
-public class TubeBlockEntity extends BlockEntity
+public class TubeBlockEntity extends BlockEntity implements ICapabilityInvalidationListener
 {
 	private static final Logger LOGGER = LogUtils.getLogger();
 	public static final String INV_NBT_KEY_ADD = "inventory_new_items";
@@ -85,6 +86,7 @@ public class TubeBlockEntity extends BlockEntity
 	
 	@Nonnull	// use getNetwork()
 	private RoutingNetwork network = RoutingNetwork.INVALID_NETWORK;
+	private boolean needsConnectionStateUpdate = true; // marked true on neighbor capability invalidation, only used serverside
 
 	public TubeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state)
 	{
@@ -278,7 +280,6 @@ public class TubeBlockEntity extends BlockEntity
 		}
 		if (this.level instanceof ServerLevel serverLevel)
 		{
-			this.onPossibleNetworkUpdateRequired();
 			this.network.invalid = true;
 			this.level.setBlockAndUpdate(this.worldPosition, newState);
 			PacketDistributor.sendToPlayersTrackingChunk(serverLevel, ChunkPos.containing(this.worldPosition), new TubeBreakPacket(Vec3.atCenterOf(this.worldPosition), Vec3.atCenterOf(otherPos)));
@@ -320,8 +321,41 @@ public class TubeBlockEntity extends BlockEntity
 		return false;
 	}
 	
+	
+	
+	@Override
+	public void onLoad()
+	{
+		super.onLoad();
+		if (this.level instanceof ServerLevel serverLevel)
+		{
+			for (Direction dir : Direction.values())
+			{
+				serverLevel.registerCapabilityListener(this.worldPosition.relative(dir), this);
+			}
+		}
+	}
+
 	protected void tick()
 	{
+		if (!this.level.isClientSide() && this.needsConnectionStateUpdate && this.getBlockState().getBlock() instanceof TubeBlock tubeBlock)
+		{
+			this.needsConnectionStateUpdate = false;
+			// manage invalidated neighbor capabilities
+			BlockState oldState = this.getBlockState();
+			BlockState newState = oldState;
+			for (Direction dir : Direction.values())
+			{
+				// neighbor handler cache map will have been nullified at least once
+				// so invoking getNeighborHandler will rebuild the new map if it hasn't already since the last invalidation
+				boolean shouldConnectOnSide = tubeBlock.canConnectTo(this.level, this.worldPosition, dir);
+				newState = newState.setValue(TubeBlock.getPropertyForDirection(dir), shouldConnectOnSide);
+			}
+			if (newState != oldState)
+			{
+				this.level.setBlockAndUpdate(this.worldPosition, newState);
+			}
+		}
 		this.mergeBuffer();
 		if (!this.inventory.isEmpty())	// if inventory is empty, skip the tick
 		{
@@ -388,10 +422,10 @@ public class TubeBlockEntity extends BlockEntity
 			}
 			else if (!this.level.isClientSide())
 			{
-				ResourceHandler<ItemResource> nextHandler = this.level.getCapability(Capabilities.Item.BLOCK, nextPos, dir.getOpposite());
+				@Nullable ResourceHandler<ItemResource> nextHandler = this.level.getCapability(Capabilities.Item.BLOCK, nextPos, dir.getOpposite());
+				ItemStack stackInWrapper = wrapper.stack;
 				if (nextHandler != null)	// te exists but is not a tube
 				{
-					ItemStack stackInWrapper = wrapper.stack;
 					int toInsert = stackInWrapper.getCount();
 					int inserted = ResourceHandlerUtil.insertStacking(nextHandler, ItemResource.of(stackInWrapper), toInsert, null);
 					int remaining = toInsert - inserted;
@@ -406,7 +440,6 @@ public class TubeBlockEntity extends BlockEntity
 						if (nextRoute == null)
 						{
 							// if we can't reenqueue item, just eject them
-							System.out.println("Ejecting to " + dir + " from " + this.worldPosition + " due to can't reenqueue - " + remainingStack);
 							WorldHelper.ejectItemstack(this.level, this.worldPosition, dir, remainingStack);
 						}
 						else
@@ -418,7 +451,22 @@ public class TubeBlockEntity extends BlockEntity
 				}
 				else	// no TE -- eject stack
 				{
-					WorldHelper.ejectItemstack(this.level, this.worldPosition, dir, wrapper.stack);
+					ItemStack remainingStack = stackInWrapper.copy();
+					@Nullable Route nextRoute = null;
+					try(Transaction t = Transaction.openRoot())
+					{
+						nextRoute = this.getBestRoute(dir, remainingStack, t);
+					}
+					if (nextRoute == null)
+					{
+						// if we can't reenqueue item, just eject them
+						WorldHelper.ejectItemstack(this.level, this.worldPosition, dir, remainingStack);
+					}
+					else
+					{
+						// if we can reenqueue item, do so
+						this.enqueueItemStack(remainingStack, dir, nextRoute);
+					}
 				}
 			}
 		}
@@ -692,5 +740,13 @@ public class TubeBlockEntity extends BlockEntity
 		}
 		
 		return results;
+	}
+
+	public boolean onInvalidate()
+	{
+		// we'll update the blockstate on next server tick
+		this.needsConnectionStateUpdate = true;
+		this.network.invalid = true;
+		return !this.isRemoved();
 	}
 }

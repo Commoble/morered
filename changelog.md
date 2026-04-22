@@ -1,3 +1,11 @@
+# 26.1.2.0
+* Fix crash when breaking wires and gears on latest neoforge (now requires neo 26.1.2.22-beta)
+
+# 26.1.0.5
+* Fix stone plate -> stone slab recipe using wrong number of ingredients
+* Tube blocks should now update properly when neighbor blocks' inventories start or stop existing without triggering block updates
+* Tubes should now reenqueue items instead of dumping them more often when target inventories no longer exist
+
 # 26.1.0.0
 * Update to MC 26.1
 
