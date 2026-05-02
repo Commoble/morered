@@ -1,3 +1,9 @@
+# 26.1.2.1
+* Fix logic plates shorting bundled cables on input side (if any color had power, all colors in the cable became powered)
+* There is a known issue where bundled cables visually connect to input sides of logic plates but do not pass signal to them
+	* Not providing signal to logic plates is currently intended,
+	* but preventing the visual connection requires future API changes
+
 # 26.1.2.0
 * Fix crash when breaking wires and gears on latest neoforge (now requires neo 26.1.2.22-beta)
 
