@@ -58,7 +58,8 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<CuboidModel>
 			baseModel.textureSlots(),
 			baseModel.parent(),
 			baseModel.rootTransform(),
-			baseModel.partVisibility());
+			baseModel.partVisibility(),
+			baseModel.itemLayerFaceData());
 	}
 	
 	public static class TintRotatingModelGeometry implements ExtendedUnbakedGeometry

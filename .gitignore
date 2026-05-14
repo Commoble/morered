@@ -24,3 +24,4 @@ runs
 logs
 maven
 src/generated/resources/.cache
+hs_err*.log

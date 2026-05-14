@@ -1,3 +1,7 @@
+# 26.1.2.2
+* Fix crash on neoforge 26.1.2.48-beta
+* Now requires neoforge 26.1.2.48-beta or higher
+
 # 26.1.2.1
 * Fix logic plates shorting bundled cables on input side (if any color had power, all colors in the cable became powered)
 * There is a known issue where bundled cables visually connect to input sides of logic plates but do not pass signal to them
