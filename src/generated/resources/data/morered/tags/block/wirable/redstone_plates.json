@@ -1,0 +1,17 @@
+{
+  "values": [
+    "morered:two_input_and_gate",
+    "morered:and_gate",
+    "morered:diode",
+    "morered:latch",
+    "morered:multiplexer",
+    "morered:two_input_nand_gate",
+    "morered:nand_gate",
+    "morered:nor_gate",
+    "morered:not_gate",
+    "morered:or_gate",
+    "morered:pulse_gate",
+    "morered:xnor_gate",
+    "morered:xor_gate"
+  ]
+}

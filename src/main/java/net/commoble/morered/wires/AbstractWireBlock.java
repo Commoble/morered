@@ -742,6 +742,7 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 		// check endpoints and transmitters
 		var levelKey = world.dimension();
 		SignalComponent neighborComponent = neighborWirer.component();
+		boolean isSignalSource = thisState.isSignalSource();
 		
 		for (Channel ourChannel : this.channels.channels())
 		{
@@ -751,11 +752,14 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 				var neighborNodes = neighborComponent.getTransmissionNodes(levelKey, world, neighborPos, neighborState, theirChannel);
 				for (TransmissionNode node : neighborNodes)
 				{
-					for (SignalGraphKey keyPreferredByNeighbor : node.connectableNodes())
+					if (isSignalSource || !node.onlyVisibleForRedstoneCables())
 					{
-						if (wireNode.isValidFor(keyPreferredByNeighbor))
+						for (SignalGraphKey keyPreferredByNeighbor : node.connectableNodes())
 						{
-							return true;
+							if (wireNode.isValidFor(keyPreferredByNeighbor))
+							{
+								return true;
+							}
 						}
 					}
 				}

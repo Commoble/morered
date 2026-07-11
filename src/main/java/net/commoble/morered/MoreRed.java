@@ -58,6 +58,7 @@ import net.commoble.morered.plate_blocks.LogicFunctionPlateBlock.LogicFunctionPl
 import net.commoble.morered.plate_blocks.LogicFunctions;
 import net.commoble.morered.plate_blocks.PlateBlock;
 import net.commoble.morered.plate_blocks.PulseGateBlock;
+import net.commoble.morered.plate_blocks.RedstonePlateSignalComponent;
 import net.commoble.morered.soldering.SolderingMenu;
 import net.commoble.morered.soldering.SolderingRecipe;
 import net.commoble.morered.soldering.SolderingRecipeButtonPacket;
@@ -645,6 +646,7 @@ public class MoreRed
 		registerSignalComponent.accept(WireSignalComponent.RESOURCE_KEY, WireSignalComponent.CODEC);
 		registerSignalComponent.accept(WirePostSignalComponent.RESOURCE_KEY, WirePostSignalComponent.CODEC);
 		registerSignalComponent.accept(BitwiseGateSignalComponent.RESOURCE_KEY, BitwiseGateSignalComponent.CODEC);
+		registerSignalComponent.accept(RedstonePlateSignalComponent.RESOURCE_KEY, RedstonePlateSignalComponent.CODEC);
 	}
 	
 	// data maps (which are registered elsewhere)
@@ -687,6 +689,7 @@ public class MoreRed
 			public static final TagKey<Block> WIRABLE_WIRE_POSTS = tag("wirable/wire_posts");
 			public static final TagKey<Block> WIRABLE = tag("wirable/wires");
 			public static final TagKey<Block> WIRABLE_BITWISE_GATES = tag("wirable/bitwise_gates");
+			public static final TagKey<Block> WIRABLE_REDSTONE_PLATES = tag("wirable/redstone_plates");
 			
 			public static final TagKey<Block> COLORED_TUBES = tag(Names.COLORED_TUBES);
 			public static final TagKey<Block> TUBES = tag(Names.TUBES);

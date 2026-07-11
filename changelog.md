@@ -1,3 +1,7 @@
+# 26.1.2.3
+* Fix bundled cables visually connecting to input sides of logic plates (they intentionally can still connect to output sides)
+* Added `morered:redstone_plate` signal component which all logic gates except alternators now use (which prevents bundled cables from connecting on input sides)
+
 # 26.1.2.2
 * Fix crash on neoforge 26.1.2.48-beta
 * Now requires neoforge 26.1.2.48-beta or higher

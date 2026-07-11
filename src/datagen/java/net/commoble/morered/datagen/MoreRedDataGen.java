@@ -1189,6 +1189,7 @@ public class MoreRedDataGen
 		blockHelper
 			.blockItemUsingBlockModel(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT))
 			.help(helper -> plateRecipes(helper, context, redstone, recipePattern));
+		blockHelper.tags(MoreRed.Tags.Blocks.WIRABLE_REDSTONE_PLATES);
 		return blockHelper;
 	}
 	
@@ -1388,6 +1389,7 @@ public class MoreRedDataGen
 		
 		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.localize(blockName);
+		blockHelper.tags(MoreRed.Tags.Blocks.WIRABLE_REDSTONE_PLATES);
 		blockHelper.simpleBlockItem(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT)).help(helper -> switchedPlateRecipes(helper, context, redstone, recipePattern));
 		return blockHelper;
 	}

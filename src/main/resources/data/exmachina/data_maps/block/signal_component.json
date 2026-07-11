@@ -3,6 +3,9 @@
 		"#morered:wirable/bitwise_gates": {
 			"type": "morered:bitwise_gate"
 		},
+		"#morered:wirable/redstone_plates": {
+			"type": "morered:redstone_plate"
+		},
 		"#morered:wirable/wires": {
 			"type": "morered:wire"
 		},

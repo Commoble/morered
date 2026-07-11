@@ -8,6 +8,7 @@ import net.minecraft.world.item.DyeColor;
 public class Names
 {
 	// blocks and blockitems
+	public static final String REDSTONE_PLATE = "redstone_plate";
 	public static final String DIODE = "diode";
 	public static final String NOT_GATE = "not_gate";
 	public static final String NOR_GATE = "nor_gate";
