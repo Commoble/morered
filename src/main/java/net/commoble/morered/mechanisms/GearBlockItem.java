@@ -8,7 +8,7 @@ import net.commoble.morered.FaceSegmentBlock;
 import net.commoble.morered.GenericBlockEntity;
 import net.commoble.morered.MoreRed;
 import net.commoble.morered.util.BlockStateUtil;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.triggers.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerPlayer;

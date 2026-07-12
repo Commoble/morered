@@ -8,10 +8,10 @@ import com.google.common.collect.Maps;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Registry;
 import net.minecraft.data.DataGenerator;
-import net.minecraft.data.tags.KeyTagProvider;
 import net.minecraft.data.tags.TagAppender;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagBuilder;
 import net.minecraft.tags.TagKey;
 import net.neoforged.fml.ModLoadingContext;
@@ -20,7 +20,7 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 /**
  * Better TagsProvider that allows other things to add tags to it
  */
-public class TagProvider<T> extends KeyTagProvider<T>
+public class TagProvider<T> extends TagsProvider<T>
 {	
 	// mojang clears the map for some reason so we have to maintain our own
 	protected final Map<Identifier, TagBuilder> subclassBuilders = Maps.newLinkedHashMap();
@@ -34,14 +34,16 @@ public class TagProvider<T> extends KeyTagProvider<T>
 		super(dataGenerator.getPackOutput(), registry, holders, modId);
 	}
 
-   public TagBuilder getOrCreateRawBuilder(TagKey<T> tagKey) {
-	  super.getOrCreateRawBuilder(tagKey); //track file
-      return this.subclassBuilders.computeIfAbsent(tagKey.location(), (key) -> TagBuilder.create());
-   }
-	
-	public TagAppender<ResourceKey<T>, T> tag(TagKey<T> tagKey)
+	public TagBuilder getOrCreateRawBuilder(TagKey<T> tagKey)
 	{
-		return super.tag(tagKey);
+		super.getOrCreateRawBuilder(tagKey); // track file
+		return this.subclassBuilders.computeIfAbsent(tagKey.location(), (key) -> TagBuilder.create());
+	}
+
+	@Override
+	public TagAppender<T> tag(TagKey<T> tag)
+	{
+		return super.tag(tag);
 	}
 
 	@Override

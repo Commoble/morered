@@ -21,7 +21,6 @@ public class PosAndDist implements Comparable<PosAndDist>
 	@Override
 	public int compareTo(PosAndDist other)
 	{
-		// TODO Auto-generated method stub
 		return this.dist - other.dist;
 	}
 	

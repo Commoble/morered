@@ -34,13 +34,13 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 
-public record UnbakedWindcatcherModel(Identifier axle, Identifier airfoil, Map<DyeColor,Identifier> airfoilSails) implements ItemModel.Unbaked
+public record WindcatcherModel(Identifier axle, Identifier airfoil, Map<DyeColor,Identifier> airfoilSails) implements ItemModel.Unbaked
 {
-	public static final MapCodec<UnbakedWindcatcherModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			Identifier.CODEC.fieldOf("axle").forGetter(UnbakedWindcatcherModel::axle),
-			Identifier.CODEC.fieldOf("airfoil").forGetter(UnbakedWindcatcherModel::airfoil),
-			Codec.simpleMap(DyeColor.CODEC, Identifier.CODEC, StringRepresentable.keys(DyeColor.values())).codec().fieldOf("airfoil_sails").forGetter(UnbakedWindcatcherModel::airfoilSails)
-		).apply(builder, UnbakedWindcatcherModel::new));
+	public static final MapCodec<WindcatcherModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+			Identifier.CODEC.fieldOf("axle").forGetter(WindcatcherModel::axle),
+			Identifier.CODEC.fieldOf("airfoil").forGetter(WindcatcherModel::airfoil),
+			Codec.simpleMap(DyeColor.CODEC, Identifier.CODEC, StringRepresentable.keys(DyeColor.values())).codec().fieldOf("airfoil_sails").forGetter(WindcatcherModel::airfoilSails)
+		).apply(builder, WindcatcherModel::new));
 
 	@Override
 	public void resolveDependencies(Resolver resolver)
@@ -74,13 +74,13 @@ public record UnbakedWindcatcherModel(Identifier axle, Identifier airfoil, Map<D
 				bakedSails.put(new SailKey(color,dir),
 					ModelUtil.wrapBlockModel(context, id, modelState, transformMatrix, List.of())));
 		}
-		return new WindcatcherModel(
+		return new BakedWindcatcherModel(
 			ModelUtil.wrapBlockModel(context, this.axle, BlockModelRotation.IDENTITY, transformMatrix, List.of()),
 			bakedFoils,
 			bakedSails);
 	}
 
-	public static record WindcatcherModel(ItemModel axle, List<ItemModel> airfoils, Map<SailKey,ItemModel> airfoilSails) implements ItemModel
+	public static record BakedWindcatcherModel(ItemModel axle, List<ItemModel> airfoils, Map<SailKey,ItemModel> airfoilSails) implements ItemModel
 	{
 		@Override
 		public void update(

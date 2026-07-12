@@ -30,9 +30,9 @@ import net.commoble.morered.TwentyFourBlock;
 import net.commoble.morered.bitwise_logic.ThreeInputBitwiseGateBlock;
 import net.commoble.morered.bitwise_logic.TwoInputBitwiseGateBlock;
 import net.commoble.morered.client.ColorHandlers;
-import net.commoble.morered.client.UnbakedLogicGateModel;
-import net.commoble.morered.client.UnbakedWindcatcherModel;
-import net.commoble.morered.client.UnbakedWirePartBlockStateModel;
+import net.commoble.morered.client.LogicGateModel;
+import net.commoble.morered.client.WindcatcherModel;
+import net.commoble.morered.client.WirePartBlockStateModel;
 import net.commoble.morered.datagen.SimpleModel.RenderTypes;
 import net.commoble.morered.mechanisms.AxleBlock;
 import net.commoble.morered.mechanisms.ClutchBlock;
@@ -938,7 +938,7 @@ public class MoreRedDataGen
 				.baseModel(SimpleModel.createWithoutRenderType(blockBlock).addTexture("particle", mangle(BuiltInRegistries.BLOCK.getKey(strippedLog), "block/%s")))
 				.mechanicalComponent(windcatcherMechanicalComponent)
 				.blockItemWithoutItemModel(modelId -> new ClientItem(
-					new UnbakedWindcatcherModel(
+					new WindcatcherModel(
 						windcatcherAxleDummyModel,
 						airfoilDummyModel,
 						airfoilSailDummyModels),
@@ -1105,7 +1105,7 @@ public class MoreRedDataGen
 
 	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context)
 	{
-		return plateBlock(blockPath, name, context, false, UnbakedLogicGateModel::new);
+		return plateBlock(blockPath, name, context, false, LogicGateModel::new);
 	}
 	
 	static BlockDataHelper plateBlock(String blockPath, String name, DataGenContext context, boolean placementPreviewUsesItemModel, Function<Identifier, ItemModel.Unbaked> previewItemFactory)
@@ -1187,7 +1187,7 @@ public class MoreRedDataGen
 	{
 		var blockHelper = plateBlock(blockPath, name, context);
 		blockHelper
-			.blockItemUsingBlockModel(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT))
+			.blockItemUsingBlockModel(id -> new ClientItem(new LogicGateModel(id), ClientItem.Properties.DEFAULT))
 			.help(helper -> plateRecipes(helper, context, redstone, recipePattern));
 		blockHelper.tags(MoreRed.Tags.Blocks.WIRABLE_REDSTONE_PLATES);
 		return blockHelper;
@@ -1390,7 +1390,7 @@ public class MoreRedDataGen
 		var blockHelper = BlockDataHelper.create(block, context, blockState, simpleLoot(block))
 			.localize(blockName);
 		blockHelper.tags(MoreRed.Tags.Blocks.WIRABLE_REDSTONE_PLATES);
-		blockHelper.simpleBlockItem(id -> new ClientItem(new UnbakedLogicGateModel(id), ClientItem.Properties.DEFAULT)).help(helper -> switchedPlateRecipes(helper, context, redstone, recipePattern));
+		blockHelper.simpleBlockItem(id -> new ClientItem(new LogicGateModel(id), ClientItem.Properties.DEFAULT)).help(helper -> switchedPlateRecipes(helper, context, redstone, recipePattern));
 		return blockHelper;
 	}
 	
@@ -1410,7 +1410,7 @@ public class MoreRedDataGen
 		Identifier lineModel = mangle(blockId, "block/%s_line");
 		Identifier edgeModel = mangle(blockId, "block/%s_edge");
 		BlockStateModelDispatcher blockState = BlockStateBuilder.multipart(multipart -> multipart
-			.apply(new UnbakedWirePartBlockStateModel(lineModel, edgeModel))
+			.apply(new WirePartBlockStateModel(lineModel, edgeModel))
 			.applyWhen(BlockStateBuilder.model(nodeModel), AbstractWireBlock.DOWN, true)
 			.applyWhen(BlockStateBuilder.model(nodeModel, r180, r0), AbstractWireBlock.UP, true)
 			.applyWhen(BlockStateBuilder.model(nodeModel, r90, r0), AbstractWireBlock.SOUTH, true)

@@ -136,7 +136,6 @@ public class PliersItem extends Item
 						else // too far away, initiate a new connection from here
 						{
 							setPlieredTube(stack, new BlockSide(pos, activatedSide));
-							// TODO give feedback to player
 						}
 					}
 				}

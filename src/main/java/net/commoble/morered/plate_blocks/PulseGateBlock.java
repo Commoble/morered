@@ -51,7 +51,7 @@ public class PulseGateBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	public EnumSet<Direction> getOutputSides(Level level, BlockPos pos, BlockState state)
+	public EnumSet<Direction> getOutputSides(BlockGetter level, BlockPos pos, BlockState state)
 	{
 		return EnumSet.of(PlateBlockStateProperties.getOutputDirection(state));
 	}

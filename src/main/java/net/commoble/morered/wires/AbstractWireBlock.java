@@ -1,12 +1,13 @@
 package net.commoble.morered.wires;
 
+import java.time.Duration;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import javax.annotation.Nullable;
 
@@ -158,7 +159,7 @@ public abstract class AbstractWireBlock extends Block implements FaceSegmentBloc
 	public static LoadingCache<Long, VoxelShape> makeVoxelCache(VoxelShape[] shapesByStateIndex, VoxelShape[] lineShapes)
 	{
 		return CacheBuilder.newBuilder()
-			.expireAfterAccess(5, TimeUnit.MINUTES)
+			.expireAfterAccess(Duration.of(5, ChronoUnit.MINUTES))
 			.build(new CacheLoader<Long, VoxelShape>()
 			{
 	

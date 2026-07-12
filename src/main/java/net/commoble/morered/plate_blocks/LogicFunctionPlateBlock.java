@@ -7,7 +7,6 @@ import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.level.BlockGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
@@ -99,7 +98,7 @@ public class LogicFunctionPlateBlock extends RedstonePlateBlock
 	}
 	
 	@Override
-	public EnumSet<Direction> getOutputSides(Level level, BlockPos pos, BlockState state)
+	public EnumSet<Direction> getOutputSides(BlockGetter level, BlockPos pos, BlockState state)
 	{
 		return EnumSet.of(PlateBlockStateProperties.getOutputDirection(state));
 	}

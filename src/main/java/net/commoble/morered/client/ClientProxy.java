@@ -222,8 +222,8 @@ public class ClientProxy
 	
 	private static void onRegisterItemModels(RegisterItemModelsEvent event)
 	{
-		event.register(MoreRed.id(Names.LOGIC_GATE), UnbakedLogicGateModel.CODEC);
-		event.register(MoreRed.id(Names.WINDCATCHER), UnbakedWindcatcherModel.CODEC);
+		event.register(MoreRed.id(Names.LOGIC_GATE), LogicGateModel.CODEC);
+		event.register(MoreRed.id(Names.WINDCATCHER), WindcatcherModel.CODEC);
 	}
 
 	public static void onRegisterModelLoaders(ModelEvent.RegisterLoaders event)
@@ -233,7 +233,7 @@ public class ClientProxy
 	
 	public static void onRegisterBlockStateModels(RegisterBlockStateModels event)
 	{
-		event.registerModel(MoreRed.id(Names.WIRE_PARTS), UnbakedWirePartBlockStateModel.CODEC);
+		event.registerModel(MoreRed.id(Names.WIRE_PARTS), WirePartBlockStateModel.CODEC);
 	}
 
 	public static void onRegisterBlockColors(RegisterColorHandlersEvent.BlockTintSources event)
@@ -273,7 +273,7 @@ public class ClientProxy
 		// TODO we could conceivably rotate blockstates correctly with the new system
 		BiConsumer<Holder<? extends Block>, Holder<? extends BlockEntityType<?>>> renderBlockAsItem = (block,type) -> event.register(
 			(ModelFactory)(colors,state) -> new SpecialBlockModelWrapper.Unbaked<>(
-				new UnbakedBlockEntityWithoutLevelRenderer(
+				new BlockEntityWithoutLevelSpecialModelRenderer(
 					state,
 					type.value()),
 				Optional.empty()),

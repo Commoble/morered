@@ -14,18 +14,7 @@ public final class ExtraRenderTypes
 	public static final RenderType CABLE_RENDER_TYPE = RenderType.create(
 		"morered:cable",
 		RenderSetup.builder(RenderPipelines.TEXT)
-			.bufferSize(256)
 			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
 			.useLightmap()
 			.createRenderSetup());
-	
-	// TODO remove this once we know 1.21.11 rendertype definition works as expected
-//	public static final RenderType CABLE_RENDER_TYPE = RenderType.create(
-//		"morered:cable",
-//		256,
-//		RenderPipelines.TEXT,
-//		RenderType.CompositeState.builder()
-//			.setTextureState(RenderType.BLOCK_SHEET)
-//			.setLightmapState(RenderType.LIGHTMAP)
-//			.createCompositeState(false));
 }

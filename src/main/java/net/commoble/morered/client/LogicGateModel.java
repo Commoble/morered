@@ -19,11 +19,11 @@ import net.minecraft.client.renderer.item.ItemModel.BakingContext;
 import net.minecraft.client.renderer.item.ItemModel.Unbaked;
 import net.minecraft.resources.Identifier;
 
-public record UnbakedLogicGateModel(Identifier model) implements ItemModel.Unbaked
+public record LogicGateModel(Identifier model) implements ItemModel.Unbaked
 {
-	public static final MapCodec<UnbakedLogicGateModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			Identifier.CODEC.fieldOf("model").forGetter(UnbakedLogicGateModel::model)
-		).apply(builder, UnbakedLogicGateModel::new));
+	public static final MapCodec<LogicGateModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+			Identifier.CODEC.fieldOf("model").forGetter(LogicGateModel::model)
+		).apply(builder, LogicGateModel::new));
 	
 	public static final Supplier<List<ItemTintSource>> TINTS = Suppliers.memoize(() -> {
 		List<ItemTintSource> tints = new ArrayList<>();

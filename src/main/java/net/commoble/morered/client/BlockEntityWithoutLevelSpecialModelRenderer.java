@@ -24,13 +24,13 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
-public record UnbakedBlockEntityWithoutLevelRenderer(BlockState blockState, BlockEntityType<?> blockEntityType) implements NoDataSpecialModelRenderer.Unbaked
+public record BlockEntityWithoutLevelSpecialModelRenderer(BlockState blockState, BlockEntityType<?> blockEntityType) implements NoDataSpecialModelRenderer.Unbaked
 {
 	// block specialrenderers don't actually use the codec
-	public static final MapCodec<UnbakedBlockEntityWithoutLevelRenderer> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-		BlockState.CODEC.fieldOf("block_state").forGetter(UnbakedBlockEntityWithoutLevelRenderer::blockState),
-		BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec().fieldOf("block_entity_type").forGetter(UnbakedBlockEntityWithoutLevelRenderer::blockEntityType)
-	).apply(builder, UnbakedBlockEntityWithoutLevelRenderer::new));
+	public static final MapCodec<BlockEntityWithoutLevelSpecialModelRenderer> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+		BlockState.CODEC.fieldOf("block_state").forGetter(BlockEntityWithoutLevelSpecialModelRenderer::blockState),
+		BuiltInRegistries.BLOCK_ENTITY_TYPE.byNameCodec().fieldOf("block_entity_type").forGetter(BlockEntityWithoutLevelSpecialModelRenderer::blockEntityType)
+	).apply(builder, BlockEntityWithoutLevelSpecialModelRenderer::new));
 
 	@Override
 	public SpecialModelRenderer<@Nullable Void> bake(BakingContext context)
@@ -50,7 +50,7 @@ public record UnbakedBlockEntityWithoutLevelRenderer(BlockState blockState, Bloc
 		@Override
 		public void submit(PoseStack poseStack, SubmitNodeCollector collector, int packedLight, int overlayCoords, boolean hasFoil, int outlineColor)
 		{
-			renderBlockEntity(this.blockEntity, poseStack, collector, Minecraft.getInstance().gameRenderer.getGameRenderState().levelRenderState.cameraRenderState, packedLight);
+			renderBlockEntity(this.blockEntity, poseStack, collector, Minecraft.getInstance().gameRenderer.gameRenderState().levelRenderState.cameraRenderState, packedLight);
 		}
 		
 		private static <T extends BlockEntity> void renderBlockEntity(T be, PoseStack poseStack, SubmitNodeCollector collector, CameraRenderState cameraRenderState, int lightCoords)

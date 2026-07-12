@@ -23,12 +23,12 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.DynamicBlockStateModel;
 import net.neoforged.neoforge.client.model.block.CustomUnbakedBlockStateModel;
 
-public record UnbakedWirePartBlockStateModel(Identifier line, Identifier edge) implements CustomUnbakedBlockStateModel
+public record WirePartBlockStateModel(Identifier line, Identifier edge) implements CustomUnbakedBlockStateModel
 {
-	public static final MapCodec<UnbakedWirePartBlockStateModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
-			Identifier.CODEC.fieldOf("line").forGetter(UnbakedWirePartBlockStateModel::line),
-			Identifier.CODEC.fieldOf("edge").forGetter(UnbakedWirePartBlockStateModel::edge)
-		).apply(builder, UnbakedWirePartBlockStateModel::new));
+	public static final MapCodec<WirePartBlockStateModel> CODEC = RecordCodecBuilder.mapCodec(builder -> builder.group(
+			Identifier.CODEC.fieldOf("line").forGetter(WirePartBlockStateModel::line),
+			Identifier.CODEC.fieldOf("edge").forGetter(WirePartBlockStateModel::edge)
+		).apply(builder, WirePartBlockStateModel::new));
 	
 	@Override
 	public BlockStateModel bake(ModelBaker baker)
@@ -63,7 +63,7 @@ public record UnbakedWirePartBlockStateModel(Identifier line, Identifier edge) i
 			materialFlags |= part.materialFlags();
 		}
 		
-		return new WirePartBlockStateModel(lineModels, edgeModels, lineModels[0].particleMaterial(), materialFlags);
+		return new BakedWirePartBlockStateModel(lineModels, edgeModels, lineModels[0].particleMaterial(), materialFlags);
 	}
 
 	@Override
@@ -79,7 +79,7 @@ public record UnbakedWirePartBlockStateModel(Identifier line, Identifier edge) i
 		return CODEC;
 	}
 	
-	public static record WirePartBlockStateModel(
+	public static record BakedWirePartBlockStateModel(
 		BlockStateModelPart[] lineModels,
 		BlockStateModelPart[] edgeModels,
 		Material.Baked particleMaterial,

@@ -45,7 +45,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	/**
 	 * {@return Set of Directions that redstone power is output to, according to the blockstate. Used for notifying neighbors.}
 	 */
-	public abstract EnumSet<Direction> getOutputSides(Level level, BlockPos pos, BlockState state);
+	public abstract EnumSet<Direction> getOutputSides(BlockGetter level, BlockPos pos, BlockState state);
 	
 	/**
 	 * Called by ItemBlocks after a block is set in the world, to allow post-place

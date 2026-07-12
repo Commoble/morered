@@ -101,7 +101,6 @@ public class WireSpoolItem extends Item
 					else	// too far away, initiate a new connection from here
 					{
 						stack.set(spooledPost, pos);
-						// TODO give feedback to player
 					}
 				}
 			}

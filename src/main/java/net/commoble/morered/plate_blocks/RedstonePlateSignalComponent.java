@@ -47,7 +47,7 @@ public enum RedstonePlateSignalComponent implements SignalComponent
 			return transmissionNodes;
 		
 		// TODO refactor getOutputSides to accept BlockGetter in 26.2+
-		if (state.getBlock() instanceof RedstonePlateBlock block && level instanceof Level theLevel)
+		if (state.getBlock() instanceof RedstonePlateBlock block)
 		{
 			Direction attachmentDir = state.getValue(PlateBlock.ATTACHMENT_DIRECTION);
 			for (InputSide inputSide : block.getInputSides())
@@ -65,7 +65,7 @@ public enum RedstonePlateSignalComponent implements SignalComponent
 					true
 				));
 			}
-			for (Direction outputDir : block.getOutputSides(theLevel, pos, state))
+			for (Direction outputDir : block.getOutputSides(level, pos, state))
 			{
 				Direction directionFromNeighbor = outputDir.getOpposite();
 				BlockPos neighborPos = pos.relative(outputDir);
