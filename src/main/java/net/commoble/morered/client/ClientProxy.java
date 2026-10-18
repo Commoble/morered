@@ -98,7 +98,7 @@ public class ClientProxy
 	// block positions are in absolute world coordinates, not local chunk coords
 	private static Map<ChunkPos, Set<BlockPos>> clientPostsInChunk = new HashMap<>();
 	private static Map<ChunkPos, Set<BlockPos>> clientTubesInChunk = new HashMap<>();
-	public static RecipeMap recipeMap = RecipeMap.create(List.of());
+	public static RecipeMap recipeMap = RecipeMap.EMPTY;
 	private static List<SolderingRecipeHolder> solderingRecipes = new ArrayList<>();
 	private static boolean isHoldingSprint = false;
 
@@ -126,7 +126,7 @@ public class ClientProxy
 	{
 		clientPostsInChunk = new HashMap<>();
 		clientTubesInChunk = new HashMap<>();
-		recipeMap = RecipeMap.create(List.of());
+		recipeMap = RecipeMap.EMPTY;
 		solderingRecipes = new ArrayList<>();
 		isHoldingSprint = false;
 	}
@@ -205,7 +205,7 @@ public class ClientProxy
 		Consumer<AbstractWireBlock> registerWireBlock = block -> event.registerBlock(
 			new IClientBlockExtensions() {
 				@Override
-				public boolean addHitEffects(BlockState state, Level Level, HitResult target, ParticleEngine manager)
+				public boolean addHitEffects(BlockState state, Level Level, BlockPos pos, Direction side, ParticleEngine manager)
 				{
 					// if we have no wires here, we have no shape, so return true to disable particles
 					// (otherwise the particle manager crashes because it performs an unsupported operation on the empty shape)
@@ -536,7 +536,7 @@ public class ClientProxy
 					EntityRenderDispatcher renderManager = Minecraft.getInstance().getEntityRenderDispatcher();
 					int handSideID = -(hand == InteractionHand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1);
 
-					float swingProgress = player.getAttackAnim(partialTicks);
+					float swingProgress = player.getSwingAnimation(partialTicks);
 					float swingZ = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
 					float playerAngle = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
 					double playerAngleX = Mth.sin(playerAngle);

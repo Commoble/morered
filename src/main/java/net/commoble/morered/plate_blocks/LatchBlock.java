@@ -106,12 +106,12 @@ public class LatchBlock extends RedstonePlateBlock
 	}
 
 	@Override
-	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+	public boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side)
 	{
 		// latch blocks have two outputs
 		// the superclass checks side == outputDirection.getOpposite() (because the given side is the side of the neighbor block)
 		// so we also check outputDirection here to see if it's the neighbor on the other side
-		return super.canConnectRedstone(state, world, pos, side)
+		return super.shouldRedstoneWireConnectTo(state, world, pos, side)
 			|| (side != null && side == PlateBlockStateProperties.getOutputDirection(state));
 	}
 }

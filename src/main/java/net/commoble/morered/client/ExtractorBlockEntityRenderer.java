@@ -158,13 +158,13 @@ public record ExtractorBlockEntityRenderer(
 		
 		// render the axles
 		poseStack.pushPose();
-		poseStack.mulPose(axleAxis.rotation(renderState.axleRadians));
+		poseStack.rotate(axleAxis, renderState.axleRadians);
 		renderState.axleItemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 		
 		poseStack.pushPose();
-		poseStack.mulPose(Axis.YN.rotationDegrees(180F));
-		poseStack.mulPose(reverseAxleAxis.rotation(renderState.reverseAxleRadians));
+		poseStack.rotateDegrees(Axis.YN, 180F);
+		poseStack.rotate(reverseAxleAxis, renderState.reverseAxleRadians);
 		renderState.axleItemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		
 		poseStack.popPose();

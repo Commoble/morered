@@ -2,6 +2,8 @@ package net.commoble.morered.plate_blocks;
 
 import java.util.Map;
 
+import org.jspecify.annotations.Nullable;
+
 import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.exmachina.api.MechanicalNodeStates;
 import net.commoble.exmachina.api.MechanicalState;
@@ -122,7 +124,7 @@ public class AlternatorBlock extends PlateBlock implements EntityBlock
 	}
 	
 	@Override
-	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+	public boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side)
 	{
 		return side != null && side.getAxis() != state.getValue(ATTACHMENT_DIRECTION).getAxis();
 	}

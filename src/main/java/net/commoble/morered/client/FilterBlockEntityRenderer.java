@@ -68,7 +68,7 @@ public class FilterBlockEntityRenderer<S extends FilterBlockEntityRenderState> i
 			poseStack.scale(0.9F, 0.9F, 0.9F);
 			if (renderState.facing.getAxis() == Axis.X)
 			{
-				poseStack.mulPose(com.mojang.math.Axis.YP.rotationDegrees(90F));	// rotate 90 degrees about y-axis
+				poseStack.rotateDegrees(com.mojang.math.Axis.YP, 90F);
 			}
 			
 			renderState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);

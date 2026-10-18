@@ -3,10 +3,12 @@ package net.commoble.morered.datagen;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -36,20 +38,30 @@ public record ItemDataHelper(Item item, DataGenContext context)
 		return helper;		
 	}
 	
-	public ItemDataHelper recipe(Recipe<?> recipe)
+	public ItemDataHelper recipe(Function<BootstrapContext<Recipe<?>>, Recipe<?>> recipe)
 	{
 		return this.recipe(this.id(), recipe);
 	}
 	
-	public ItemDataHelper recipe(Identifier recipeId, Recipe<?> recipe)
+	public ItemDataHelper recipe(Recipe<?> recipe)
+	{
+		return this.recipe(bootstrap -> recipe);
+	}
+	
+	public ItemDataHelper recipe(Identifier recipeId, Function<BootstrapContext<Recipe<?>>, Recipe<?>> recipe)
 	{
 		this.context.recipes().put(recipeId, recipe);
 		return this;
 	}
 	
+	public ItemDataHelper recipe(Identifier recipeId, Recipe<?> recipe)
+	{
+		return this.recipe(recipeId, bootstrap -> recipe);
+	}
+	
 	public ItemDataHelper localize(String localizedName)
 	{
-		this.context.lang().addItem(this::item, localizedName);
+		this.context.lang().add(langProvider -> langProvider.addItem(this::item, localizedName));
 		return this;
 	}
 	
@@ -58,7 +70,7 @@ public record ItemDataHelper(Item item, DataGenContext context)
 	{
 		for (TagKey<Item> tagKey : tags)
 		{
-			context.itemTags().tag(tagKey).add(BuiltInRegistries.ITEM.getResourceKey(item).get());
+			context.itemTags().add(tagProvider -> tagProvider.tag(tagKey).add(BuiltInRegistries.ITEM.getResourceKey(item).get()));
 		}
 		return this;
 	}

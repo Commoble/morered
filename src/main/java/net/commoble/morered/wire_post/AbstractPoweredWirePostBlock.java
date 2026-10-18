@@ -10,6 +10,8 @@ import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import org.jspecify.annotations.Nullable;
+
 import net.commoble.exmachina.api.Channel;
 import net.commoble.exmachina.api.ExMachinaGameEvents;
 import net.commoble.exmachina.api.NodeShape;
@@ -124,7 +126,7 @@ public abstract class AbstractPoweredWirePostBlock extends AbstractPostBlock imp
 	}
 
 	@Override
-	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+	public boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side)
 	{
 		return side != null && this.getParallelDirections(state).contains(side.getOpposite());
 	}

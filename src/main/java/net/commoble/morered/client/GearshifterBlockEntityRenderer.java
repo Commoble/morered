@@ -108,13 +108,13 @@ public record GearshifterBlockEntityRenderer(ItemModelResolver resolver, Map<Blo
 		Axis bigAxis = bigDir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.YN : Axis.YP;
 		Axis smallAxis = smallDir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.ZN : Axis.ZP;
 		poseStack.pushPose();
-		poseStack.mulPose(bigAxis.rotation(renderState.gearRadians));
+		poseStack.rotate(bigAxis, renderState.gearRadians);
 		renderState.gearState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 		
 		// render the small gear + axle
 		poseStack.pushPose();
-		poseStack.mulPose(smallAxis.rotation(renderState.axleRadians));
+		poseStack.rotate(smallAxis, renderState.axleRadians);
 		renderState.axleState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 		

@@ -10,6 +10,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
 import com.google.common.base.Suppliers;
@@ -163,6 +164,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
+import net.minecraft.world.level.storage.loot.providers.number.ints.ContextIntProviders;
+import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.neoforged.bus.api.EventPriority;
@@ -198,12 +201,13 @@ public class MoreRed
 		return Identifier.fromNamespaceAndPath(MODID, name);
 	}
 	
-	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SERVER, ServerConfig::create);
+	public static final ServerConfig SERVERCONFIG = ConfigHelper.register(MoreRed.MODID, ModConfig.Type.SYNCED, ServerConfig::create);
 	public static final ToIntFunction<LevelReader> NO_SOURCE = reader -> 0;
 	private static final BlockBehaviour.StatePredicate NEVER_STATE_PREDICATE = ($,$$,$$$) -> false;
+	private static final BlockBehaviour.StateArgumentPredicate<AABB> NEVER_VIEW_BLOCKING = ($,$$,$$$,$$$$) -> false;
 	
-	private static final DeferredRegister<Block> BLOCKS = defreg(Registries.BLOCK);
-	private static final DeferredRegister<Item> ITEMS = defreg(Registries.ITEM);
+	private static final DeferredRegister.Blocks BLOCKS = defreg(DeferredRegister::createBlocks);
+	private static final DeferredRegister.Items ITEMS = defreg(DeferredRegister::createItems);
 	private static final DeferredRegister<CreativeModeTab> TABS = defreg(Registries.CREATIVE_MODE_TAB);
 	private static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITY_TYPES = defreg(Registries.BLOCK_ENTITY_TYPE);
 	private static final DeferredRegister<MenuType<?>> MENU_TYPES = defreg(Registries.MENU);
@@ -334,24 +338,24 @@ public class MoreRed
 	
 	// wires and cables
 	public static final DeferredHolder<Block, PoweredWireBlock> RED_ALLOY_WIRE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.RED_ALLOY_WIRE, 
-		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.DESTROY).noCollision().instabreak(),
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_RED).pushReaction(PushReaction.POPPED).noCollision().instabreak(),
 		PoweredWireBlock::createRedAlloyWireBlock,
-		Item.Properties::new,
+		UnaryOperator.identity(),
 		WireBlockItem::new);
 	public static final Map<DyeColor, DeferredHolder<Block, PoweredWireBlock>> COLORED_CABLE_BLOCKS = Util.make(new LinkedHashMap<>(), map -> {
 		for (DyeColor color : DyeColor.values())
 		{
 			map.put(color, registerBlockItem(BLOCKS, ITEMS, Names.COLORED_CABLES_BY_COLOR[color.ordinal()],
-				() -> BlockBehaviour.Properties.of().mapColor(color).pushReaction(PushReaction.DESTROY).noCollision().instabreak(),
+				() -> BlockBehaviour.Properties.of().mapColor(color).pushReaction(PushReaction.POPPED).noCollision().instabreak(),
 				properties -> PoweredWireBlock.createColoredCableBlock(properties, color),
-				Item.Properties::new,
+				UnaryOperator.identity(),
 				WireBlockItem::new));
 		}
 	});
 	public static final DeferredHolder<Block, BundledCableBlock> BUNDLED_CABLE_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.BUNDLED_CABLE,
-		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.DESTROY).noCollision().instabreak(),
+		() -> BlockBehaviour.Properties.of().mapColor(MapColor.COLOR_BLUE).pushReaction(PushReaction.POPPED).noCollision().instabreak(),
 		BundledCableBlock::new,
-		Item.Properties::new,
+		UnaryOperator.identity(),
 		WireBlockItem::new);
 
 	// tubes
@@ -396,7 +400,7 @@ public class MoreRed
 		.noOcclusion()
         .isRedstoneConductor(NEVER_STATE_PREDICATE)
         .isSuffocating(NEVER_STATE_PREDICATE)
-        .isViewBlocking(NEVER_STATE_PREDICATE)
+        .isViewBlocking(Blocks.NEAR_PLANE_INTERSECTS_OUTLINE)
 		.sound(SoundType.WOOD),
 		ExtractorBlock::new);
 	public static final DeferredHolder<Block, FilterBlock> FILTER_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.FILTER,
@@ -441,7 +445,9 @@ public class MoreRed
 		AirFoilBlock::new);
 	public static final Map<String, DeferredHolder<Block, AxleBlock>> AXLE_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.AXLE,
 		() -> Block.Properties.ofFullCopy(woodSet.strippedLog()).noOcclusion(),
-		AxleBlock::new));
+		AxleBlock::new,
+		props -> props,
+		BlockItem::new));
 	// cheat to register clutch blocks before GEAR_BLOCKS is defined
 	private static final GearBlock getGearBlock(String woodName)
 	{
@@ -454,7 +460,7 @@ public class MoreRed
 			.noOcclusion()
 	        .isRedstoneConductor(NEVER_STATE_PREDICATE)
 	        .isSuffocating(NEVER_STATE_PREDICATE)
-	        .isViewBlocking(NEVER_STATE_PREDICATE),
+	        .isViewBlocking(Blocks.NEAR_PLANE_INTERSECTS_OUTLINE),
 		props -> new ClutchBlock(props, Suppliers.memoize(() -> new ItemStack(getGearBlock(woodName))))));
 	public static final Map<String, DeferredHolder<Block, GearBlock>> GEAR_BLOCKS = registerWoodSetBlocks((woodName, woodSet) -> registerBlockItem(BLOCKS, ITEMS, woodName + "_" + Names.GEAR,
 		() -> woodSet.finagleProps(Block.Properties.of()
@@ -463,7 +469,7 @@ public class MoreRed
 			.sound(woodSet.soundType())
 			.noOcclusion()),
 		GearBlock::new,
-		Item.Properties::new,
+		props -> props.cookingFuel(ContextIntProviders.COOKING_TIME_WOOD_ITEMS_EXTRA_SMALL),
 		GearBlockItem::new));
 	public static final DeferredHolder<Block, GearsBlock> GEARS_BLOCK = registerBlock(BLOCKS, Names.GEARS, () -> Block.Properties.of()
 		.mapColor(MapColor.WOOD)
@@ -480,8 +486,10 @@ public class MoreRed
             .isValidSpawn(Blocks::never)
             .isRedstoneConductor(NEVER_STATE_PREDICATE)
             .isSuffocating(NEVER_STATE_PREDICATE)
-            .isViewBlocking(NEVER_STATE_PREDICATE)),
-		GearshifterBlock::new));
+            .isViewBlocking(NEVER_VIEW_BLOCKING)),
+		GearshifterBlock::new,
+		props -> props.cookingFuel(ContextIntProviders.COOKING_TIME_WOOD_ITEMS_EXTRA_SMALL),
+		BlockItem::new));
 	public static final DeferredHolder<Block, StonemillBlock> STONEMILL_BLOCK = registerBlockItem(BLOCKS, ITEMS, Names.STONEMILL, () -> Block.Properties.of()
 		.mapColor(MapColor.COLOR_BLACK)
 		.strength(2F, 6F)
@@ -498,9 +506,9 @@ public class MoreRed
 	        .isValidSpawn(Blocks::never)
 	        .isRedstoneConductor(NEVER_STATE_PREDICATE)
 	        .isSuffocating(NEVER_STATE_PREDICATE)
-	        .isViewBlocking(NEVER_STATE_PREDICATE),
+	        .isViewBlocking(NEVER_VIEW_BLOCKING),
 		WindcatcherBlock::new,
-		Item.Properties::new,
+		props -> props.cookingFuel(ContextIntProviders.COOKING_TIME_WOOD_ITEMS_LARGE),
 		WindCatcherBlockItem::new
 	));
 
@@ -917,30 +925,30 @@ public class MoreRed
 	
 	private static <BLOCK extends Block, ITEM extends BlockItem> DeferredHolder<Block, BLOCK> registerBlockItem(
 		DeferredRegister<Block> blocks,
-		DeferredRegister<Item> items,
+		DeferredRegister.Items items,
 		String name,
 		Supplier<BlockBehaviour.Properties> blockProperties,
 		Function<BlockBehaviour.Properties, ? extends BLOCK> blockFactory,
-		Supplier<Item.Properties> itemProperties,
+		UnaryOperator<Item.Properties> itemProperties,
 		BiFunction<? super BLOCK, Item.Properties, ? extends ITEM> itemFactory)
 	{
 		Identifier id = Identifier.fromNamespaceAndPath(blocks.getNamespace(), name);
-		DeferredHolder<Block, BLOCK> block = blocks.register(name, () -> blockFactory.apply(blockProperties.get().setId(ResourceKey.create(Registries.BLOCK, id))));;
-		items.register(name, () -> itemFactory.apply(block.get(), itemProperties.get().setId(ResourceKey.create(Registries.ITEM, id)).useBlockDescriptionPrefix()));
+		DeferredHolder<Block, BLOCK> block = blocks.register(name, () -> blockFactory.apply(blockProperties.get().setId(ResourceKey.create(Registries.BLOCK, id))));
+		items.registerItem(name, props -> itemFactory.apply(block.get(), props), itemProperties);
 		return block;
 	}
 	
 	private static <BLOCK extends Block> DeferredHolder<Block, BLOCK> registerBlockItem(
 		DeferredRegister<Block> blocks,
-		DeferredRegister<Item> items,
+		DeferredRegister.Items items,
 		String name,
 		Supplier<BlockBehaviour.Properties> blockProperties,
 		Function<BlockBehaviour.Properties, ? extends BLOCK> blockFactory)
 	{
-		return registerBlockItem(blocks, items, name, blockProperties, blockFactory, () -> new Item.Properties(), BlockItem::new);
+		return registerBlockItem(blocks, items, name, blockProperties, blockFactory, UnaryOperator.identity(), BlockItem::new);
 	}
 	
-	public static DeferredHolder<Block, LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public static DeferredHolder<Block, LogicFunctionPlateBlock> registerLogicGateType(DeferredRegister<Block> blocks, DeferredRegister.Items items, String name,
 		LogicFunction function,
 		LogicFunctionPlateBlockFactory factory)
 	{
@@ -956,7 +964,7 @@ public class MoreRed
 		return blockGetter;
 	}
 	
-	public static <B extends BitwiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister<Item> items, String name,
+	public static <B extends BitwiseGateBlock> DeferredHolder<Block, B> registerBitwiseLogicGateType(DeferredRegister<Block> blocks, DeferredRegister.Items items, String name,
 		BitwiseLogicFunction function,
 		BiFunction<BlockBehaviour.Properties, BitwiseLogicFunction, B> blockFactory)
 	{
@@ -975,6 +983,12 @@ public class MoreRed
 	public static <T> DeferredRegister<T> defreg(ResourceKey<Registry<T>> registryKey)
 	{
 		var reg = DeferredRegister.create(registryKey, MODID);
+		reg.register(ModList.get().getModContainerById(MODID).get().getEventBus());
+		return reg;
+	}
+	
+	public static <T, R extends DeferredRegister<T>> R defreg(Function<String, R> factory) {
+		var reg = factory.apply(MODID);
 		reg.register(ModList.get().getModContainerById(MODID).get().getEventBus());
 		return reg;
 	}

@@ -87,7 +87,7 @@ public class WirePostBlockEntityRenderState extends BlockEntityRenderState
 					{
 						int handSideID = -(hand == InteractionHand.MAIN_HAND ? -1 : 1) * (player.getMainArm() == HumanoidArm.RIGHT ? 1 : -1);
 
-						float swingProgress = player.getAttackAnim(partialTicks);
+						float swingProgress = player.getSwingAnimation(partialTicks);
 						float swingZ = Mth.sin(Mth.sqrt(swingProgress) * (float) Math.PI);
 						float playerAngle = Mth.lerp(partialTicks, player.yBodyRotO, player.yBodyRot) * ((float) Math.PI / 180F);
 						double playerAngleX = Mth.sin(playerAngle);

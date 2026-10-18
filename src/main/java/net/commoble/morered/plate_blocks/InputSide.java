@@ -1,13 +1,13 @@
 package net.commoble.morered.plate_blocks;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.RedStoneWireBlock;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.minecraft.core.Direction;
 import net.commoble.morered.util.BlockStateUtil;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RedstoneWireBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 public enum InputSide
 {
@@ -57,7 +57,7 @@ public enum InputSide
 		else
 		{
 			BlockState inputState = world.getBlockState(inputPos);
-			return (inputState.getBlock() == Blocks.REDSTONE_WIRE && inputState.getValue(RedStoneWireBlock.POWER) > 0);
+			return (inputState.getBlock() == Blocks.REDSTONE_WIRE && inputState.getValue(RedstoneWireBlock.POWER) > 0);
 		}
 	}
 }

@@ -1,5 +1,7 @@
 package net.commoble.morered;
 
+import org.jspecify.annotations.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -9,7 +11,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Mirror;
-import net.minecraft.world.level.block.RedStoneWireBlock;
+import net.minecraft.world.level.block.RedstoneWireBlock;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition.Builder;
@@ -118,7 +120,7 @@ public class HexidecrubrometerBlock extends Block
 		int comparatorPower = neighborState.getAnalogOutputSignal(world, neighborPos, direction);
 		int canonicalRedstonePower = world.getSignal(neighborPos, direction);
 		int redstonePower = canonicalRedstonePower > 0 ? canonicalRedstonePower
-			: neighborState.getBlock() instanceof RedStoneWireBlock ? neighborState.getValue(BlockStateProperties.POWER)
+			: neighborState.getBlock() instanceof RedstoneWireBlock ? neighborState.getValue(BlockStateProperties.POWER)
 			: 0;
 		return Math.max(redstonePower, comparatorPower);
 	      
@@ -148,7 +150,7 @@ public class HexidecrubrometerBlock extends Block
 	}
 
 	@Override
-	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+	public boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side)
 	{
 		return side != null && side.getOpposite() == getReadingDirection(state);
 	}

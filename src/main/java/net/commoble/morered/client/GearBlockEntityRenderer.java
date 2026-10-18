@@ -82,11 +82,11 @@ public record GearBlockEntityRenderer(ItemModelResolver resolver, Map<Block, Ite
 		poseStack.translate(offset, offset, offset);
 		switch(facing)
 		{
-			case DOWN: poseStack.mulPose(Axis.XN.rotationDegrees(90F));break;
-			case UP: poseStack.mulPose(Axis.XP.rotationDegrees(90));break;
-			case SOUTH: poseStack.mulPose(Axis.YP.rotationDegrees(180F));break;
-			case WEST: poseStack.mulPose(Axis.YP.rotationDegrees(90F));break;
-			case EAST: poseStack.mulPose(Axis.YP.rotationDegrees(270F));break;
+			case DOWN: poseStack.rotateDegrees(Axis.XN, 90F);break;
+			case UP: poseStack.rotateDegrees(Axis.XP, 90F);break;
+			case SOUTH: poseStack.rotateDegrees(Axis.YP, 180F);break;
+			case WEST: poseStack.rotateDegrees(Axis.YP, 90F);break;
+			case EAST: poseStack.rotateDegrees(Axis.YP, 270F);break;
 			default:
 		}
 		// keep gears from being in exactly the same angle
@@ -94,7 +94,7 @@ public record GearBlockEntityRenderer(ItemModelResolver resolver, Map<Block, Ite
 		// because of the rotation above, the positive directions (up,south,east) are now about to rotate in the wrong direction
 		// invert the rotation if needed
 		float parityFix = facing.ordinal() % 2 == 0 ? 1F : -1F;
-		poseStack.mulPose(Axis.ZP.rotation(radians * parityFix));
+		poseStack.rotate(Axis.ZP, radians * parityFix);
 		itemState.submit(poseStack, collector, lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 	}

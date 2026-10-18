@@ -5,15 +5,16 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.commons.lang3.text.WordUtils;
 
+import com.google.common.base.Suppliers;
 import com.google.common.collect.ImmutableList;
 import com.mojang.math.Quadrant;
 
-import net.commoble.exmachina.api.ExMachinaRegistries;
 import net.commoble.exmachina.api.ExMachinaTags;
 import net.commoble.exmachina.api.NodeShape;
 import net.commoble.exmachina.api.Parity;
@@ -55,6 +56,7 @@ import net.commoble.morered.wires.AbstractWireBlock;
 import net.commoble.morered.wires.PoweredWireBlock;
 import net.commoble.morered.wires.WireCountLootFunction;
 import net.commoble.preview_placement.client.PlacementPreviewDefinition;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.client.color.item.Constant;
 import net.minecraft.client.color.item.ItemTintSource;
 import net.minecraft.client.renderer.block.dispatch.BlockStateModel;
@@ -66,13 +68,10 @@ import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.client.renderer.item.ItemModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.HolderSet;
-import net.minecraft.core.RegistrySetBuilder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
-import net.minecraft.data.DataGenerator;
-import net.minecraft.data.PackOutput;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BlockTags;
@@ -98,22 +97,20 @@ import net.minecraft.world.level.storage.loot.entries.LootItem;
 import net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.ExplosionCondition;
-import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.neoforged.api.distmarker.Dist;
-import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.common.EventBusSubscriber;
+import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
 import net.neoforged.neoforge.common.crafting.IntersectionIngredient;
 import net.neoforged.neoforge.common.crafting.SizedIngredient;
 import net.neoforged.neoforge.common.data.LanguageProvider;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
-import net.neoforged.neoforge.registries.datamaps.builtin.FurnaceFuel;
-import net.neoforged.neoforge.registries.datamaps.builtin.NeoForgeDataMaps;
 
 @SuppressWarnings("deprecation")
 @EventBusSubscriber(modid=MoreRed.MODID, value=Dist.CLIENT)
+@Mod(MoreRed.MODID)
 public class MoreRedDataGen
 {
 	static final TagKey<Item> SMOOTH_STONE = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "smooth_stone"));
@@ -121,32 +118,29 @@ public class MoreRedDataGen
 	static final TagKey<Item> SMOOTH_STONE_QUARTER_SLABS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "quarter_slabs/smooth_stone"));
 	static final TagKey<Item> REDSTONE_ALLOY_INGOTS = TagKey.create(Registries.ITEM, Identifier.fromNamespaceAndPath("c", "ingots/redstone_alloy"));
 
-	@SuppressWarnings("unchecked")
-	@SubscribeEvent
-	static void onGatherData(GatherDataEvent.Client event)
-	{
-		DataGenerator generator = event.getGenerator();
-		CompletableFuture<HolderLookup.Provider> holders = event.getLookupProvider();
-		PackOutput output = generator.getPackOutput();
+	public MoreRedDataGen(IEventBus modBus) {
+		Supplier<DataGenContext> context = Suppliers.memoize(() -> createContext());
 		
-		RegistrySetBuilder registrySetBuilder = new RegistrySetBuilder();
+		modBus.addListener(new DataGatherer(context));
+		modBus.addListener(new RegistryEntriesGatherer(context));
+	}
+	
+	@SuppressWarnings("unchecked")
+	private static DataGenContext createContext()
+	{
 		Map<Identifier, BlockStateModelDispatcher> blockStates = new HashMap<>();
 		Map<Identifier, ClientItem> clientItems = new HashMap<>();
 		Map<Identifier, SimpleModel> models = new HashMap<>();
 		Map<Identifier, PreviewModel> previewModels = new HashMap<>();
 		Map<Identifier, Map<Block,Map<String,Variant>>> placementPreviews = new HashMap<>();
-		Map<Identifier, Recipe<?>> recipes = new HashMap<>();
-		Map<Identifier, LootTable> lootTables = new HashMap<>();
-		DataMapsProvider dataMaps = new DataMapsProvider(output, holders);
-		TagProvider<Block> blockTags = TagProvider.create(event, Registries.BLOCK, holders);
-		TagProvider<Item> itemTags = TagProvider.create(event, Registries.ITEM, holders);
-		LanguageProvider lang = new LanguageProvider(output, MoreRed.MODID, "en_us")
-		{
-			@Override
-			protected void addTranslations()
-			{} // no
-		};
-		DataGenContext context = new DataGenContext(new HashMap<>(), blockStates, clientItems, models, previewModels, placementPreviews, recipes, lootTables, dataMaps, blockTags, itemTags, lang);
+		Map<Identifier, Function<BootstrapContext<Recipe<?>>, Recipe<?>>> recipes = new HashMap<>();
+		Map<Identifier, Function<BootstrapContext<LootTable>, LootTable>> lootTables = new HashMap<>();
+		Map<Identifier, Function<BootstrapContext<Advancement>, Advancement>> advancements = new HashMap<>();
+		List<Consumer<DataMapsProvider>> dataMaps = new ArrayList<>();
+		List<Consumer<TagProvider<Block>>> blockTagGatherer = new ArrayList<>();
+		List<Consumer<TagProvider<Item>>> itemTagGatherer = new ArrayList<>();
+		List<Consumer<LanguageProvider>> lang = new ArrayList<>();
+		DataGenContext context = new DataGenContext(new HashMap<>(), blockStates, clientItems, models, previewModels, placementPreviews, recipes, lootTables, advancements, dataMaps, blockTagGatherer, itemTagGatherer, lang);
 		
 		Identifier blockBlock = Identifier.withDefaultNamespace("block/block");
 		
@@ -171,30 +165,30 @@ public class MoreRedDataGen
 		postBlock(Names.CABLE_RELAY, "Cable Relay", context)
 			.tags(MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.simpleBlockItem()
-			.help(helper -> helper.recipe(RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.help(helper -> helper.recipe(bootstrap -> RecipeHelpers.shapeless(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					ingredient(MoreRed.Tags.Items.BUNDLED_CABLES),
 					ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), bootstrap -> new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(MoreRed.Tags.Items.BUNDLED_CABLES,1),
 					sizedIngredient(Tags.Items.INGOTS_IRON,1)))));
 		postBlock(Names.CABLE_JUNCTION, "Cable Junction", context)
 			.tags(MoreRed.Tags.Blocks.BUNDLED_CABLE_POSTS)
 			.simpleBlockItem()
-			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+			.help(helper -> helper.recipe(bootstrap -> RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					" b ",
 					"bFb",
 					"###"), Map.of(
 					'#', ingredient(SMOOTH_STONE_QUARTER_SLABS),
 					'b', ingredient(MoreRed.Tags.Items.BUNDLED_CABLES),
 					'F', ingredient(Tags.Items.INGOTS_IRON))))
-				.recipe(mangle(helper.id(), fromSoldering), new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
+				.recipe(mangle(helper.id(), fromSoldering), bootstrap -> new SolderingRecipe(new ItemStackTemplate(helper.item()), List.of(
 					sizedIngredient(SMOOTH_STONE_QUARTER_SLABS, 2),
 					sizedIngredient(Tags.Items.INGOTS_IRON, 1),
 					sizedIngredient(MoreRed.Tags.Items.BUNDLED_CABLES, 1)))));
 		wireBlock(Names.BUNDLED_CABLE, "Bundled Cable", context)
 			.blockItemWithoutItemModel()
 			.tags(MoreRed.Tags.Items.BUNDLED_CABLES)
-			.help(helper -> helper.recipe(RecipeHelpers.shaped(helper.item(), 3, CraftingBookCategory.REDSTONE, List.of(
+			.help(helper -> helper.recipe(bootstrap -> RecipeHelpers.shaped(helper.item(), 3, CraftingBookCategory.REDSTONE, List.of(
 					"#",
 					"#",
 					"#"), Map.of('#', ingredient(MoreRed.Tags.Items.CABLES)))));
@@ -262,7 +256,7 @@ public class MoreRedDataGen
 					Optional.empty(),
 					alternatorTints), ClientItem.Properties.DEFAULT))
 			.help(helper -> {
-				helper.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
+				helper.recipe(bootstrap -> RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.REDSTONE, List.of(
 					"#t#",
 					"tot",
 					"#t#"), Map.of(
@@ -363,10 +357,10 @@ public class MoreRedDataGen
 			.help(helper -> helper
 				.recipe(mangle(helper.id(), "%s_from_gold"), RecipeHelpers.shaped(helper.item(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', ingredient(Tags.Items.INGOTS_GOLD),
-					'G', ingredient(Tags.Items.GLASS_BLOCKS_COLORLESS))))
+					'G', ingredient(Tags.BlockItems.GLASS_BLOCKS_COLORLESS.item()))))
 				.recipe(mangle(helper.id(), "%s_from_copper"), RecipeHelpers.shaped(helper.item(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 					'i', ingredient(Tags.Items.INGOTS_COPPER),
-					'G', ingredient(Tags.Items.GLASS_BLOCKS_COLORLESS))))
+					'G', ingredient(Tags.BlockItems.GLASS_BLOCKS_COLORLESS.item()))))
 				.tags(MoreRed.Tags.Items.TUBES));
 		tubeBlock(Names.REDSTONE_TUBE, "Redstone Tube", context, redstoneTubeBlockState(MoreRed.REDSTONE_TUBE_BLOCK.get()))
 			.model("block/%s_on", SimpleModel.createWithoutRenderType(MoreRed.id("block/tube"))
@@ -386,9 +380,9 @@ public class MoreRedDataGen
 				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("csc", "sGs", "csc"),
 					Map.of(
-						'c', ingredient(Tags.Items.COBBLESTONES),
+						'c', ingredient(Tags.BlockItems.COBBLESTONES.item()),
 						's', Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()),
-						'G', ingredient(Tags.Items.FENCE_GATES)))));
+						'G', ingredient(Tags.BlockItems.FENCE_GATES.item())))));
 		VariantsMechanicalComponent extractorMachine = VariantsMechanicalComponent.builder(true);
 		for (Direction attachDir : Direction.values())
 		{
@@ -448,7 +442,7 @@ public class MoreRedDataGen
 				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of(" t ", "tst", " t "),
 					Map.of(
-						's', ingredient(Tags.Items.COBBLESTONES),
+						's', ingredient(Tags.BlockItems.COBBLESTONES.item()),
 						't', ingredient(MoreRed.Tags.Items.TUBES)))));
 		sixWayBlock(Names.FILTER, "Filter", context)
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
@@ -466,7 +460,7 @@ public class MoreRedDataGen
 					Map.of(
 						'i', ingredient(Tags.Items.INGOTS_IRON),
 						'f', Ingredient.of(MoreRed.FILTER_BLOCK.get().asItem()),
-						'C', ingredient(Tags.Items.CHESTS)))));
+						'C', ingredient(Tags.BlockItems.CHESTS.item())))));
 		sixWayBlock(Names.LOADER, "Loader", context)
 			.tags(BlockTags.MINEABLE_WITH_PICKAXE)
 			.simpleBlockItem()
@@ -474,7 +468,7 @@ public class MoreRedDataGen
 				.recipe(RecipeHelpers.shaped(helper.item(), 1, CraftingBookCategory.BUILDING,
 					List.of("sss", "P S", "sss"),
 					Map.of(
-						's', ingredient(Tags.Items.COBBLESTONES),
+						's', ingredient(Tags.BlockItems.COBBLESTONES.item()),
 						'S', Ingredient.of(MoreRed.SHUNT_BLOCK.get().asItem()),
 						'P', Ingredient.of(Items.PISTON)))));
 		BlockDataHelper.create(MoreRed.OSMOSIS_FILTER_BLOCK.get(), context, MoreRedDataGen::sixWayBlockState, MoreRedDataGen::simpleLoot)
@@ -511,38 +505,42 @@ public class MoreRedDataGen
 			.localize("Pliers"));
 		
 		// data for vanilla things
-		recipes.put(MoreRed.id("smooth_stone_slab_from_stone_plate"), RecipeHelpers.shaped(Items.SMOOTH_STONE_SLAB, 1, CraftingBookCategory.BUILDING, List.of(
+		recipes.put(MoreRed.id("smooth_stone_slab_from_stone_plate"), bootstrap -> RecipeHelpers.shaped(Items.SMOOTH_STONE_SLAB, 1, CraftingBookCategory.BUILDING, List.of(
 				"##",
 				"##"), Map.of(
 				'#', Ingredient.of(MoreRed.STONE_PLATE_BLOCK.get()))));
 		
-		itemTags.tag(SMOOTH_STONE)
-			.add(Items.SMOOTH_STONE.builtInRegistryHolder().key());
-		itemTags.tag(SMOOTH_STONE_SLABS)
-			.add(Items.SMOOTH_STONE_SLAB.builtInRegistryHolder().key());
-		itemTags.tag(MoreRed.Tags.Items.RED_ALLOYABLE_INGOTS)
-			.addTag(Tags.Items.INGOTS_COPPER);
-		
-		// tags in tags
-		itemTags.tag(MoreRed.Tags.Items.CABLES)
-			.addTag(MoreRed.Tags.Items.BUNDLED_CABLES)
-			.addTag(MoreRed.Tags.Items.COLORED_CABLES);
-		blockTags.tag(MoreRed.Tags.Blocks.TUBES).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
-		blockTags.tag(BlockTags.MINEABLE_WITH_PICKAXE).addTags(
-			MoreRed.Tags.Blocks.CLUTCHES,
-			MoreRed.Tags.Blocks.COLORED_TUBES);
-		blockTags.tag(BlockTags.MINEABLE_WITH_AXE).addTags(
-			MoreRed.Tags.Blocks.WOODEN_AXLES,
-			MoreRed.Tags.Blocks.WOODEN_GEARS,
-			MoreRed.Tags.Blocks.WOODEN_GEARSHIFTERS,
-			MoreRed.Tags.Blocks.WINDCATCHERS);
-		itemTags.tag(MoreRed.Tags.Items.TUBES).addTag(MoreRed.Tags.Items.COLORED_TUBES);
-		itemTags.tag(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS).addTag(MoreRed.Tags.Items.WINDCATCHERS);
+		itemTagGatherer.add(itemTags -> {
+			itemTags.tag(SMOOTH_STONE)
+				.add(Items.SMOOTH_STONE.builtInRegistryHolder().key());
+			itemTags.tag(SMOOTH_STONE_SLABS)
+				.add(Items.SMOOTH_STONE_SLAB.builtInRegistryHolder().key());
+			itemTags.tag(MoreRed.Tags.Items.RED_ALLOYABLE_INGOTS)
+				.addTag(Tags.Items.INGOTS_COPPER);
+			
+			// tags in tags
+			itemTags.tag(MoreRed.Tags.Items.CABLES)
+				.addTag(MoreRed.Tags.Items.BUNDLED_CABLES)
+				.addTag(MoreRed.Tags.Items.COLORED_CABLES);
+			
+			itemTags.tag(MoreRed.Tags.Items.TUBES).addTag(MoreRed.Tags.Items.COLORED_TUBES);
+			itemTags.tag(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS).addTag(MoreRed.Tags.Items.WINDCATCHERS);
+		});
+		blockTagGatherer.add(blockTags -> {
+			blockTags.tag(MoreRed.Tags.Blocks.TUBES).addTag(MoreRed.Tags.Blocks.COLORED_TUBES);
+			blockTags.tag(BlockTags.MINEABLE_WITH_PICKAXE).addTags(
+				MoreRed.Tags.Blocks.CLUTCHES,
+				MoreRed.Tags.Blocks.COLORED_TUBES);
+			blockTags.tag(BlockTags.MINEABLE_WITH_AXE).addTags(
+				MoreRed.Tags.Blocks.WOODEN_AXLES,
+				MoreRed.Tags.Blocks.WOODEN_GEARS,
+				MoreRed.Tags.Blocks.WOODEN_GEARSHIFTERS,
+				MoreRed.Tags.Blocks.WINDCATCHERS);
+		});
 		
 		// misc. translations
-		lang.add("itemGroup.morered", "More Red");
-		lang.add("emi.category.morered.soldering", "Soldering");
-		lang.add("gui.morered.category.soldering", "Soldering");
+		lang.add(langProvider -> langProvider.add("itemGroup.morered", "More Red"));
+		lang.add(langProvider -> langProvider.add("gui.morered.category.soldering", "Soldering"));
 		
 		Map<DyeColor,Identifier> airfoilSailDummyModels = Util.makeEnumMap(DyeColor.class,
 			color -> MoreRed.id(String.format("block/%s_airfoil_sail", color)));
@@ -583,7 +581,7 @@ public class MoreRedDataGen
 
 			// generate recipe
 			recipes.put(wireBlockId,
-				RecipeHelpers.shaped(wireBlockItem, 8, CraftingBookCategory.REDSTONE,
+				bootstrap -> RecipeHelpers.shaped(wireBlockItem, 8, CraftingBookCategory.REDSTONE,
 					List.of("www", "w#w", "www"),
 					Map.<Character,Ingredient>of(
 						'w', ingredient(MoreRed.Tags.Items.RED_ALLOY_WIRES),
@@ -605,12 +603,12 @@ public class MoreRedDataGen
 					.recipe(mangle(helper.id(), "%s_from_gold"), RecipeHelpers.shaped(helper.item(), 8, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 						'i', ingredient(Tags.Items.INGOTS_GOLD),
 						'G', IntersectionIngredient.of(
-							ingredient(Tags.Items.GLASS_BLOCKS),
+							ingredient(Tags.BlockItems.GLASS_BLOCKS.item()),
 							ingredient(color.getDyedTag())))))
 					.recipe(mangle(helper.id(), "%s_from_copper"), RecipeHelpers.shaped(helper.item(), 2, CraftingBookCategory.BUILDING, List.of("iGi"), Map.of(
 						'i', ingredient(Tags.Items.INGOTS_COPPER),
 						'G', IntersectionIngredient.of(
-							ingredient(Tags.Items.GLASS_BLOCKS),
+							ingredient(Tags.BlockItems.GLASS_BLOCKS.item()),
 							ingredient(color.getDyedTag())))))
 					.tags(MoreRed.Tags.Items.COLORED_TUBES, color.getDyedTag()));
 			
@@ -636,7 +634,7 @@ public class MoreRedDataGen
 				// unsupported modded logs are craftable into oak parts
 				// but, we want to make sure the relevant ingredient is never empty
 				// we can cheese it by just not declaring oak a "supported" wood type
-				itemTags.tag(MoreRed.Tags.Items.SUPPORTED_STRIPPED_LOGS).add(ResourceKey.create(Registries.ITEM, strippedLogId));
+				itemTagGatherer.add(tags -> tags.tag(MoreRed.Tags.Items.SUPPORTED_STRIPPED_LOGS).add(ResourceKey.create(Registries.ITEM, strippedLogId)));
 			}
 			
 			VariantsMechanicalComponent axleMechanicalComponent = VariantsMechanicalComponent.builder(true);
@@ -926,7 +924,7 @@ public class MoreRedDataGen
 			}
 			BlockDataHelper.create(MoreRed.WINDCATCHER_BLOCKS.get(woodName).get(), context,
 				(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
-				(id,block) -> LootTable.lootTable()
+				(id,block) -> bootstrap -> LootTable.lootTable()
 					.withPool(LootPool.lootPool()
 						.add(LootItem.lootTableItem(block)
 							.apply(CopyComponentsFunction.copyComponentsFromBlockEntity(LootContextParams.BLOCK_ENTITY)
@@ -993,7 +991,7 @@ public class MoreRedDataGen
 		}
 		BlockDataHelper.create(MoreRed.GEARS_BLOCK.get(), context,
 			(id,block) -> BlockStateBuilder.singleVariant(BlockStateBuilder.model(blockModel(id))),
-			(id,block) -> LootTable.lootTable()
+			(id,block) -> bootstrap -> LootTable.lootTable()
 				.withPool(LootPool.lootPool()
 					.add(GearsLootEntry.gearsLoot())
 					.when(ExplosionCondition.survivesExplosion()))
@@ -1052,54 +1050,26 @@ public class MoreRedDataGen
 			
 		
 		// special recipes
-		recipes.put(MoreRed.WINDCATCHER_DYE_RECIPE_SERIALIZER.getId(), WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS)));
+		recipes.put(MoreRed.WINDCATCHER_DYE_RECIPE_SERIALIZER.getId(), bootstrap -> WindcatcherDyeRecipe.of(ingredient(MoreRed.Tags.Items.DYEABLE_WINDCATCHERS)));
 		
 		// add recipes for unsupported wood types so they can default to oak
 		Ingredient unsupportedStrippedLogsIngredient = new Ingredient(new DifferenceIngredient(
-			ingredient(Tags.Items.STRIPPED_LOGS),
+			ingredient(Tags.BlockItems.STRIPPED_LOGS.item()),
 			ingredient(MoreRed.Tags.Items.SUPPORTED_STRIPPED_LOGS)));
 		
-		recipes.put(MoreRed.id("oak_" + Names.AXLE), RecipeHelpers.shaped(MoreRed.AXLE_BLOCKS.get("oak").get().asItem(), 16, CraftingBookCategory.BUILDING, List.of(
+		recipes.put(MoreRed.id("oak_" + Names.AXLE), bootstrap -> RecipeHelpers.shaped(MoreRed.AXLE_BLOCKS.get("oak").get().asItem(), 16, CraftingBookCategory.BUILDING, List.of(
 			"#",
 			"#",
 			"#"),
 			Map.of('#', unsupportedStrippedLogsIngredient)));
-		recipes.put(MoreRed.id("oak_" + Names.GEAR), RecipeHelpers.shaped(MoreRed.GEAR_BLOCKS.get("oak").get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
+		recipes.put(MoreRed.id("oak_" + Names.GEAR), bootstrap -> RecipeHelpers.shaped(MoreRed.GEAR_BLOCKS.get("oak").get().asItem(), 1, CraftingBookCategory.BUILDING, List.of(
 			"///",
 			"/O/",
 			"///"),
 			Map.of('/', ingredient(Tags.Items.RODS_WOODEN),
 				'O', unsupportedStrippedLogsIngredient)));
 		
-		// add fuels
-		dataMaps.builder(NeoForgeDataMaps.FURNACE_FUELS)
-			.add(MoreRed.Tags.Items.AXLES, new FurnaceFuel(100), false)
-			.add(MoreRed.Tags.Items.GEARS, new FurnaceFuel(300), false)
-			.add(MoreRed.Tags.Items.GEARSHIFTERS, new FurnaceFuel(300), false)
-			.add(MoreRed.Tags.Items.WINDCATCHERS, new FurnaceFuel(300), false);
-		
-		// finalize datapack registries (we have to do these all in one go)
-		registrySetBuilder.add(ExMachinaRegistries.MECHANICAL_COMPONENT, bootstap ->
-			context.mechanicalComponents()
-				.forEach((id,component) -> bootstap.register(
-					ResourceKey.create(ExMachinaRegistries.MECHANICAL_COMPONENT, id),
-					component)));
-		
-		BlockStateBuilder.addDataProvider(event, blockStates);
-		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, clientItems);
-		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "models", SimpleModel.CODEC, models);
-		PreviewModel.addDataProvider(event, previewModels);
-		PlacementPreviewDefinition.addDataProvider(event, placementPreviews);
-		MoreRedAdvancements.genAdvancements(event, lang);
-		generator.addProvider(true, lang);
-
-		JsonDataProvider.addProvider(event, PackOutput.Target.DATA_PACK, "loot_table", LootTable.DIRECT_CODEC, lootTables);
-		JsonDataProvider.addProvider(event, PackOutput.Target.DATA_PACK, "recipe", Recipe.CODEC, recipes);
-		generator.addProvider(true, dataMaps);
-		generator.addProvider(true, blockTags);
-		generator.addProvider(true, itemTags);
-
-		event.createDatapackRegistryObjects(registrySetBuilder);
+		return context;
 	}
 	
 
@@ -1175,7 +1145,7 @@ public class MoreRedDataGen
 			});
 			context.placementPreviews().put(blockId, Map.of(block, previewVariants));
 		});
-		LootTable lootTable = simpleLoot(block);
+		Function<BootstrapContext<LootTable>, LootTable> lootTable = simpleLoot(block);
 		var blockHelper = BlockDataHelper.create(block, context, blockState, lootTable).localize(name);
 		Identifier previewModel = previewId.withPrefix("block/");
 		context.clientItems().put(previewId, new ClientItem(previewItemFactory.apply(previewModel), ClientItem.Properties.DEFAULT));
@@ -1241,9 +1211,9 @@ public class MoreRedDataGen
 		return blockHelper;
 	}
 	
-	static LootTable simpleLoot(Block block)
+	static Function<BootstrapContext<LootTable>, LootTable> simpleLoot(Block block)
 	{
-		return LootTable.lootTable()
+		return bootstrap -> LootTable.lootTable()
 			.withPool(LootPool.lootPool()
 				.add(LootItem.lootTableItem(block))
 				.when(ExplosionCondition.survivesExplosion()))
@@ -1454,8 +1424,8 @@ public class MoreRedDataGen
 				.addCondition(AbstractWireBlock.UP, true)
 				.addCondition(AbstractWireBlock.SOUTH, true)));
 		
-		LootTable lootTable = LootTable.lootTable()
-			.withPool(LootPool.lootPool().setRolls(ConstantValue.exactly(1))
+		Function<BootstrapContext<LootTable>, LootTable> lootTable = bootstrap -> LootTable.lootTable()
+			.withPool(LootPool.lootPool()
 				.add(LootItem.lootTableItem(block)
 					.apply(() -> WireCountLootFunction.INSTANCE))
 				.when(ExplosionCondition.survivesExplosion()))
@@ -1470,7 +1440,7 @@ public class MoreRedDataGen
 	{
 		Identifier blockId = MoreRed.id(blockPath);
 		Block block = BuiltInRegistries.BLOCK.getValue(blockId);
-		context.lang().add(block, blockName);
+		context.lang().add(langProvider -> langProvider.add(block, blockName));
 		return BlockDataHelper.create(block, context,
 			BlockStateBuilder.singleVariant(BlockStateBuilder.model(mangle(blockId, "block/%s"))),
 			simpleLoot(block));

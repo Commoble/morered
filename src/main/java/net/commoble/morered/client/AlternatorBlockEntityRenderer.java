@@ -70,7 +70,7 @@ public record AlternatorBlockEntityRenderer(ItemModelResolver resolver, Supplier
 		RenderHelper.rotateTwentyFourBlockPoseStack(poseStack, attachDir, faceRotations);
 		// for whatever reason, if we point in a positive direction, we have to spin backward
 		Axis axis = attachDir.getAxisDirection() == Direction.AxisDirection.POSITIVE ? Axis.YN : Axis.YP;
-		poseStack.mulPose(axis.rotation(renderState.radians));
+		poseStack.rotate(axis, renderState.radians);
 		poseStack.scale(1.001F, 1.001F, 1.001F); // fix a z-fighting between the axle and the static model
 		renderState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		

@@ -68,13 +68,13 @@ public record AxleBlockEntityRenderer(ItemModelResolver resolver, Map<Block, Ite
 		Direction.Axis axis = state.getValue(AxleBlock.AXIS);
 		if (axis == Direction.Axis.X)
 		{
-			poseStack.mulPose(Axis.YP.rotationDegrees(90F));
+			poseStack.rotateDegrees(Axis.YP, 90F);
 		}
 		else if (axis == Direction.Axis.Y)
 		{
-			poseStack.mulPose(Axis.XN.rotationDegrees(90F));
+			poseStack.rotateDegrees(Axis.XN, 90F);
 		}
-		poseStack.mulPose(Axis.ZP.rotation(renderState.radians));
+		poseStack.rotate(Axis.ZP, renderState.radians);
 		renderState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 	}

@@ -100,8 +100,10 @@ public class TintRotatingModelLoader implements UnbakedModelLoader<CuboidModel>
 				baseMat.sprite(),
 				baseMat.layer(),
 				baseMat.itemRenderType(),
+				baseMat.itemGlintRenderType(),
+				baseMat.itemGlintSpecialRenderType(),
 				newTint,
-				baseMat.shade(),
+				baseMat.shadeDirectionOverride(), // TODO check if this needs to be rotated
 				baseMat.lightEmission(),
 				baseMat.ambientOcclusion());
 			return new BakedQuad(

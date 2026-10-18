@@ -90,7 +90,7 @@ public class PoweredWireBlock extends AbstractWireBlock implements EntityBlock
 	}
 
 	@Override
-	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction directionFromNeighbor)
+	public boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction directionFromNeighbor)
 	{
 		// connectability is fundamentally sided
 		// if no side is supplied, we can't connect

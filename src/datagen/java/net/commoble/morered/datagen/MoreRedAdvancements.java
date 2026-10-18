@@ -2,15 +2,12 @@ package net.commoble.morered.datagen;
 
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiFunction;
-import java.util.function.UnaryOperator;
 
 import net.commoble.morered.MoreRed;
 import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.AdvancementType;
@@ -24,7 +21,6 @@ import net.minecraft.core.ClientAsset.ResourceTexture;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.data.advancements.AdvancementProvider;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
@@ -33,119 +29,112 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStackTemplate;
 import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.Tags;
-import net.neoforged.neoforge.common.data.LanguageProvider;
-import net.neoforged.neoforge.data.event.GatherDataEvent;
 
 // advancements are totally unrelated to everything else
 // so I don't mind doing them in a separate class
 public class MoreRedAdvancements
 {
-	public static void genAdvancements(GatherDataEvent event, LanguageProvider lang)
+	public static void genAdvancements(DataGenContext context)
 	{
-		event.addProvider(new AdvancementProvider(event.getGenerator().getPackOutput(), event.getLookupProvider(), List.of((registries, advancements) -> {
-			UnaryOperator<AdvancementHolder> advance = advancement -> {
-				advancements.accept(advancement);
-				return advancement;
-			};
-			// the root advancement
-			var root = advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"root",
-				"More Red",
-				"There's a lot of redstone in your pockets",
-				(title, description) -> AdvancementBuilder.root()
-					.display(DisplayBuilder.of(MoreRed.RED_ALLOY_INGOT_ITEM.get(), title, description, AdvancementType.TASK)
-						.background(Identifier.withDefaultNamespace("block/polished_blackstone"))
-						.visibility(true, false, true))
-					.tagStackCriterion(Tags.Items.DUSTS_REDSTONE, 64)));
+		// the root advancement
+		Identifier root = advancement(
+			context,
+			MoreRed.MODID,
+			"root",
+			"More Red",
+			"There's a lot of redstone in your pockets",
+			(title, description) -> AdvancementBuilder.root()
+				.display(DisplayBuilder.of(MoreRed.RED_ALLOY_INGOT_ITEM.get(), title, description, AdvancementType.TASK)
+					.background(Identifier.withDefaultNamespace("block/polished_blackstone"))
+					.visibility(true, false, true))
+				.tagStackCriterion(Tags.Items.DUSTS_REDSTONE, 64));
 						
-			// transportation advancements
-			advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_tube",
-				"Square Hole",
-				"Craft a Tube from Copper and Glass",
-				(title, description) -> AdvancementBuilder.parented(root.id())
-					.display(MoreRed.TUBE_BLOCK.get(), title, description, AdvancementType.TASK)
-					.itemTagCriterion(MoreRed.Tags.Items.TUBES)));
-			// TODO use pliers on tubes
-			// redstone advancements
-			advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_soldering_table",
-				"Red Hot",
-				"Craft a Soldering Table from Blaze Rods, Red Nether Bricks, and Stone Plates",
-				(title,description) -> AdvancementBuilder.parented(root.id())
-					.display(
-						MoreRed.SOLDERING_TABLE_BLOCK.get(),
-						title,
-						description,
-						AdvancementType.TASK)
-					.itemCriterion(MoreRed.SOLDERING_TABLE_BLOCK.get())));
-			var redstoneRevolution = advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_red_alloy_wire",
-				"Redstone Revolution",
-				"Craft copper and redstone into Red Alloy Ingots and then craft those into Red Alloy Wires",
-				(title,description) -> AdvancementBuilder.parented(root.id())
-					.display(MoreRed.RED_ALLOY_WIRE_BLOCK.get(), title, description, AdvancementType.TASK)
-					.itemCriterion(MoreRed.RED_ALLOY_WIRE_BLOCK.get())));
-			var tasteTheRainbow = advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_colored_cable",
-				"Taste the Rainbow",
-				"Craft a Colored Cable from Wool and Red Alloy Wires",
-				(title, description) -> AdvancementBuilder.parented(redstoneRevolution.id())
-					.display(MoreRed.COLORED_CABLE_BLOCKS.get(DyeColor.ORANGE).get(), title, description, AdvancementType.TASK)
-					.itemTagCriterion(MoreRed.Tags.Items.COLORED_CABLES)));
-			advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_bundled_cable",
-				"Humble Bundle",
-				"Craft a Bundled Cable from Colored Cables",
-				(title, description) -> AdvancementBuilder.parented(tasteTheRainbow.id())
-					.display(MoreRed.BUNDLED_CABLE_BLOCK.get(), title, description, AdvancementType.TASK)
-					.itemCriterion(MoreRed.BUNDLED_CABLE_BLOCK.get())));
-			// TODO use spool on junction
-			// mechanical advancmennts
-			var windyThing = advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_windcatcher",
-				"The Windy Thing",
-				"Craft a Windcatcher from an Axle, Sticks, and Wool",
-				(title, description) -> AdvancementBuilder.parented(root.id())
-					.display(MoreRed.WINDCATCHER_BLOCKS.get("oak").get(), title, description, AdvancementType.TASK)
-					.itemTagCriterion(MoreRed.Tags.Items.WINDCATCHERS)));
-			advance.apply(advancement(
-				lang,
-				MoreRed.MODID,
-				"craft_mechanism",
-				"Power User",
-				"Craft an Alternator, Extractor, or Stonemill",
-				(title, description) -> AdvancementBuilder.parented(windyThing.id())
-					.display(MoreRed.EXTRACTOR_BLOCK.get(), title, description, AdvancementType.TASK)
-					.itemsCriterion("items", MoreRed.EXTRACTOR_BLOCK.get(), MoreRed.ALTERNATOR_BLOCK.get(), MoreRed.STONEMILL_BLOCK.get())
-					.requireAny()));
-		})));
+		// transportation advancements
+		advancement(
+			context,
+			MoreRed.MODID,
+			"craft_tube",
+			"Square Hole",
+			"Craft a Tube from Copper and Glass",
+			(title, description) -> AdvancementBuilder.parented(root)
+				.display(MoreRed.TUBE_BLOCK.get(), title, description, AdvancementType.TASK)
+				.itemTagCriterion(MoreRed.Tags.Items.TUBES));
+		// TODO use pliers on tubes
+		// redstone advancements
+		advancement(
+			context,
+			MoreRed.MODID,
+			"craft_soldering_table",
+			"Red Hot",
+			"Craft a Soldering Table from Blaze Rods, Red Nether Bricks, and Stone Plates",
+			(title,description) -> AdvancementBuilder.parented(root)
+				.display(
+					MoreRed.SOLDERING_TABLE_BLOCK.get(),
+					title,
+					description,
+					AdvancementType.TASK)
+				.itemCriterion(MoreRed.SOLDERING_TABLE_BLOCK.get()));
+		Identifier redstoneRevolution = advancement(
+			context,
+			MoreRed.MODID,
+			"craft_red_alloy_wire",
+			"Redstone Revolution",
+			"Craft copper and redstone into Red Alloy Ingots and then craft those into Red Alloy Wires",
+			(title,description) -> AdvancementBuilder.parented(root)
+				.display(MoreRed.RED_ALLOY_WIRE_BLOCK.get(), title, description, AdvancementType.TASK)
+				.itemCriterion(MoreRed.RED_ALLOY_WIRE_BLOCK.get()));
+		Identifier tasteTheRainbow = advancement(
+			context,
+			MoreRed.MODID,
+			"craft_colored_cable",
+			"Taste the Rainbow",
+			"Craft a Colored Cable from Wool and Red Alloy Wires",
+			(title, description) -> AdvancementBuilder.parented(redstoneRevolution)
+				.display(MoreRed.COLORED_CABLE_BLOCKS.get(DyeColor.ORANGE).get(), title, description, AdvancementType.TASK)
+				.itemTagCriterion(MoreRed.Tags.Items.COLORED_CABLES));
+		advancement(
+			context,
+			MoreRed.MODID,
+			"craft_bundled_cable",
+			"Humble Bundle",
+			"Craft a Bundled Cable from Colored Cables",
+			(title, description) -> AdvancementBuilder.parented(tasteTheRainbow)
+				.display(MoreRed.BUNDLED_CABLE_BLOCK.get(), title, description, AdvancementType.TASK)
+				.itemCriterion(MoreRed.BUNDLED_CABLE_BLOCK.get()));
+		// TODO use spool on junction
+		// mechanical advancmennts
+		Identifier windyThing = advancement(
+			context,
+			MoreRed.MODID,
+			"craft_windcatcher",
+			"The Windy Thing",
+			"Craft a Windcatcher from an Axle, Sticks, and Wool",
+			(title, description) -> AdvancementBuilder.parented(root)
+				.display(MoreRed.WINDCATCHER_BLOCKS.get("oak").get(), title, description, AdvancementType.TASK)
+				.itemTagCriterion(MoreRed.Tags.Items.WINDCATCHERS));
+		advancement(
+			context,
+			MoreRed.MODID,
+			"craft_mechanism",
+			"Power User",
+			"Craft an Alternator, Extractor, or Stonemill",
+			(title, description) -> AdvancementBuilder.parented(windyThing)
+				.display(MoreRed.EXTRACTOR_BLOCK.get(), title, description, AdvancementType.TASK)
+				.itemsCriterion("items", MoreRed.EXTRACTOR_BLOCK.get(), MoreRed.ALTERNATOR_BLOCK.get(), MoreRed.STONEMILL_BLOCK.get())
+				.requireAny());
 	}
 	
-	public static AdvancementHolder advancement(LanguageProvider lang, String tab, String path, String title, String description, BiFunction<String,String,AdvancementBuilder> advancement)
+	public static Identifier advancement(DataGenContext context, String tab, String path, String title, String description, BiFunction<String,String,AdvancementBuilder> advancement)
 	{
 		String namespace = MoreRed.MODID;
 		String key = String.format("advancements.%s.%s.%s", namespace, tab, path);
 		String titleKey = key + ".title";
 		String descriptionKey = key + ".description";
 		Identifier id = Identifier.fromNamespaceAndPath(namespace, tab + "/" + path);
-		lang.add(titleKey, title);
-		lang.add(descriptionKey, description);
-		return advancement.apply(titleKey, descriptionKey).build(id);
+		context.lang().add(langProvider -> langProvider.add(titleKey, title));
+		context.lang().add(langProvider -> langProvider.add(descriptionKey, description));
+		context.advancements().put(id, advancements -> advancement.apply(titleKey, descriptionKey).build(id));
+		return id;
 	}
 	
 	// vanilla's builder does things we don't like
@@ -240,15 +229,15 @@ public class MoreRedAdvancements
 			return this;
 		}
 		
-		AdvancementHolder build(Identifier id)
+		Advancement build(Identifier id)
 		{
-			return new AdvancementHolder(id, new Advancement(
+			return new Advancement(
 				this.parent,
 				this.display,
 				AdvancementRewards.EMPTY,
 				this.criteria,
 				this.strategy.create(this.criteria.keySet()),
-				false));
+				false);
 		}
 	}
 	

@@ -66,7 +66,7 @@ public record StonemillBlockEntityRenderer(ItemModelResolver resolver, Supplier<
 		
 		// render the axles
 		poseStack.pushPose();
-		poseStack.mulPose(axleAxis.rotation(renderState.radians));
+		poseStack.rotate(axleAxis, renderState.radians);
 		renderState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 		

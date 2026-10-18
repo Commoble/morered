@@ -1,8 +1,5 @@
 package net.commoble.morered.transportation;
 
-import com.mojang.serialization.MapCodec;
-
-import net.commoble.morered.MoreRed;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -47,11 +44,5 @@ public class OsmosisSlimeBlock extends DirectionalBlock
 	protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder)
 	{
 		builder.add(FACING);
-	}
-
-	@Override
-	protected MapCodec<? extends DirectionalBlock> codec()
-	{
-		return MapCodec.unit((() -> MoreRed.OSMOSIS_SLIME_BLOCK.get()));
 	}
 }

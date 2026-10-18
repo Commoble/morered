@@ -2,13 +2,14 @@ package net.commoble.morered.wires;
 
 import java.util.Set;
 
+import org.jspecify.annotations.Nullable;
+
 import com.google.common.collect.ImmutableSet;
 import com.mojang.serialization.MapCodec;
 
 import net.commoble.morered.MoreRed;
 import net.minecraft.util.context.ContextKey;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
@@ -26,11 +27,10 @@ public class WireCountLootFunction implements LootItemFunction
 	@Override
 	public ItemStack apply(ItemStack input, LootContext context)
 	{
-		BlockState state = context.getParameter(LootContextParams.BLOCK_STATE);
-		Block block = state.getBlock();
-		if (block instanceof AbstractWireBlock)
+		@Nullable BlockState state = context.getOptional(LootContextParams.BLOCK_STATE);
+		if (state != null && state.getBlock() instanceof AbstractWireBlock block)
 		{
-			input.setCount(((AbstractWireBlock)block).getWireCount(state));
+			input.setCount(block.getWireCount(state));
 		}
 		return input;
 	}

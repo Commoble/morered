@@ -105,7 +105,7 @@ public abstract class RedstonePlateBlock extends PlateBlock
 	}
 	
 	@Override
-	public boolean canConnectRedstone(BlockState state, BlockGetter world, BlockPos pos, Direction side)
+	public boolean shouldRedstoneWireConnectTo(BlockState state, BlockGetter world, BlockPos pos, @Nullable Direction side)
 	{
 		if (side == null)
 			return false;

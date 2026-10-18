@@ -84,7 +84,7 @@ public record WindcatcherBlockEntityRenderer(ItemModelResolver resolver, Map<Win
 	{
 		poseStack.pushPose();
 		poseStack.translate(0.5D,0.5D,0.5D); // item renderer renders the center of the item model at 0,0,0 in the cube		
-		poseStack.mulPose(Axis.YP.rotation(renderState.radians));
+		poseStack.rotate(Axis.YP, renderState.radians);
 		renderState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 		poseStack.popPose();
 	}

@@ -151,17 +151,17 @@ public record GearsBlockEntityRenderer(ItemModelResolver resolver) implements Bl
 			poseStack.pushPose();
 			switch(facing)
 			{
-				case DOWN: poseStack.mulPose(Axis.XN.rotationDegrees(90F));break;
-				case UP: poseStack.mulPose(Axis.XP.rotationDegrees(90));break;
-				case SOUTH: poseStack.mulPose(Axis.YP.rotationDegrees(180F));break;
-				case WEST: poseStack.mulPose(Axis.YP.rotationDegrees(90F));break;
-				case EAST: poseStack.mulPose(Axis.YP.rotationDegrees(270F));break;
+				case DOWN: poseStack.rotateDegrees(Axis.XN, 90F);break;
+				case UP: poseStack.rotateDegrees(Axis.XP, 90);break;
+				case SOUTH: poseStack.rotateDegrees(Axis.YP, 180F);break;
+				case WEST: poseStack.rotateDegrees(Axis.YP, 90F);break;
+				case EAST: poseStack.rotateDegrees(Axis.YP, 270F);break;
 				default:
 			}
 			poseStack.translate(0D,0D,-(renderState.manhattanZFightOffset + facing.ordinal() * 0.00001D));
 			// because of the rotation above, the positive directions (up,south,east) are now about to rotate in the wrong direction
 			// invert the rotation if needed
-			poseStack.mulPose(Axis.ZP.rotation(sideState.radians * sideState.parityFix));
+			poseStack.rotate(Axis.ZP, sideState.radians * sideState.parityFix);
 			sideState.itemState.submit(poseStack, collector, renderState.lightCoords, OverlayTexture.NO_OVERLAY, 0);
 			poseStack.popPose();
 		}

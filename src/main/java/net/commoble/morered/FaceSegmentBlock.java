@@ -6,9 +6,11 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.util.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.util.Util;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -58,35 +60,35 @@ public interface FaceSegmentBlock
 	public abstract Map<Direction,VoxelShape> getRaytraceBackboards();
     public abstract void handleLeftClickBlock(LeftClickBlock event, Level level, BlockPos pos, BlockState state);
 	
-	public default void destroyClickedSegment(BlockState state, Level world, BlockPos pos, Player player, Direction interiorFace, boolean dropItems)
+	public default void destroyClickedSegment(BlockState state, Level level, BlockPos pos, Player player, Direction interiorFace, boolean dropItems)
 	{
 		BooleanProperty sideProperty = getProperty(interiorFace);
 		BlockState newState = state.setValue(sideProperty, false);
 		Block newBlock = newState.getBlock();
 		BlockState removedState = newBlock.defaultBlockState().setValue(sideProperty, true);
 		Block removedBlock = removedState.getBlock();
-		if (dropItems)
+		if (dropItems && level instanceof ServerLevel serverLevel && player instanceof ServerPlayer serverPlayer)
 		{
 			// add player stats and spawn drops
-			removedBlock.playerDestroy(world, player, pos, removedState, world.getBlockEntity(pos), player.getMainHandItem().copy());
+			removedBlock.playerDestroy(serverLevel, serverPlayer, pos, removedState, level.getBlockEntity(pos), player.getMainHandItem().copy());
 		}
-		if (world.isClientSide())
+		if (level.isClientSide())
 		{
 			// level event 2001 plays break sound and makes break particles
 			// on the server world, onBlockHarvested will play the break effects for each player except the player given
 			// and also anger piglins at that player, so we do want to give it the player
 			// on the client world, willHarvest is always false, so we need to manually play the effects for that player
-			world.levelEvent(player, 2001, pos, Block.getId(removedState));
+			level.levelEvent(player, 2001, pos, Block.getId(removedState));
 		}
 		else
 		{
 			// plays the break event for every nearby player except the breaking player
-			removedBlock.playerWillDestroy(world, pos, removedState, player);
+			removedBlock.playerWillDestroy(level, pos, removedState, player);
 		}
 		// default and rerender flags are used when block is broken on client
-		if (world.setBlock(pos, newState, Block.UPDATE_ALL_IMMEDIATE))
+		if (level.setBlock(pos, newState, Block.UPDATE_ALL_IMMEDIATE))
 		{
-			removedBlock.destroy(world, pos, removedState);
+			removedBlock.destroy(level, pos, removedState);
 		}
 	}
 

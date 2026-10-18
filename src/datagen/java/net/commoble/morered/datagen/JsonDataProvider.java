@@ -73,7 +73,7 @@ public record JsonDataProvider<T>(CompletableFuture<HolderLookup.Provider> regis
 	
 	public static <T> void addNamed(GatherDataEvent event, PackOutput.Target target, String folder, Codec<T> codec, Map<Identifier,T> objects, String uniqueName)
 	{
-		event.addProvider(new JsonDataProvider<>(event.getLookupProvider(), event.getGenerator().getPackOutput(), event.getGenerator(), target, folder, codec, objects, uniqueName));
+		event.addProvider(new JsonDataProvider<>(event.getWorldLookupProvider(), event.getGenerator().getPackOutput(), event.getGenerator(), target, folder, codec, objects, uniqueName));
 	}
 	
 	@Override

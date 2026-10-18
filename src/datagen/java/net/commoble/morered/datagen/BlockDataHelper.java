@@ -12,6 +12,7 @@ import net.minecraft.client.renderer.block.dispatch.BlockStateModelDispatcher;
 import net.minecraft.client.renderer.item.ClientItem;
 import net.minecraft.client.renderer.item.CuboidItemModelWrapper;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.data.worldgen.BootstrapContext;
 import net.minecraft.resources.Identifier;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
@@ -22,7 +23,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 {
 	public static BlockDataHelper create(Block block, DataGenContext context,
 		BiFunction<Identifier, Block, BlockStateModelDispatcher> blockstate,
-		BiFunction<Identifier, Block, LootTable> lootTable)
+		BiFunction<Identifier, Block, Function<BootstrapContext<LootTable>, LootTable>> lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		Identifier id = helper.id();
@@ -47,7 +48,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateModelDispatcher blockstate, LootTable lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, BlockStateModelDispatcher blockstate, Function<BootstrapContext<LootTable>, LootTable> lootTable)
 	{
 		BlockDataHelper helper = new BlockDataHelper(block, context);
 		context.blockStates().put(helper.id(), blockstate);
@@ -55,7 +56,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 		return helper;
 	}
 	
-	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockStateModelDispatcher> blockstate, Function<Block, LootTable> lootTable)
+	public static BlockDataHelper create(Block block, DataGenContext context, Function<Block, BlockStateModelDispatcher> blockstate, Function<Block, Function<BootstrapContext<LootTable>, LootTable>> lootTable)
 	{
 		return create(block, context, blockstate.apply(block), lootTable.apply(block));
 	}
@@ -67,7 +68,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	
 	public BlockDataHelper localize(String localizedName)
 	{
-		context.lang().add(this.block, localizedName);
+		context.lang().add(langProvider -> langProvider.add(this.block, localizedName));
 		return this;
 	}
 	
@@ -76,7 +77,7 @@ public record BlockDataHelper(Block block, DataGenContext context)
 	{
 		for (TagKey<Block> tag : tags)
 		{
-			context.blockTags().tag(tag).add(BuiltInRegistries.BLOCK.getResourceKey(block).get());
+			context.blockTags().add(tagProvider -> tagProvider.tag(tag).add(BuiltInRegistries.BLOCK.getResourceKey(block).get()));
 		}
 		return this;
 	}
