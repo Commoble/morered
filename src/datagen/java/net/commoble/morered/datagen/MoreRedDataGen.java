@@ -141,6 +141,7 @@ public class MoreRedDataGen
 		List<Consumer<TagProvider<Item>>> itemTagGatherer = new ArrayList<>();
 		List<Consumer<LanguageProvider>> lang = new ArrayList<>();
 		DataGenContext context = new DataGenContext(new HashMap<>(), blockStates, clientItems, models, previewModels, placementPreviews, recipes, lootTables, advancements, dataMaps, blockTagGatherer, itemTagGatherer, lang);
+		MoreRedAdvancements.genAdvancements(context);
 		
 		Identifier blockBlock = Identifier.withDefaultNamespace("block/block");
 		

@@ -1,19 +1,16 @@
 {
   "pools": [
     {
-      "bonus_rolls": 0.0,
-      "conditions": [
-        {
-          "condition": "minecraft:survives_explosion"
-        }
-      ],
+      "condition": {
+        "type": "minecraft:survives_explosion"
+      },
       "entries": [
         {
           "type": "minecraft:item",
           "name": "morered:warped_gear"
         }
       ],
-      "rolls": 1.0
+      "rolls": 1
     }
   ]
 }

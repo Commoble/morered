@@ -40,6 +40,7 @@ public record DataGatherer(Supplier<DataGenContext> memoizedContext) implements 
 		
 		context.blockTags().forEach(consumer -> consumer.accept(blockTags));
 		context.itemTags().forEach(consumer -> consumer.accept(itemTags));
+		context.lang().forEach(consumer -> consumer.accept(lang));
 		
 		BlockStateBuilder.addDataProvider(event, context.blockStates());
 		JsonDataProvider.addProvider(event, PackOutput.Target.RESOURCE_PACK, "items", ClientItem.CODEC, context.clientItems());

@@ -124,7 +124,7 @@ public class MoreRedAdvancements
 				.requireAny());
 	}
 	
-	public static Identifier advancement(DataGenContext context, String tab, String path, String title, String description, BiFunction<String,String,AdvancementBuilder> advancement)
+	private static Identifier advancement(DataGenContext context, String tab, String path, String title, String description, BiFunction<String,String,AdvancementBuilder> advancement)
 	{
 		String namespace = MoreRed.MODID;
 		String key = String.format("advancements.%s.%s.%s", namespace, tab, path);
