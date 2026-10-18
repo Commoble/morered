@@ -14,6 +14,7 @@ public final class ExtraRenderTypes
 	public static final RenderType CABLE_RENDER_TYPE = RenderType.create(
 		"morered:cable",
 		RenderSetup.builder(RenderPipelines.TEXT)
+        	.setOitPipelines(RenderPipelines.OIT_TEXT)
 			.withTexture("Sampler0", TextureAtlas.LOCATION_BLOCKS)
 			.useLightmap()
 			.createRenderSetup());
