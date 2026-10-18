@@ -1,3 +1,6 @@
+# 26.3.0.0
+* Update to MC 26.3 / Neoforge 26.3.0.92
+
 # 26.2.0.0
 * Update to 26.2
 
